@@ -1,1 +1,70 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function showSuccessMessage() {
+            alert("Data berhasil disimpan");
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Input Data</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="input.html">Input Data</a></li>
+            <li><a href="detail.html">Detail Data</a></li>
+        </ul>
+    </nav>
+    <section class="content">
+        <h2>Form Input</h2>
+        <form action="https://script.google.com/macros/s/AKfycbzBGEUeX9bXNV1ii17EFwTB6vwH9VfpnlHv0pta7SF69A1-jKRNIOyr02DRMJoOEMvZvg/exec" method="post" onsubmit="showSuccessMessage()">
+            <div class="form-group">
+                <label for="tanggal">Tanggal:</label>
+                <input type="date" id="tanggal" name="tanggal" required>
+            </div>
+            <div class="form-group">
+                <label for="shift">Shift:</label>
+                <select id="shift" name="shift" required>
+                    <option value="MALAM">Malam</option>
+                    <option value="PAGI">Pagi</option>
+                    <option value="SIANG">Siang</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="std">STD:</label>
+                <input type="number" id="std" name="std" required>
+            </div>
+            <div class="form-group">
+                <label for="psm">PSM:</label>
+                <input type="number" id="psm" name="psm" required>
+            </div>
+            <div class="form-group">
+                <label for="pwp">PWP:</label>
+                <input type="number" id="pwp" name="pwp" required>
+            </div>
+            <div class="form-group">
+                <label for="serba">SERBA:</label>
+                <input type="number" id="serba" name="serba" required>
+            </div>
+            <div class="form-group">
+                <label for="member">MEMBER:</label>
+                <input type="number" id="member" name="member" required>
+            </div>
+            <div class="form-group">
+                <label for="nama-crew">Nama Crew:</label>
+                <input type="text" id="nama-crew" name="nama-crew" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </section>
+</body>
+</html>
