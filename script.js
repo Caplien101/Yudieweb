@@ -43,3 +43,30 @@ function displayData(data) {
 
 // Panggil fetchDataFromSheets saat halaman dimuat
 window.onload = fetchDataFromSheets;
+
+const TOTAL_URL = 'https://script.google.com/macros/s/AKfycbyXqsurt-FSN1fIb2HwYy8wMvOH3cVf9amj7V-k8Ey_AtK8Qg2HZQITkLk2TNjG00dLsw/exec?action=getTotal';
+async function fetchTotal() {
+  try {
+    const response = await fetch(TOTAL_URL);
+    if (!response.ok) {
+      throw new Error('Gagal mengambil total');
+    }
+    const totals = await response.json();
+    updateTotalUI(totals); // Memperbarui UI dengan total yang diambil
+  } catch (error) {
+    console.error('Error fetching total:', error);
+    // Tampilkan pesan error atau lakukan penanganan lain jika perlu
+  }
+}
+
+// Panggil fetchTotal saat halaman dimuat
+window.onload = fetchTotal;
+
+// Fungsi untuk memperbarui UI dengan total yang diambil
+function updateTotalUI(totals) {
+  document.getElementById('std-total').textContent = totals.STD;
+  document.getElementById('psm-total').textContent = totals.PSM;
+  document.getElementById('pwp-total').textContent = totals.PWP;
+  document.getElementById('serba-total').textContent = totals.SERBA;
+  document.getElementById('member-total').textContent = totals.MEMBER;
+}
