@@ -58,6 +58,28 @@
     #toggleDataBtn {
       margin-top: 10px;
     }
+    
+    /* Gaya untuk menyejajarkan tombol */
+    .button-container {
+      display: flex;
+      align-items: flex-end;
+    }
+
+    /* Margin untuk tombol Submit dan Lihat Data */
+    .button-container .btn {
+      margin-bottom: 10px;
+    }
+
+    /* Gaya untuk baris tombol */
+    .button-row {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Gaya untuk tombol dalam baris */
+    .button-row .btn {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -103,9 +125,10 @@
           <input type="text" class="form-control" id="crew" name="crew" placeholder="Masukkan Nama Crew" value="" required>
         </div>
       </div>
-      <br>
-      <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
-      <button type="button" class="btn btn-warning ml-2" id="toggleDataBtn">Lihat Data</button>
+      <div class="button-container">
+        <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
+        <button type="button" class="btn btn-warning ml-2" id="toggleDataBtn">Lihat Data</button>
+      </div>
     </form>
 
     <div id="response" class="mt-4"></div>
@@ -240,48 +263,46 @@
       return true;
     }
 
-    // Fungsi untuk memuat data dari Google Sheets (format JSON)
-function loadDataFromGoogleSheets() {
-  fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
-  .then(response => response.json())
-  .then(data => {
-    // Urutkan data dari yang terbaru ke yang terlama
-    data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+    // Fungsi untuk memuat data dari skrip Google Apps Script (format JSON)
+    function loadDataFromScript() {
+      fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
+      .then(response => response.json())
+      .then(data => {
+        // Urutkan data dari yang terbaru ke yang terlama
+        data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-    var html = '<table class="table table-bordered table-custom"><thead><tr><th>TANGGAL</th><th>SHIFT</th><th>STD</th><th>PSM</th><th>PWP</th><th>SERBA</th><th>MEMBER</th><th>CREW</th></tr></thead><tbody>';
+        var html = '<table class="table table-bordered table-custom"><thead><tr><th>TANGGAL</th><th>SHIFT</th><th>STD</th><th>PSM</th><th>PWP</th><th>SERBA</th><th>MEMBER</th><th>CREW</th></tr></thead><tbody>';
 
-    // Menambahkan baris tabel dari data JSON
-    data.forEach(row => {
-      // Ubah format tanggal dari ISO ke format yang diinginkan
-      var formattedDate = new Date(row.tanggal).toLocaleDateString('id-ID'); // Sesuaikan dengan zona waktu lokal
+        // Menambahkan baris tabel dari data JSON
+        data.forEach(row => {
+          var formattedDate = new Date(row.tanggal).toLocaleDateString('id-ID'); // Sesuaikan dengan zona waktu lokal
+          html += '<tr>';
+          html += '<td>' + formattedDate + '</td>'; // Hanya menampilkan bagian tanggal
+          html += '<td>' + row.shift + '</td>';
+          html += '<td>' + row.std + '</td>';
+          html += '<td>' + row.psm + '</td>';
+          html += '<td>' + row.pwp + '</td>';
+          html += '<td>' + row.serba + '</td>';
+          html += '<td>' + row.member + '</td>';
+          html += '<td>' + row.crew + '</td>';
+          html += '</tr>';
+        });
 
-      html += '<tr>';
-      html += '<td>' + formattedDate + '</td>';
-      html += '<td>' + row.shift + '</td>';
-      html += '<td>' + row.std + '</td>';
-      html += '<td>' + row.psm + '</td>';
-      html += '<td>' + row.pwp + '</td>';
-      html += '<td>' + row.serba + '</td>';
-      html += '<td>' + row.member + '</td>';
-      html += '<td>' + row.crew + '</td>';
-      html += '</tr>';
-    });
+        html += '</tbody></table>';
 
-    html += '</tbody></table>';
+        // Menampilkan data dalam elemen dataContainer
+        var dataContainer = document.getElementById('dataContainer');
+        dataContainer.innerHTML = html;
 
-    // Menampilkan data dalam elemen dataContainer
-    var dataContainer = document.getElementById('dataContainer');
-    dataContainer.innerHTML = html;
-
-    // Tampilkan tabel dataContainer
-    dataContainer.style.display = 'block';
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    var dataContainer = document.getElementById('dataContainer');
-    dataContainer.innerHTML = '<p class="text-danger">Error: Failed to load data from Google Sheets.</p>';
-  });
-}
+        // Tampilkan tabel dataContainer
+        dataContainer.style.display = 'block';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        var dataContainer = document.getElementById('dataContainer');
+        dataContainer.innerHTML = '<p class="text-danger">Error: Failed to load data from spreadsheet.</p>';
+      });
+    }
 
     // Fungsi untuk menyembunyikan atau menampilkan tabel dataContainer
     document.getElementById('toggleDataBtn').addEventListener('click', function() {
