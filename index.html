@@ -1,57 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Management</title>
+  <!-- Link Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* CSS Custom untuk alert berwarna hijau */
+    .alert-success-custom {
+      background-color: #d4edda;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+
+    /* Animasi loading spinner */
+    .spinner-border-sm {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>PRAMUKA BEKASI</h1>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="index.html">Dashboard</a></li>
-            <li><a href="input.html">Input Data</a></li>
-            <li><a href="detail.html">Detail Data</a></li>
-        </ul>
-    </nav>
-    
-    <div class="card hover-animation">
-    <div class="card-header">
-        <h3>Total Variabel</h3>
-    </div>
-    <div class="card-body">
-        <div class="variable">
-            <span>STD</span>
-            <span id="std-total">0</span>
+  <div class="container mt-5">
+    <h2 class="mb-4">Submit Data</h2>
+    <form id="dataForm" class="needs-validation" novalidate>
+      <div class="form-row">
+        <div class="col-md-6 mb-3">
+          <label for="tanggal">Tanggal:</label>
+          <input type="date" class="form-control" id="tanggal" name="tanggal" placeholder="Masukkan tanggal" value="" required>
         </div>
-        <div class="variable">
-            <span>PSM</span>
-            <span id="psm-total">0</span>
+        <div class="col-md-6 mb-3">
+          <label for="shift">Shift:</label>
+          <select class="form-control" id="shift" name="shift" required>
+            <option value="">Pilih Shift</option>
+            <option value="SHIFT 1">SHIFT 1</option>
+            <option value="SHIFT 2">SHIFT 2</option>
+            <option value="SHIFT 3">SHIFT 3</option>
+          </select>
         </div>
-        <div class="variable">
-            <span>PWP</span>
-            <span id="pwp-total">0</span>
+        <div class="col-md-6 mb-3">
+          <label for="std">STD:</label>
+          <input type="number" class="form-control" id="std" name="std" placeholder="Masukkan Qty STD" value="" required>
         </div>
-        <div class="variable">
-            <span>SERBA</span>
-            <span id="serba-total">0</span>
+        <div class="col-md-6 mb-3">
+          <label for="psm">PSM:</label>
+          <input type="number" class="form-control" id="psm" name="psm" placeholder="Masukkan Qty PSM" value="" required>
         </div>
-        <div class="variable">
-            <span>MEMBER</span>
-            <span id="member-total">0</span>
+        <div class="col-md-6 mb-3">
+          <label for="pwp">PWP:</label>
+          <input type="number" class="form-control" id="pwp" name="pwp" placeholder="Masukkan Qty PWP" value="" required>
         </div>
-    </div>
-</div>
+        <div class="col-md-6 mb-3">
+          <label for="serba">Serba Gratis:</label>
+          <input type="number" class="form-control" id="serba" name="serba" placeholder="Masukkan Qty Serba Gratis" value="" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="member">Member:</label>
+          <input type="number" class="form-control" id="member" name="member" placeholder="Masukkan Qty Member" value="" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="crew">Nama Crew:</label>
+          <input type="text" class="form-control" id="crew" name="crew" placeholder="Masukkan Nama Crew" value="" required>
+        </div>
+      </div>
+      <br>
+      <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
+      <button type="button" class="btn btn-warning ml-2" id="toggleDataBtn">Lihat Data</button>
+    </form>
 
-    </div>
-</div>
+    <div id="response" class="mt-4"></div>
+    <hr class="my-4">
+    <h2 class="mb-4">Data from Spreadsheet</h2>
+    <div id="dataContainer" style="display: none;"></div>
+  </div>
 
-    </section>
+  <!-- Bootstrap JS and dependencies (Popper.js, jQuery) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script src="script.js"></script>
+  <script>
+    // Menangani pengiriman formulir
+    var formSubmitted = false; // Status apakah form sudah dikirim
 
+    document.getElementById("dataForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // Menghentikan pengiriman formulir standar
+
+      if (formSubmitted) {
+        return; // Jika form sudah dikirim, hentikan eksekusi
+      }
+
+      // Mendapatkan tombol submit dan ubah labelnya menjadi "Sedang mengirim data..."
+      var submitBtn = document.getElementById("submitBtn");
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sedang mengirim data...';
+      submitBtn.disabled = true; // Nonaktifkan tombol submit sementara
+
+      // Validasi form sebelum pengiriman
+      if (!validateForm()) {
+        // Kembalikan label tombol submit ke semula
+        submitBtn.innerHTML = 'Submit';
+        submitBtn.disabled = false; // Aktifkan kembali tombol submit
+        return;
+      }
+
+      var formData = new FormData(this);
+      var jsonData = {};
+
+      // Mengonversi FormData ke objek JSON
+      formData.forEach(function(value, key){
+        jsonData[key] = value;
+      });
+
+      // Mengirim data sebagai permintaan POST menggunakan fetch API
+      fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec', {
+        method: 'POST',
+        body: JSON.stringify(jsonData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+
+        // Display success alert with timeout
+        var message = '<strong>Status:</strong> ' + data.status + '<br><strong>Message:</strong> ' + data.message;
+        displayAlertWithTimeout(message, 'alert alert-success-custom');
+
+        // Clear form inputs and reset form values
+        document.getElementById("dataForm").reset();
+        resetFormValues();
+
+        // Set form submitted status
+        formSubmitted = true;
+
+        // Restore submit button text and enable it
+        submitBtn.innerHTML = 'Submit';
+        submitBtn.disabled = false;
+
+        // Reload data after successful submission
+        loadDataFromScript();
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+
+        // Display error alert with timeout
+        displayAlertWithTimeout('<strong>Error:</strong> Failed to submit data.', 'alert alert-danger');
+
+        // Restore submit button text and enable it
+        submitBtn.innerHTML = 'Submit';
+        submitBtn.disabled = false;
+      });
+    });
+
+    // Function to display alert with timeout
+    function displayAlertWithTimeout(message, alertClass) {
+      // Create alert element
+      var alertDiv = document.createElement('div');
+      alertDiv.className = alertClass;
+      alertDiv.innerHTML = message;
+
+      // Append alert to response container
+      var responseDiv = document.getElementById("response");
+      responseDiv.innerHTML = ''; // Clear existing alerts
+      responseDiv.appendChild(alertDiv);
+
+      // Set timeout to remove alert after 3 seconds
+      setTimeout(function() {
+        responseDiv.removeChild(alertDiv);
+      }, 3000); // 3000 milliseconds = 3 seconds
+    }
+
+    // Fungsi untuk mengosongkan nilai input pada formulir
+    function resetFormValues() {
+      document.getElementById("tanggal").value = '';
+      document.getElementById("shift").value = '';
+      document.getElementById("std").value = '';
+      document.getElementById("psm").value = '';
+      document.getElementById("pwp").value = '';
+      document.getElementById("serba").value = '';
+      document.getElementById("member").value = '';
+      document.getElementById("crew").value = '';
+    }
+
+    // Validasi form sebelum pengiriman
+    function validateForm() {
+      var tanggal = document.getElementById("tanggal").value.trim();
+      var shift = document.getElementById("shift").value.trim();
+      var std = document.getElementById("std").value.trim();
+      var psm = document.getElementById("psm").value.trim();
+      var pwp = document.getElementById("pwp").value.trim();
+      var serba = document.getElementById("serba").value.trim();
+      var member = document.getElementById("member").value.trim();
+      var crew = document.getElementById("crew").value.trim();
+
+      // Lakukan validasi di sini, contoh: memastikan semua input tidak kosong
+      if (tanggal === '' || shift === '' || std === '' || psm === '' || pwp === '' || serba === '' || member === '' || crew === '') {
+        alert('Harap lengkapi semua kolom sebelum mengirimkan data.');
+        return false;
+      }
+
+      return true;
+    }
+
+    // Fungsi untuk memuat data dari skrip Google Apps Script (format JSON)
+    function loadDataFromScript() {
+      fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
+      .then(response => response.json())
+      .then(data => {
+        var html = '<table class="table table-bordered"><thead><tr><th>TANGGAL</th><th>SHIFT</th><th>STD</th><th>PSM</th><th>PWP</th><th>SERBA</th><th>MEMBER</th><th>CREW</th></tr></thead><tbody>';
+
+        // Menambahkan baris tabel dari data JSON
+        data.forEach(row => {
+          html += '<tr>';
+          html += '<td>' + row.tanggal.split('T')[0] + '</td>'; // Hanya menampilkan bagian tanggal
+          html += '<td>' + row.shift + '</td>';
+          html += '<td>' + row.std + '</td>';
+          html += '<td>' + row.psm + '</td>';
+          html += '<td>' + row.pwp + '</td>';
+          html += '<td>' + row.serba + '</td>';
+          html += '<td>' + row.member + '</td>';
+          html += '<td>' + row.crew + '</td>';
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+
+        // Menampilkan data dalam elemen dataContainer
+        var dataContainer = document.getElementById('dataContainer');
+        dataContainer.innerHTML = html;
+
+        // Tampilkan tabel dataContainer
+        dataContainer.style.display = 'block';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        var dataContainer = document.getElementById('dataContainer');
+        dataContainer.innerHTML = '<p class="text-danger">Error: Failed to load data from spreadsheet.</p>';
+      });
+    }
+
+    // Fungsi untuk menyembunyikan atau menampilkan tabel dataContainer
+    document.getElementById('toggleDataBtn').addEventListener('click', function() {
+      var dataContainer = document.getElementById('dataContainer');
+      if (dataContainer.style.display === 'none') {
+        dataContainer.style.display = 'block';
+        this.innerHTML = 'Sembunyikan Data';
+      } else {
+        dataContainer.style.display = 'none';
+        this.innerHTML = 'Lihat Data';
+      }
+    });
+
+    // Panggil fungsi untuk memuat data saat halaman dimuat
+    loadDataFromScript();
+  </script>
 </body>
 </html>
