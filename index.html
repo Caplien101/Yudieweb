@@ -19,6 +19,19 @@
       width: 1.5rem;
       height: 1.5rem;
     }
+
+    /* Gaya untuk tabel */
+    .table-custom {
+      max-width: 100%;
+      font-size: 14px; /* Ubah sesuai kebutuhan */
+    }
+
+    /* Gaya untuk teks rata tengah di kolom */
+    .table-custom td,
+    .table-custom th {
+      text-align: center;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -206,7 +219,7 @@
       fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
       .then(response => response.json())
       .then(data => {
-        var html = '<table class="table table-bordered"><thead><tr><th>TANGGAL</th><th>SHIFT</th><th>STD</th><th>PSM</th><th>PWP</th><th>SERBA</th><th>MEMBER</th><th>CREW</th></tr></thead><tbody>';
+        var html = '<table class="table table-bordered table-custom"><thead><tr><th>TANGGAL</th><th>SHIFT</th><th>STD</th><th>PSM</th><th>PWP</th><th>SERBA</th><th>MEMBER</th><th>CREW</th></tr></thead><tbody>';
 
         // Menambahkan baris tabel dari data JSON
         data.forEach(row => {
