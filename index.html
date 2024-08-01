@@ -39,6 +39,25 @@
       text-align: center;
       vertical-align: middle;
     }
+
+    /* Gaya untuk header tabel yang tetap saat scroll */
+    .freeze-header {
+      overflow-y: auto;
+      height: 300px; /* Atur tinggi maksimum untuk scroll */
+    }
+
+    /* Gaya untuk mengatur agar header tetap di atas saat scroll */
+    .freeze-header thead th {
+      position: sticky;
+      top: 0;
+      background-color: #f8f9fa; /* Warna latar belakang header */
+      z-index: 1; /* Pastikan header di atas konten */
+    }
+
+    /* Gaya untuk tombol Lihat Data */
+    #toggleDataBtn {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -92,7 +111,7 @@
     <div id="response" class="mt-4"></div>
     <hr class="my-4">
     <h2 class="mb-4">Data from Spreadsheet</h2>
-    <div id="dataContainer" style="display: none;"></div>
+    <div class="freeze-header" id="dataContainer" style="display: none;"></div>
   </div>
 
   <!-- Bootstrap JS and dependencies (Popper.js, jQuery) -->
@@ -222,56 +241,52 @@
     }
 
     // Fungsi untuk memuat data dari skrip Google Apps Script (format JSON)
-    function loadDataFromScript() {
-      fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
-      .then(response => response.json())
-      .then(data => {
-        var html = '<table class="table table-bordered table-custom"><thead><tr><th>TANGGAL</th><th>SHIFT</th><th>STD</th><th>PSM</th><th>PWP</th><th>SERBA</th><th>MEMBER</th><th>CREW</th></tr></thead><tbody>';
+// Fungsi untuk memuat data dari Google Sheets (format JSON)
+function loadDataFromGoogleSheets() {
+  fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
+  .then(response => response.json())
+  .then(data => {
+    // Urutkan data dari yang terbaru ke yang terlama
+    data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-        // Menambahkan baris tabel dari data JSON
-        data.forEach(row => {
-          html += '<tr>';
-          html += '<td>' + row.tanggal.split('T')[0] + '</td>'; // Hanya menampilkan bagian tanggal
-          html += '<td>' + row.shift + '</td>';
-          html += '<td>' + row.std + '</td>';
-          html += '<td>' + row.psm + '</td>';
-          html += '<td>' + row.pwp + '</td>';
-          html += '<td>' + row.serba + '</td>';
-          html += '<td>' + row.member + '</td>';
-          html += '<td>' + row.crew + '</td>';
-          html += '</tr>';
-        });
+    var html = '<table class="table table-bordered table-custom"><thead><tr><th>TANGGAL</th><th>SHIFT</th><th>STD</th><th>PSM</th><th>PWP</th><th>SERBA</th><th>MEMBER</th><th>CREW</th></tr></thead><tbody>';
 
-        html += '</tbody></table>';
+    // Menambahkan baris tabel dari data JSON
+    data.forEach(row => {
+      // Ubah format tanggal dari ISO ke format yang diinginkan
+      var formattedDate = new Date(row.tanggal).toLocaleDateString('id-ID'); // Sesuaikan dengan zona waktu lokal
 
-        // Menampilkan data dalam elemen dataContainer
-        var dataContainer = document.getElementById('dataContainer');
-        dataContainer.innerHTML = html;
-
-        // Tampilkan tabel dataContainer
-        dataContainer.style.display = 'block';
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        var dataContainer = document.getElementById('dataContainer');
-        dataContainer.innerHTML = '<p class="text-danger">Error: Failed to load data from spreadsheet.</p>';
-      });
-    }
-
-    // Fungsi untuk menyembunyikan atau menampilkan tabel dataContainer
-    document.getElementById('toggleDataBtn').addEventListener('click', function() {
-      var dataContainer = document.getElementById('dataContainer');
-      if (dataContainer.style.display === 'none') {
-        dataContainer.style.display = 'block';
-        this.innerHTML = 'Sembunyikan Data';
-      } else {
-        dataContainer.style.display = 'none';
-        this.innerHTML = 'Lihat Data';
-      }
+      html += '<tr>';
+      html += '<td>' + formattedDate + '</td>';
+      html += '<td>' + row.shift + '</td>';
+      html += '<td>' + row.std + '</td>';
+      html += '<td>' + row.psm + '</td>';
+      html += '<td>' + row.pwp + '</td>';
+      html += '<td>' + row.serba + '</td>';
+      html += '<td>' + row.member + '</td>';
+      html += '<td>' + row.crew + '</td>';
+      html += '</tr>';
     });
 
-    // Panggil fungsi untuk memuat data saat halaman dimuat
-    loadDataFromScript();
+    html += '</tbody></table>';
+
+    // Menampilkan data dalam elemen dataContainer
+    var dataContainer = document.getElementById('dataContainer');
+    dataContainer.innerHTML = html;
+
+    // Tampilkan tabel dataContainer
+    dataContainer.style.display = 'block';
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    var dataContainer = document.getElementById('dataContainer');
+    dataContainer.innerHTML = '<p class="text-danger">Error: Failed to load data from Google Sheets.</p>';
+  });
+}
+
+// Panggil fungsi untuk memuat data saat halaman dimuat
+loadDataFromGoogleSheets();
+
   </script>
 </body>
 </html>
