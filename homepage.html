@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card View Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding-top: 140px; /* Ensure content starts below the header and subheader */
+        }
+
+        header {
+            background: linear-gradient(135deg, #007bff, #00d2ff);
+            color: white;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 5px;
+            background-color: white;
+            margin: 10px auto 0;
+            border-radius: 5px;
+        }
+
+        .sub-header {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 10px 40px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 80px; /* This should be just below the header */
+            z-index: 999;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit; /* Ensure text color is not changed by the link */
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            margin: 0 0 10px;
+        }
+
+        .card-description {
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        Daily Task Overview
+    </header>
+
+    <div class="sub-header" id="date">
+        <!-- JavaScript will dynamically insert the date here -->
+    </div>
+
+    <div class="card-container">
+        <a href="daily-activity.html" class="card">
+            <div class="card-body">
+                <h2 class="card-title">Daily Activity</h2>
+                <p class="card-description">Ceklist Kebersihan harian</p>
+            </div>
+        </a>
+        <a href="focus-marketing.html" class="card">
+            <div class="card-body">
+                <h2 class="card-title">Focus Marketing</h2>
+                <p class="card-description">Monitoring promo PPS dan Member</p>
+            </div>
+        </a>
+
+        <a href="bean-spot.html" class="card">
+            <div class="card-body">
+                <h2 class="card-title">Bean Spot</h2>
+                <p class="card-description">Rekap Musnah Item Bean Spot dan telur.</p>
+            </div>
+        </a>
+    </div>
+
+    <script>
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        document.getElementById('date').innerText = formatDate(new Date());
+    </script>
+
+</body>
+</html>
