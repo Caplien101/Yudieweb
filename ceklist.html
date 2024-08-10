@@ -4,107 +4,141 @@
   <meta charset="UTF-8">
   <title>Ceklist Kebersihan</title>
   <style>
+    /* CSS yang diperbarui di atas */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px; /* Jarak antar kartu */
-      padding: 20px;
-      background-color: #f0f2f5;
-      margin: 0;
-    }
-    h1 {
-      width: 100%;
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
-    }
-    .card {
-      background-color: #ffffff;
-      border-radius: 8px; /* Radius border lebih kecil */
-      padding: 15px; /* Padding kartu lebih kecil */
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 300px; /* Lebar maksimum kartu lebih kecil */
-      box-sizing: border-box;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    }
-    .card-content {
-      margin-bottom: 15px;
-    }
-    .card-content span {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #333;
-    }
-    .card-content select,
-    .card-content input {
-      width: calc(100% - 20px);
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-    .update-button {
-      background-color: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 4px; /* Radius border tombol lebih kecil */
-      padding: 8px; /* Padding tombol lebih kecil */
-      cursor: pointer;
-      text-align: center;
-      width: 100%;
-      font-size: 14px; /* Ukuran font tombol lebih kecil */
-      transition: background-color 0.3s ease, opacity 0.3s ease;
-      position: relative;
-    }
-    .update-button.loading {
-      background-color: #6c757d;
-      cursor: not-allowed;
-    }
-    .update-button.loading::after {
-      content: 'Sedang mengirim data...';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font-size: 12px;
-    }
-    .update-button:hover {
-      background-color: #218838;
-    }
-    .card-content input[disabled],
-    .card-content select[disabled] {
-      background-color: #e9ecef;
-    }
-    .alert {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: #28a745;
-      color: white;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      display: none;
-    }
-    .alert.error {
-      background-color: #dc3545;
-    }
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f0f2f5;
+  margin: 0;
+}
+
+h1 {
+  width: 100%;
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Jarak antar kartu */
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px; /* Max width for larger screens */
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 8px; /* Radius border lebih kecil */
+  padding: 15px; /* Padding kartu lebih kecil */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 320px; /* Lebar maksimum kartu */
+  box-sizing: border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.card-content {
+  margin-bottom: 15px;
+}
+
+.card-content span {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.card-content select,
+.card-content input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.update-button {
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px; /* Radius border tombol lebih kecil */
+  padding: 10px; /* Padding tombol lebih besar */
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  font-size: 14px; /* Ukuran font tombol lebih kecil */
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+  position: relative;
+  overflow: hidden; /* Ensure the loading text doesn't overflow */
+}
+
+.update-button.loading {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.update-button.loading::after {
+  content: 'Sedang mengirim data...';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap; /* Prevents the text from breaking into multiple lines */
+}
+
+.update-button:hover {
+  background-color: #218838;
+}
+
+.card-content input[disabled],
+.card-content select[disabled] {
+  background-color: #e9ecef;
+}
+
+.alert {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #28a745;
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  display: none;
+  z-index: 1000; /* Ensure it's on top of other content */
+}
+
+.alert.error {
+  background-color: #dc3545;
+}
+
+@media (max-width: 600px) {
+  .card {
+    max-width: 100%; /* Make card full width on small screens */
+  }
+}
+
   </style>
 </head>
 <body>
   <div class="alert" id="alert"></div>
-  <h1>API Tester with Card View</h1>
-  <div id="card-container"></div>
+  <h1>Ceklist Kebersihan</h1>
+  <div class="card-container" id="card-container"></div>
 
   <script>
     const webAppUrl = 'https://script.google.com/macros/s/AKfycbxEleM1JCpR4QAqdcjmbHARqMuJ_RErTLXcLooA7Qa3R25eM-uHypTlp4BmJ5RmPR9e/exec'; // Ganti dengan URL web app Anda
@@ -181,7 +215,7 @@
 
     function updateCard(row, button) {
       button.classList.add('loading');
-      button.textContent = '';
+      button.textContent = ''; // Hide the original button text
 
       const card = document.querySelector(`[data-row="${row}"]`);
       const statusSelect = card.querySelector('select[data-col="3"]');
