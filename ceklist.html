@@ -3,46 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <title>API Tester with Card View</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
   <style>
     body {
-      padding: 20px;
-      background-color: #f8f9fa;
-    }
-    .card-container {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 20px; /* Jarak antar kartu */
+      padding: 20px;
+      background-color: #f0f2f5;
+      margin: 0;
+    }
+    h1 {
+      width: 100%;
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
     }
     .card {
-      width: 100%; /* Set to 100% to fit the container */
-      max-width: 400px; /* Maximum width for the card */
+      background-color: #ffffff;
+      border-radius: 8px; /* Radius border lebih kecil */
+      padding: 15px; /* Padding kartu lebih kecil */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 300px; /* Lebar maksimum kartu lebih kecil */
+      box-sizing: border-box;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .card-content {
+      margin-bottom: 15px;
+    }
+    .card-content span {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+    .card-content select,
+    .card-content input {
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      font-size: 14px;
     }
     .update-button {
-      width: 100%; /* Make button full-width */
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px; /* Radius border tombol lebih kecil */
+      padding: 8px; /* Padding tombol lebih kecil */
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      font-size: 14px; /* Ukuran font tombol lebih kecil */
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+      position: relative;
+    }
+    .update-button.loading {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    .update-button.loading::after {
+      content: 'Sedang mengirim data...';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 12px;
+    }
+    .update-button:hover {
+      background-color: #218838;
+    }
+    .card-content input[disabled],
+    .card-content select[disabled] {
+      background-color: #e9ecef;
     }
     .alert {
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 1050; /* Ensure alert is on top */
+      background-color: #28a745;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
       display: none;
+    }
+    .alert.error {
+      background-color: #dc3545;
     }
   </style>
 </head>
 <body>
-  <div class="alert alert-success" id="alert"></div>
-  <h1 class="mb-4">API Tester with Card View</h1>
-  <div class="card-container" id="card-container"></div>
+  <div class="alert" id="alert"></div>
+  <h1>API Tester with Card View</h1>
+  <div id="card-container"></div>
 
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script>
     const webAppUrl = 'https://script.google.com/macros/s/AKfycbxEleM1JCpR4QAqdcjmbHARqMuJ_RErTLXcLooA7Qa3R25eM-uHypTlp4BmJ5RmPR9e/exec'; // Ganti dengan URL web app Anda
 
     function showAlert(message, isError = false) {
       const alert = document.getElementById('alert');
       alert.textContent = message;
-      alert.className = `alert ${isError ? 'alert-danger' : 'alert-success'}`;
+      alert.className = isError ? 'alert error' : 'alert';
       alert.style.display = 'block';
       setTimeout(() => alert.style.display = 'none', 3000); // Hide alert after 3 seconds
     }
@@ -66,7 +136,8 @@
       if (data.length > 0) {
         for (let i = 1; i < data.length; i++) {
           const card = document.createElement('div');
-          card.className = 'card shadow-sm';
+          card.className = 'card';
+          card.setAttribute('data-row', i);
 
           const statusOptions = `
             <option value="Belum dikerjakan" ${data[i][3] === 'Belum dikerjakan' ? 'selected' : ''}>Belum dikerjakan</option>
@@ -75,22 +146,26 @@
           
           const formattedDate = formatDate(data[i][4]);
 
-          card.innerHTML = `
-            <div class="card-body">
-              <h5 class="card-title">Id: ${data[i][0]}</h5>
-              <p class="card-text"><strong>Nama:</strong> ${data[i][1]}</p>
-              <p class="card-text"><strong>Rak:</strong> ${data[i][2]}</p>
-              <div class="mb-3">
-                <label for="status-${i}" class="form-label">Status</label>
-                <select id="status-${i}" class="form-select">
-                  ${statusOptions}
-                </select>
-              </div>
-              <p class="card-text"><strong>Tanggal:</strong> ${formattedDate}</p>
-              <button class="btn btn-primary update-button" onclick="updateCard(${i})">Update Data</button>
-            </div>
-          `;
-
+          let cardContent = '<div class="card-content">';
+          
+          // Menyesuaikan dengan kolom Id, Nama, Rak, Status, Tanggal
+          cardContent += `
+            <span>Id</span>
+            <input type="text" value="${data[i][0]}" data-col="0" disabled />
+            <span>Nama</span>
+            <input type="text" value="${data[i][1]}" data-col="1" disabled />
+            <span>Rak</span>
+            <input type="text" value="${data[i][2]}" data-col="2" disabled />
+            <span>Status</span>
+            <select data-col="3">
+              ${statusOptions}
+            </select>
+            <span>Tanggal</span>
+            <input type="text" value="${formattedDate}" data-col="4" disabled />
+            <button class="update-button" onclick="updateCard(${i}, this)">Update Data</button>
+          </div>`;
+          
+          card.innerHTML = cardContent;
           container.appendChild(card);
         }
       }
@@ -104,8 +179,12 @@
       return `${day}/${month}/${year}`;
     }
 
-    function updateCard(row) {
-      const statusSelect = document.getElementById(`status-${row}`);
+    function updateCard(row, button) {
+      button.classList.add('loading');
+      button.textContent = '';
+
+      const card = document.querySelector(`[data-row="${row}"]`);
+      const statusSelect = card.querySelector('select[data-col="3"]');
       const status = statusSelect.value;
       const currentDate = new Date();
       const formattedDate = formatDateForUpdate(currentDate);
@@ -133,6 +212,10 @@
         .catch(error => {
           console.error('Error:', error);
           showAlert('Error updating data', true);
+        })
+        .finally(() => {
+          button.classList.remove('loading');
+          button.textContent = 'Update Data';
         });
     }
 
