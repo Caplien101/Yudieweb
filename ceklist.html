@@ -4,144 +4,167 @@
   <meta charset="UTF-8">
   <title>Ceklist Kebersihan</title>
   <style>
-    /* CSS yang diperbarui di atas */
+    /* Style your page here */
     body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background-color: #f0f2f5;
-  margin: 0;
-}
-
-h1 {
-  width: 100%;
-  text-align: center;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.card-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px; /* Jarak antar kartu */
-  justify-content: center;
-  width: 100%;
-  max-width: 1200px; /* Max width for larger screens */
-}
-
-.card {
-  background-color: #ffffff;
-  border-radius: 8px; /* Radius border lebih kecil */
-  padding: 15px; /* Padding kartu lebih kecil */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 320px; /* Lebar maksimum kartu */
-  box-sizing: border-box;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
-
-.card-content {
-  margin-bottom: 15px;
-}
-
-.card-content span {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #333;
-}
-
-.card-content select,
-.card-content input {
-  width: calc(100% - 20px);
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-.update-button {
-  background-color: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 4px; /* Radius border tombol lebih kecil */
-  padding: 10px; /* Padding tombol lebih besar */
-  cursor: pointer;
-  text-align: center;
-  width: 100%;
-  font-size: 14px; /* Ukuran font tombol lebih kecil */
-  transition: background-color 0.3s ease, opacity 0.3s ease;
-  position: relative;
-  overflow: hidden; /* Ensure the loading text doesn't overflow */
-}
-
-.update-button.loading {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-.update-button.loading::after {
-  content: 'Sedang mengirim data...';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 12px;
-  white-space: nowrap; /* Prevents the text from breaking into multiple lines */
-}
-
-.update-button:hover {
-  background-color: #218838;
-}
-
-.card-content input[disabled],
-.card-content select[disabled] {
-  background-color: #e9ecef;
-}
-
-.alert {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #28a745;
-  color: white;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-  display: none;
-  z-index: 1000; /* Ensure it's on top of other content */
-}
-
-.alert.error {
-  background-color: #dc3545;
-}
-
-@media (max-width: 600px) {
-  .card {
-    max-width: 100%; /* Make card full width on small screens */
-  }
-}
-
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      background-color: #f0f2f5;
+      margin: 0;
+    }
+    h1 {
+      width: 100%;
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .search-container {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .search-bar {
+      width: 100%;
+      max-width: 600px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px; /* Jarak antar kartu */
+      justify-content: center; /* Center align cards */
+    }
+    .card {
+      background-color: #ffffff;
+      border-radius: 8px; /* Radius border lebih kecil */
+      padding: 15px; /* Padding kartu lebih kecil */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 320px; /* Lebar maksimum kartu lebih besar */
+      box-sizing: border-box;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .card-content {
+      margin-bottom: 15px;
+    }
+    .card-content span {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+    .card-content select,
+    .card-content input {
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .update-button {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px; /* Radius border tombol lebih kecil */
+      padding: 10px; /* Padding tombol lebih besar */
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      font-size: 14px; /* Ukuran font tombol lebih kecil */
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+      position: relative;
+      overflow: hidden; /* Ensure the loading text doesn't overflow */
+    }
+    .update-button.loading {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    .update-button.loading::after {
+      content: 'Sedang mengirim data...';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 12px;
+      white-space: nowrap; /* Prevents the text from breaking into multiple lines */
+    }
+    .update-button:hover {
+      background-color: #218838;
+    }
+    .card-content input[disabled],
+    .card-content select[disabled] {
+      background-color: #e9ecef;
+    }
+    .alert {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #28a745;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 1000; /* Ensure it's on top of other content */
+    }
+    .alert.error {
+      background-color: #dc3545;
+    }
+    .home-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #ffc107;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+    }
+    .home-button:hover {
+      background-color: #e0a800;
+    }
+    @media (max-width: 600px) {
+      .card {
+        max-width: 100%; /* Make card full width on small screens */
+      }
+      .search-bar {
+        width: 100%; /* Make search bar full width on small screens */
+      }
+    }
   </style>
 </head>
 <body>
+  <button class="home-button" onclick="window.location.href='index.html';">
+    <i class="fas fa-home"></i>
+  </button>
   <div class="alert" id="alert"></div>
   <h1>Ceklist Kebersihan</h1>
-  <div class="card-container" id="card-container"></div>
+  <div class="search-container">
+    <input type="text" id="search-bar" class="search-bar" placeholder="Cari berdasarkan nama..." oninput="searchData()">
+  </div>
+  <div id="card-container" class="card-container"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
   <script>
     const webAppUrl = 'https://script.google.com/macros/s/AKfycbxEleM1JCpR4QAqdcjmbHARqMuJ_RErTLXcLooA7Qa3R25eM-uHypTlp4BmJ5RmPR9e/exec'; // Ganti dengan URL web app Anda
+
+    let allData = [];
 
     function showAlert(message, isError = false) {
       const alert = document.getElementById('alert');
@@ -155,7 +178,11 @@ h1 {
       fetch(`${webAppUrl}?action=getData`)
         .then(response => response.json())
         .then(data => {
-          displayData(data);
+          if (data.length > 0) {
+            // Skip the first row which is assumed to be the header
+            allData = data.slice(1);
+            displayData(allData);
+          }
         })
         .catch(error => {
           console.error('Error:', error);
@@ -168,10 +195,10 @@ h1 {
       container.innerHTML = '';
 
       if (data.length > 0) {
-        for (let i = 1; i < data.length; i++) {
+        for (let i = 0; i < data.length; i++) { // Perhatikan index dimulai dari 0
           const card = document.createElement('div');
           card.className = 'card';
-          card.setAttribute('data-row', i);
+          card.setAttribute('data-original-row', data[i][0]); // Simpan ID baris asli
 
           const statusOptions = `
             <option value="Belum dikerjakan" ${data[i][3] === 'Belum dikerjakan' ? 'selected' : ''}>Belum dikerjakan</option>
@@ -196,7 +223,7 @@ h1 {
             </select>
             <span>Tanggal</span>
             <input type="text" value="${formattedDate}" data-col="4" disabled />
-            <button class="update-button" onclick="updateCard(${i}, this)">Update Data</button>
+            <button class="update-button" onclick="updateCard('${data[i][0]}', this)">Update Data</button>
           </div>`;
           
           card.innerHTML = cardContent;
@@ -213,23 +240,23 @@ h1 {
       return `${day}/${month}/${year}`;
     }
 
-    function updateCard(row, button) {
+    function updateCard(originalRowId, button) {
       button.classList.add('loading');
       button.textContent = ''; // Hide the original button text
 
-      const card = document.querySelector(`[data-row="${row}"]`);
+      const card = document.querySelector(`[data-original-row="${originalRowId}"]`);
       const statusSelect = card.querySelector('select[data-col="3"]');
       const status = statusSelect.value;
       const currentDate = new Date();
       const formattedDate = formatDateForUpdate(currentDate);
 
       const updateRequests = [
-        fetch(`${webAppUrl}?action=updateData&row=${row}&col=3&value=${encodeURIComponent(status)}`)
+        fetch(`${webAppUrl}?action=updateData&row=${originalRowId}&col=3&value=${encodeURIComponent(status)}`)
       ];
       
       if (status === 'Sudah dikerjakan') {
         updateRequests.push(
-          fetch(`${webAppUrl}?action=updateData&row=${row}&col=4&value=${encodeURIComponent(formattedDate)}`)
+          fetch(`${webAppUrl}?action=updateData&row=${originalRowId}&col=4&value=${encodeURIComponent(formattedDate)}`)
         );
       }
       
@@ -260,7 +287,14 @@ h1 {
       return `${day}/${month}/${year}`;
     }
 
+    function searchData() {
+      const searchQuery = document.getElementById('search-bar').value.toLowerCase();
+      const filteredData = allData.filter(row => row[1].toLowerCase().includes(searchQuery));
+      displayData(filteredData);
+    }
+
     window.onload = fetchData;
   </script>
 </body>
 </html>
+
