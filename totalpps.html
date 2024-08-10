@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Viewer</title>
+  <!-- Link Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* CSS Custom untuk alert berwarna hijau */
+    .alert-success-custom {
+      background-color: #d4edda;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+
+    /* Animasi loading spinner */
+    .spinner-border-sm {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    /* Gaya untuk card */
+    .card-custom {
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .card-text {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      text-align: right;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .card-item {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Gaya untuk filter container */
+    .filter-container {
+      margin-bottom: 20px;
+    }
+
+    .filter-container label {
+      margin-right: 10px;
+    }
+
+    .filter-container input {
+      margin-bottom: 2px; /* Jarak antar input */
+    }
+
+    .filter-container button {
+      margin-top: 2px; /* Jarak atas tombol Filter */
+    }
+
+    /* Gaya untuk tombol Filter */
+    #filterBtn:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">REKAP DATA</h2>
+    <!-- Filter container -->
+    <div class="filter-container">
+      <div class="form-group">
+        <label for="startDate">Tanggal Awal</label>
+        <input type="date" id="startDate" class="form-control" style="display: inline-block; width: auto;">
+      </div>
+      <div class="form-group">
+        <label for="endDate">Tanggal Akhir</label>
+        <input type="date" id="endDate" class="form-control" style="display: inline-block; width: auto;">
+      </div>
+      <button type="button" class="btn btn-info" id="filterBtn">Filter</button>
+    </div>
+
+    <!-- Card container for totals -->
+    <div id="cardContainer"></div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies (Popper.js, jQuery) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    function formatDateToIndonesian(dateString) {
+      var options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+      var date = new Date(dateString);
+      return date.toLocaleDateString('id-ID', options);
+    }
+
+    function loadDataFromScript() {
+      fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
+      .then(response => response.json())
+      .then(data => {
+        data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        var totals = {
+          std: 0,
+          psm: 0,
+          pwp: 0,
+          serba: 0,
+          member: 0
+        };
+
+        data.forEach(row => {
+          totals.std += parseFloat(row.std) || 0;
+          totals.psm += parseFloat(row.psm) || 0;
+          totals.pwp += parseFloat(row.pwp) || 0;
+          totals.serba += parseFloat(row.serba) || 0;
+          totals.member += parseFloat(row.member) || 0;
+        });
+
+        updateCardView(totals);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        var cardContainer = document.getElementById('cardContainer');
+        cardContainer.innerHTML = '<div class="card card-custom text-danger"><div class="card-body">Error: Failed to load data from spreadsheet.</div></div>';
+      });
+    }
+
+    function filterData() {
+      var filterBtn = document.getElementById('filterBtn');
+      filterBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sedang Mengambil Data...';
+      filterBtn.disabled = true;
+
+      var startDateInput = document.getElementById('startDate').value;
+      var endDateInput = document.getElementById('endDate').value;
+      
+      var startDate = new Date(startDateInput);
+      var endDate = new Date(endDateInput);
+      
+      // Normalisasi tanggal agar waktu tidak diperhitungkan
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999); // Set akhir tanggal ke 23:59:59 untuk menyertakan seluruh hari
+
+      if (startDate > endDate) {
+        alert('Tanggal Awal tidak boleh lebih besar dari Tanggal Akhir.');
+        filterBtn.innerHTML = 'Filter';
+        filterBtn.disabled = false;
+        return;
+      }
+
+      fetch('https://script.google.com/macros/s/AKfycbzSkJODotoWNPY4VZkKLCVnGv26hzFcqu8Jt1ENc_OJDObueJQ-wR_huWKEtZLPtiZvig/exec')
+        .then(response => response.json())
+        .then(data => {
+          // Filter data berdasarkan tanggal dengan waktu yang dinormalisasi
+          data = data.filter(row => {
+            var rowDate = new Date(row.tanggal);
+            rowDate.setHours(0, 0, 0, 0); // Normalisasi tanggal dari data agar waktu tidak diperhitungkan
+            return rowDate >= startDate && rowDate <= endDate;
+          });
+
+          data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+          var totals = {
+            std: 0,
+            psm: 0,
+            pwp: 0,
+            serba: 0,
+            member: 0
+          };
+
+          data.forEach(row => {
+            totals.std += parseFloat(row.std) || 0;
+            totals.psm += parseFloat(row.psm) || 0;
+            totals.pwp += parseFloat(row.pwp) || 0;
+            totals.serba += parseFloat(row.serba) || 0;
+            totals.member += parseFloat(row.member) || 0;
+          });
+
+          updateCardView(totals);
+          filterBtn.innerHTML = 'Filter';
+          filterBtn.disabled = false;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          var cardContainer = document.getElementById('cardContainer');
+          cardContainer.innerHTML = '<div class="card card-custom text-danger"><div class="card-body">Error: Failed to load data from spreadsheet.</div></div>';
+          filterBtn.innerHTML = 'Filter';
+          filterBtn.disabled = false;
+        });
+    }
+
+    function updateCardView(totals) {
+  var cardContainer = document.getElementById('cardContainer');
+  cardContainer.innerHTML = `
+    <div class="card card-custom">
+      <div class="card-body">
+        <h5 class="card-title" style="color: blue;">Total Data Masuk By Category</h5>
+        <div class="row">
+          <div class="col-md-4 card-item">
+            <p class="card-text"><strong>STD</strong></p>
+            <p class="card-text card-value">${Math.round(totals.std)}</p>
+          </div>
+          <div class="col-md-4 card-item">
+            <p class="card-text"><strong>PSM</strong></p>
+            <p class="card-text card-value">${Math.round(totals.psm)}</p>
+          </div>
+          <div class="col-md-4 card-item">
+            <p class="card-text"><strong>PWP</strong></p>
+            <p class="card-text card-value">${Math.round(totals.pwp)}</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 card-item">
+            <p class="card-text"><strong>SERBA</strong></p>
+            <p class="card-text card-value">${Math.round(totals.serba)}</p>
+          </div>
+          <div class="col-md-4 card-item">
+            <p class="card-text"><strong>MEMBER</strong></p>
+            <p class="card-text card-value">${Math.round(totals.member)}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+    document.getElementById('filterBtn').addEventListener('click', filterData);
+
+    loadDataFromScript(); // Panggil fungsi untuk memuat data saat halaman dimuat
+  </script>
+</body>
+</html>
