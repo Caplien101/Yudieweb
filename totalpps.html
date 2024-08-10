@@ -6,6 +6,7 @@
   <title>Data Viewer</title>
   <!-- Link Bootstrap CSS -->
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     /* CSS Custom untuk alert berwarna hijau */
     .alert-success-custom {
@@ -71,11 +72,42 @@
       cursor: not-allowed;
       opacity: 0.7;
     }
+
+    /* Custom style untuk header dan tombol Home */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .btn-home {
+      display: flex;
+      align-items: center;
+      background-color: #ffc107; /* Warna kuning */
+      border-color: #ffc107; /* Warna kuning */
+      color: #fff; /* Warna teks putih */
+    }
+
+    .btn-home i {
+      margin-right: 5px; /* Jarak antara ikon dan teks */
+    }
+
+    .btn-home:hover {
+      background-color: #e0a800; /* Warna kuning lebih gelap saat di-hover */
+      border-color: #e0a800; /* Warna kuning lebih gelap saat di-hover */
+    }
   </style>
 </head>
 <body>
   <div class="container mt-5">
-    <h2 class="mb-4">REKAP DATA</h2>
+    <div class="header-container">
+      <h2 class="mb-4">REKAP DATA</h2>
+      <a href="index.html" class="btn btn-home">
+        <i class="bi bi-house"></i> Home
+      </a>
+    </div>
+
     <!-- Filter container -->
     <div class="filter-container">
       <div class="form-group">
@@ -86,7 +118,7 @@
         <label for="endDate">Tanggal Akhir</label>
         <input type="date" id="endDate" class="form-control" style="display: inline-block; width: auto;">
       </div>
-      <button type="button" class="btn btn-info" id="filterBtn">Filter</button>
+      <button type="button" class="btn btn-info" id="filterBtn">Filter Data</button>
     </div>
 
     <!-- Card container for totals -->
@@ -103,6 +135,12 @@
       var options = { day: '2-digit', month: '2-digit', year: 'numeric' };
       var date = new Date(dateString);
       return date.toLocaleDateString('id-ID', options);
+    }
+
+    function setTodayDate() {
+      var today = new Date().toISOString().split('T')[0];
+      document.getElementById('startDate').value = today;
+      document.getElementById('endDate').value = today;
     }
 
     function loadDataFromScript() {
@@ -199,42 +237,42 @@
     }
 
     function updateCardView(totals) {
-  var cardContainer = document.getElementById('cardContainer');
-  cardContainer.innerHTML = `
-    <div class="card card-custom">
-      <div class="card-body">
-        <h5 class="card-title" style="color: blue;">Total Data Masuk By Category</h5>
-        <div class="row">
-          <div class="col-md-4 card-item">
-            <p class="card-text"><strong>STD</strong></p>
-            <p class="card-text card-value">${Math.round(totals.std)}</p>
-          </div>
-          <div class="col-md-4 card-item">
-            <p class="card-text"><strong>PSM</strong></p>
-            <p class="card-text card-value">${Math.round(totals.psm)}</p>
-          </div>
-          <div class="col-md-4 card-item">
-            <p class="card-text"><strong>PWP</strong></p>
-            <p class="card-text card-value">${Math.round(totals.pwp)}</p>
+      var cardContainer = document.getElementById('cardContainer');
+      cardContainer.innerHTML = `
+        <div class="card card-custom">
+          <div class="card-body">
+            <h5 class="card-title" style="color: blue;">Total Data Masuk By Category</h5>
+            <div class="row">
+              <div class="col-md-4 card-item">
+                <p class="card-text"><strong>STD</strong></p>
+                <p class="card-text card-value">${Math.round(totals.std)}</p>
+              </div>
+              <div class="col-md-4 card-item">
+                <p class="card-text"><strong>PSM</strong></p>
+                <p class="card-text card-value">${Math.round(totals.psm)}</p>
+              </div>
+              <div class="col-md-4 card-item">
+                <p class="card-text"><strong>PWP</strong></p>
+                <p class="card-text card-value">${Math.round(totals.pwp)}</p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 card-item">
+                <p class="card-text"><strong>SERBA</strong></p>
+                <p class="card-text card-value">${Math.round(totals.serba)}</p>
+              </div>
+              <div class="col-md-4 card-item">
+                <p class="card-text"><strong>MEMBER</strong></p>
+                <p class="card-text card-value">${Math.round(totals.member)}</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-4 card-item">
-            <p class="card-text"><strong>SERBA</strong></p>
-            <p class="card-text card-value">${Math.round(totals.serba)}</p>
-          </div>
-          <div class="col-md-4 card-item">
-            <p class="card-text"><strong>MEMBER</strong></p>
-            <p class="card-text card-value">${Math.round(totals.member)}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
+      `;
+    }
 
     document.getElementById('filterBtn').addEventListener('click', filterData);
-
+    window.onload = setTodayDate; // Set default tanggal ke hari ini saat halaman dimuat
     loadDataFromScript(); // Panggil fungsi untuk memuat data saat halaman dimuat
   </script>
 </body>
