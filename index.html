@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             margin: 0;
-            padding-top: 140px; /* Ensure content starts below the header and subheader */
+            padding-top: 80px; /* Adjust this value based on the height of the header */
         }
 
         header {
@@ -22,8 +22,10 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            position: sticky;
+            position: fixed; /* Fixed position to ensure it stays at the top */
             top: 0;
+            left: 0;
+            width: 100%;
             z-index: 1000;
         }
 
@@ -35,19 +37,6 @@
             background-color: white;
             margin: 10px auto 0;
             border-radius: 5px;
-        }
-
-        .sub-header {
-            background-color: #e0e0e0;
-            color: #333;
-            padding: 10px 40px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 500;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 80px; /* This should be just below the header */
-            z-index: 999;
         }
 
         .card-container {
@@ -94,10 +83,6 @@
         Daily Task Pramuka Bekasi
     </header>
 
-    <div class="sub-header" id="date">
-        <!-- JavaScript will dynamically insert the date here -->
-    </div>
-
     <div class="card-container">
         <a href="daily-activity.html" class="card">
             <div class="card-body">
@@ -119,15 +104,6 @@
             </div>
         </a>
     </div>
-
-    <script>
-        function formatDate(date) {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('en-US', options);
-        }
-
-        document.getElementById('date').innerText = formatDate(new Date());
-    </script>
 
 </body>
 </html>
