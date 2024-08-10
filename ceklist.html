@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>API Tester with Card View</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .card {
+      width: 100%; /* Set to 100% to fit the container */
+      max-width: 400px; /* Maximum width for the card */
+    }
+    .update-button {
+      width: 100%; /* Make button full-width */
+    }
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050; /* Ensure alert is on top */
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="alert alert-success" id="alert"></div>
+  <h1 class="mb-4">API Tester with Card View</h1>
+  <div class="card-container" id="card-container"></div>
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbxEleM1JCpR4QAqdcjmbHARqMuJ_RErTLXcLooA7Qa3R25eM-uHypTlp4BmJ5RmPR9e/exec'; // Ganti dengan URL web app Anda
+
+    function showAlert(message, isError = false) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = `alert ${isError ? 'alert-danger' : 'alert-success'}`;
+      alert.style.display = 'block';
+      setTimeout(() => alert.style.display = 'none', 3000); // Hide alert after 3 seconds
+    }
+
+    function fetchData() {
+      fetch(`${webAppUrl}?action=getData`)
+        .then(response => response.json())
+        .then(data => {
+          displayData(data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showAlert('Error fetching data', true);
+        });
+    }
+
+    function displayData(data) {
+      const container = document.getElementById('card-container');
+      container.innerHTML = '';
+
+      if (data.length > 0) {
+        for (let i = 1; i < data.length; i++) {
+          const card = document.createElement('div');
+          card.className = 'card shadow-sm';
+
+          const statusOptions = `
+            <option value="Belum dikerjakan" ${data[i][3] === 'Belum dikerjakan' ? 'selected' : ''}>Belum dikerjakan</option>
+            <option value="Sudah dikerjakan" ${data[i][3] === 'Sudah dikerjakan' ? 'selected' : ''}>Sudah dikerjakan</option>
+          `;
+          
+          const formattedDate = formatDate(data[i][4]);
+
+          card.innerHTML = `
+            <div class="card-body">
+              <h5 class="card-title">Id: ${data[i][0]}</h5>
+              <p class="card-text"><strong>Nama:</strong> ${data[i][1]}</p>
+              <p class="card-text"><strong>Rak:</strong> ${data[i][2]}</p>
+              <div class="mb-3">
+                <label for="status-${i}" class="form-label">Status</label>
+                <select id="status-${i}" class="form-select">
+                  ${statusOptions}
+                </select>
+              </div>
+              <p class="card-text"><strong>Tanggal:</strong> ${formattedDate}</p>
+              <button class="btn btn-primary update-button" onclick="updateCard(${i})">Update Data</button>
+            </div>
+          `;
+
+          container.appendChild(card);
+        }
+      }
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    function updateCard(row) {
+      const statusSelect = document.getElementById(`status-${row}`);
+      const status = statusSelect.value;
+      const currentDate = new Date();
+      const formattedDate = formatDateForUpdate(currentDate);
+
+      const updateRequests = [
+        fetch(`${webAppUrl}?action=updateData&row=${row}&col=3&value=${encodeURIComponent(status)}`)
+      ];
+      
+      if (status === 'Sudah dikerjakan') {
+        updateRequests.push(
+          fetch(`${webAppUrl}?action=updateData&row=${row}&col=4&value=${encodeURIComponent(formattedDate)}`)
+        );
+      }
+      
+      Promise.all(updateRequests)
+        .then(responses => Promise.all(responses.map(response => response.text())))
+        .then(results => {
+          if (results.every(result => result === 'Update Successful')) {
+            showAlert('Data updated successfully');
+            fetchData(); // Refresh data after update
+          } else {
+            showAlert('Update Error', true);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showAlert('Error updating data', true);
+        });
+    }
+
+    function formatDateForUpdate(date) {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    window.onload = fetchData;
+  </script>
+</body>
+</html>
