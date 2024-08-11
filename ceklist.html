@@ -94,19 +94,24 @@
       width: 100%;
     }
     .update-button.loading {
-      background-color: #6c757d;
-      cursor: not-allowed;
-    }
-    .update-button.loading::after {
-      content: 'Sedang mengirim data...';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font-size: 14px;
-      white-space: nowrap; /* Prevents the text from breaking into multiple lines */
-    }
+  position: relative; /* Pastikan posisi relatif pada elemen induk */
+}
+
+.update-button.loading::after {
+  content: 'Sedang mengirim data...';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  background-color: rgba(0, 0, 0, 0.7); /* Background semi-transparan */
+  padding: 5px 10px; /* Padding untuk jarak antara teks dan background */
+  border-radius: 3px; /* Membuat sudut latar belakang sedikit melengkung */
+  z-index: 10; /* Pastikan teks berada di atas elemen lain */
+}
+
     .update-button:hover {
       background-color: #1c86ee;
     }
