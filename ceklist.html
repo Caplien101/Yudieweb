@@ -8,21 +8,55 @@
   <style>
     /* Global Styles */
     body {
-  font-family: 'Poppins', sans-serif;
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  background: radial-gradient(circle at 6.6% 12%, rgb(64, 0, 126) 20.8%, rgb(0, 255, 160) 100.2%);
-  margin: 0;
-  min-height: 100vh; /* Menggunakan min-height untuk memastikan body selalu setinggi viewport */
-  box-sizing: border-box;
-}
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      margin: 0;
+      background: radial-gradient(circle at 6.6% 12%, rgb(64, 0, 126) 20.8%, rgb(0, 255, 160) 100.2%);
+      min-height: 100vh; /* Ensuring the body height covers the viewport */
+      box-sizing: border-box;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.5); /* Transparansi navbar */
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      position: sticky; /* Membuat navbar sticky */
+      top: 0;
+      width: 100%;
+      z-index: 1000; /* Memastikan navbar berada di atas konten lain */
+    }
+    .navbar-logo {
+      font-size: 24px;
+      font-weight: 700;
+      margin-right: auto;
+    }
+    .navbar-menu {
+      display: flex;
+      gap: 15px;
+    }
+    .navbar-menu a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .navbar-menu a:hover {
+      background-color: #555;
+    }
 
     h1 {
-      width: 100%;
       text-align: center;
       color: #ffffff;
       margin-bottom: 20px;
+      font-size: 24px; /* Adjusted font size for heading */
     }
     .search-container {
       margin-bottom: 20px;
@@ -40,7 +74,7 @@
     .card-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px; /* Jarak antar kartu */
+      gap: 20px; /* Space between cards */
       justify-content: center; /* Center align cards */
     }
     .card {
@@ -49,13 +83,14 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-      padding: 20px;
+      padding: 15px; /* Adjusted padding for better spacing */
       width: 320px;
-      max-width: 350px; /* Lebar maksimum kartu untuk smartphone */
+      max-width: 350px; /* Maximum width of the card */
       box-sizing: border-box;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       color: #f5f5f5;
       text-align: center;
+      font-size: 14px; /* Adjusted font size for the card content */
     }
     .card:hover {
       transform: scale(1.05);
@@ -69,16 +104,17 @@
       margin-bottom: 5px;
       font-weight: bold;
       color: #ffffff;
+      font-size: 16px; /* Adjusted font size for labels */
     }
     .card-content select,
     .card-content input {
       width: calc(100% - 20px);
-      padding: 10px;
+      padding: 8px; /* Adjusted padding for input fields */
       border: 1px solid #ccc;
       border-radius: 5px;
       box-sizing: border-box;
       margin-bottom: 10px;
-      font-size: 12px;
+      font-size: 14px; /* Adjusted font size for input fields */
     }
     .update-button {
       background-color: #1e90ff;
@@ -86,7 +122,7 @@
       border: none;
       border-radius: 12px;
       padding: 10px 25px;
-      font-size: 16px;
+      font-size: 14px; /* Adjusted font size for button */
       cursor: pointer;
       text-decoration: none;
       transition: background-color 0.3s ease;
@@ -94,24 +130,22 @@
       width: 100%;
     }
     .update-button.loading {
-  position: relative; /* Pastikan posisi relatif pada elemen induk */
-}
-
-.update-button.loading::after {
-  content: 'Sedang mengirim data...';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 14px;
-  white-space: nowrap;
-  background-color: rgba(0, 0, 0, 0.7); /* Background semi-transparan */
-  padding: 5px 10px; /* Padding untuk jarak antara teks dan background */
-  border-radius: 3px; /* Membuat sudut latar belakang sedikit melengkung */
-  z-index: 10; /* Pastikan teks berada di atas elemen lain */
-}
-
+      position: relative; /* Ensure relative position on parent element */
+    }
+    .update-button.loading::after {
+      content: 'Sedang mengirim data...';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 12px; /* Adjusted font size for loading text */
+      white-space: nowrap;
+      background-color: rgba(0, 0, 0, 0); /* Semi-transparent background */
+      padding: 5px 10px; /* Padding for spacing */
+      border-radius: 3px; /* Rounded corners for background */
+      z-index: 10; /* Ensure text is on top */
+    }
     .update-button:hover {
       background-color: #1c86ee;
     }
@@ -130,27 +164,10 @@
       border-radius: 5px;
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
       display: none;
-      z-index: 1000; /* Ensure it's on top of other content */
+      z-index: 1000; /* Ensure it is on top of other content */
     }
     .alert.error {
       background-color: #dc3545;
-    }
-    .home-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: #ffc107;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      padding: 10px;
-      font-size: 20px;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: background-color 0.3s ease;
-    }
-    .home-button:hover {
-      background-color: #e0a800;
     }
     @media (max-width: 600px) {
       .card-container {
@@ -190,41 +207,38 @@
       background: linear-gradient(45deg, #4caf50, #81c784);
       border-radius: 10px;
       animation: progress 2s infinite;
-      transition: width 0.3s ease-in-out;
+      transition: width 0.5s ease;
+    }
+    @keyframes progress {
+      0% { width: 0%; }
+      50% { width: 100%; }
+      100% { width: 0%; }
     }
     .progress-text {
       margin-top: 10px;
-      text-align: center;
-      color: #333;
       font-size: 16px;
-    }
-    @keyframes progress {
-      0% {
-        width: 0%;
-      }
-      50% {
-        width: 50%;
-      }
-      100% {
-        width: 100%;
-      }
     }
   </style>
 </head>
 <body>
-  <!-- Progress Bar -->
+  <div class="navbar">
+    <div class="navbar-logo">Pramuka Apps</div>
+    <div class="navbar-menu">
+      <a href="index.html">Home</a>
+      <a href="totalpps.html">Focus Promo</a>
+      <a href="sales.html">Sales</a>
+    </div>
+  </div>
+
   <div class="progress-overlay" id="progress-overlay">
     <div class="progress-container">
       <div class="progress-bar"></div>
-      <span class="progress-text">Sedang mengambil data...</span>
+      <div class="progress-text">Loading...</div>
     </div>
   </div>
-  
-  <!-- Existing content -->
-  <button class="home-button" onclick="window.location.href='index.html';">
-    <i class="fas fa-home"></i>
-  </button>
-  <div class="alert" id="alert"></div>
+
+  <div id="alert" class="alert"></div>
+
   <h1>Ceklist Kebersihan</h1>
   <div class="search-container">
     <input type="text" id="search-bar" class="search-bar" placeholder="Cari berdasarkan nama..." oninput="searchData()">
