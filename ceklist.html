@@ -4,20 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ceklist Kebersihan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Style your page here */
+    /* Global Styles */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Poppins', sans-serif;
       display: flex;
       flex-direction: column;
       padding: 20px;
-      background-color: #f0f2f5;
+      background: radial-gradient(circle at 6.6% 12%, rgb(64, 0, 126) 20.8%, rgb(0, 255, 160) 100.2%);
       margin: 0;
+      box-sizing: border-box;
     }
     h1 {
       width: 100%;
       text-align: center;
-      color: #333;
+      color: #ffffff;
       margin-bottom: 20px;
     }
     .search-container {
@@ -36,22 +38,26 @@
     .card-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 25px; /* Jarak antar kartu */
+      gap: 20px; /* Jarak antar kartu */
       justify-content: center; /* Center align cards */
     }
     .card {
-      background-color: #ffffff;
-      border-radius: 8px; /* Radius border lebih kecil */
-      padding: 15px; /* Padding kartu lebih kecil */
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      padding: 20px;
       width: 100%;
-      max-width: 600px; /* Lebar maksimum kartu lebih besar */
+      max-width: 350px; /* Lebar maksimum kartu untuk smartphone */
       box-sizing: border-box;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      color: #f5f5f5;
+      text-align: center;
     }
     .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
     }
     .card-content {
       margin-bottom: 15px;
@@ -60,7 +66,7 @@
       display: block;
       margin-bottom: 5px;
       font-weight: bold;
-      color: #333;
+      color: #ffffff;
     }
     .card-content select,
     .card-content input {
@@ -73,18 +79,17 @@
       font-size: 15px;
     }
     .update-button {
-      background-color: #28a745;
+      background-color: #1e90ff;
       color: #fff;
       border: none;
-      border-radius: 4px; /* Radius border tombol lebih kecil */
-      padding: 10px; /* Padding tombol lebih besar */
+      border-radius: 12px;
+      padding: 10px 25px;
+      font-size: 18px;
       cursor: pointer;
-      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      font-family: 'Poppins', sans-serif;
       width: 100%;
-      font-size: 16px; /* Ukuran font tombol lebih kecil */
-      transition: background-color 0.3s ease, opacity 0.3s ease;
-      position: relative;
-      overflow: hidden; /* Ensure the loading text doesn't overflow */
     }
     .update-button.loading {
       background-color: #6c757d;
@@ -101,7 +106,7 @@
       white-space: nowrap; /* Prevents the text from breaking into multiple lines */
     }
     .update-button:hover {
-      background-color: #218838;
+      background-color: #1c86ee;
     }
     .card-content input[disabled],
     .card-content select[disabled] {
@@ -116,7 +121,7 @@
       color: white;
       padding: 15px;
       border-radius: 5px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
       display: none;
       z-index: 1000; /* Ensure it's on top of other content */
     }
@@ -153,7 +158,6 @@
         width: 100%; /* Make search bar full width on small screens */
       }
     }
-
     /* Progress Bar Style */
     .progress-overlay {
       position: fixed;
@@ -227,22 +231,20 @@
 
     let allData = [];
 
-    // Function to show progress bar
     function showProgressBar() {
       document.getElementById('progress-overlay').style.display = 'flex';
     }
 
-    // Function to hide progress bar
     function hideProgressBar() {
       document.getElementById('progress-overlay').style.display = 'none';
     }
 
     function showAlert(message, isError = false) {
-      const alert = document.getElementById('alert');
-      alert.textContent = message;
-      alert.className = isError ? 'alert error' : 'alert';
-      alert.style.display = 'block';
-      setTimeout(() => alert.style.display = 'none', 3000); // Hide alert after 3 seconds
+      const alertElement = document.getElementById('alert');
+      alertElement.textContent = message;
+      alertElement.className = isError ? 'alert error' : 'alert';
+      alertElement.style.display = 'block';
+      setTimeout(() => alertElement.style.display = 'none', 3000); // Hide alert after 3 seconds
     }
 
     function fetchData() {
@@ -270,7 +272,7 @@
       container.innerHTML = '';
 
       if (data.length > 0) {
-        for (let i = 0; i < data.length; i++) { // Perhatikan index dimulai dari 0
+        for (let i = 0; i < data.length; i++) {
           const card = document.createElement('div');
           card.className = 'card';
           card.setAttribute('data-original-row', data[i][0]); // Simpan ID baris asli
