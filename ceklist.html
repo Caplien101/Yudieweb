@@ -77,7 +77,8 @@
       gap: 20px; /* Space between cards */
       justify-content: center; /* Center align cards */
     }
-  .card {
+/* Card Styles */
+.card {
   background: rgba(255, 255, 255, 0.3);
   border-radius: 20px;
   backdrop-filter: blur(10px);
@@ -89,19 +90,20 @@
   box-sizing: border-box;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   color: #f5f5f5;
-  text-align: center; /* Teks di card secara keseluruhan */
   font-size: 14px;
 }
 
+/* Card Content Styles */
 .card-content {
   display: flex;
-  flex-direction: column; /* Menyusun elemen secara vertikal */
-  align-items: center; /* Menyusun elemen di tengah secara horizontal */
+  flex-direction: column; /* Vertikal alignment */
+  align-items: stretch; /* Membuat elemen mengisi lebar card secara horizontal */
+  text-align: left; /* Menyusun teks di dalam card ke kiri */
 }
 
 .card-content span {
   display: block;
-  margin-bottom: 10px; /* Menambah jarak antara label dan input */
+  margin-bottom: 10px; /* Jarak antara label dan input */
   font-weight: bold;
   color: #ffffff;
   font-size: 16px;
@@ -109,16 +111,25 @@
 
 .card-content input,
 .card-content select {
-  width: calc(100% - 20px); /* Lebar hampir penuh dengan margin */
+  width: 100%; /* Lebar penuh untuk input dan select */
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
-  margin-bottom: 15px; /* Menambah jarak antara input/select */
+  margin-bottom: 15px; /* Jarak antara input/select */
   font-size: 15px;
-  text-align: center; /* Teks di dalam input/select di tengah secara horizontal */
+  text-align: center; /* Teks di dalam input dan select di tengah secara horizontal */
 }
 
+/* Styles for Select */
+.card-content select {
+  -webkit-appearance: none; /* Menghilangkan tampilan default pada select untuk beberapa browser */
+  appearance: none; /* Menghilangkan tampilan default pada select */
+  background-color: rgba(255, 255, 255, 0.5); /* Menambahkan latar belakang semi-transparan */
+  padding: 8px; /* Padding dalam select */
+}
+
+/* Styles for Buttons */
 .update-button {
   background-color: #1e90ff;
   color: #fff;
