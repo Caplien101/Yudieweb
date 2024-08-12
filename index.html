@@ -6,19 +6,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <title>Yudie Project</title>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: radial-gradient(circle at 6.6% 12%, rgb(64, 0, 126) 20.8%, rgb(0, 255, 160) 100.2%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            gap: 20px;
-        }
+        /* Global Styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      margin: 0;
+      background: radial-gradient(circle at 6.6% 12%, rgb(64, 0, 126) 20.8%, rgb(0, 255, 160) 100.2%);
+      min-height: 100vh; /* Ensuring the body height covers the viewport */
+      box-sizing: border-box;
+    }
 
-       /* Navbar Styles */
+    /* Navbar Styles */
     .navbar {
       background-color: rgba(0, 0, 0, 0.5); /* Transparansi navbar */
       color: #fff;
@@ -50,12 +50,6 @@
     }
     .navbar-menu a:hover {
       background-color: #555;
-    }
-        h1 {
-      text-align: center;
-      color: #ffffff;
-      margin-bottom: 20px;
-      font-size: 24px; /* Adjusted font size for heading */
     }
 
         /* Card Styles */
