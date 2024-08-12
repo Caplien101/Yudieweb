@@ -18,46 +18,39 @@
             gap: 20px;
         }
 
-        /* Navbar Styles */
-        header {
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Transparansi navbar */
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            padding: 10px 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .navbar-logo {
-            font-size: 20px;
-            font-weight: 700;
-            margin-right: auto;
-        }
-
-        .navbar-menu {
-            display: flex;
-            gap: 15px;
-        }
-
-        .navbar-menu a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .navbar-menu a:hover {
-            background-color: #555;
-        }
+       /* Navbar Styles */
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.5); /* Transparansi navbar */
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 10px 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      position: sticky; /* Membuat navbar sticky */
+      top: 0;
+      width: 100%;
+      z-index: 1000; /* Memastikan navbar berada di atas konten lain */
+    }
+    .navbar-logo {
+      font-size: 20px;
+      font-weight: 700;
+      margin-right: auto;
+    }
+    .navbar-menu {
+      display: flex;
+      gap: 15px;
+    }
+    .navbar-menu a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .navbar-menu a:hover {
+      background-color: #555;
+    }
 
         /* Card Styles */
         .card {
