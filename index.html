@@ -219,6 +219,11 @@
           setTimeout(() => {
             responseElement.style.display = 'none';
           }, 3000);
+
+          // Disable editing of QTY fields after successful submission
+          document.querySelectorAll('#cardContainer .card-view input[name="QTY"]').forEach(input => {
+            input.setAttribute('readonly', true);
+          });
         })
         .catch(error => {
           console.error('Error submitting data:', error);
