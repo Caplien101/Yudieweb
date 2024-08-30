@@ -1,156 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <title>Yudie Project</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: radial-gradient(circle at 6.6% 12%, rgb(64, 0, 126) 20.8%, rgb(0, 255, 160) 100.2%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; /* Centering content vertically */
-            height: 100vh;
-            gap: 20px;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* Navbar Styles */
-        .navbar {
-            background-color: rgba(0, 0, 0, 0.5); /* Navbar transparency */
-            color: #fff;
-            display: flex;
-            align-items: center;
-            padding: 10px 20px; /* Add some padding for better spacing */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            position: fixed; /* Fix position to stay on top */
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000; /* Ensure navbar is above other content */
-        }
-        .navbar-logo {
-            font-size: 20px;
-            font-weight: 700;
-            margin-right: auto;
-        }
-        .navbar-menu {
-            display: flex;
-            gap: 15px;
-        }
-        .navbar-menu a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .navbar-menu a:hover {
-            background-color: #555;
-        }
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
 
-        /* Adjust content padding to avoid overlap with fixed navbar */
-        .content {
-            margin-top: 60px; /* Ensure content is not hidden under the fixed navbar */
-            text-align: center;
-            display: flex;
-            flex-wrap: wrap; /* Allow cards to wrap onto new lines */
-            justify-content: center; /* Center the cards horizontally */
-            gap: 20px; /* Add space between cards */
-        }
+  <title>SO SERAH TRIMA SHIFT</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f3f4f6; /* Warna background lembut */
+    }
 
-        h1 {
-            color: #ffffff;
-            font-size: 24px; /* Adjusted font size for heading */
-        }
+    .card-view {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-        /* Card Styles */
-        .card {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            padding: 20px;
-            width: 320px;
-            color: #f5f5f5;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin: 0; /* Remove default margin */
-        }
+    .card-view:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
 
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-        }
+    .card-body-scroll {
+      overflow-y: hidden; /* Menghilangkan scrollbar */
+      max-height: 100px;
+      font-size: 0.875rem;
+      margin-bottom: 8px;
+      background-color: #eef1f5; /* Background modern */
+      padding: 5px;
+      border-radius: 5px;
+    }
 
-        .card h2 {
-            margin: 0 0 10px;
-            font-size: 26px;
-            color: #ffffff;
-            font-weight: 600;
-        }
+    .card-view h5 {
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
 
-        .card p {
-            font-size: 18px;
-            margin: 0;
-            color: #e0e0e0;
-        }
+    .input-group {
+      margin-top: 5px;
+    }
 
-        .button {
-            display: inline-block;
-            margin-top: 20px;
-            background-color: #1e90ff;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 25px;
-            font-size: 18px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            font-family: 'Poppins', sans-serif;
-        }
+    .input-group-text, .form-control {
+      font-size: 0.8rem;
+    }
 
-        .button:hover {
-            background-color: #1c86ee;
-        }
-    </style>
+    .btn-spaced {
+      margin: 15px 0;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+    }
+
+    .alert-custom {
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="navbar-logo">Pramuka Apps</div>
-        <div class="navbar-menu">
-            <a href="index.html">HOME</a>
-            <a href="totalpps.html">PPS</a>
-            <a href="sales.html">SALES</a>
-        </div>
-    </div>
-    
-    <div class="content">
-        <div class="card">
-            <h2>Daily Activity</h2>
-            <p>Ceklist kebersihan harian.</p>
-            <a href="ceklist.html" class="button">Masuk</a>
-        </div>
+  <div id="content" class="container mt-5">
+    <h2>SO SERAH TERIMA SHIFT</h2>
 
-        <div class="card">
-            <h2>Focus Marketing</h2>
-            <p>Form monitoring pershift.</p>
-            <a href="pps.html" class="button">Masuk</a>
-        </div>
+    <!-- Form Input -->
+    <form id="pluForm" class="mt-4">
+      <div class="mb-3">
+        <label for="tanggal" class="form-label">Tanggal:</label>
+        <input type="date" class="form-control" id="tanggal" name="TANGGAL" required>
+      </div>
 
-        <div class="card">
-            <h2>Report Sales</h2>
-            <p>Report perkembangan Daily Sales.</p>
-            <a href="totalpps.html" class="button">Masuk</a>
-        </div>
+      <div class="mb-3">
+        <label for="shift" class="form-label">Shift:</label>
+        <select id="shift" class="form-select" name="SHIFT" required>
+          <option value="">Pilih Shift</option>
+          <option value="Shift 1">Shift 1</option>
+          <option value="Shift 2">Shift 2</option>
+          <option value="Shift 3">Shift 3</option>
+        </select>
+      </div>
+
+      <!-- Tombol Ambil Data -->
+      <button type="button" class="btn btn-primary mt-2" id="fetchDataBtn" onclick="fetchData()" disabled>
+        <span class="spinner-border spinner-border-sm d-none" id="fetchButtonSpinner" aria-hidden="true"></span>
+        <span role="status" id="fetchButtonText">Ambil Data</span>
+      </button>
+    </form>
+
+    <!-- Group CardView Formulir -->
+    <div id="cardContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-4">
+      <!-- Data akan dimuat di sini oleh JavaScript -->
     </div>
+
+    <!-- Alert untuk notifikasi keberhasilan -->
+    <div id="response" class="alert alert-success alert-custom" role="alert">
+      Data berhasil dikirim!
+    </div>
+
+    <!-- Tombol Simpan Data -->
+    <button type="button" class="btn btn-success mt-2 btn-spaced" id="submitBtn" onclick="submitForm(event)" disabled>
+      <span class="spinner-border spinner-border-sm d-none" id="buttonSpinner" aria-hidden="true"></span>
+      <span role="status" id="buttonText">Simpan Data</span>
+    </button>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzCfF1XUcZ8jpZfJA2KPeHGA17CIBy_dCLnTyzDUVMX1Aj18RTeTlxs5k8nnn79S-L7Pg/exec';
+
+    function fetchData() {
+      const fetchDataBtn = document.getElementById('fetchDataBtn');
+      const fetchButtonSpinner = document.getElementById('fetchButtonSpinner');
+      const fetchButtonText = document.getElementById('fetchButtonText');
+
+      fetchDataBtn.disabled = true;
+      fetchButtonSpinner.classList.remove('d-none');
+      fetchButtonText.textContent = 'Loading...';
+
+      fetch(scriptURL)
+        .then(response => response.json())
+        .then(data => {
+          const cardContainer = document.getElementById('cardContainer');
+          cardContainer.innerHTML = '';
+
+          data.forEach(row => {
+            const card = document.createElement('div');
+            card.className = 'col';
+            card.innerHTML = `
+              <div class="card-view">
+                <h5>${row[0]}</h5>
+                <div class="card-body-scroll">
+                  <p>${row[1]}</p>
+                </div>
+                <div class="input-group">
+                  <span class="input-group-text">QTY</span>
+                  <input type="number" class="form-control qty-input" value="${row[2]}" name="QTY" required>
+                </div>
+              </div>
+            `;
+            cardContainer.appendChild(card);
+          });
+
+          fetchDataBtn.disabled = false;
+          fetchButtonSpinner.classList.add('d-none');
+          fetchButtonText.textContent = 'Ambil Data';
+
+          checkFormValidity(); // Validasi form setelah data diambil
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          fetchDataBtn.disabled = false;
+          fetchButtonSpinner.classList.add('d-none');
+          fetchButtonText.textContent = 'Ambil Data';
+
+          alert('Terjadi kesalahan saat mengambil data. Silakan coba lagi.');
+        });
+    }
+
+    function submitForm(event) {
+      event.preventDefault();
+
+      const tanggal = document.getElementById('tanggal').value;
+      const shift = document.getElementById('shift').value;
+      const cardContainer = document.getElementById('cardContainer');
+      const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
+
+      const dataToSubmit = cards.map(card => {
+        const inputs = card.getElementsByTagName('input');
+        return {
+          TANGGAL: tanggal,
+          SHIFT: shift,
+          PLU: card.getElementsByTagName('h5')[0].textContent,
+          DESCRIPTION: card.getElementsByTagName('p')[0].textContent,
+          QTY: inputs[0].value
+        };
+      });
+
+      const submitBtn = document.getElementById('submitBtn');
+      const buttonSpinner = document.getElementById('buttonSpinner');
+      const buttonText = document.getElementById('buttonText');
+      const responseElement = document.getElementById('response');
+
+      if (dataToSubmit.some(item => !item.QTY)) {
+        alert('Semua kolom QTY harus diisi.');
+        submitBtn.disabled = false;
+        buttonSpinner.classList.add('d-none');
+        buttonText.textContent = 'Simpan Data';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      buttonSpinner.classList.remove('d-none');
+      buttonText.textContent = 'Loading...';
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(dataToSubmit)
+      })
+        .then(response => response.text())
+        .then(result => {
+          submitBtn.disabled = false;
+          buttonSpinner.classList.add('d-none');
+          buttonText.textContent = 'Simpan Data';
+          responseElement.textContent = 'Data berhasil dikirim!';
+          responseElement.style.display = 'block';
+
+          setTimeout(() => {
+            responseElement.style.display = 'none';
+          }, 3000);
+        })
+        .catch(error => {
+          submitBtn.disabled = false;
+          buttonSpinner.classList.add('d-none');
+          buttonText.textContent = 'Simpan Data';
+          console.error('Error submitting data:', error);
+          alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+        });
+    }
+
+    function checkFormValidity() {
+      const tanggal = document.getElementById('tanggal').value;
+      const shift = document.getElementById('shift').value;
+      const fetchDataBtn = document.getElementById('fetchDataBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      const qtyInputs = document.querySelectorAll('#cardContainer .card-view input[name="QTY"]');
+
+      const allQtyFilled = Array.from(qtyInputs).every(input => input.value.trim() !== '');
+
+      fetchDataBtn.disabled = !(tanggal && shift);
+      submitBtn.disabled = !(tanggal && shift && allQtyFilled);
+    }
+
+    // Tambahkan event listener untuk memeriksa validitas form setiap kali ada perubahan
+    document.getElementById('tanggal').addEventListener('input', checkFormValidity);
+    document.getElementById('shift').addEventListener('change', checkFormValidity);
+    document.getElementById('cardContainer').addEventListener('input', checkFormValidity);
+  </script>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
