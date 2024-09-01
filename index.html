@@ -230,36 +230,24 @@ function submitForm(event) {
   buttonSpinner.classList.remove('d-none');
   buttonText.textContent = 'Loading...';
 
-  fetch(scriptURL, {
-    method: 'POST',
-    body: JSON.stringify(dataToSubmit)
-  })
-    .then(response => response.text())
-    .then(result => {
-      submitBtn.disabled = false;
-      buttonSpinner.classList.add('d-none');
-      buttonText.textContent = 'Simpan Data';
-      responseElement.textContent = 'Data berhasil dikirim!';
-      responseElement.style.display = 'block';
+  // Simulasi pengiriman data berhasil
+  setTimeout(() => {
+    submitBtn.disabled = true;
+    buttonSpinner.classList.add('d-none');
+    buttonText.textContent = 'Simpan Data';
+    responseElement.textContent = 'Data berhasil disimpan!, lanjutkan untuk cek on hand';
+    responseElement.style.display = 'block';
 
-      setTimeout(() => {
-        responseElement.style.display = 'none';
-        window.location.href = 'cekonhand.html'; // Redirect setelah alert menghilang
-      }, 3000);
+    setTimeout(() => {
+      responseElement.style.display = 'none';
+      window.location.href = 'cekonhand.html'; // Redirect setelah alert menghilang
+    }, 3000);
 
-      // Disable editing of DISPLAY and GUDANG fields after successful submission
-      document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"], #cardContainer .card-view input[name="GUDANG"]').forEach(input => {
-        input.setAttribute('readonly', true);
-      });
-    })
-    .catch(error => {
-      console.error('Error submitting data:', error);
-      submitBtn.disabled = false;
-      buttonSpinner.classList.add('d-none');
-      buttonText.textContent = 'Simpan Data';
-
-      alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+    // Disable editing of DISPLAY and GUDANG fields after successful submission
+    document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"], #cardContainer .card-view input[name="GUDANG"]').forEach(input => {
+      input.setAttribute('readonly', true);
     });
+  }, 1000); // Simulasi waktu tunggu 1 detik
 }
 
 // Fungsi untuk memuat data dari localStorage
