@@ -115,143 +115,188 @@
       <span role="status" id="buttonText">Simpan Data</span>
     </button>
   </div>
+<script>
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwelfEQUFSYBTyQL9auKNT2ygx-0pVBhp_m9TdD-H-2wrgSRtYv-vVNnmmpNn_FkOHlIA/exec';
 
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzCfF1XUcZ8jpZfJA2KPeHGA17CIBy_dCLnTyzDUVMX1Aj18RTeTlxs5k8nnn79S-L7Pg/exec';
+// Muat data dari localStorage saat halaman dimuat
+window.onload = function() {
+  loadFromLocalStorage();
+  checkFormValidity(); // Validasi form saat halaman dimuat
+};
 
-    function fetchData() {
-      const fetchDataBtn = document.getElementById('fetchDataBtn');
-      const fetchButtonSpinner = document.getElementById('fetchButtonSpinner');
-      const fetchButtonText = document.getElementById('fetchButtonText');
+function fetchData() {
+  const fetchDataBtn = document.getElementById('fetchDataBtn');
+  const fetchButtonSpinner = document.getElementById('fetchButtonSpinner');
+  const fetchButtonText = document.getElementById('fetchButtonText');
 
-      fetchDataBtn.disabled = true;
-      fetchButtonSpinner.classList.remove('d-none');
-      fetchButtonText.textContent = 'Loading...';
+  fetchDataBtn.disabled = true;
+  fetchButtonSpinner.classList.remove('d-none');
+  fetchButtonText.textContent = 'Loading...';
 
-      fetch(scriptURL)
-        .then(response => response.json())
-        .then(data => {
-          const cardContainer = document.getElementById('cardContainer');
-          cardContainer.innerHTML = '';
-
-          data.forEach(row => {
-            const card = document.createElement('div');
-            card.className = 'col';
-            card.innerHTML = `
-              <div class="card-view">
-                <h5>${row[0]}</h5>
-                <div class="card-body-scroll">
-                  <p>${row[1]}</p>
-                </div>
-                <div class="input-group">
-                  <span class="input-group-text">QTY</span>
-                  <input type="number" class="form-control qty-input" value="${row[2]}" name="QTY" required>
-                </div>
-              </div>
-            `;
-            cardContainer.appendChild(card);
-          });
-
-          fetchDataBtn.disabled = false;
-          fetchButtonSpinner.classList.add('d-none');
-          fetchButtonText.textContent = 'Ambil Data';
-
-          checkFormValidity(); // Validasi form setelah data diambil
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-          fetchDataBtn.disabled = false;
-          fetchButtonSpinner.classList.add('d-none');
-          fetchButtonText.textContent = 'Ambil Data';
-
-          alert('Terjadi kesalahan saat mengambil data. Silakan coba lagi.');
-        });
-    }
-
-    function submitForm(event) {
-      event.preventDefault();
-
-      const tanggal = document.getElementById('tanggal').value;
-      const shift = document.getElementById('shift').value;
+  fetch(scriptURL)
+    .then(response => response.json())
+    .then(data => {
       const cardContainer = document.getElementById('cardContainer');
-      const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
+      cardContainer.innerHTML = '';
 
-      const dataToSubmit = cards.map(card => {
-        const inputs = card.getElementsByTagName('input');
-        return {
-          TANGGAL: tanggal,
-          SHIFT: shift,
-          PLU: card.getElementsByTagName('h5')[0].textContent,
-          DESCRIPTION: card.getElementsByTagName('p')[0].textContent,
-          QTY: inputs[0].value
-        };
+      data.forEach((row, index) => { 
+        const card = document.createElement('div'); 
+        card.className = 'col'; 
+        card.innerHTML = ` 
+          <div class="card-view"> 
+            <h5>${row[0]}</h5> 
+            <div class="card-body-scroll"> 
+              <p>${row[1]}</p> 
+            </div> 
+            <div class="input-group mb-2"> 
+              <span class="input-group-text">DISPLAY</span> 
+              <input type="number" class="form-control qty-input" value="${row[2]}" name="DISPLAY" required id="display-${index}">
+            </div> 
+            <div class="input-group mb-2"> 
+              <span class="input-group-text">GUDANG</span> 
+              <input type="number" class="form-control qty-input" value="${row[3]}" name="GUDANG" required id="gudang-${index}">
+            </div> 
+            <div class="input-group"> 
+              <span class="input-group-text">TOTAL</span> 
+              <input type="number" class="form-control qty-input" value="${row[4]}" name="TOTAL" required id="total-${index}" readonly> 
+            </div> 
+          </div>`;
+
+        cardContainer.appendChild(card);
+
+        // Add event listeners to update the total
+        document.getElementById(`display-${index}`).addEventListener('input', updateTotal);
+        document.getElementById(`gudang-${index}`).addEventListener('input', updateTotal);
+
+        function updateTotal() {
+          const displayValue = parseFloat(document.getElementById(`display-${index}`).value) || 0;
+          const gudangValue = parseFloat(document.getElementById(`gudang-${index}`).value) || 0;
+          const totalField = document.getElementById(`total-${index}`);
+
+          // Calculate the total
+          totalField.value = displayValue + gudangValue;
+        }
       });
 
-      const submitBtn = document.getElementById('submitBtn');
-      const buttonSpinner = document.getElementById('buttonSpinner');
-      const buttonText = document.getElementById('buttonText');
-      const responseElement = document.getElementById('response');
+      // Simpan data yang diambil ke localStorage
+      localStorage.setItem('fetchedData', JSON.stringify(data));
 
-      if (dataToSubmit.some(item => !item.QTY)) {
-        alert('Semua kolom QTY harus diisi.');
-        submitBtn.disabled = false;
-        buttonSpinner.classList.add('d-none');
-        buttonText.textContent = 'Simpan Data';
-        return;
-      }
+      fetchDataBtn.disabled = false;
+      fetchButtonSpinner.classList.add('d-none');
+      fetchButtonText.textContent = 'Ambil Data';
 
-      submitBtn.disabled = true;
-      buttonSpinner.classList.remove('d-none');
-      buttonText.textContent = 'Loading...';
+      checkFormValidity(); // Validasi form setelah data diambil
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+      fetchDataBtn.disabled = false;
+      fetchButtonSpinner.classList.add('d-none');
+      fetchButtonText.textContent = 'Ambil Data';
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(dataToSubmit)
-      })
-        .then(response => response.text())
-        .then(result => {
-          submitBtn.disabled = false;
-          buttonSpinner.classList.add('d-none');
-          buttonText.textContent = 'Simpan Data';
-          responseElement.textContent = 'Data berhasil dikirim!';
-          responseElement.style.display = 'block';
+      alert('Terjadi kesalahan saat mengambil data. Silakan coba lagi.');
+    });
+}
 
-          setTimeout(() => {
-            responseElement.style.display = 'none';
-          }, 3000);
+function submitForm(event) {
+  event.preventDefault();
 
-          // Disable editing of QTY fields after successful submission
-          document.querySelectorAll('#cardContainer .card-view input[name="QTY"]').forEach(input => {
-            input.setAttribute('readonly', true);
-          });
-        })
-        .catch(error => {
-          console.error('Error submitting data:', error);
-          submitBtn.disabled = false;
-          buttonSpinner.classList.add('d-none');
-          buttonText.textContent = 'Simpan Data';
+  const tanggal = document.getElementById('tanggal').value;
+  const shift = document.getElementById('shift').value;
+  const cardContainer = document.getElementById('cardContainer');
+  const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
 
-          alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-        });
-    }
+  const dataToSubmit = cards.map(card => { 
+    const inputs = card.getElementsByTagName('input'); 
+    return { 
+      TANGGAL: tanggal, 
+      SHIFT: shift, 
+      PLU: card.getElementsByTagName('h5')[0].textContent, 
+      DESCRIPTION: card.getElementsByTagName('p')[0].textContent, 
+      DISPLAY: inputs[0].value, 
+      GUDANG: inputs[1].value, 
+      TOTAL: inputs[2].value 
+    };
+  });
 
-    function checkFormValidity() {
-      const tanggal = document.getElementById('tanggal').value;
-      const shift = document.getElementById('shift').value;
-      const fetchDataBtn = document.getElementById('fetchDataBtn');
-      const submitBtn = document.getElementById('submitBtn');
-      const qtyInputs = document.querySelectorAll('#cardContainer .card-view input[name="QTY"]');
+  // Simpan data yang akan dikirim ke localStorage
+  localStorage.setItem('formData', JSON.stringify(dataToSubmit));
 
-      const allQtyFilled = Array.from(qtyInputs).every(input => input.value.trim() !== '');
+  const submitBtn = document.getElementById('submitBtn');
+  const buttonSpinner = document.getElementById('buttonSpinner');
+  const buttonText = document.getElementById('buttonText');
+  const responseElement = document.getElementById('response');
 
-      fetchDataBtn.disabled = !(tanggal && shift);
-      submitBtn.disabled = !(tanggal && shift && allQtyFilled);
-    }
+  submitBtn.disabled = true;
+  buttonSpinner.classList.remove('d-none');
+  buttonText.textContent = 'Loading...';
 
-    document.getElementById('tanggal').addEventListener('input', checkFormValidity);
-    document.getElementById('shift').addEventListener('change', checkFormValidity);
-    document.getElementById('cardContainer').addEventListener('input', checkFormValidity);
-  </script>
+  fetch(scriptURL, {
+    method: 'POST',
+    body: JSON.stringify(dataToSubmit)
+  })
+    .then(response => response.text())
+    .then(result => {
+      submitBtn.disabled = false;
+      buttonSpinner.classList.add('d-none');
+      buttonText.textContent = 'Simpan Data';
+      responseElement.textContent = 'Data berhasil dikirim!';
+      responseElement.style.display = 'block';
+
+      setTimeout(() => {
+        responseElement.style.display = 'none';
+        window.location.href = 'cekonhand.html'; // Redirect setelah alert menghilang
+      }, 3000);
+
+      // Disable editing of DISPLAY and GUDANG fields after successful submission
+      document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"], #cardContainer .card-view input[name="GUDANG"]').forEach(input => {
+        input.setAttribute('readonly', true);
+      });
+    })
+    .catch(error => {
+      console.error('Error submitting data:', error);
+      submitBtn.disabled = false;
+      buttonSpinner.classList.add('d-none');
+      buttonText.textContent = 'Simpan Data';
+
+      alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+    });
+}
+
+// Fungsi untuk memuat data dari localStorage
+function loadFromLocalStorage() {
+  const savedData = localStorage.getItem('fetchedData');
+  if (savedData) {
+    const data = JSON.parse(savedData);
+    // Proses untuk memuat data yang disimpan ke dalam elemen halaman
+    const cardContainer = document.getElementById('cardContainer');
+    cardContainer.innerHTML = '';
+
+    data.forEach((row, index) => {
+      // Lanjutkan dengan memuat data ke dalam card, seperti dalam fungsi fetchData
+    });
+  }
+}
+
+function checkFormValidity() {
+  const tanggal = document.getElementById('tanggal').value;
+  const shift = document.getElementById('shift').value;
+  const fetchDataBtn = document.getElementById('fetchDataBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  const displayInputs = document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"]');
+  const gudangInputs = document.querySelectorAll('#cardContainer .card-view input[name="GUDANG"]');
+
+  const allInputsFilled = Array.from(displayInputs).every(input => input.value.trim() !== '') &&
+                          Array.from(gudangInputs).every(input => input.value.trim() !== '');
+
+  fetchDataBtn.disabled = !(tanggal && shift);
+  submitBtn.disabled = !(tanggal && shift && allInputsFilled);
+}
+
+document.getElementById('tanggal').addEventListener('input', checkFormValidity);
+document.getElementById('shift').addEventListener('change', checkFormValidity);
+document.getElementById('cardContainer').addEventListener('input', checkFormValidity);
+
+</script>
 
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
