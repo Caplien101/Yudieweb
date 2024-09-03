@@ -1,292 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-  
-  <!-- Bootstrap CSS -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
-
-  <title>SO SERAH TRIMA SHIFT</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f3f4f6; /* Warna background lembut */
-    }
-
-    .card-view {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 8px;
-      margin: 0 auto;
-      background-color: #ffffff;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card-view:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .card-body-scroll {
-      overflow-y: hidden; /* Menghilangkan scrollbar */
-      max-height: 100px;
-      font-size: 0.875rem;
-      margin-bottom: 8px;
-      background-color: #eef1f5; /* Background modern */
-      padding: 5px;
-      border-radius: 5px;
-    }
-
-    .card-view h5 {
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-    }
-
-    .input-group {
-      margin-top: 5px;
-    }
-
-    .input-group-text, .form-control {
-      font-size: 16px; /* Minimal 16px untuk mencegah zoom otomatis di perangkat seluler */
-    }
-
-    .btn-spaced {
-      margin: 15px 0;
-      margin-left: auto;
-      margin-right: auto;
-      display: block;
-    }
-
-    .alert-custom {
-      display: none;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div id="content" class="container mt-5">
-    <h2>SO SERAH TERIMA SHIFT</h2>
-
-    <!-- Form Input -->
-    <form id="pluForm" class="mt-4">
-      <div class="mb-3">
-        <label for="tanggal" class="form-label">Tanggal:</label>
-        <input type="date" class="form-control" id="tanggal" name="TANGGAL" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="shift" class="form-label">Shift:</label>
-        <select id="shift" class="form-select" name="SHIFT" required>
-          <option value="">Pilih Shift</option>
-          <option value="Shift 1">Shift 1</option>
-          <option value="Shift 2">Shift 2</option>
-          <option value="Shift 3">Shift 3</option>
-        </select>
-      </div>
-
-      <!-- Tombol Ambil Data -->
-      <button type="button" class="btn btn-primary mt-2" id="fetchDataBtn" onclick="fetchData()" disabled>
-        <span class="spinner-border spinner-border-sm d-none" id="fetchButtonSpinner" aria-hidden="true"></span>
-        <span role="status" id="fetchButtonText">Ambil Data</span>
-      </button>
-    </form>
-
-    <!-- Group CardView Formulir -->
-    <div id="cardContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-4">
-      <!-- Data akan dimuat di sini oleh JavaScript -->
-    </div>
-
-    <!-- Alert untuk notifikasi keberhasilan -->
-    <div id="response" class="alert alert-success alert-custom" role="alert">
-      Data berhasil dikirim!
-    </div>
-
-    <!-- Tombol Simpan Data -->
-    <button type="button" class="btn btn-success mt-2 btn-spaced" id="submitBtn" onclick="submitForm(event)" disabled>
-      <span class="spinner-border spinner-border-sm d-none" id="buttonSpinner" aria-hidden="true"></span>
-      <span role="status" id="buttonText">Simpan Data</span>
-    </button>
-  </div>
-<script>
-const scriptURL = 'https://script.google.com/macros/s/AKfycbwelfEQUFSYBTyQL9auKNT2ygx-0pVBhp_m9TdD-H-2wrgSRtYv-vVNnmmpNn_FkOHlIA/exec';
-
-// Muat data dari localStorage saat halaman dimuat
-window.onload = function() {
-  loadFromLocalStorage();
-  checkFormValidity(); // Validasi form saat halaman dimuat
-};
-
-function fetchData() {
-  const fetchDataBtn = document.getElementById('fetchDataBtn');
-  const fetchButtonSpinner = document.getElementById('fetchButtonSpinner');
-  const fetchButtonText = document.getElementById('fetchButtonText');
-
-  fetchDataBtn.disabled = true;
-  fetchButtonSpinner.classList.remove('d-none');
-  fetchButtonText.textContent = 'Loading...';
-
-  fetch(scriptURL)
-    .then(response => response.json())
-    .then(data => {
-      const cardContainer = document.getElementById('cardContainer');
-      cardContainer.innerHTML = '';
-
-      data.forEach((row, index) => { 
-        const card = document.createElement('div'); 
-        card.className = 'col'; 
-        card.innerHTML = ` 
-          <div class="card-view"> 
-            <h5>${row[0]}</h5> 
-            <div class="card-body-scroll"> 
-              <p>${row[1]}</p> 
-            </div> 
-            <div class="input-group mb-2"> 
-              <span class="input-group-text">DISPLAY</span> 
-              <input type="number" class="form-control qty-input" value="${row[2]}" name="DISPLAY" required id="display-${index}">
-            </div> 
-            <div class="input-group mb-2"> 
-              <span class="input-group-text">GUDANG</span> 
-              <input type="number" class="form-control qty-input" value="${row[3]}" name="GUDANG" required id="gudang-${index}">
-            </div> 
-            <div class="input-group"> 
-              <span class="input-group-text">TOTAL</span> 
-              <input type="number" class="form-control qty-input" value="${row[4]}" name="TOTAL" required id="total-${index}" readonly> 
-            </div> 
-          </div>`;
-
-        cardContainer.appendChild(card);
-
-        // Add event listeners to update the total
-        document.getElementById(`display-${index}`).addEventListener('input', updateTotal);
-        document.getElementById(`gudang-${index}`).addEventListener('input', updateTotal);
-
-        function updateTotal() {
-          const displayValue = parseFloat(document.getElementById(`display-${index}`).value) || 0;
-          const gudangValue = parseFloat(document.getElementById(`gudang-${index}`).value) || 0;
-          const totalField = document.getElementById(`total-${index}`);
-
-          // Calculate the total
-          totalField.value = displayValue + gudangValue;
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Home Page</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(120deg, #1c1c1c, #333);
+            color: #eee;
+            margin: 0;
+            overflow-x: hidden;
         }
-      });
 
-      // Simpan data yang diambil ke localStorage
-      localStorage.setItem('fetchedData', JSON.stringify(data));
+        .navbar {
+            background-color: transparent;
+            z-index: 10;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            transition: background-color 0.5s;
+        }
 
-      fetchDataBtn.disabled = false;
-      fetchButtonSpinner.classList.add('d-none');
-      fetchButtonText.textContent = 'Ambil Data';
+        .navbar.scrolled {
+            background-color: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
 
-      checkFormValidity(); // Validasi form setelah data diambil
-    })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-      fetchDataBtn.disabled = false;
-      fetchButtonSpinner.classList.add('d-none');
-      fetchButtonText.textContent = 'Ambil Data';
+        .navbar-brand,
+        .nav-link {
+            color: #fff !important;
+            transition: color 0.3s;
+        }
 
-      alert('Terjadi kesalahan saat mengambil data. Silakan coba lagi.');
-    });
-}
+        .navbar.scrolled .navbar-brand,
+        .navbar.scrolled .nav-link {
+            color: #fff !important;
+        }
 
-function submitForm(event) {
-  event.preventDefault();
+        /* Perbaikan warna ikon navbar saat collapse */
+        .navbar-toggler {
+            border-color: #fff; /* Warna border tombol toggle */
+        }
 
-  const tanggal = document.getElementById('tanggal').value;
-  const shift = document.getElementById('shift').value;
-  const cardContainer = document.getElementById('cardContainer');
-  const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
+        .navbar-toggler-icon {
+            background-color: #fff; /* Mengatur latar belakang agar terlihat saat loading */
+            filter: invert(1); /* Membuat ikon default menjadi putih */
+        }
 
-  const dataToSubmit = cards.map(card => { 
-    const inputs = card.getElementsByTagName('input'); 
-    return { 
-      TANGGAL: tanggal, 
-      SHIFT: shift, 
-      PLU: card.getElementsByTagName('h5')[0].textContent, 
-      DESCRIPTION: card.getElementsByTagName('p')[0].textContent, 
-      DISPLAY: inputs[0].value, 
-      GUDANG: inputs[1].value, 
-      TOTAL: inputs[2].value 
-    };
-  });
+        .hero {
+            height: 100vh;
+            background-color: #000;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #fff;
+        }
 
-  // Simpan data yang akan dikirim ke localStorage
-  localStorage.setItem('formData', JSON.stringify(dataToSubmit));
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 700px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
 
-  const submitBtn = document.getElementById('submitBtn');
-  const buttonSpinner = document.getElementById('buttonSpinner');
-  const buttonText = document.getElementById('buttonText');
-  const responseElement = document.getElementById('response');
+        .hero:hover .hero-overlay {
+            transform: scale(1.05);
+        }
 
-  submitBtn.disabled = true;
-  buttonSpinner.classList.remove('d-none');
-  buttonText.textContent = 'Loading...';
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
 
-  // Simulasi pengiriman data berhasil
-  setTimeout(() => {
-    submitBtn.disabled = true;
-    buttonSpinner.classList.add('d-none');
-    buttonText.textContent = 'Simpan Data';
-    responseElement.textContent = 'Data berhasil disimpan!, lanjutkan untuk cek on hand';
-    responseElement.style.display = 'block';
+        .hero p {
+            font-size: 1.2rem;
+            color: #ddd;
+            margin-bottom: 30px;
+        }
 
-    setTimeout(() => {
-      responseElement.style.display = 'none';
-      window.location.href = 'cekonhand.html'; // Redirect setelah alert menghilang
-    }, 3000);
+        .btn-custom {
+            background-color: #ff4081;
+            color: #fff;
+            border-radius: 30px;
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            transition: transform 0.3s, background-color 0.3s;
+        }
 
-    // Disable editing of DISPLAY and GUDANG fields after successful submission
-    document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"], #cardContainer .card-view input[name="GUDANG"]').forEach(input => {
-      input.setAttribute('readonly', true);
-    });
-  }, 1000); // Simulasi waktu tunggu 1 detik
-}
+        .btn-custom:hover {
+            transform: translateY(-5px);
+            background-color: #ff6699;
+        }
 
-// Fungsi untuk memuat data dari localStorage
-function loadFromLocalStorage() {
-  const savedData = localStorage.getItem('fetchedData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    // Proses untuk memuat data yang disimpan ke dalam elemen halaman
-    const cardContainer = document.getElementById('cardContainer');
-    cardContainer.innerHTML = '';
+        .features {
+            padding: 80px 0;
+            background: #111;
+        }
 
-    data.forEach((row, index) => {
-      // Lanjutkan dengan memuat data ke dalam card, seperti dalam fungsi fetchData
-    });
-  }
-}
+        .features .feature-card {
+            border: none;
+            border-radius: 15px;
+            padding: 30px;
+            background-color: #222;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
 
-function checkFormValidity() {
-  const tanggal = document.getElementById('tanggal').value;
-  const shift = document.getElementById('shift').value;
-  const fetchDataBtn = document.getElementById('fetchDataBtn');
-  const submitBtn = document.getElementById('submitBtn');
-  const displayInputs = document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"]');
-  const gudangInputs = document.querySelectorAll('#cardContainer .card-view input[name="GUDANG"]');
+        .features .feature-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
 
-  const allInputsFilled = Array.from(displayInputs).every(input => input.value.trim() !== '') &&
-                          Array.from(gudangInputs).every(input => input.value.trim() !== '');
+        .feature-card h5 {
+            font-weight: bold;
+            color: #ff4081;
+        }
 
-  fetchDataBtn.disabled = !(tanggal && shift);
-  submitBtn.disabled = !(tanggal && shift && allInputsFilled);
-}
+        .feature-card p {
+            color: #ccc;
+        }
 
-document.getElementById('tanggal').addEventListener('input', checkFormValidity);
-document.getElementById('shift').addEventListener('change', checkFormValidity);
-document.getElementById('cardContainer').addEventListener('input', checkFormValidity);
+        .footer {
+            background-color: #000;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: auto;
+        }
 
-</script>
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
 
-  <!-- Bootstrap JS Bundle -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-overlay {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">PramukaApps</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-overlay">
+            <h1>Welcome to Pramuka Web Apps</h1>
+            <p>Plan, Monitor, Execute.</p>
+            <a href="landing.html" class="btn btn-custom">Get Started</a>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <h5 class="card-title">SO Rawan Hilang</h5>
+                            <p class="card-text">Aplikasi Form untuk Stock Opname.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Report Sales</h5>
+                            <p class="card-text">Monitoring daily sales.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Report Focus Marketing</h5>
+                            <p class="card-text">Monitoring daily focus Psm, Pwp, Member.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 MyBrand. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Change navbar color on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
+
 </html>
