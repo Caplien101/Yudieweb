@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chart Perbandingan SPD</title>
+  
+  <!-- Link ke Flat UI CSS -->
+  <link href="https://designmodo.github.io/Flat-UI/dist/css/flat-ui.css" rel="stylesheet">
+  
+  <!-- Link ke Bootstrap 5 CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Charts Library -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+  <style>
+    /* Tambahkan ini ke dalam bagian <style> di atas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+th {
+  background-color: #f8f9fa; /* Ubah warna latar belakang header tabel */
+  color: #333;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2; /* Warna latar belakang untuk baris genap */
+}
+
+tr:hover {
+  background-color: #f1f1f1; /* Efek hover untuk baris tabel */
+  transition: background-color 0.2s;
+}
+
+.growth-increase {
+  color: #28a745; /* Warna hijau untuk pertumbuhan naik */
+  font-weight: bold;
+}
+
+.growth-decrease {
+  color: #dc3545; /* Warna merah untuk pertumbuhan turun */
+  font-weight: bold;
+}
+
+#chart-container {
+  margin-top: 40px;
+  width: 100%;
+}
+
+.chart-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 767px) {
+  .chart-title {
+    font-size: 18px;
+  }
+  table {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 768px) {
+  table {
+    font-size: 16px;
+  }
+}
+
+#chart_div {
+  width: 100%;
+  height: 400px; /* Default height */
+}
+
+/* Navbar styles */
+.navbar {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  color: #333;
+  text-decoration: none;
+}
+
+.navbar-nav {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-link {
+  color: #333;
+  font-size: 1rem;
+  padding: 8px 15px;
+  text-decoration: none;
+}
+
+.nav-link.active {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a class="navbar-brand" href="#">Sales Dashboard</a>
+      <div class="navbar-nav">
+        <a class="nav-link" href="landing.html">Home</a>
+        <a class="nav-link" href="laporansales.html">Input Sales</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <div id="table-container">
+      <h5>Perbandingan Sales</h5>
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th>Bulan</th>
+            <th>Tahun 2023</th>
+            <th>Tahun 2024</th>
+            <th>Growth vs LY</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <div id="chart-container">
+      <h2 class="chart-title">Grafik Perbandingan SPD</h2>
+      <div id="chart_div"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const url = 'https://script.googleusercontent.com/macros/echo?user_content_key=5Xp5ukK0hSGMiJiTgnqh3khie2VhOClx2DIM0hQYdFyepgd7_K-7gTmfOWWKUbf2aBk69aDjoL0MdWlIZnzkEawSLqHh3YcXm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnCdy_j8g7IzU0D1xSHSKP33cQ30NKJF5zWpxnyCLNktYCn_pIxKYn94TiEvccepXcoFJiGuve7iawAaTevvwgWSn4-Tz32KfqQ&lib=MrlGS6bVlE4DJb3-GnSBhiWLWPv1vsdOx'; // Ganti dengan URL Google Apps Script Anda
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const spdData = calculateAverageSPD(data.S2023, data.S2024);
+          populateTable('table-body', spdData);
+          drawChart(spdData);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    });
+
+    function calculateAverageSPD(data2023, data2024) {
+      const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+      const spdData = {};
+
+      // Initialize data structure
+      months.forEach(month => {
+        spdData[month] = { S2023: [], S2024: [] };
+      });
+
+      function processData(data, year) {
+        data.slice(1).forEach(row => {
+          const date = new Date(row[0]);
+          const bulan = months[date.getMonth()]; // Ambil bulan dari tanggal
+          const spd = row[1];
+          if (spdData[bulan]) {
+            spdData[bulan][year].push(parseFloat(spd));
+          }
+        });
+      }
+
+      processData(data2023, 'S2023');
+      processData(data2024, 'S2024');
+
+      // Calculate averages and format numbers
+      const result = months.map(month => {
+        const data = spdData[month];
+        const avg2023 = data.S2023.length ? formatNumber((data.S2023.reduce((a, b) => a + b, 0) / data.S2023.length).toFixed(2)) : '-';
+        const avg2024 = data.S2024.length ? formatNumber((data.S2024.reduce((a, b) => a + b, 0) / data.S2024.length).toFixed(2)) : '-';
+        const growth = avg2023 !== '-' && avg2024 !== '-'
+          ? (parseFloat(avg2024.replace(/,/g, '')) > parseFloat(avg2023.replace(/,/g, '')) ? '<span class="growth-increase">Naik</span>' : '<span class="growth-decrease">Turun</span>')
+          : '-';
+        return [month, avg2023, avg2024, growth];
+      });
+
+      // Calculate YTD averages
+      const avgYTD2023 = data2023.slice(1).reduce((acc, row) => acc + parseFloat(row[1]), 0) / (data2023.length - 1);
+      const avgYTD2024 = data2024.slice(1).reduce((acc, row) => acc + parseFloat(row[1]), 0) / (data2024.length - 1);
+      const avgYTDResult = [
+        'AVG YTD',
+        formatNumber(avgYTD2023.toFixed(2)),
+        formatNumber(avgYTD2024.toFixed(2)),
+        avgYTD2024 > avgYTD2023
+          ? '<span class="growth-increase">Naik</span>'
+          : (avgYTD2024 < avgYTD2023
+            ? '<span class="growth-decrease">Turun</span>'
+            : '-')
+      ];
+
+      // Add the YTD row to the result
+      result.push(avgYTDResult);
+
+      return result;
+    }
+
+    function formatNumber(number) {
+      if (number === '-') return '-';
+      return number.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function populateTable(bodyId, data) {
+      const body = document.getElementById(bodyId);
+      body.innerHTML = ''; // Clear existing rows
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+
+        // Create link for the 'Bulan' column
+        const bulanLink = document.createElement('td');
+        const link = document.createElement('a');
+        link.href = `detailsales.html?bulan=${encodeURIComponent(row[0])}`; // Redirect to detailsales.html with query parameter
+        link.textContent = row[0]; // Set link text as the month name
+        bulanLink.appendChild(link);
+        tr.appendChild(bulanLink);
+
+        // Append the rest of the cells
+        row.slice(1).forEach(cellText => {
+          const td = document.createElement('td');
+          td.innerHTML = cellText; // Use innerHTML to include HTML for growth
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    }
+
+    function drawChart(data) {
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(() => {
+        const dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Bulan');
+        dataTable.addColumn('number', 'S2023');
+        dataTable.addColumn('number', 'S2024');
+
+        data.forEach(row => {
+          if (row[0] !== 'AVG YTD') { // Exclude AVG YTD from the chart
+            dataTable.addRow([row[0], parseFloat(row[1].replace(/,/g, '')), parseFloat(row[2].replace(/,/g, ''))]);
+          }
+        });
+
+        const options = {
+          title: 'Perbandingan SPD per Bulan',
+          chartArea: { width: '80%', height: '70%' },
+          hAxis: {
+            title: 'Bulan',
+            slantedText: true,
+            slantedTextAngle: 45,
+            textStyle: { fontSize: 10 }
+          },
+          vAxis: {
+            title: 'Rata-rata SPD',
+            textStyle: { fontSize: 10 },
+            viewWindow: {
+              min: 0
+            }
+          },
+          legend: { position: 'top' },
+          colors: ['#1b9e77', '#d95f02'],
+          height: Math.max(window.innerHeight * 0.4, 300), // Dynamic height
+          width: '100%' // Full width
+        };
+
+        const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(dataTable, options);
+
+        // Redraw chart on window resize
+        window.addEventListener('resize', () => {
+          chart.draw(dataTable, options);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
