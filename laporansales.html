@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Input Data</title>
+  
+  <!-- Link ke Flat UI CSS -->
+  <link href="https://designmodo.github.io/Flat-UI/dist/css/flat-ui.css" rel="stylesheet">
+
+  <!-- Link ke Bootstrap 5 CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Tambahkan CSS kustom untuk gaya tambahan -->
+  <style>
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      font-size: 16px; /* Ensure base font size is 16px */
+    }
+
+    .container {
+      max-width: 100%;
+      padding: 15px; /* Add some padding to ensure content is not too close to the edges on mobile */
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(135deg, #f9f9f9, #ffffff);
+      max-width: 100%;
+      margin: 0 auto; /* Center the card */
+      padding: 0 15px; /* Ensure there's padding inside the card on mobile */
+    }
+
+    .card-header {
+      background-color: #1abc9c;
+      color: #fff;
+      border-bottom: 1px solid #16a085;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      padding: 15px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .card-footer {
+      background-color: #f1f1f1;
+      border-top: 1px solid #ddd;
+      padding: 15px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-control {
+      font-size: 16px; /* Set font size for input fields */
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      transition: border-color 0.3s;
+    }
+
+    .form-control:focus {
+      border-color: #1abc9c;
+      outline: none;
+      background-color: #f9f9f9;
+    }
+
+    .btn-primary {
+      background-color: #1abc9c;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: bold;
+      font-size: 16px; /* Ensure button font size is consistent */
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .btn-primary:hover {
+      background-color: #16a085;
+      transform: translateY(-2px);
+    }
+
+    .spinner {
+      display: none;
+      margin: 20px auto;
+    }
+
+    .alert {
+      display: none;
+      margin-top: 20px;
+    }
+
+    /* Navbar styles */
+    .navbar {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+      color: #333;
+      text-decoration: none;
+    }
+
+    .navbar-nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-link {
+      color: #333;
+      font-size: 1rem;
+      padding: 8px 15px;
+      text-decoration: none;
+    }
+
+    .nav-link.active {
+      color: #007bff;
+      font-weight: bold;
+    }
+
+    .nav-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a class="navbar-brand" href="#">Sales Dashboard</a>
+      <div class="navbar-nav">
+        <a class="nav-link active" aria-current="page" href="landing.html">Home</a>
+        <a class="nav-link" href="repsales.html">Report Sales</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Form Input Data -->
+  <div class="container mt-5">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        Input Data
+      </div>
+      <div class="card-body">
+        <form id="dataForm">
+          <div class="form-group">
+            <label for="tanggal" class="form-label">Tanggal</label>
+            <input type="date" class="form-control" id="tanggal" required>
+          </div>
+          <div class="form-group">
+            <label for="spd" class="form-label">SPD</label>
+            <input type="text" class="form-control" id="spd" required>
+          </div>
+          <div class="form-group">
+            <label for="std" class="form-label">STD</label>
+            <input type="text" class="form-control" id="std" required>
+          </div>
+          <div class="form-group">
+            <label for="apc" class="form-label">APC</label>
+            <input type="text" class="form-control" id="apc" required>
+          </div>
+          <div class="form-group">
+            <label for="gm" class="form-label">GM</label>
+            <input type="text" class="form-control" id="gm" required>
+          </div>
+          <div class="form-group">
+            <label for="nsb" class="form-label">NSB</label>
+            <input type="text" class="form-control" id="nsb" required>
+          </div>
+          <div class="form-group">
+            <label for="pulsa" class="form-label">Pulsa</label>
+            <input type="text" class="form-control" id="pulsa" required>
+          </div>
+          <button type="button" id="submitButton" class="btn btn-primary w-100" onclick="submitData()">Submit</button>
+        </form>
+
+        <!-- Spinner untuk loading -->
+        <div id="loadingSpinner" class="spinner spinner-lg"></div>
+
+        <!-- Alert untuk pesan sukses -->
+        <div id="successMessage" class="alert alert-success">Data berhasil dikirim!</div>
+      </div>
+      <div class="card-footer">
+        Data Anda akan disimpan dengan aman.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatTanggal(tanggal) {
+      const bulanNama = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+      const dateObj = new Date(tanggal);
+      const hari = dateObj.getDate();
+      const bulan = bulanNama[dateObj.getMonth()];
+      const tahun = dateObj.getFullYear();
+      return `${hari} ${bulan} ${tahun}`;
+    }
+
+    function submitData() {
+      var tanggalInput = document.getElementById('tanggal').value;
+      var tanggal = formatTanggal(tanggalInput);
+      var spd = document.getElementById('spd').value;
+      var std = document.getElementById('std').value;
+      var apc = document.getElementById('apc').value;
+      var gm = document.getElementById('gm').value;
+      var nsb = document.getElementById('nsb').value;
+      var pulsa = document.getElementById('pulsa').value;
+
+      // Tampilkan spinner loading
+      document.getElementById('loadingSpinner').style.display = 'block';
+      var submitButton = document.getElementById('submitButton');
+      submitButton.classList.add('btn-loading');
+
+      // URL Web App dari Google Apps Script
+      var url = 'https://script.google.com/macros/s/AKfycbxWlTQhkUNJRiiTF39uOYP8qt9SYH82JGjoTIoXZ2u7eF7a9jhSn1sdDg60qaVTtbvm/exec';
+
+      fetch(url, {
+        method: 'POST',
+        mode: 'no-cors', 
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tanggal, spd, std, apc, gm, nsb, pulsa })
+      })
+      .then(response => response.text())
+      .then(data => {
+        // Sembunyikan spinner loading
+        document.getElementById('loadingSpinner').style.display = 'none';
+        submitButton.classList.remove('btn-loading');
+
+        // Tampilkan pesan sukses
+        var successMessage = document.getElementById('successMessage');
+        successMessage.style.display = 'block';
+        setTimeout(() => successMessage.style.display = 'none', 5000);
+
+        // Reset form setelah data dikirim
+        document.getElementById('dataForm').reset();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        submitButton.classList.remove('btn-loading');
+      });
+    }
+  </script>
+
+  <!-- Script untuk Bootstrap dan Flat UI -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
