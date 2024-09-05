@@ -100,6 +100,8 @@
         <input type="text" class="form-control" id="penerima" name="PENERIMA" required>
       </div>
     </div>
+        <!-- Response Element -->
+        <div id="response" class="alert-custom"></div>
 
     <!-- Save Button with Loading Animation -->
     <button class="btn btn-success btn-spaced" id="saveButton">
@@ -107,194 +109,227 @@
       <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
     </button>
 
-    <!-- Response Element -->
-    <div id="response" class="alert-custom"></div>
+    
   </div>
 
-<script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbz6qUkzN8Tiy1UMfNNxo1jgjMguvIDbByu9Y5Uioi4oZv2MIG0jYIfN-pfRKAQHnYNcHg/exec';
-
-  function loadData() {
-    const cardContainer = document.getElementById('cardContainer');
-    const tanggalField = document.getElementById('tanggal');
-    const shiftField = document.getElementById('shift');
-    cardContainer.innerHTML = ''; // Clear existing content
-
-    const formData = localStorage.getItem('formData');
-    if (formData) {
-      const data = JSON.parse(formData);
-
-      // Display tanggal and shift from the first item
-      if (data.length > 0) {
-        tanggalField.value = data[0].TANGGAL;
-        shiftField.value = data[0].SHIFT;
-      }
-
-      data.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'col';
-
-        // Create the card content including input fields for DISPLAY, GUDANG, TOTAL, and QTY OH
-        card.innerHTML = `
-          <div class="card-view">
-            <h5 class="center-text">${item.PLU}</h5>
-            <div class="card-body-scroll">
-              <p class="center-text">${item.DESCRIPTION}</p>
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz6qUkzN8Tiy1UMfNNxo1jgjMguvIDbByu9Y5Uioi4oZv2MIG0jYIfN-pfRKAQHnYNcHg/exec';
+  
+    function loadData() {
+      const cardContainer = document.getElementById('cardContainer');
+      const tanggalField = document.getElementById('tanggal');
+      const shiftField = document.getElementById('shift');
+      cardContainer.innerHTML = ''; // Clear existing content
+  
+      const formData = localStorage.getItem('formData');
+      if (formData) {
+        const data = JSON.parse(formData);
+  
+        // Display tanggal and shift from the first item
+        if (data.length > 0) {
+          tanggalField.value = data[0].TANGGAL;
+          shiftField.value = data[0].SHIFT;
+        }
+  
+        data.forEach((item, index) => {
+          const card = document.createElement('div');
+          card.className = 'col';
+  
+          // Create the card content including input fields for DISPLAY, GUDANG, TOTAL, and QTY OH
+          card.innerHTML = `
+            <div class="card-view">
+              <h5 class="center-text">${item.PLU}</h5>
+              <div class="card-body-scroll">
+                <p class="center-text">${item.DESCRIPTION}</p>
+              </div>
+              <div class="row text-center">
+                <div class="col">
+                  <p class="center-text">Display</p>
+                  <p class="center-text" id="display-${index}">${item.DISPLAY}</p>
+                </div>
+                <div class="col">
+                  <p class="center-text">Gudang</p>
+                  <p class="center-text" id="gudang-${index}">${item.GUDANG}</p>
+                </div>
+                <div class="col">
+                  <p class="center-text">Total</p>
+                  <p class="center-text" id="total-${index}">${item.TOTAL}</p>
+                </div>
+                <div class="col">
+                  <p class="center-text">Selisih</p>
+                  <p class="center-text" id="selisih-${index}">${item.TOTAL - item.QTY_OH}</p>
+                </div>
+              </div>
+              <div class="input-group mb-2"> 
+                <span class="input-group-text">QTY OH</span> 
+                <input type="number" class="form-control qty-oh-input" value="${item.QTY_OH}" id="qty-oh-${index}" required>
+              </div>
             </div>
-            <div class="row text-center">
-              <div class="col">
-                <p class="center-text">Display</p>
-                <p class="center-text" id="display-${index}">${item.DISPLAY}</p>
-              </div>
-              <div class="col">
-                <p class="center-text">Gudang</p>
-                <p class="center-text" id="gudang-${index}">${item.GUDANG}</p>
-              </div>
-              <div class="col">
-                <p class="center-text">Total</p>
-                <p class="center-text" id="total-${index}">${item.TOTAL}</p>
-              </div>
-              <div class="col">
-                <p class="center-text">Selisih</p>
-                <p class="center-text" id="selisih-${index}">${item.TOTAL - item.QTY_OH}</p>
-              </div>
-            </div>
-            <div class="input-group mb-2"> 
-              <span class="input-group-text">QTY OH</span> 
-              <input type="number" class="form-control qty-oh-input" value="${item.QTY_OH}" id="qty-oh-${index}" required>
-            </div>
-          </div>
-        `;
-
-        cardContainer.appendChild(card);
-
-        // Update 'Selisih' field when QTY OH changes
-        document.getElementById(`qty-oh-${index}`).addEventListener('input', function() {
-          updateSelisih(index, item.TOTAL);
+          `;
+  
+          cardContainer.appendChild(card);
+  
+          // Update 'Selisih' field when QTY OH changes
+          document.getElementById(`qty-oh-${index}`).addEventListener('input', function() {
+            updateSelisih(index, item.TOTAL);
+          });
         });
-      });
-
-    } else {
-      const noDataMessage = document.createElement('div');
-      noDataMessage.className = 'alert alert-info';
-      noDataMessage.textContent = 'No data available';
-      cardContainer.appendChild(noDataMessage);
-    }
-  }
-
-  function updateSelisih(index, total) {
-    const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
-    const selisihField = document.getElementById(`selisih-${index}`);
-
-    // Calculate the Selisih
-    const selisih = total - qtyOhValue;
-    selisihField.textContent = selisih;
-  }
-
-  function showResponseMessage(message, isSuccess, redirect = false) {
-    const responseElement = document.getElementById('response');
-    responseElement.textContent = message;
-    responseElement.className = `alert-custom ${isSuccess ? 'alert-success' : 'alert-error'}`;
-    responseElement.style.display = 'block';
-
-    if (redirect) {
-      setTimeout(() => {
-        window.location.href = 'index.html'; // Ganti dengan URL halaman tujuan
-      }, 4000);
-    } else {
-      setTimeout(() => {
-        responseElement.style.display = 'none';
-      }, 3000);
-    }
-  }
-
-  function saveData(event) {
-    event.preventDefault(); // Prevent the default form submission
-
-    const saveButton = document.getElementById('saveButton');
-    const saveButtonText = document.getElementById('saveButtonText');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const qtyOhInputs = document.querySelectorAll('.qty-oh-input');
-    
-    // Check if all QTY OH inputs are filled
-    let allFilled = true;
-    qtyOhInputs.forEach(input => {
-      if (!input.value.trim()) {
-        allFilled = false;
-        input.classList.add('border-danger');
+  
       } else {
-        input.classList.remove('border-danger');
+        const noDataMessage = document.createElement('div');
+        noDataMessage.className = 'alert alert-info';
+        noDataMessage.textContent = 'No data available';
+        cardContainer.appendChild(noDataMessage);
       }
-    });
-
-    if (!allFilled) {
-      showResponseMessage('Semua kolom wajib di isi!!!', false);
-      return;
     }
-
-    saveButton.disabled = true;
-    saveButtonText.textContent = 'Saving...';
-    loadingSpinner.classList.remove('d-none');
-
-    const formData = localStorage.getItem('formData');
-    if (formData) {
-      const data = JSON.parse(formData);
-      const penyerah = document.getElementById('penyerah').value;
-      const penerima = document.getElementById('penerima').value;
-
-      // Check if penyerah and penerima are provided
-      if (!penyerah.trim() || !penerima.trim()) {
-        showResponseMessage('Penyerah and Penerima wajib di isi.', false);
-        saveButton.disabled = false;
-        saveButtonText.textContent = 'Save Data';
-        loadingSpinner.classList.add('d-none');
+  
+    function updateSelisih(index, total) {
+      const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
+      const selisihField = document.getElementById(`selisih-${index}`);
+  
+      // Calculate the Selisih
+      const selisih = total - qtyOhValue;
+      selisihField.textContent = selisih;
+    }
+  
+    function showResponseMessage(message, isSuccess, redirect = false) {
+      const responseElement = document.getElementById('response');
+      responseElement.textContent = message;
+      responseElement.className = `alert-custom ${isSuccess ? 'alert-success' : 'alert-error'}`;
+      responseElement.style.display = 'block';
+  
+      if (redirect) {
+        setTimeout(() => {
+          window.location.href = 'minus.html'; // Change to the desired page URL
+        }, 4000);
+      } else {
+        setTimeout(() => {
+          responseElement.style.display = 'none';
+        }, 3000);
+      }
+    }
+  
+    function saveData(event) {
+      event.preventDefault(); // Prevent the default form submission
+  
+      const saveButton = document.getElementById('saveButton');
+      const saveButtonText = document.getElementById('saveButtonText');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const qtyOhInputs = document.querySelectorAll('.qty-oh-input');
+  
+      // Check if all QTY OH inputs are filled
+      let allFilled = true;
+      qtyOhInputs.forEach(input => {
+        if (!input.value.trim()) {
+          allFilled = false;
+          input.classList.add('border-danger');
+        } else {
+          input.classList.remove('border-danger');
+        }
+      });
+  
+      if (!allFilled) {
+        showResponseMessage('Semua kolom wajib di isi!!!', false);
         return;
       }
-
-      // Update QTY OH values from inputs
-      const dataToSubmit = data.map((item, index) => {
-        const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
-        const selisih = item.TOTAL - qtyOhValue;
-        return {
-          ...item,
-          QTY_OH: qtyOhValue,
-          SELISIH: selisih,
-          PENYERAH: penyerah,
-          PENERIMA: penerima
-        };
-      });
-
-      // Fetch request to submit data
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(dataToSubmit)
-      })
-      .then(response => {
-        if (response.ok) {
-          // Remove the data from localStorage
-          localStorage.removeItem('formData');
-
-          // Show success message with redirect
-          showResponseMessage('Terima Kasih, Stock Opname serah terima shift sudah selesai dilakukan.', true, true);
-          saveButton.disabled = true;
+  
+      saveButton.disabled = true;
+      saveButtonText.textContent = 'Saving...';
+      loadingSpinner.classList.remove('d-none');
+  
+      const formData = localStorage.getItem('formData');
+      if (formData) {
+        const data = JSON.parse(formData);
+        const penyerah = document.getElementById('penyerah').value;
+        const penerima = document.getElementById('penerima').value;
+  
+        // Check if penyerah and penerima are provided
+        if (!penyerah.trim() || !penerima.trim()) {
+          showResponseMessage('Penyerah and Penerima wajib di isi.', false);
+          saveButton.disabled = false;
           saveButtonText.textContent = 'Save Data';
           loadingSpinner.classList.add('d-none');
-        } else {
-          throw new Error('Failed to save data');
+          return;
         }
-      })
-      .catch(error => {
-        showResponseMessage(`Error: ${error.message}`, false);
-        saveButton.disabled = false;
-        saveButtonText.textContent = 'Save Data';
-        loadingSpinner.classList.add('d-none');
-      });
+  
+        // Update QTY OH values from inputs
+        const dataToSubmit = data.map((item, index) => {
+          const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
+          const selisih = item.TOTAL - qtyOhValue;
+          return {
+            ...item,
+            QTY_OH: qtyOhValue,
+            SELISIH: selisih,
+            PENYERAH: penyerah,
+            PENERIMA: penerima
+          };
+        });
+
+        function validateInputs() {
+  const penyerahField = document.getElementById('penyerah');
+  const penerimaField = document.getElementById('penerima');
+  let isValid = true;
+
+  [penyerahField, penerimaField].forEach(field => {
+    if (!field.value.trim()) {
+      field.classList.add('is-invalid');
+      isValid = false;
+    } else {
+      field.classList.remove('is-invalid');
+      field.classList.add('is-valid');
     }
+  });
+
+  return isValid;
+}
+
+function saveData(event) {
+  event.preventDefault();
+
+  const isValid = validateInputs();
+  if (!isValid) {
+    showResponseMessage('Semua kolom harus terisi.', false);
+    return;
   }
 
-  document.addEventListener('DOMContentLoaded', loadData);
-  document.getElementById('saveButton').addEventListener('click', saveData);
-</script>
+  // Proceed with the rest of the save logic
+}
+
+  
+        // Save to localStorage before sending
+        localStorage.setItem('formData', JSON.stringify(dataToSubmit));
+  
+        // Fetch request to submit data
+        fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify(dataToSubmit)
+        })
+        .then(response => {
+          if (response.ok) {
+            
+  
+            // Show success message with redirect
+            showResponseMessage('Data berhasil disimpan.Silahkan cek selisih data SO.', true, true);
+            saveButton.disabled = true;
+            saveButtonText.textContent = 'Save Data';
+            loadingSpinner.classList.add('d-none');
+          } else {
+            throw new Error('Failed to save data');
+          }
+        })
+        .catch(error => {
+          showResponseMessage(`Error: ${error.message}`, false);
+          saveButton.disabled = false;
+          saveButtonText.textContent = 'Save Data';
+          loadingSpinner.classList.add('d-none');
+        });
+      }
+    }
+  
+    document.addEventListener('DOMContentLoaded', loadData);
+    document.getElementById('saveButton').addEventListener('click', saveData);
+  </script>
+  
 
 </body>
 </html>
