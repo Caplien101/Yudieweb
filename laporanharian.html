@@ -105,6 +105,9 @@
   </nav>
   <textarea id="csvData" readonly>Silahkan Pilih Group Laporan</textarea>
   <br>
+   <!-- Elemen Alert untuk Pesan -->
+  <div id="alertBox" class="alert"></div>
+
    <!-- Kontainer untuk Tombol -->
   <div class="button-container">
     <button onclick="fetchData('AllCrew')">Group No.15 ( All Crew ) Shift 1,2,3</button>
@@ -117,10 +120,6 @@
   
   <!-- Tombol untuk Menyalin Data ke Clipboard -->
   <button class="copy-button" onclick="copyToClipboard()">Salin Data</button>
-
-  <!-- Elemen Alert untuk Pesan -->
-  <div id="alertBox" class="alert"></div>
-
   <script>
     const scriptUrl = 'https://script.google.com/macros/s/AKfycbwmR_XWv2hQWaYOfE0jETuwShH1TFkf7LeJ-OZCDYMDtdq8u0XXXjNpFIf5zHYc0SwV-g/exec'; // Ganti dengan URL Google Apps Script Anda
 
