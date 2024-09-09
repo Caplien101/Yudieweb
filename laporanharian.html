@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Format Laporan WA</title>
+  <style>
+    body {
+      background-color: #1e1e1e; /* Background gelap */
+      color: #f5f5f5; /* Teks berwarna putih */
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 80%;
+      height: 300px;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #333;
+      color: #f5f5f5;
+      border: 1px solid #555;
+      border-radius: 5px;
+      resize: none;
+    }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px; /* Spasi antara tombol */
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s ease;
+      margin: 5px;
+      width: 160px; /* Lebar tetap untuk tombol */
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .copy-button {
+      background-color: #2196F3; /* Warna biru untuk tombol copy */
+      font-weight: bold;
+    }
+
+    .copy-button:hover {
+      background-color: #0b7dda; /* Warna biru lebih gelap saat hover */
+    }
+
+    .alert {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #767c26;
+      color: white;
+      border-radius: 5px;
+    }
+
+    .alert.error {
+      background-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h2>Format Laporan Crew PKAB</h2>
+  <textarea id="csvData" readonly>Silahkan Pilih Group Laporan</textarea>
+  <br>
+  <!-- Kontainer untuk Tombol -->
+  <div class="button-container">
+    <button onclick="fetchData('AllCrew')">Group No.15 ( All Crew ) Shift 1,2,3</button>
+    <button onclick="fetchData('SalesTdp')">Group No.4 ( IKT/TDP) Shift 2</button>
+    <button onclick="fetchData('FocusMkt')">Group No.2 (F.MKT) Shift 1,2,3</button>
+    <button onclick="fetchData('EvNew')">Group No.5 (EV & MMBER) Shift 1,2,3</button>
+  </div>
+  
+  <!-- Tombol untuk Menyalin Data ke Clipboard -->
+  <button class="copy-button" onclick="copyToClipboard()">Salin Data</button>
+
+  <!-- Elemen Alert untuk Pesan -->
+  <div id="alertBox" class="alert"></div>
+
+  <script>
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwmR_XWv2hQWaYOfE0jETuwShH1TFkf7LeJ-OZCDYMDtdq8u0XXXjNpFIf5zHYc0SwV-g/exec'; // Ganti dengan URL Google Apps Script Anda
+
+    // Fungsi untuk Mengambil Data Berdasarkan Nama Sheet
+    function fetchData(sheetName) {
+      const url = `${scriptUrl}?sheetName=${encodeURIComponent(sheetName)}`; // Menambahkan parameter nama sheet ke URL
+      document.getElementById('csvData').textContent = "Mengambil data..."; // Teks loading saat data diambil
+
+      fetch(url)
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('csvData').textContent = data;
+        })
+        .catch(error => showAlert('Error: Gagal mengambil data', 'error'));
+    }
+
+    // Fungsi untuk Menampilkan Alert
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = 'alert'; // Reset kelas
+
+      if (type === 'error') {
+        alertBox.classList.add('error');
+      }
+
+      alertBox.style.display = 'block'; // Tampilkan alert
+
+      setTimeout(() => {
+        alertBox.style.display = 'none'; // Sembunyikan alert setelah 3 detik
+      }, 3000);
+    }
+
+    // Fungsi untuk Menyalin Data ke Clipboard
+    function copyToClipboard() {
+      const textarea = document.getElementById('csvData');
+      textarea.select();
+      textarea.setSelectionRange(0, 99999); // Untuk perangkat seluler
+
+      navigator.clipboard.writeText(textarea.value)
+        .then(() => showAlert('Teks berhasil disalin ke clipboard!', 'success'))
+        .catch(err => showAlert('Gagal menyalin teks ke clipboard', 'error'));
+    }
+  </script>
+</body>
+</html>
