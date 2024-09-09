@@ -177,6 +177,29 @@
   <div id="alertBox" class="alert"></div>
 
   <script>
+     // Function Definitions for Calculations and Data Submission
+    function calculateAPC() {
+      const spd = parseFloat(document.getElementById('spd').value);
+      const std = parseFloat(document.getElementById('std').value);
+      const apc = document.getElementById('apc');
+      
+      if (!isNaN(spd) && !isNaN(std) && std !== 0) {
+        apc.value = Math.round(spd / std); // Membulatkan nilai APC
+      } else {
+        apc.value = ''; // Kosongkan jika input tidak valid
+      }
+    }
+
+    function calculateTotal() {
+      const ihb = parseFloat(document.getElementById('ihb').value) || 0;
+      const rte = parseFloat(document.getElementById('rte').value) || 0;
+      const rtd = parseFloat(document.getElementById('rtd').value) || 0;
+      const total = document.getElementById('total');
+      
+      total.value = Math.round(ihb + rte + rtd); // Membulatkan nilai TOTAL
+    }
+
+    
     function submitData() {
       const alertBox = document.getElementById('alertBox');
       const submitButton = document.getElementById('submitButton');
