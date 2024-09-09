@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Input Form</title>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+
+    form {
+      max-width: 600px;
+      margin: auto;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #555;
+      border-radius: 5px;
+      background-color: #333;
+      color: #f5f5f5;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:disabled {
+      background-color: #888;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #45a049;
+    }
+
+    .alert {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+    }
+
+    .alert.error {
+      background-color: #f44336;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    nav a {
+      margin: 0 10px;
+      padding: 10px 15px;
+      color: #f5f5f5;
+      text-decoration: none;
+      background-color: #333;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <h2>Data Input Form</h2>
+
+  <nav>
+    <a href="landing.html">Home</a>
+    <a href="laporanharian.html">Rekap Data</a>
+  </nav>
+
+  <form id="dataForm">
+    <!-- Form fields -->
+    <label for="tanggal">Tanggal</label>
+    <input type="date" id="tanggal" name="TANGGAL" required>
+
+    <label for="shift">Shift</label>
+    <input type="text" id="shift" name="SHIFT" placeholder="Masukkan shift (contoh: 3, 1, 2)" required>
+
+    <label for="nama">Nama</label>
+    <input type="text" id="nama" name="NAMA" placeholder="Masukkan nama lengkap" required>
+
+    <label for="spd">SPD</label>
+    <input type="number" step="any" id="spd" name="SPD" placeholder="Masukkan nilai SPD tanpa tanda baca (Contoh: 12000000)" required oninput="calculateAPC()">
+
+    <label for="std">STD</label>
+    <input type="number" step="any" id="std" name="STD" placeholder="Masukkan nilai STD tanpa tanda baca (Contoh: 1002)" required oninput="calculateAPC()">
+
+    <label for="apc">APC</label>
+    <input type="number" id="apc" name="APC" readonly placeholder="APC akan dihitung otomatis">
+
+    <label for="gm">GM</label>
+    <input type="number" step="any" id="gm" name="GM" placeholder="Masukkan nilai GM tambahkan tanda , (Contoh: 22,32)" required>
+
+    <label for="oos">OOS</label>
+    <input type="text" id="oos" name="OOS" placeholder="Masukkan nilai OOS tambahkan tanda , (Contoh: 0,78)">
+
+    <label for="pl">PL</label>
+    <input type="number" id="pl" name="PL" placeholder="Masukkan nilai PL sesuai nilai di Report">
+
+    <label for="inventory">Inventory</label>
+    <input type="number" id="inventory" name="INVENTORY" placeholder="Masukkan nilai Inventory tanpa tanda ,">
+
+    <label for="br">BR</label>
+    <input type="number" id="br" name="BR" placeholder="Masukkan nilai BR">
+
+    <label for="bke">BKE</label>
+    <input type="number" id="bke" name="BKE" placeholder="Masukkan nilai BKE">
+
+    <label for="tgl_datang">Tanggal Datang Barang Terakhir</label>
+    <input type="date" id="tgl_datang" name="TGL_DATANGBARANG_TERAKHIR">
+
+    <label for="evoucher">EVoucher</label>
+    <input type="number" id="evoucher" name="EVOUCHER" placeholder="Masukkan jumlah EVoucher">
+
+    <label for="psm">PSM</label>
+    <input type="number" id="psm" name="PSM" placeholder="Masukkan nilai PSM">
+
+    <label for="pwp">PWP</label>
+    <input type="number" id="pwp" name="PWP" placeholder="Masukkan nilai PWP">
+
+    <label for="sergap">Sergap</label>
+    <input type="number" id="sergap" name="SERGAP" placeholder="Masukkan nilai Sergap">
+
+    <label for="member">Member</label>
+    <input type="number" id="member" name="MEMBER" placeholder="Masukkan jumlah Member">
+
+    <label for="new_member">New Member</label>
+    <input type="number" id="new_member" name="NEW_MEMBER" placeholder="Masukkan jumlah New Member">
+
+    <label for="telur">Telur</label>
+    <input type="number" id="telur" name="TELUR" placeholder="Masukkan jumlah Telur">
+
+    <label for="ihb">IHB</label>
+    <input type="number" step="any" id="ihb" name="IHB" placeholder="Masukkan nilai IHB" oninput="calculateTotal()">
+
+    <label for="rte">RTE</label>
+    <input type="number" step="any" id="rte" name="RTE" placeholder="Masukkan nilai RTE" oninput="calculateTotal()">
+
+    <label for="rtd">RTD</label>
+    <input type="number" step="any" id="rtd" name="RTD" placeholder="Masukkan nilai RTD" oninput="calculateTotal()">
+
+    <label for="total">TOTAL</label>
+    <input type="number" id="total" name="TOTAL" readonly placeholder="Total akan dihitung otomatis">
+
+    <button type="button" onclick="submitData()" id="submitButton">Submit</button>
+  </form>
+
+  <div id="alertBox" class="alert"></div>
+
+  <script>
+    function submitData() {
+      const alertBox = document.getElementById('alertBox');
+      const submitButton = document.getElementById('submitButton');
+      const formData = new FormData(document.getElementById('dataForm'));
+
+      // Disable button and change text to indicate sending
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sedang Mengirim Data...';
+
+      fetch('https://script.google.com/macros/s/AKfycbxVU5o4BHEN8iKPRTXM2OlWRUWXhon-O11NFnWDHVkafHR11gmDXY8v98lSfNYDjJRvLw/exec', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        alertBox.textContent = 'Data berhasil dikirim!';
+        alertBox.className = 'alert';
+        alertBox.style.display = 'block';
+
+        // Reset button and form
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit';
+        document.getElementById('dataForm').reset();
+
+        setTimeout(() => {
+          alertBox.style.display = 'none';
+        }, 3000);
+      })
+      .catch(error => {
+        alertBox.textContent = 'Gagal mengirim data';
+        alertBox.className = 'alert error';
+        alertBox.style.display = 'block';
+
+        // Reset button
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit';
+
+        setTimeout(() => {
+          alertBox.style.display = 'none';
+        }, 3000);
+      });
+    }
+  </script>
+</body>
+</html>
