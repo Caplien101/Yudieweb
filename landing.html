@@ -23,46 +23,36 @@
         }
 
         .navbar {
-            background-color: #1e1e1e; /* Darker navbar background */
-            border-bottom: 1px solid #333; /* Subtle border for separation */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Darker shadow for a modern touch */
+            background-color: transparent;
+            z-index: 10;
             position: fixed;
             width: 100%;
             top: 0;
-            z-index: 10;
-            transition: box-shadow 0.3s ease; /* Smooth transition for shadow effect */
+            transition: background-color 0.5s, box-shadow 0.3s;
         }
 
         .navbar.scrolled {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Slightly stronger shadow on scroll */
+            background-color: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         .navbar-brand,
         .nav-link {
-            color: #eaeaea; /* Light text color for navbar */
-            font-weight: 500; /* Slightly bolder text */
-        }
-
-        .navbar-brand {
-            font-size: 1.25rem;
-        }
-
-        .nav-link {
-            margin-left: 1rem;
-            font-size: 1rem;
-            transition: color 0.3s; /* Smooth transition for color change */
+            color: #fff !important;
+            transition: color 0.3s;
         }
 
         .nav-link:hover {
-            color: #007bff; /* Accent color on hover */
+            color: #007bff !important; /* Accent color on hover */
         }
 
         .navbar-toggler {
-            border-color: #333; /* Match the color of the border */
+            border-color: #fff;
         }
 
         .navbar-toggler-icon {
-            background-color: #333;
+            background-color: #fff;
+            filter: invert(1);
         }
 
         .header {
@@ -84,6 +74,36 @@
             font-weight: 300; /* Lighter font for subtext */
         }
 
+        .features {
+            padding: 80px 0;
+            background: #111;
+        }
+
+        .features .feature-card {
+            border: none;
+            border-radius: 15px;
+            padding: 30px;
+            background-color: #222;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .features .feature-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card h5 {
+            font-weight: bold;
+            color: #ff4081;
+        }
+
+        .feature-card p {
+            color: #ccc;
+        }
+
+
         .content {
             padding: 40px 0;
             flex: 1;
@@ -102,7 +122,7 @@
             background-color: #007bff; /* Blue button */
             color: #ffffff;
             border-radius: 25px; /* More rounded for a modern look */
-            padding: 10px 20px;
+            padding: 5px 25px;
             font-size: 1rem;
             border: none; /* Remove border for a cleaner look */
             transition: background-color 0.3s, transform 0.3s; /* Smooth transition effects */
@@ -114,12 +134,16 @@
         }
 
         .footer {
-            background-color: #111; /* Very dark background */
-            color: #eaeaea; /* Light text color */
-            padding: 20px 0;
-            text-align: center;
-            border-top: 1px solid #333; /* Subtle border for separation */
-        }
+        background-color: #000;
+        color: white;
+        padding: 20px 0;
+        text-align: center;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        border-top: 1px solid #333;
+    }
 
         /* Responsiveness */
         @media (max-width: 768px) {
@@ -133,7 +157,7 @@
 
             .btn-custom {
                 font-size: 0.875rem;
-                padding: 8px 16px;
+                padding: 5px 16px;
             }
         }
     </style>
@@ -167,35 +191,59 @@
     </nav>
 
     <!-- Header Section -->
+    
     <div class="header">
         <div class="container">
             <h1>Pramuka Web Apps</h1>
-            <p>Hai, ini adalah Apps bantu untuk daily monitoring.Berfungsi untuk input ,report, dan planing haarian kamu.</p>
+            <p>Hai, ini adalah Apps bantu untuk daily monitoring.</p>
         </div>
     </div>
 
-    <!-- Content Section -->
-    <div class="content">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h3>Report Sales</h3>
-                    <p>Input sales harian dan report sales.</p>
-                    <a href="repsales.html" class="btn btn-custom mt-3">Report Sales</a>
+   <!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card">
+                    <div class="card-body">
+                        <h5 class="card-title">SO Rawan Hilang</h5>
+                        <p class="card-text">Aplikasi Form untuk Stock Opname.</p>
+                        <!-- Centering the button -->
+                        <div class="d-flex justify-content-center">
+                            <a href="inputso.html" class="btn btn-custom">Show More</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h3>Laporan Grub Pershift</h3>
-                    <p>Input laporan penjualan focus marketing.</p>
-                    <a href="inputlaporanharian.html" class="btn btn-custom mt-3">Input Laporan</a>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Report Sales</h5>
+                        <p class="card-text">Monitoring daily sales.</p>
+                        <!-- Centering the button -->
+                        <div class="d-flex justify-content-center">
+                            <a href="laporansales.html" class="btn btn-custom">Show More</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h3>SO Rawan Hilang</h3>
-                    <p>Input SO Rawan Hilang.</p>
-                    <a href="inputso.html" class="btn btn-custom mt-3">Input SO</a>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Laporan Grup Area</h5>
+                        <p class="card-text">Monitoring daily focus.</p>
+                        <!-- Centering the button -->
+                        <div class="d-flex justify-content-center">
+                            <a href="inputlaporanharian.html" class="btn btn-custom">Show More</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</section>
+
+   
 
     <!-- Footer -->
     <footer class="footer">
