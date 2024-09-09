@@ -75,10 +75,34 @@
     .alert.error {
       background-color: #f44336;
     }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    nav a {
+      margin: 0 10px;
+      padding: 10px 15px;
+      color: #f5f5f5;
+      text-decoration: none;
+      background-color: #333;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+    }
   </style>
 </head>
 <body>
   <h2>Format Laporan Crew PKAB</h2>
+  <nav>
+    <a href="landing.html">Home</a>
+    <a href="inputlaporanharian.html">Input Data</a>
+  </nav>
   <textarea id="csvData" readonly>Silahkan Pilih Group Laporan</textarea>
   <br>
    <!-- Kontainer untuk Tombol -->
