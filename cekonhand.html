@@ -142,6 +142,11 @@
   
           // Create the card content including input fields for DISPLAY, GUDANG, TOTAL, and QTY OH
           card.innerHTML = `
+          <div class="card-view">
+              <h5 class="center-text">${item.PLU}</h5>
+              <div class="card-body-scroll">
+                <p class="center-text">${item.DESCRIPTION}</p>
+              </div>
         <div class="row text-center">
           <div class="col hidden"> <!-- Menambahkan class "hidden" untuk menyembunyikan -->
             <p class="center-text">Display</p>
