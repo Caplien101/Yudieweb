@@ -67,6 +67,9 @@
       background-color: #f8d7da;
       color: #721c24;
     }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -100,16 +103,14 @@
         <input type="text" class="form-control" id="penerima" name="PENERIMA" required>
       </div>
     </div>
-        <!-- Response Element -->
-        <div id="response" class="alert-custom"></div>
+    <!-- Response Element -->
+    <div id="response" class="alert-custom"></div>
 
     <!-- Save Button with Loading Animation -->
     <button class="btn btn-success btn-spaced" id="saveButton">
       <span id="saveButtonText">Save Data</span>
       <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
     </button>
-
-    
   </div>
 
   <script>
@@ -143,19 +144,19 @@
                 <p class="center-text">${item.DESCRIPTION}</p>
               </div>
               <div class="row text-center">
-                <div class="col">
+                <div class="col hidden"> <!-- Menyembunyikan kolom Display -->
                   <p class="center-text">Display</p>
                   <p class="center-text" id="display-${index}">${item.DISPLAY}</p>
                 </div>
-                <div class="col">
+                <div class="col hidden"> <!-- Menyembunyikan kolom Gudang -->
                   <p class="center-text">Gudang</p>
                   <p class="center-text" id="gudang-${index}">${item.GUDANG}</p>
                 </div>
-                <div class="col">
+                <div class="col hidden"> <!-- Menyembunyikan kolom Total -->
                   <p class="center-text">Total</p>
                   <p class="center-text" id="total-${index}">${item.TOTAL}</p>
                 </div>
-                <div class="col">
+                <div class="col hidden"> <!-- Menyembunyikan kolom Selisih -->
                   <p class="center-text">Selisih</p>
                   <p class="center-text" id="selisih-${index}">${item.TOTAL - item.QTY_OH}</p>
                 </div>
@@ -209,127 +210,33 @@
       }
     }
   
-    function saveData(event) {
-      event.preventDefault(); // Prevent the default form submission
+    function saveData(e) {
+      e.preventDefault();
   
-      const saveButton = document.getElementById('saveButton');
       const saveButtonText = document.getElementById('saveButtonText');
       const loadingSpinner = document.getElementById('loadingSpinner');
-      const qtyOhInputs = document.querySelectorAll('.qty-oh-input');
-  
-      // Check if all QTY OH inputs are filled
-      let allFilled = true;
-      qtyOhInputs.forEach(input => {
-        if (!input.value.trim()) {
-          allFilled = false;
-          input.classList.add('border-danger');
-        } else {
-          input.classList.remove('border-danger');
-        }
-      });
-  
-      if (!allFilled) {
-        showResponseMessage('Semua kolom wajib di isi!!!', false);
-        return;
-      }
-  
-      saveButton.disabled = true;
-      saveButtonText.textContent = 'Saving...';
+      saveButtonText.textContent = 'Sedang Mengirim Data';
       loadingSpinner.classList.remove('d-none');
   
-      const formData = localStorage.getItem('formData');
-      if (formData) {
-        const data = JSON.parse(formData);
-        const penyerah = document.getElementById('penyerah').value;
-        const penerima = document.getElementById('penerima').value;
+      const form = document.forms['submit-to-google-sheet'];
   
-        // Check if penyerah and penerima are provided
-        if (!penyerah.trim() || !penerima.trim()) {
-          showResponseMessage('Penyerah and Penerima wajib di isi.', false);
-          saveButton.disabled = false;
+      fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+        .then(response => {
           saveButtonText.textContent = 'Save Data';
           loadingSpinner.classList.add('d-none');
-          return;
-        }
-  
-        // Update QTY OH values from inputs
-        const dataToSubmit = data.map((item, index) => {
-          const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
-          const selisih = item.TOTAL - qtyOhValue;
-          return {
-            ...item,
-            QTY_OH: qtyOhValue,
-            SELISIH: selisih,
-            PENYERAH: penyerah,
-            PENERIMA: penerima
-          };
-        });
-
-        function validateInputs() {
-  const penyerahField = document.getElementById('penyerah');
-  const penerimaField = document.getElementById('penerima');
-  let isValid = true;
-
-  [penyerahField, penerimaField].forEach(field => {
-    if (!field.value.trim()) {
-      field.classList.add('is-invalid');
-      isValid = false;
-    } else {
-      field.classList.remove('is-invalid');
-      field.classList.add('is-valid');
-    }
-  });
-
-  return isValid;
-}
-
-function saveData(event) {
-  event.preventDefault();
-
-  const isValid = validateInputs();
-  if (!isValid) {
-    showResponseMessage('Semua kolom harus terisi.', false);
-    return;
-  }
-
-  // Proceed with the rest of the save logic
-}
-
-  
-        // Save to localStorage before sending
-        localStorage.setItem('formData', JSON.stringify(dataToSubmit));
-  
-        // Fetch request to submit data
-        fetch(scriptURL, {
-          method: 'POST',
-          body: JSON.stringify(dataToSubmit)
-        })
-        .then(response => {
-          if (response.ok) {
-            
-  
-            // Show success message with redirect
-            showResponseMessage('Data berhasil disimpan.Silahkan cek selisih data SO.', true, true);
-            saveButton.disabled = true;
-            saveButtonText.textContent = 'Save Data';
-            loadingSpinner.classList.add('d-none');
-          } else {
-            throw new Error('Failed to save data');
-          }
+          showResponseMessage('Data berhasil dikirim.', true, true);
+          form.reset();
         })
         .catch(error => {
-          showResponseMessage(`Error: ${error.message}`, false);
-          saveButton.disabled = false;
           saveButtonText.textContent = 'Save Data';
           loadingSpinner.classList.add('d-none');
+          showResponseMessage('Terjadi kesalahan, coba lagi.', false);
+          console.error('Error!', error.message);
         });
-      }
     }
   
-    document.addEventListener('DOMContentLoaded', loadData);
     document.getElementById('saveButton').addEventListener('click', saveData);
+    window.onload = loadData;
   </script>
-  
-
 </body>
 </html>
