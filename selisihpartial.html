@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SO MANUAL - SELISIH DATA</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f3f4f6; }
+    h1 { font-weight: bold; color: #333; }
+    .card-container { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .data-card {
+      width: 100%; max-width: 350px; padding: 1rem; border-radius: 10px;
+      background-color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .data-card:hover { transform: translateY(-5px); }
+    .card-title { font-size: 0.9rem; font-weight: 500; color: #007bff; }
+    .card-content { font-size: 0.9rem; color: #666; }
+    .footer { background-color: #333; color: #fff; text-align: center; padding: 1rem; width: 100%; }
+    .footer a { color: #007bff; text-decoration: none; }
+    .footer a:hover { color: #0056b3; }
+    .input-group-text, .form-control-plaintext {
+      background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: .25rem;
+      color: #495057; font-size: 0.9rem; padding: .375rem .75rem;
+    }
+    @media (max-width: 576px) {
+      .card-container { flex-direction: column; align-items: center; }
+      .data-card { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h1 class="text-center mb-4">SO MANUAL - SELISIH DATA</h1>
+  <div class="col">
+    <div class="p-3">Note : Jika ada revisi pada selisih , lakukan edit pada Qty sesuai dengan fisik yang ada</div>
+  </div>
+  <div id="alertContainer"></div>
+
+  <div class="card-container" id="dataCardContainer">
+    <!-- Cards with selisih will be added here dynamically -->
+  </div>
+
+  <button class="btn btn-primary mt-3" id="uploadButton" onclick="uploadData()">
+    <span id="uploadSpinner" class="spinner-border spinner-border-sm d-none"></span> Upload Data to Google Sheets
+  </button>
+</div>
+
+<footer class="footer mt-5">
+  <p>&copy; 2024 Pramuka Apps. All rights reserved.</p>
+</footer>
+
+<script>
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbyXKWF8GrSjUi1NHIsFNEPj7XNe0WKkCO-TY_aGmvfheM7YerRtOuyS4pQvB9AuT4kCkg/exec';
+
+  function loadSelisihData() {
+    const data = JSON.parse(localStorage.getItem('onHandDataFinal'));
+    if (data && data.length > 0) {
+      displaySelisihData(data);
+      showAlert('Loaded selisih data.', 'info');
+    } else {
+      showAlert('No final data found. Please save data from the on-hand page first.', 'warning');
+    }
+  }
+
+  function displaySelisihData(data) {
+  const cardContainer = document.getElementById('dataCardContainer');
+  cardContainer.innerHTML = ''; // Clear previous cards
+
+  data.forEach((row, index) => {
+    const qty = parseInt(row.qty) || 0; // Get the quantity
+    const qtyOh = parseInt(row.qty_oh) || 0; // Get the quantity on hand
+    const selisih = qty - qtyOh; // Calculate selisih
+
+    const card = document.createElement('div');
+    card.className = 'data-card';
+    card.innerHTML = `
+      <div class="card-title">Rak: ${row.rak}</div>
+      <div class="card-content">Plu: ${row.plu}</div>
+      <div class="card-content">Des: ${row.desc}</div>
+      <div class="input-group mt-2">
+        <span class="input-group-text">Qty</span>
+        <input name="qty_${index}" class="form-control" value="${qty}" 
+               aria-label="Quantity" data-index="${index}" oninput="updateQty(${index}, this.value)">
+      </div>
+      <div class="input-group mt-2">
+        <span class="input-group-text">Qty OH</span>
+        <input name="qty_oh_${index}" class="form-control" value="${qtyOh}" 
+               aria-label="Quantity On-Hand" readonly>
+      </div>
+      <div class="input-group mt-2">
+        <span class="input-group-text">Selisih</span>
+        <input id="selisih_${index}" class="form-control" value="${selisih}" 
+               aria-label="Selisih" readonly style="color: ${selisih < 0 ? 'red' : 'green'};">
+      </div>
+    `;
+    cardContainer.appendChild(card);
+  });
+}
+
+function updateQty(index, newQty) {
+  let data = JSON.parse(localStorage.getItem('onHandDataFinal')) || [];
+  if (data[index]) {
+    data[index].qty = newQty;
+    const qtyOh = parseInt(data[index].qty_oh) || 0; // Get qty OH
+    const selisih = newQty - qtyOh; // Calculate selisih
+    
+    // Update selisih display in real-time
+    const selisihElement = document.getElementById(`selisih_${index}`);
+    selisihElement.value = selisih; // Update selisih value
+    selisihElement.style.color = selisih < 0 ? 'red' : 'green'; // Change color based on value
+
+    localStorage.setItem('onHandDataFinal', JSON.stringify(data)); // Update local storage
+  }
+}
+
+
+  function showAlert(message, type) {
+    const icon = type === 'success' ? '✓' : type === 'info' ? 'ℹ️' : type === 'warning' ? '⚠️' : '❌';
+    const alertContainer = document.getElementById('alertContainer');
+    alertContainer.innerHTML = `
+      <div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center" role="alert">
+        <span class="me-2">${icon}</span> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+    setTimeout(() => {
+      alertContainer.innerHTML = ''; // Clear alert after 3 seconds
+    }, 3000);
+  }
+
+  function uploadData() {
+    const data = JSON.parse(localStorage.getItem('onHandDataFinal'));
+    if (!data || data.length === 0) {
+      showAlert('No data to upload. Please load data first.', 'warning');
+      return;
+    }
+
+    const uploadButton = document.getElementById('uploadButton');
+    const spinner = document.getElementById('uploadSpinner');
+    spinner.classList.remove('d-none'); // Show spinner
+
+    const formData = new FormData();
+    formData.append('rowCount', data.length);
+
+    data.forEach((item, index) => {
+      const qty = parseInt(item.qty) || 0;
+      const qtyOh = parseInt(item.qty_oh) || 0;
+      const selisih = qty - qtyOh;
+
+      formData.append(`rak_${index}`, item.rak);
+      formData.append(`plu_${index}`, item.plu);
+      formData.append(`desc_${index}`, item.desc);
+      formData.append(`qty_${index}`, qty);
+      formData.append(`qty_oh_${index}`, qtyOh);
+      formData.append(`selisih_${index}`, selisih);
+    });
+
+    fetch(scriptURL, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.result === 'success') {
+        showAlert('Data sent successfully!', 'success');
+        document.getElementById('dataCardContainer').innerHTML = ''; // Clear card view
+        localStorage.removeItem('onHandDataFinal'); // Clear local storage data
+      } else {
+        showAlert('Error sending data.', 'danger');
+      }
+    })
+    .catch(error => showAlert('Error uploading data!', 'danger'))
+    .finally(() => {
+      spinner.classList.add('d-none'); // Hide spinner after upload completes
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', loadSelisihData);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
