@@ -123,10 +123,10 @@
         <div class="card-title">Rak: ${row.rak}</div>
         <div class="card-content">Plu: ${row.plu}</div>
         <div class="card-content">Des: ${row.desc}</div>
-        <div class="input-group mt-2">
-          <span class="input-group-text">Qty</span>
-          <input name="qty_${index}" class="form-control" value="${row.qty}" readonly>
-        </div>
+         <div class="input-group mt-2" style="display: none;"> <!-- Hide the entire input group -->
+        <span class="input-group-text">Qty</span>
+        <input name="qty_${index}" class="form-control" value="${row.qty}" readonly>
+      </div>
         <div class="input-group mt-2">
           <span class="input-group-text">Qty OH</span>
           <input name="qty_oh_${index}" class="form-control" type="number" placeholder="Enter Qty OH" 
