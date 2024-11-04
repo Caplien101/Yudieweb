@@ -74,32 +74,35 @@
     const qtyOh = parseInt(row.qty_oh) || 0; // Get the quantity on hand
     const selisih = qty - qtyOh; // Calculate selisih
 
-    const card = document.createElement('div');
-    card.className = 'data-card';
-    card.innerHTML = `
-      <div class="card-title">Rak: ${row.rak}</div>
-      <div class="card-content">Plu: ${row.plu}</div>
-      <div class="card-content">Des: ${row.desc}</div>
-      <div class="input-group mt-2">
-        <span class="input-group-text">Qty</span>
-        <input name="qty_${index}" class="form-control" type="number" value="${qty}" 
-               aria-label="Quantity" data-index="${index}" oninput="updateQty(${index}, this.value)">
-      </div>
-      <div class="input-group mt-2">
-        <span class="input-group-text">Qty OH</span>
-        <input name="qty_oh_${index}" class="form-control" value="${qtyOh}" 
-               aria-label="Quantity On-Hand" readonly>
-      </div>
-      <div class="input-group mt-2">
-        <span class="input-group-text">Selisih</span>
-        <input id="selisih_${index}" class="form-control" value="${selisih}" 
-               aria-label="Selisih" readonly style="color: ${selisih < 0 ? 'red' : 'green'};">
-      </div>
-    `;
-    cardContainer.appendChild(card);
+    // Only display cards where the selisih is not zero
+    if (selisih !== 0) {
+      const card = document.createElement('div');
+      card.className = 'data-card';
+      card.innerHTML = `
+        <div class="card-title">Rak: ${row.rak}</div>
+        <div class="card-content">Plu: ${row.plu}</div>
+        <div class="card-content">Des: ${row.desc}</div>
+        <div class="input-group mt-2">
+          <span class="input-group-text">Qty</span>
+          <input name="qty_${index}" class="form-control" type="number" value="${qty}" 
+                 aria-label="Quantity" data-index="${index}" oninput="updateQty(${index}, this.value)">
+        </div>
+        <div class="input-group mt-2">
+          <span class="input-group-text">Qty OH</span>
+          <input name="qty_oh_${index}" class="form-control" value="${qtyOh}" 
+                 aria-label="Quantity On-Hand" readonly>
+        </div>
+        <div class="input-group mt-2">
+          <span class="input-group-text">Selisih</span>
+          <input id="selisih_${index}" class="form-control" value="${selisih}" 
+                 aria-label="Selisih" readonly style="color: ${selisih < 0 ? 'red' : 'green'};">
+        </div>
+      `;
+      cardContainer.appendChild(card);
+    }
   });
-}
-
+  }
+  
 function updateQty(index, newQty) {
   let data = JSON.parse(localStorage.getItem('onHandDataFinal')) || [];
   if (data[index]) {
