@@ -18,6 +18,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
+      justify-content: center;
     }
     .data-card {
       width: 100%;
@@ -93,6 +94,11 @@
       <span id="loadSpinner" class="spinner-border spinner-border-sm d-none"></span> Ambil Data
     </button>
   </div>
+  
+  <!-- Search box untuk pencarian berdasarkan PLU atau Description -->
+  <div class="input-group mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Cari berdasarkan PLU atau Description">
+  </div>
 
   <div class="card-container" id="dataCardContainer">
     <!-- Cards will be added here dynamically -->
@@ -109,7 +115,7 @@
 
 <script>
   const scriptURL = 'https://script.google.com/macros/s/AKfycbyXKWF8GrSjUi1NHIsFNEPj7XNe0WKkCO-TY_aGmvfheM7YerRtOuyS4pQvB9AuT4kCkg/exec';
-  
+
   function showAlert(message, type) {
     const alertContainer = document.getElementById('alertContainer');
     const icon = type === 'success' ? 'fa-check-circle' : type === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle';
@@ -127,25 +133,31 @@
       if (alertElement) alertElement.classList.remove('show');
     }, 3000);
   }
-  
+
   async function loadFilteredData() {
     const filterValue = document.getElementById('filterInput').value.trim();
+    if (!filterValue) {
+      showAlert('Nomor Rak harus diisi.', 'warning');
+      return;
+    }
+
     const loadButton = document.getElementById('loadButton');
     const loadSpinner = document.getElementById('loadSpinner');
-  
+
     loadSpinner.classList.remove('d-none');
     loadButton.disabled = true;
-  
+
     try {
       const response = await fetch(`${scriptURL}?rak=${encodeURIComponent(filterValue)}`);
       const result = await response.json();
-  
+
       if (result.result === 'success' && result.data.length > 0) {
         localStorage.setItem('filteredData', JSON.stringify(result.data));
         displayData(result.data);
         showAlert('Data loaded successfully!', 'success');
       } else {
         showAlert('No data found for the specified Rak.', 'danger');
+        document.getElementById('dataCardContainer').innerHTML = '';  // Clear cards if no data found
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -155,37 +167,58 @@
       loadButton.disabled = false;
     }
   }
-  
+
   function displayData(data) {
-    const cardContainer = document.getElementById('dataCardContainer');
-    cardContainer.innerHTML = '';
+  const cardContainer = document.getElementById('dataCardContainer');
+  cardContainer.innerHTML = '';
+
+  data.forEach((row, index) => {
+    const card = document.createElement('div');
+    card.className = 'data-card';
+    card.innerHTML = `
+      <div class="card-title">Rak: ${row.rak}</div>
+      <div class="card-content">Plu: ${row.plu}</div>
+      <div class="card-content">Des: ${row.desc}</div>
+      <div class="input-group mt-2">
+        <span class="input-group-text">Qty</span>
+        <input name="qty_${index}" class="form-control" type="number" value="${row.qty}" 
+               aria-label="Quantity" data-original-index="${row.originalIndex}" oninput="updateQty(${row.originalIndex}, this.value)">
+      </div>
+    `;
+    cardContainer.appendChild(card);
+  });
+}
+
+function updateQty(originalIndex, newQty) {
+  // Mengambil data dari localStorage dan mengupdate pada index asli (originalIndex)
+  let data = JSON.parse(localStorage.getItem('filteredData')) || [];
   
-    data.forEach((row, index) => {
-      const card = document.createElement('div');
-      card.className = 'data-card';
-      card.innerHTML = `
-        <div class="card-title">Rak: ${row.rak}</div>
-        <div class="card-content">Plu: ${row.plu}</div>
-        <div class="card-content">Des: ${row.desc}</div>
-        <div class="input-group mt-2">
-          <span class="input-group-text">Qty</span>
-          <input name="qty_${index}" class="form-control" type="number" value="${row.qty}" 
-                 aria-label="Quantity" data-index="${index}" oninput="updateQty(${index}, this.value)">
-        </div>
-      `;
-      cardContainer.appendChild(card);
+  if (data[originalIndex]) {
+    data[originalIndex].qty = newQty;
+    localStorage.setItem('filteredData', JSON.stringify(data));
+  }
+}
+
+function filterDataBySearch(data, query) {
+  const lowerQuery = query.toLowerCase();
+  
+  return data
+    .map((item, index) => ({ ...item, originalIndex: index })) // Tambahkan originalIndex untuk menjaga posisi asli
+    .filter(item => {
+      const pluMatch = item.plu.toString().includes(lowerQuery);
+      const descMatch = item.desc.toLowerCase().includes(lowerQuery);
+      return pluMatch || descMatch;
     });
-  }
-  
-  function updateQty(index, newQty) {
-    let data = JSON.parse(localStorage.getItem('filteredData')) || [];
-    if (data[index]) {
-      data[index].qty = newQty;
-      localStorage.setItem('filteredData', JSON.stringify(data));
-    }
-  }
-  
-  function saveData() {
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  const searchQuery = this.value;
+  const data = JSON.parse(localStorage.getItem('filteredData')) || [];
+  const filteredData = filterDataBySearch(data, searchQuery);
+  displayData(filteredData);
+});
+
+function saveData() {
     const data = JSON.parse(localStorage.getItem('filteredData'));
     if (data && data.length > 0) {
       localStorage.setItem('onHandData', JSON.stringify(data));
@@ -195,7 +228,7 @@
       showAlert('No data to save. Please load data first.', 'warning');
     }
   }
-  
+
   document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('filteredData');
     localStorage.removeItem('onHandData');
@@ -211,3 +244,4 @@
 
 </body>
 </html>
+
