@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SO MANUAL - ONHAND DATA</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f3f4f6;
+    }
+    h1 {
+      font-weight: bold;
+      color: #333;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .data-card {
+      width: 100%;
+      max-width: 350px;
+      padding: 1rem;
+      border-radius: 10px;
+      background-color: #ffffff;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .data-card:hover {
+      transform: translateY(-5px);
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #007bff;
+    }
+    .card-content {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .btn-custom {
+      background-color: #007bff;
+      color: white;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .btn-custom:hover {
+      background-color: #0056b3;
+    }
+    .spinner-border {
+      width: 1rem;
+      height: 1rem;
+    }
+    .footer {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+    }
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      color: #0056b3;
+    }
+    @media (max-width: 576px) {
+      .card-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .data-card {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h1 class="text-center mb-4">SO MANUAL - ONHAND DATA</h1>
+  
+  <div id="alertContainer"></div>
+
+  <div class="card-container" id="dataCardContainer">
+    <!-- Cards will be added here dynamically -->
+  </div>
+
+  <button class="btn btn-custom" id="saveButton" onclick="saveOnHandData()">
+    <span id="saveSpinner" class="spinner-border spinner-border-sm d-none"></span> Simpan Data On Hand
+  </button>
+</div>
+
+<footer class="footer mt-5">
+  <p>&copy; 2024 Pramuka Apps. All rights reserved.</p>
+</footer>
+
+<script>
+  // Load filtered data from localStorage
+  function loadOnHandData() {
+    const data = JSON.parse(localStorage.getItem('onHandData'));
+    if (data && data.length > 0) {
+      displayOnHandData(data);
+      showAlert('Loaded on-hand data.', 'info', 'ℹ️');
+    } else {
+      showAlert('No data found. Please load data from the entry page.', 'warning', '⚠️');
+    }
+  }
+
+  // Display on-hand data with Qty OH field
+  function displayOnHandData(data) {
+    const cardContainer = document.getElementById('dataCardContainer');
+    cardContainer.innerHTML = ''; // Clear previous cards
+
+    data.forEach((row, index) => {
+      const card = document.createElement('div');
+      card.className = 'data-card';
+      card.innerHTML = `
+        <div class="card-title">Rak: ${row.rak}</div>
+        <div class="card-content">Plu: ${row.plu}</div>
+        <div class="card-content">Des: ${row.desc}</div>
+        <div class="input-group mt-2">
+          <span class="input-group-text">Qty</span>
+          <input name="qty_${index}" class="form-control" value="${row.qty}" readonly>
+        </div>
+        <div class="input-group mt-2">
+          <span class="input-group-text">Qty OH</span>
+          <input name="qty_oh_${index}" class="form-control" placeholder="Enter Qty OH" 
+                 aria-label="Quantity On-Hand" data-index="${index}" oninput="updateQtyOH(${index}, this.value)">
+        </div>
+      `;
+      cardContainer.appendChild(card);
+    });
+  }
+
+  // Update Qty OH in localStorage
+  function updateQtyOH(index, newQtyOH) {
+    let data = JSON.parse(localStorage.getItem('onHandData')) || [];
+    if (data[index]) {
+      data[index].qty_oh = newQtyOH;
+      localStorage.setItem('onHandData', JSON.stringify(data)); // Save updated data
+    }
+  }
+
+  // Show alert message with icon and auto-hide after 3 seconds
+  function showAlert(message, type, icon) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+      ${icon} ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    alertContainer.appendChild(alertDiv);
+
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      alertDiv.classList.remove('show');
+      alertDiv.classList.add('fade');
+      setTimeout(() => alertDiv.remove(), 500); // Remove element after fade-out
+    }, 3000);
+  }
+
+  // Save on-hand data and redirect to cetak selisih page
+  function saveOnHandData() {
+    const data = JSON.parse(localStorage.getItem('onHandData'));
+    if (data && data.length > 0) {
+      localStorage.setItem('onHandDataFinal', JSON.stringify(data)); // Save final on-hand data for cetak selisih
+      showAlert('Data saved successfully!', 'success', '✅');
+
+      // Redirect to cetak selisih page after saving
+      setTimeout(() => {
+        window.location.href = 'SelisihData.html';
+      }, 1000); // Delay for 1 second to show success message
+    } else {
+      showAlert('No data to save. Please load data first.', 'warning', '⚠️');
+    }
+  }
+
+  // Load on-hand data on page load
+  document.addEventListener('DOMContentLoaded', loadOnHandData);
+</script>
+
+</body>
+</html>
