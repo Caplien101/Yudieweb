@@ -7,172 +7,233 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
-    body {
-      background-color: #f3f4f6;
-    }
-    h1 {
-      font-weight: bold;
-      color: #333;
-    }
-    .card-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-    }
-    .data-card {
-      width: 100%;
-      max-width: 350px;
-      padding: 1rem;
-      border-radius: 10px;
-      background-color: #ffffff;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-    .data-card:hover {
-      transform: translateY(-5px);
-    }
-    .card-title {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #007bff;
-    }
-    .card-content {
-      font-size: 0.9rem;
-      color: #666;
-    }
-    .btn-custom {
-      background-color: #007bff;
-      color: white;
-      margin-top: 10px;
-      width: 100%;
-    }
-    .btn-custom:hover {
-      background-color: #0056b3;
-    }
-    .spinner-border {
-      width: 1rem;
-      height: 1rem;
-    }
-    .footer {
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      padding: 1rem;
-      position: relative;
-      bottom: 0;
-      width: 100%;
-    }
-    .footer a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    .footer a:hover {
-      color: #0056b3;
-    }
-    @media (max-width: 576px) {
-      .card-container {
-        flex-direction: column;
-        align-items: center;
-      }
-      .data-card {
-        max-width: 100%;
-      }
-    }
+/* Reset CSS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body & Wrapper Layout */
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Wrapper untuk konten dan footer */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+h1 {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Card Container */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Data Card */
+.data-card {
+  width: 100%;
+  max-width: 350px;
+  padding: 1rem;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.data-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Card Title */
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #007bff;
+}
+
+/* Card Content */
+.card-content {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Custom Button */
+.btn-custom {
+  background-color: #007bff;
+  color: white;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-custom:hover {
+  background-color: #0056b3;
+}
+
+/* Spinner */
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Footer */
+.footer {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 1rem;
+  width: 100%;
+  margin-top: auto;
+}
+
+.footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #0056b3;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .data-card {
+    max-width: 100%;
+  }
+}
+
   </style>
 </head>
 <body>
+  <div class="wrapper">
+    <div class="content">
+      <div class="container mt-5">
+        <h1 class="text-center mb-4">SO MANUAL - ENTRY DATA</h1>
+        
+        <div id="alertContainer"></div>
 
-<div class="container mt-5">
-  <h1 class="text-center mb-4">SO MANUAL - ENTRY DATA</h1>
-  
-  <div id="alertContainer"></div>
+        <div class="input-group mb-3">
+          <input type="text" id="filterInput" class="form-control" placeholder="Masukkan Nomor Rak (dengan huruf capital)">
+          <button class="btn btn-custom" id="loadButton" onclick="loadFilteredData()">
+            <span id="loadSpinner" class="spinner-border spinner-border-sm d-none"></span> Ambil Data
+          </button>
+        </div>
 
-  <div class="input-group mb-3">
-    <input type="text" id="filterInput" class="form-control" placeholder="Masukkan Nomor Rak (dengan huruf capital)">
-    <button class="btn btn-custom" id="loadButton" onclick="loadFilteredData()">
-      <span id="loadSpinner" class="spinner-border spinner-border-sm d-none"></span> Ambil Data
-    </button>
-  </div>
-  
-  <!-- Search box untuk pencarian berdasarkan PLU atau Description -->
-  <div class="input-group mb-3">
-    <input type="text" id="searchInput" class="form-control" placeholder="Cari berdasarkan PLU atau Description">
-  </div>
+        <!-- Search box untuk pencarian berdasarkan PLU atau Description -->
+        <div class="input-group mb-3">
+          <input type="text" id="searchInput" class="form-control" placeholder="Cari berdasarkan PLU atau Description">
+        </div>
 
-  <div class="card-container" id="dataCardContainer">
-    <!-- Cards will be added here dynamically -->
-  </div>
-
-  <button class="btn btn-custom" id="sendButton" onclick="saveData()">
-    <span id="sendSpinner" class="spinner-border spinner-border-sm d-none"></span> Simpan Entry
-  </button>
-</div>
-
-<footer class="footer mt-5">
-  <p>&copy; 2024 Pramuka Apps. All rights reserved.</p>
-</footer>
-
-<script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbyXKWF8GrSjUi1NHIsFNEPj7XNe0WKkCO-TY_aGmvfheM7YerRtOuyS4pQvB9AuT4kCkg/exec';
-
-  function showAlert(message, type) {
-    const alertContainer = document.getElementById('alertContainer');
-    const icon = type === 'success' ? 'fa-check-circle' : type === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle';
-    
-    alertContainer.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center" role="alert">
-        <i class="fas ${icon} me-2"></i>
-        <span>${message}</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="card-container" id="dataCardContainer">
+          <!-- Cards will be added here dynamically -->
+        </div>
+        
+        <button class="btn btn-custom" id="sendButton" onclick="saveData()">
+          <span id="sendSpinner" class="spinner-border spinner-border-sm d-none"></span> Simpan Entry
+        </button>
       </div>
-    `;
-    
-    setTimeout(() => {
-      const alertElement = document.querySelector('.alert');
-      if (alertElement) alertElement.classList.remove('show');
-    }, 3000);
+    </div>
+    <footer class="footer">
+      <p>&copy; 2024 Pramuka Apps. All rights reserved.</p>
+    </footer>
+    </div>
+  </div>
+  <script>
+ const scriptURL = 'https://script.google.com/macros/s/AKfycbyXKWF8GrSjUi1NHIsFNEPj7XNe0WKkCO-TY_aGmvfheM7YerRtOuyS4pQvB9AuT4kCkg/exec';
+
+function showAlert(message, type) {
+  const alertContainer = document.getElementById('alertContainer');
+  const icon = type === 'success' ? 'fa-check-circle' : type === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle';
+  
+  alertContainer.innerHTML = `
+    <div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center" role="alert">
+      <i class="fas ${icon} me-2"></i>
+      <span>${message}</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+  
+  setTimeout(() => {
+    const alertElement = document.querySelector('.alert');
+    if (alertElement) alertElement.classList.remove('show');
+  }, 3000);
+}
+
+async function loadFilteredData() {
+  const filterValue = document.getElementById('filterInput').value.trim();
+  if (!filterValue) {
+    showAlert('Nomor Rak harus diisi.', 'warning');
+    return;
   }
 
-  async function loadFilteredData() {
-    const filterValue = document.getElementById('filterInput').value.trim();
-    if (!filterValue) {
-      showAlert('Nomor Rak harus diisi.', 'warning');
-      return;
+  const loadButton = document.getElementById('loadButton');
+  const loadSpinner = document.getElementById('loadSpinner');
+
+  loadSpinner.classList.remove('d-none');
+  loadButton.disabled = true;
+
+  try {
+    const response = await fetch(`${scriptURL}?rak=${encodeURIComponent(filterValue)}`);
+    const result = await response.json();
+
+    if (result.result === 'success' && result.data.length > 0) {
+      // Assign each item a unique ID based on its index in the data array
+      const dataWithId = result.data.map((item, index) => ({ ...item, id: index }));
+      localStorage.setItem('filteredData', JSON.stringify(dataWithId));
+      displayData(dataWithId);
+      showAlert('Data loaded successfully!', 'success');
+    } else {
+      showAlert('No data found for the specified Rak.', 'danger');
+      document.getElementById('dataCardContainer').innerHTML = '';
     }
-
-    const loadButton = document.getElementById('loadButton');
-    const loadSpinner = document.getElementById('loadSpinner');
-
-    loadSpinner.classList.remove('d-none');
-    loadButton.disabled = true;
-
-    try {
-      const response = await fetch(`${scriptURL}?rak=${encodeURIComponent(filterValue)}`);
-      const result = await response.json();
-
-      if (result.result === 'success' && result.data.length > 0) {
-        localStorage.setItem('filteredData', JSON.stringify(result.data));
-        displayData(result.data);
-        showAlert('Data loaded successfully!', 'success');
-      } else {
-        showAlert('No data found for the specified Rak.', 'danger');
-        document.getElementById('dataCardContainer').innerHTML = '';  // Clear cards if no data found
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-      showAlert('Error loading data. Please try again.', 'danger');
-    } finally {
-      loadSpinner.classList.add('d-none');
-      loadButton.disabled = false;
-    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+    showAlert('Error loading data. Please try again.', 'danger');
+  } finally {
+    loadSpinner.classList.add('d-none');
+    loadButton.disabled = false;
   }
+}
 
-  function displayData(data) {
+function displayData(data) {
   const cardContainer = document.getElementById('dataCardContainer');
   cardContainer.innerHTML = '';
 
-  data.forEach((row, index) => {
+  data.forEach((row) => {
     const card = document.createElement('div');
     card.className = 'data-card';
     card.innerHTML = `
@@ -181,20 +242,22 @@
       <div class="card-content">Des: ${row.desc}</div>
       <div class="input-group mt-2">
         <span class="input-group-text">Qty</span>
-        <input name="qty_${index}" class="form-control" type="number" value="${row.qty}" 
-               aria-label="Quantity" data-original-index="${row.originalIndex}" oninput="updateQty(${row.originalIndex}, this.value)">
+        <input name="qty_${row.id}" class="form-control" type="number" value="${row.qty}" 
+               aria-label="Quantity" data-id="${row.id}" oninput="updateQty(${row.id}, this.value)">
       </div>
     `;
     cardContainer.appendChild(card);
   });
 }
 
-function updateQty(originalIndex, newQty) {
-  // Mengambil data dari localStorage dan mengupdate pada index asli (originalIndex)
+function updateQty(id, newQty) {
+  // Retrieve data from localStorage and update the entry with the specified ID
   let data = JSON.parse(localStorage.getItem('filteredData')) || [];
   
-  if (data[originalIndex]) {
-    data[originalIndex].qty = newQty;
+  // Find the item with the matching id and update its qty
+  const itemIndex = data.findIndex(item => item.id === id);
+  if (itemIndex !== -1) {
+    data[itemIndex].qty = newQty;
     localStorage.setItem('filteredData', JSON.stringify(data));
   }
 }
@@ -203,7 +266,6 @@ function filterDataBySearch(data, query) {
   const lowerQuery = query.toLowerCase();
   
   return data
-    .map((item, index) => ({ ...item, originalIndex: index })) // Tambahkan originalIndex untuk menjaga posisi asli
     .filter(item => {
       const pluMatch = item.plu.toString().includes(lowerQuery);
       const descMatch = item.desc.toLowerCase().includes(lowerQuery);
@@ -219,29 +281,28 @@ document.getElementById('searchInput').addEventListener('input', function() {
 });
 
 function saveData() {
-    const data = JSON.parse(localStorage.getItem('filteredData'));
-    if (data && data.length > 0) {
-      localStorage.setItem('onHandData', JSON.stringify(data));
-      showAlert('Data saved successfully!', 'success');
-      window.location.href = 'ohpartial.html';
-    } else {
-      showAlert('No data to save. Please load data first.', 'warning');
-    }
+  const data = JSON.parse(localStorage.getItem('filteredData'));
+  if (data && data.length > 0) {
+    localStorage.setItem('onHandData', JSON.stringify(data));
+    showAlert('Data saved successfully!', 'success');
+    window.location.href = 'ohpartial.html';
+  } else {
+    showAlert('No data to save. Please load data first.', 'warning');
   }
+}
 
-  document.addEventListener('DOMContentLoaded', () => {
-    localStorage.removeItem('filteredData');
-    localStorage.removeItem('onHandData');
-    document.getElementById('dataCardContainer').innerHTML = '';
+document.addEventListener('DOMContentLoaded', () => {
+  localStorage.removeItem('filteredData');
+  localStorage.removeItem('onHandData');
+  document.getElementById('dataCardContainer').innerHTML = '';
 
-    const savedData = JSON.parse(localStorage.getItem('filteredData'));
-    if (savedData && savedData.length > 0) {
-      displayData(savedData);
-      showAlert('Loaded data from previous session.', 'info');
-    }
-  });
+  const savedData = JSON.parse(localStorage.getItem('filteredData'));
+  if (savedData && savedData.length > 0) {
+    displayData(savedData);
+    showAlert('Loaded data from previous session.', 'info');
+  }
+});
+
 </script>
-
 </body>
 </html>
-
