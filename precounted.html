@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CRUD with Google Sheets and Barcode Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  <script>
+    async function searchSuggestion() {
+      const query = document.getElementById('searchBox').value.trim();
+      if (!query) {
+        document.getElementById('suggestions').innerHTML = '';
+        return;
+      }
+      const response = await google.script.run.withSuccessHandler(showSuggestions).searchData(query);
+    }
+
+    function showSuggestions(data) {
+      const suggestions = document.getElementById('suggestions');
+      suggestions.innerHTML = '';
+      data.forEach((row, index) => {
+        const suggestion = document.createElement('div');
+        suggestion.textContent = `${row[2]} - ${row[3]} (${row[1]})`;
+        suggestion.dataset.index = index;
+        suggestion.dataset.rak = row[0];
+        suggestion.dataset.barcode = row[1];
+        suggestion.dataset.plu = row[2];
+        suggestion.dataset.description = row[3];
+        suggestion.dataset.qty = row[4];
+        suggestion.onclick = () => selectSuggestion(row);
+        suggestions.appendChild(suggestion);
+      });
+    }
+
+    function selectSuggestion(row) {
+      document.getElementById('rak').value = row[0];
+      document.getElementById('barcode').value = row[1];
+      document.getElementById('plu').value = row[2];
+      document.getElementById('description').value = row[3];
+      document.getElementById('qty').value = '';
+      document.getElementById('suggestions').innerHTML = '';
+    }
+
+    async function saveData() {
+      const rak = document.getElementById('rak').value;
+      const barcode = document.getElementById('barcode').value;
+      const plu = document.getElementById('plu').value;
+      const description = document.getElementById('description').value;
+      const qty = document.getElementById('qty').value;
+
+      if (!rak || !barcode || !plu || !description || !qty) {
+        alert('All fields are required!');
+        return;
+      }
+
+      const response = await google.script.run.addData(rak, barcode, plu, description, qty);
+      alert('Data saved successfully!');
+      clearForm();
+      displayData();
+    }
+
+    function clearForm() {
+      document.getElementById('rak').value = '';
+      document.getElementById('barcode').value = '';
+      document.getElementById('plu').value = '';
+      document.getElementById('description').value = '';
+      document.getElementById('qty').value = '';
+    }
+
+    async function displayData() {
+      const response = await google.script.run.getDataSheet2();
+      const table = document.getElementById('dataTable');
+      table.innerHTML = ''; // Clear existing table content
+
+      if (response.length > 0) {
+        // Add headers
+        const headerRow = document.createElement('tr');
+        ['Rak', 'Barcode', 'PLU', 'Description', 'Qty'].forEach(header => {
+          const th = document.createElement('th');
+          th.textContent = header;
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+
+        // Add data rows
+        response.forEach(row => {
+          const tr = document.createElement('tr');
+          row.forEach(cell => {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            tr.appendChild(td);
+          });
+          table.appendChild(tr);
+        });
+      } else {
+        table.innerHTML = '<tr><td colspan="5">No data available</td></tr>';
+      }
+    }
+
+    // Initialize barcode scanner
+    function startScanner() {
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector('#barcodeScanner'),
+          constraints: {
+            facingMode: "environment"
+          }
+        },
+        decoder: {
+          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader"]
+        }
+      }, function(err) {
+        if (err) {
+          console.error(err);
+          alert('Error initializing scanner');
+          return;
+        }
+        console.log("Quagga initialized and ready to scan!");
+        Quagga.start();
+      });
+
+      Quagga.onDetected(function(result) {
+        const barcode = result.codeResult.code;
+        console.log('Barcode detected:', barcode);
+        alert('Barcode detected: ' + barcode);
+        document.getElementById('barcode').value = barcode;
+        Quagga.stop(); // Stop scanning after detection
+      });
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    #suggestions {
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    #suggestions div {
+      padding: 8px;
+      cursor: pointer;
+    }
+    #suggestions div:hover {
+      background-color: #f0f0f0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CRUD with Google Sheets and Barcode Scanner</h1>
+  <div>
+    <label for="searchBox">Search (PLU, Barcode, Description):</label>
+    <input type="text" id="searchBox" oninput="searchSuggestion()" />
+    <div id="suggestions"></div>
+  </div>
+
+  <div>
+    <label for="rak">Rak:</label>
+    <input type="text" id="rak" />
+  </div>
+  <div>
+    <label for="barcode">Barcode:</label>
+    <input type="text" id="barcode" />
+    <button onclick="startScanner()">Scan Barcode</button>
+  </div>
+  <div>
+    <label for="plu">PLU:</label>
+    <input type="text" id="plu" />
+  </div>
+  <div>
+    <label for="description">Description:</label>
+    <input type="text" id="description" />
+  </div>
+  <div>
+    <label for="qty">Qty:</label>
+    <input type="number" id="qty" />
+  </div>
+  <button onclick="saveData()">Save</button>
+
+  <h2>Data in Sheet2</h2>
+  <table id="dataTable"></table>
+</body>
+</html>
