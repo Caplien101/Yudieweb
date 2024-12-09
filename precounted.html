@@ -56,65 +56,71 @@
 
     <script>
     async function fetchData() {
-        const apiUrl = 'https://script.google.com/macros/s/AKfycbw3sbgsJZp4Zccv_7n7N-SFA6yIJM5o5-uhAjsBMwHHI2SF8VxiWCoJqoA0i45PwX0wQQ/exec'; // Ganti dengan URL web app Anda
-        try {
-            const response = await fetch(apiUrl);
-            const result = await response.json();
-
-            if (result.status === "success") {
-                renderCards(result.data);
-            } else {
-                console.error("Failed to fetch data: ", result);
+            try {
+                const response = await fetch("https://script.google.com/macros/s/AKfycbw3sbgsJZp4Zccv_7n7N-SFA6yIJM5o5-uhAjsBMwHHI2SF8VxiWCoJqoA0i45PwX0wQQ/exec");
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    renderCards(result.data);
+                } else {
+                    console.error("Failed to fetch data:", result);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
             }
-        } catch (error) {
-            console.error("Error fetching data: ", error);
         }
-    }
 
-    function renderCards(data) {
-        const cardContainer = document.getElementById('cardContainer');
-        cardContainer.innerHTML = ''; // Clear existing cards
+        function renderCards(data) {
+    const cardContainer = document.getElementById('cardContainer');
+    cardContainer.innerHTML = ''; // Clear existing cards
 
-        data.forEach(item => {
-            const card = document.createElement('div');
-            card.classList.add('card');
+    data.forEach(item => {
+        // Check if SCAN value is valid
+        if (!item.SCAN) {
+            console.warn(`Invalid SCAN value for item with PLU: ${item.PLU}`);
+            return; // Skip this item if SCAN is empty or undefined
+        }
 
-            // Generate barcode
-            const barcodeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            barcodeSvg.classList.add('barcode');
-            JsBarcode(barcodeSvg, item.SCAN, {
-                format: 'CODE128',
-                lineColor: '#000',
-                width: 2,
-                height: 40,
-                displayValue: true
-            });
-            card.appendChild(barcodeSvg);
+        const card = document.createElement('div');
+        card.classList.add('card');
 
-            // Add other details
-            const details = document.createElement('div');
-            details.classList.add('details');
-
-            const scan = document.createElement('p');
-            scan.textContent = `SCAN: ${item.SCAN}`;
-            details.appendChild(scan);
-
-            const plu = document.createElement('p');
-            plu.textContent = `PLU: ${item.PLU}`;
-            details.appendChild(plu);
-
-            const description = document.createElement('p');
-            description.textContent = `Description: ${item.DESCRIPTION || 'N/A'}`;
-            details.appendChild(description);
-
-            const total = document.createElement('p');
-            total.textContent = `Total: ${item.TOTAL}`;
-            details.appendChild(total);
-
-            card.appendChild(details);
-            cardContainer.appendChild(card);
+        // Generate barcode
+        const barcodeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        barcodeSvg.classList.add('barcode');
+        JsBarcode(barcodeSvg, item.SCAN, {
+            format: 'CODE128',
+            lineColor: '#000',
+            width: 2,
+            height: 40,
+            displayValue: true
         });
-    }
+        card.appendChild(barcodeSvg);
+
+        // Add other details
+        const details = document.createElement('div');
+        details.classList.add('details');
+
+        const scan = document.createElement('p');
+        scan.textContent = `SCAN: ${item.SCAN}`;
+        details.appendChild(scan);
+
+        const plu = document.createElement('p');
+        plu.textContent = `PLU: ${item.PLU}`;
+        details.appendChild(plu);
+
+        const description = document.createElement('p');
+        description.textContent = `Description: ${item.DESCRIPTION || 'N/A'}`;
+        details.appendChild(description);
+
+        const total = document.createElement('p');
+        total.textContent = `Total: ${item.TOTAL}`;
+        details.appendChild(total);
+
+        card.appendChild(details);
+        cardContainer.appendChild(card);
+    });
+}
+
 
     // Fetch and render data when the page loads
     document.addEventListener('DOMContentLoaded', fetchData);
