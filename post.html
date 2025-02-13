@@ -280,42 +280,60 @@
     }
 
     // Fungsi untuk mengirim data ke Google Sheets
-    async function sendDataToGoogleSheets() {
-      const data = JSON.parse(localStorage.getItem("editedData")) || [];
-      if (data.length === 0) {
+async function sendDataToGoogleSheets() {
+    const data = JSON.parse(localStorage.getItem("editedData")) || [];
+    if (data.length === 0) {
         alert("Tidak ada data untuk dikirim.");
         return;
-      }
-      const submitButton = document.getElementById('submitButton');
-            const submitSpinner = document.getElementById('submitSpinner');
-            submitButton.disabled = true;
-            submitSpinner.classList.remove('d-none');
+    }
 
-      const url = "https://script.google.com/macros/s/AKfycbxZJvZDPP1EJRH-QkzCP9BjzShUwuSXuph6KNUt9SgqHz8v68zd1u20ri7bpQMiUonTAQ/exec"; // Ganti dengan URL Google Apps Script Anda
-      try {
+    const submitButton = document.getElementById('submitButton');
+    const submitSpinner = document.getElementById('submitSpinner');
+    submitButton.disabled = true;
+    submitSpinner.classList.remove('d-none');
+
+    const url = "https://script.google.com/macros/s/AKfycbxZJvZDPP1EJRH-QkzCP9BjzShUwuSXuph6KNUt9SgqHz8v68zd1u20ri7bpQMiUonTAQ/exec"; // Ganti dengan URL Google Apps Script Anda
+
+    try {
         const response = await fetch(url, {
-          method: "POST",
-          mode: "no-cors", // Menggunakan mode no-cors
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
+            method: "POST",
+            mode: "no-cors", // Menggunakan mode no-cors
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
         });
+
         // Tidak ada akses ke respons karena mode no-cors
         alert("Permintaan berhasil dikirim.");
-      } catch (error) {
+
+        // Hapus data dari local storage setelah pengiriman berhasil
+        localStorage.removeItem("editedData");
+        console.log("Data telah dibersihkan dari local storage.");
+    } catch (error) {
         console.error("Error posting data:", error);
         alert(`Terjadi kesalahan saat mengirim data: ${error.message}`);
-      }finally {
-                // Nonaktifkan spinner dan aktifkan kembali tombol
-                submitButton.disabled = false;
-                submitSpinner.classList.add('d-none');
-            }
-        }
-    
+    } finally {
+        // Nonaktifkan spinner dan aktifkan kembali tombol
+        submitButton.disabled = false;
+        submitSpinner.classList.add('d-none');
+    }
+}
 
-    // Muat data dari local storage saat halaman dimuat
-    window.onload = loadFromLocalStorage;
+// Fungsi untuk memuat data dari local storage
+function loadFromLocalStorage() {
+    const savedData = localStorage.getItem("editedData");
+    if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        console.log("Data dimuat dari local storage:", parsedData);
+        // Lakukan sesuatu dengan data yang dimuat
+    } else {
+        console.log("Tidak ada data di local storage.");
+    }
+}
+
+// Muat data dari local storage saat halaman dimuat
+window.onload = loadFromLocalStorage;
   </script>
 </body>
 </html>
