@@ -310,6 +310,9 @@ async function sendDataToGoogleSheets() {
         // Hapus data dari local storage setelah pengiriman berhasil
         localStorage.removeItem("editedData");
         console.log("Data telah dibersihkan dari local storage.");
+
+        // Refresh halaman setelah data berhasil dikirim
+        location.reload(); // Ini akan me-refresh halaman
     } catch (error) {
         console.error("Error posting data:", error);
         alert(`Terjadi kesalahan saat mengirim data: ${error.message}`);
@@ -320,20 +323,9 @@ async function sendDataToGoogleSheets() {
     }
 }
 
-// Fungsi untuk memuat data dari local storage
-function loadFromLocalStorage() {
-    const savedData = localStorage.getItem("editedData");
-    if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        console.log("Data dimuat dari local storage:", parsedData);
-        // Lakukan sesuatu dengan data yang dimuat
-    } else {
-        console.log("Tidak ada data di local storage.");
-    }
-}
-
 // Muat data dari local storage saat halaman dimuat
 window.onload = loadFromLocalStorage;
+
   </script>
 </body>
 </html>
