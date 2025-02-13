@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Card View with OH and Selisih</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      padding: 20px;
+      background-color: #f8f9fa;
+      font-family: 'Poppins', sans-serif;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      color: #333;
+    }
+    .card {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: auto;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Styling for Checkbox */
+    .custom-checkbox {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px; /* Ukuran checkbox */
+      height: 24px; /* Ukuran checkbox */
+      border: 2px solid #0d6efd; /* Garis tepi biru */
+      border-radius: 50%; /* Bentuk lingkaran */
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    .custom-checkbox input[type="checkbox"] {
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    .custom-checkbox input[type="checkbox"]:checked + .checkmark {
+      background-color: #198754; /* Warna hijau saat dicentang */
+      border-color: #0d6efd; /* Garis tepi biru tetap ada */
+    }
+    .checkmark {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Gap and Layout Adjustments */
+    .row-flex {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+    .selisih-block {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 15px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: center;
+      color: #fff;
+      margin-top: 10px;
+    }
+    .selisih-negative {
+      background-color: #dc3545; /* Red */
+    }
+    .selisih-zero {
+      background-color: #198754; /* Green */
+    }
+    .selisih-positive {
+      background-color: #0d6efd; /* Blue */
+    }
+
+    /* Styling for Input Group */
+    .input-group-text.custom-checkbox {
+      padding: 0; /* Hapus padding default */
+      margin-right: 10px; /* Jarak antara checkbox dan textbox */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-primary">Data Card View</h1>
+    <div id="resultsContainer" class="row"></div>
+    <button id="submitButton" class="btn btn-primary mt-3" onclick="sendDataToGoogleSheets()">
+        <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        Save and Fixed
+    </button>
+  </div>
+  <script>
+    // Fungsi untuk memuat data dari local storage saat halaman dimuat
+    function loadFromLocalStorage() {
+      const savedData = localStorage.getItem('editedData');
+      if (savedData) {
+        currentData = JSON.parse(savedData);
+        console.log('Data loaded from local storage:', currentData);
+        displayResults(currentData); // Tampilkan data dari local storage
+      }
+    }
+
+    // Fungsi untuk menampilkan data dalam card view
+    function displayResults(results) {
+      const container = document.getElementById('resultsContainer');
+      container.innerHTML = ''; // Hapus hasil sebelumnya
+      if (results.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center">Data tidak ditemukan</div>';
+        return;
+      }
+      results.forEach(item => {
+        const selisih = calculateSelisih(item.qty, item.oh);
+        const selisihClass = getSelisihClass(selisih);
+
+        const card = `
+          <div class="col-md-6 col-lg-4">
+            <div class="card">
+              <div class="card-body">
+                <!-- Rak dan PLU -->
+                <div class="row-flex">
+                  <p><strong>Rak:</strong> ${item.rak}</p>
+                  <p><strong>PLU:</strong> ${item.plu}</p>
+                </div>
+                <!-- Deskripsi dengan Checkbox -->
+                <div class="input-group mb-2">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text custom-checkbox">
+                      <input type="checkbox" id="checkbox-${item.plu}" onchange="handleCheckboxChange(this, '${item.plu}')">
+                      <div class="checkmark"></div>
+                    </div>
+                  </div>
+                  <input type="text" class="form-control" value="${item.desc || ''}" readonly>
+                </div>
+                <!-- Qty dan OH -->
+                <div class="row-flex">
+                  <div class="input-group mb-2 mr-sm-2" style="width: 48%;">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Qty</div>
+                    </div>
+                    <input type="number" class="form-control qty-input" id="qty-${item.plu}" data-plu="${item.plu}" value="${item.qty || ''}" oninput="updateQty(this)">
+                  </div>
+                  <div class="input-group mb-2 mr-sm-2" style="width: 48%;">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">OH</div>
+                    </div>
+                    <input type="number" class="form-control oh-input" id="oh-${item.plu}" data-plu="${item.plu}" value="${item.oh || ''}" oninput="updateOH(this)">
+                  </div>
+                </div>
+                <!-- Selisih -->
+                <div class="selisih-block ${selisihClass}" id="selisih-${item.plu}">
+                  Selisih: ${selisih}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', card);
+      });
+    }
+
+    // Fungsi untuk menghitung selisih
+    function calculateSelisih(qty, oh) {
+      const qtyNum = Number(qty) || 0;
+      const ohNum = Number(oh) || 0;
+      return qtyNum - ohNum;
+    }
+
+    // Fungsi untuk menentukan kelas CSS berdasarkan nilai selisih
+    function getSelisihClass(selisih) {
+      if (selisih < 0) {
+        return 'selisih-negative';
+      } else if (selisih === 0) {
+        return 'selisih-zero';
+      } else {
+        return 'selisih-positive';
+      }
+    }
+
+    // Fungsi untuk memperbarui tampilan selisih
+    function updateSelisih(plu) {
+      const currentData = JSON.parse(localStorage.getItem('editedData')) || [];
+      const index = currentData.findIndex(item => item.plu.toString() === plu);
+      if (index !== -1) {
+        const qty = currentData[index].qty || 0;
+        const oh = currentData[index].oh || 0;
+        const newSelisih = calculateSelisih(qty, oh);
+        const selisihClass = getSelisihClass(newSelisih);
+
+        // Perbarui elemen selisih di UI
+        const selisihBlock = document.getElementById(`selisih-${plu}`);
+        if (selisihBlock) {
+          selisihBlock.textContent = `Selisih: ${newSelisih}`;
+          selisihBlock.className = `selisih-block ${selisihClass}`;
+        }
+      }
+    }
+
+    // Fungsi untuk menangani perubahan checkbox
+    function handleCheckboxChange(checkbox, plu) {
+      const isChecked = checkbox.checked;
+      const currentData = JSON.parse(localStorage.getItem('editedData')) || [];
+      const index = currentData.findIndex(item => item.plu.toString() === plu);
+      if (index !== -1) {
+        if (isChecked) {
+          currentData[index].oh = currentData[index].qty;
+        } else {
+          currentData[index].oh = '';
+        }
+        localStorage.setItem('editedData', JSON.stringify(currentData));
+        console.log(`OH untuk PLU ${plu} diperbarui di local storage.`);
+        // Perbarui UI
+        const ohInput = document.querySelector(`#oh-${plu}`);
+        if (ohInput) {
+          ohInput.value = isChecked ? currentData[index].qty : '';
+          updateOH(ohInput);
+        }
+        // Perbarui selisih
+        updateSelisih(plu);
+      }
+    }
+
+    // Fungsi untuk memperbarui Qty di local storage dan menghitung selisih
+    function updateQty(inputElement) {
+      const plu = inputElement.dataset.plu;
+      const qty = inputElement.value;
+      const currentData = JSON.parse(localStorage.getItem('editedData')) || [];
+      const index = currentData.findIndex(item => item.plu.toString() === plu);
+      if (index !== -1) {
+        currentData[index].qty = Number(qty);
+        localStorage.setItem('editedData', JSON.stringify(currentData));
+        console.log(`Qty untuk PLU ${plu} diperbarui di local storage.`);
+        // Perbarui selisih
+        updateSelisih(plu);
+      }
+    }
+
+    // Fungsi untuk memperbarui OH di local storage dan menghitung selisih
+    function updateOH(inputElement) {
+      const plu = inputElement.dataset.plu;
+      const oh = inputElement.value;
+      const currentData = JSON.parse(localStorage.getItem('editedData')) || [];
+      const index = currentData.findIndex(item => item.plu.toString() === plu);
+      if (index !== -1) {
+        currentData[index].oh = Number(oh);
+        localStorage.setItem('editedData', JSON.stringify(currentData));
+        console.log(`OH untuk PLU ${plu} diperbarui di local storage.`);
+        // Perbarui selisih
+        updateSelisih(plu);
+      }
+    }
+
+    // Fungsi untuk mengirim data ke Google Sheets
+    async function sendDataToGoogleSheets() {
+      const data = JSON.parse(localStorage.getItem("editedData")) || [];
+      if (data.length === 0) {
+        alert("Tidak ada data untuk dikirim.");
+        return;
+      }
+      const submitButton = document.getElementById('submitButton');
+            const submitSpinner = document.getElementById('submitSpinner');
+            submitButton.disabled = true;
+            submitSpinner.classList.remove('d-none');
+
+      const url = "https://script.google.com/macros/s/AKfycbxZJvZDPP1EJRH-QkzCP9BjzShUwuSXuph6KNUt9SgqHz8v68zd1u20ri7bpQMiUonTAQ/exec"; // Ganti dengan URL Google Apps Script Anda
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          mode: "no-cors", // Menggunakan mode no-cors
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        // Tidak ada akses ke respons karena mode no-cors
+        alert("Permintaan berhasil dikirim.");
+      } catch (error) {
+        console.error("Error posting data:", error);
+        alert(`Terjadi kesalahan saat mengirim data: ${error.message}`);
+      }finally {
+                // Nonaktifkan spinner dan aktifkan kembali tombol
+                submitButton.disabled = false;
+                submitSpinner.classList.add('d-none');
+            }
+        }
+    
+
+    // Muat data dari local storage saat halaman dimuat
+    window.onload = loadFromLocalStorage;
+  </script>
+</body>
+</html>
