@@ -22,13 +22,18 @@
     }
     .card {
       margin-bottom: 20px;
-      padding: 20px;
+      padding: 5px;
       border: none;
       border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       height: auto;
     }
+    .card-body {
+  padding: 5px;
+  
+  gap: 12px; /* Mengatur jarak antar element */
+}
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -99,6 +104,13 @@
     .selisih-positive {
       background-color: #0d6efd; /* Blue */
     }
+    
+     .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
 
     /* Styling for Input Group */
     .input-group-text.custom-checkbox {
@@ -112,13 +124,16 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="text-primary">Data Card View</h1>
-    <div id="resultsContainer" class="row"></div>
-    <button id="submitButton" class="btn btn-primary mt-3" onclick="sendDataToGoogleSheets()">
-        <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-        Save and Fixed
+  <h1 class="text-primary">CEK ON HAND DAN SELISIH</h1>
+  <div id="resultsContainer" class="row"></div>
+  <div class="button-container">
+    <button id="cekSelisihButton" class="btn btn-warning mt-3" onclick="cekSelisih()">Cek Selisih</button>
+    <button id="submitButton" class="btn btn-primary mt-3" onclick="sendDataToGoogleSheets()" style="display: none;">
+      <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+      Save and Fixed
     </button>
   </div>
+</div>
   <script>
     // Fungsi untuk memuat data dari local storage saat halaman dimuat
     function loadFromLocalStorage() {
@@ -224,6 +239,27 @@
         }
       }
     }
+    
+    
+    function cekSelisih() {
+  // Sembunyikan card dengan selisih 0
+  const allSelisihBlocks = document.querySelectorAll('[id^="selisih-"]');
+  allSelisihBlocks.forEach(block => {
+    const selisihValue = parseInt(block.textContent.split(': ')[1]);
+    const cardContainer = block.closest('.col-md-6');
+    
+    if (selisihValue === 0) {
+      cardContainer.style.display = 'none';
+    } else {
+      cardContainer.style.display = 'block';
+    }
+  });
+
+  // Tampilkan tombol Save
+  document.getElementById('submitButton').style.display = 'inline-block';
+  // Sembunyikan tombol Cek Selisih
+  document.getElementById('cekSelisihButton').style.display = 'none';
+}
 
     // Fungsi untuk menangani perubahan checkbox
     function handleCheckboxChange(checkbox, plu) {
