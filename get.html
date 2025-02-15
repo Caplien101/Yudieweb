@@ -38,7 +38,7 @@ body {
             display: block;
             width: fit-content;
             margin: 20px auto;
-            padding: 12px 40px;
+            padding: 12px 15px;
             font-size: 1.1rem;
             transition: transform 0.2s ease;
         }
@@ -89,11 +89,11 @@ body {
 }
 
 .qty-box {
-    background: #f0fdf4;
+    background: #ffffff;
     padding: 6px 10px;
     border-radius: 6px;
-    border: 1px solid #dcfce7;
-    font-size: 0.9rem;
+    border: 1px solid #e2e8f0 ;
+    font-size: 1.5rem;
 }
 
 .qty-value {
@@ -114,6 +114,58 @@ body {
     border-radius: 6px;
     font-size: 0.9rem;
     text-align: center;
+}
+
+/* Tambahkan di bagian CSS *
+/* Base Card Style */
+.product-card {
+    transition: all 0.3s ease;
+    position: relative;
+    background: #ffffff; /* White base untuk kontras maksimal */
+}
+
+/* Focus State */
+.product-card:focus-within {
+    background: #F8F5FF; /* Ultra light purple */
+    border-color: #D4CCF0; /* Soft purple border */
+    box-shadow: 0 2px 8px rgba(146, 124, 214, 0.1);
+}
+
+.product-card:focus-within .qty-box{
+    background: #fffeba; /* Ultra light purple */
+    border-color: #D4CCF0; /* Soft purple border */
+    box-shadow: 0 2px 8px rgba(146, 124, 214, 0.1);
+}
+
+/* Text Emphasis */
+.product-card:focus-within .description {
+    color: #0048ff !important; /* Dark purple untuk readability */
+    font-weight: bold;
+}
+
+/* Accent Line */
+.product-card:focus-within::after {
+    background: #9E7BFF; /* Medium vibrant purple */
+    width: 3px;
+    border-radius: 4px 0 0 4px;
+}
+
+/* Input Focus State (Tambahan agar selaras) */
+.add-qty-input:focus {
+    border-color: #9E7BFF !important;
+    box-shadow: 0 0 0 2px rgba(158, 123, 255, 0.15) !important;
+}
+
+/* Garis aksen kiri untuk emphasis */
+.product-card:focus-within::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #9E7BFF;
+    border-radius: 8px 0 0 8px;
 }
 
 /* Tombol Styling */
@@ -138,22 +190,38 @@ body {
     display: none;
 }
 
+/* Tambahkan CSS untuk visual feedback */
+.saved-effect {
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.add-qty-input:focus {
+    border-color: #22c55e;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+
 /* Responsive Mobile */
 @media (max-width: 768px) {
     .product-card {
         padding: 10px;
+
     }
     
     .desc-qty-row {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 4px;
     }
     
     .qty-box {
-        width: 100%;
+        width: 30%;
         text-align: center;
         padding: 8px;
+        
     }
     
     .control-row {
@@ -309,19 +377,57 @@ body {
         }
 
         function saveData(index) {
-            const qtyElement = document.getElementById(`qty-${index}`);
-            const addQtyInput = document.getElementById(`addQty-${index}`);
-            
-            const currentQty = parseInt(qtyElement.textContent) || 0;
-            const addQty = parseInt(addQtyInput.value) || 0;
-            
-            const newQty = currentQty + addQty;
-            qtyElement.textContent = newQty;
-            addQtyInput.value = '';
-            
-            updateLocalStorage(index, newQty);
-        }
+    const qtyElement = document.getElementById(`qty-${index}`);
+    const addQtyInput = document.getElementById(`addQty-${index}`);
+    
+    const currentQty = parseInt(qtyElement.textContent) || 0;
+    const addQty = parseInt(addQtyInput.value) || 0;
+    
+    const newQty = currentQty + addQty;
+    qtyElement.textContent = newQty;
+    addQtyInput.value = '';
+    
+    updateLocalStorage(index, newQty);
+    
+    // Animasi visual feedback
+    addQtyInput.parentElement.classList.add('saved-effect');
+    setTimeout(() => {
+        addQtyInput.parentElement.classList.remove('saved-effect');
+    }, 200);
+    
+    // Pindah fokus ke input berikutnya
+    moveToNextInput(index);
+}
 
+// Fungsi perpindahan fokus dengan improvement
+function moveToNextInput(currentIndex) {
+    const allInputs = Array.from(document.querySelectorAll('.add-qty-input:not([disabled])'));
+    const visibleInputs = allInputs.filter(input => 
+        !input.closest('.product-card').classList.contains('hidden')
+    );
+
+    if(visibleInputs.length === 0) return;
+
+    const currentInput = document.getElementById(`addQty-${currentIndex}`);
+    const currentPosition = visibleInputs.indexOf(currentInput);
+    
+    let nextIndex = (currentPosition + 1) % visibleInputs.length;
+    visibleInputs[nextIndex].focus();
+    
+    // Scroll ke input berikutnya jika tidak terlihat
+    const nextInputRect = visibleInputs[nextIndex].getBoundingClientRect();
+    if(nextInputRect.bottom > window.innerHeight) {
+        visibleInputs[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// Modifikasi fungsi handle Enter
+function handleQtyInputEnter(e, index) {
+    if (e.key === 'Enter') {
+        saveData(index);
+        e.preventDefault();
+    }
+}
         
         function updateLocalStorage(index, qty) {
             if (index >= 0 && index < currentData.length) {
