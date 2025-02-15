@@ -343,10 +343,8 @@ async function sendDataToGoogleSheets() {
         // Tidak ada akses ke respons karena mode no-cors
         alert("Permintaan berhasil dikirim.");
 
-        // Hapus data dari local storage setelah pengiriman berhasil
-        localStorage.removeItem("editedData");
-        console.log("Data telah dibersihkan dari local storage.");
-
+             // Redirect ke halaman laporan
+        window.location.href = 'hasilselisih.html'; // Ganti dengan nama file laporan
         // Refresh halaman setelah data berhasil dikirim
         location.reload(); // Ini akan me-refresh halaman
     } catch (error) {
