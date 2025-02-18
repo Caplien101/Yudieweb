@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Inventory System</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto+Slab:wght@500;700&display=swap"
@@ -246,7 +250,7 @@
 
       .qty {
         font-size: 1.2em;
-        background-color: #F5F5F5;
+        background-color: #f5f5f5;
         padding: 5px;
         border-radius: 15px;
         color: #070707;
@@ -272,82 +276,111 @@
         font-size: 1.2rem; /* Ukuran ikon */
         cursor: pointer; /* Menunjukkan bahwa ini dapat diklik */
         transition: background-color 0.3s ease; /* Efek hover halus */
-    }
+      }
 
-    .edit-icon-circle:hover {
+      .edit-icon-circle:hover {
         background-color: #0b5ed7; /* Warna hover lebih gelap */
-    }
+      }
 
-    /* Modal Styling */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-}
+      /* Modal Styling */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
 
-.modal-content {
-  background-color: white;
-  margin: 10% auto;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
 
-.modal-content h3 {
-  margin-bottom: 15px;
-}
+      .modal-content h3 {
+        margin-bottom: 15px;
+      }
 
-.modal-content label {
-  display: block;
-  margin-top: 10px;
-}
+      .modal-content label {
+        display: block;
+        margin-top: 10px;
+      }
 
-.modal-content input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  box-sizing: border-box;
-}
+      .modal-content input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        box-sizing: border-box;
+      }
 
-.modal-buttons {
-  margin-top: 20px;
-  text-align: right;
-}
+      .modal-buttons {
+        margin-top: 20px;
+        text-align: right;
+      }
 
-.modal-buttons button {
-  padding: 8px 12px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+      .modal-buttons button {
+        padding: 9px 15px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
 
-#resetButton {
-  background-color: #f44336;
-  color: white;
-}
+      #resetButton {
+        background-color: #f44336;
+        color: white;
+      }
 
-#cancelButton {
-  background-color: #555;
-  color: white;
-}
+      #cancelButton {
+        background-color: #555;
+        color: white;
+      }
 
-#saveButton {
-  background-color: #4caf50;
-  color: white;
-}
+      #saveButton {
+        background-color: #4caf50;
+        color: white;
+      }
 
-.close {
-  float: right;
-  font-size: 24px;
-  cursor: pointer;
-}
+      .close {
+        float: right;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      /* Responsive Modal Styling */
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%; /* Full width on small devices */
+        max-width: 400px; /* Maximum width for larger devices */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      @media (max-width: 600px) {
+        /* Adjust modal and input styles for smaller screens */
+        .modal-content {
+          padding: 15px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+          font-size: 16px; /* Ensure font size is large enough */
+          padding: 10px;
+        }
+
+        .modal-buttons button {
+          font-size: 14px;
+          padding: 10px;
+        }
+      }
 
       @keyframes spin {
         from {
@@ -395,34 +428,34 @@
       </div>
 
       <!-- Modal -->
-<div id="editModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h3>Edit Data</h3>
-      <form id="editForm">
-        <label for="plu">PLU:</label>
-        <input type="text" id="plu" readonly />
-  
-        <label for="barcode">Barcode:</label>
-        <input type="text" id="barcode" readonly />
-  
-        <label for="description">Description:</label>
-        <input type="text" id="description" readonly />
-  
-        <label for="oldQty">Old Qty:</label>
-        <input type="number" id="oldQty" readonly />
-  
-        <label for="newQty">New Qty:</label>
-        <input type="number" id="newQty" placeholder="Enter new quantity" />
-  
-        <div class="modal-buttons">
-          <button type="button" id="resetButton">Reset</button>
-          <button type="button" id="cancelButton">Cancel</button>
-          <button type="button" id="saveButton">Save</button>
+      <div id="editModal" class="modal" style="display: none">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h3>Edit Data</h3>
+          <form id="editForm">
+            <label for="plu">PLU:</label>
+            <input type="text" id="plu" readonly />
+
+            <label for="barcode">Barcode:</label>
+            <input type="text" id="barcode" readonly />
+
+            <label for="description">Description:</label>
+            <input type="text" id="description" readonly />
+
+            <label for="oldQty">Old Qty:</label>
+            <input type="number" id="oldQty" readonly />
+
+            <label for="newQty">New Qty:</label>
+            <input type="number" id="newQty" placeholder="Enter new quantity" />
+
+            <div class="modal-buttons">
+              <button type="button" id="resetButton">Reset</button>
+              <button type="button" id="cancelButton">Cancel</button>
+              <button type="button" id="saveButton">Save</button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
-  </div>
+      </div>
 
       <!-- Card Container -->
       <div class="card-container" id="resultContainer"></div>
@@ -528,117 +561,146 @@
       }
 
       // Global variable to track the currently edited card
-let currentCard = null;
+      let currentCard = null;
 
-// Function to open the modal and populate it with data
-function openEditModal(cardData) {
-  const modal = document.getElementById("editModal");
-  const pluInput = document.getElementById("plu");
-  const barcodeInput = document.getElementById("barcode");
-  const descriptionInput = document.getElementById("description");
-  const oldQtyInput = document.getElementById("oldQty");
-  const newQtyInput = document.getElementById("newQty");
+      // Function to open the modal and populate it with data
+      function openEditModal(cardData) {
+        const modal = document.getElementById("editModal");
+        const pluInput = document.getElementById("plu");
+        const barcodeInput = document.getElementById("barcode");
+        const descriptionInput = document.getElementById("description");
+        const oldQtyInput = document.getElementById("oldQty");
+        const newQtyInput = document.getElementById("newQty");
 
-  // Populate modal fields
-  pluInput.value = cardData.plu;
-  barcodeInput.value = cardData.barcode;
-  descriptionInput.value = cardData.description;
-  oldQtyInput.value = cardData.qty || "0";
-  newQtyInput.value = "";
+        // Populate modal fields
+        pluInput.value = cardData.plu;
+        barcodeInput.value = cardData.barcode;
+        descriptionInput.value = cardData.description;
+        oldQtyInput.value = cardData.qty || "0";
+        newQtyInput.value = "";
 
-  // Show the modal
-  modal.style.display = "block";
+        // Show the modal
+        modal.style.display = "block";
 
-  // Store the current card data
-  currentCard = cardData;
-}
+        // Store the current card data
+        currentCard = cardData;
+      }
 
-// Function to close the modal
-function closeEditModal() {
-  const modal = document.getElementById("editModal");
-  modal.style.display = "none";
-}
+      // Function to close the modal
+      function closeEditModal() {
+        const modal = document.getElementById("editModal");
+        modal.style.display = "none";
+      }
 
-// Add event listener to close modal when clicking the close button
-document.querySelector(".close").addEventListener("click", closeEditModal);
+      // Add event listener to close modal when clicking the close button
+      document
+        .querySelector(".close")
+        .addEventListener("click", closeEditModal);
 
-// Add event listener to close modal when clicking outside of it
-window.addEventListener("click", (event) => {
-  const modal = document.getElementById("editModal");
-  if (event.target === modal) {
-    closeEditModal();
-  }
-});
+      // Add event listener to close modal when clicking outside of it
+      window.addEventListener("click", (event) => {
+        const modal = document.getElementById("editModal");
+        if (event.target === modal) {
+          closeEditModal();
+        }
+      });
 
-// Reset button functionality
-document.getElementById("resetButton").addEventListener("click", () => {
-  const oldQtyInput = document.getElementById("oldQty");
-  const newQtyInput = document.getElementById("newQty");
+      // Reset button functionality
+      document.getElementById("resetButton").addEventListener("click", () => {
+        const oldQtyInput = document.getElementById("oldQty");
+        const newQtyInput = document.getElementById("newQty");
 
-  // Reset Old Qty and New Qty in the modal
-  oldQtyInput.value = "0";
-  newQtyInput.value = "";
+        // Reset Old Qty and New Qty in the modal
+        oldQtyInput.value = "0";
+        newQtyInput.value = "";
 
-  // Reset Qty on the card and update timestamp
-  if (currentCard) {
-    currentCard.qty = "0"; // Reset Qty to 0
-    currentCard.timestamp = getCurrentTimestamp(); // Update timestamp
+        // Reset Qty on the card and update timestamp
+        if (currentCard) {
+          currentCard.qty = "0"; // Reset Qty to 0
+          currentCard.timestamp = getCurrentTimestamp(); // Update timestamp
 
-    // Re-render the cards to reflect the updated quantity and timestamp
-    renderCards(allCardsData);
-  }
-});
+          // Re-render the cards to reflect the updated quantity and timestamp
+          renderCards(allCardsData);
+        }
+      });
 
-// Cancel button functionality
-document.getElementById("cancelButton").addEventListener("click", closeEditModal);
+      // Cancel button functionality
+      document
+        .getElementById("cancelButton")
+        .addEventListener("click", closeEditModal);
 
-// Save button functionality
-document.getElementById("saveButton").addEventListener("click", () => {
-  const newQtyInput = document.getElementById("newQty");
-  const newQty = parseInt(newQtyInput.value, 10);
+      // Save button functionality
+      document.getElementById("saveButton").addEventListener("click", () => {
+        const newQtyInput = document.getElementById("newQty");
+        const newQty = parseInt(newQtyInput.value, 10);
 
-  if (isNaN(newQty) || newQty < 0) {
-    alert("Please enter a valid positive number for New Qty.");
-    return;
-  }
+        if (isNaN(newQty) || newQty < 0) {
+          alert("Please enter a valid positive number for New Qty.");
+          return;
+        }
 
-  // Update the current card's quantity
-  const oldQty = parseInt(currentCard.qty || "0", 10);
-  currentCard.qty = (oldQty + newQty).toString();
+        // Update the current card's quantity
+        const oldQty = parseInt(currentCard.qty || "0", 10);
+        currentCard.qty = (oldQty + newQty).toString();
 
-  // Update the timestamp
-  currentCard.timestamp = getCurrentTimestamp();
+        // Update the timestamp
+        currentCard.timestamp = getCurrentTimestamp();
 
-  // Re-render the cards to reflect the updated quantity and timestamp
-  renderCards(allCardsData);
+        // Re-render the cards to reflect the updated quantity and timestamp
+        renderCards(allCardsData);
 
-  // Close the modal
-  closeEditModal();
-});
+        // Close the modal
+        closeEditModal();
+      });
 
-// Helper function to get the current timestamp
-function getCurrentTimestamp() {
-  const now = new Date();
-  const options = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  };
-  return now.toLocaleString(undefined, options);
-}
+      // Helper function to get the current timestamp
+      function getCurrentTimestamp() {
+        const now = new Date();
+        const options = {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        };
+        return now.toLocaleString(undefined, options);
+      }
 
-// Add click event listener to edit icon circles
-document.getElementById("resultContainer").addEventListener("click", (event) => {
-  if (event.target.closest(".edit-icon-circle")) {
-    const card = event.target.closest(".card");
-    const cardIndex = Array.from(card.parentNode.children).indexOf(card);
-    const cardData = allCardsData[cardIndex];
-    openEditModal(cardData);
-  }
-});
+      // Add click event listener to edit icon circles
+      document
+        .getElementById("resultContainer")
+        .addEventListener("click", (event) => {
+          if (event.target.closest(".edit-icon-circle")) {
+            const card = event.target.closest(".card");
+            const cardIndex = Array.from(card.parentNode.children).indexOf(
+              card
+            );
+            const cardData = allCardsData[cardIndex];
+            openEditModal(cardData);
+          }
+        });
+
+      // Prevent zooming on input focus
+      document.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("focus", () => {
+          document
+            .querySelector("meta[name=viewport]")
+            .setAttribute(
+              "content",
+              "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+            );
+        });
+
+        input.addEventListener("blur", () => {
+          document
+            .querySelector("meta[name=viewport]")
+            .setAttribute(
+              "content",
+              "width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+            );
+        });
+      });
     </script>
   </body>
 </html>
