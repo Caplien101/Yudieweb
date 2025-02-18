@@ -16,34 +16,26 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
     <style>
       :root {
         --primary-color: #2c3e50;
         --secondary-color: #3498db;
         --background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        --font-primary: "Poppins", sans-serif; /* Font utama */
-        --font-secondary: "Roboto Slab", serif; /* Font sekunder untuk elemen penting */
+        --font-primary: "Poppins", sans-serif;
+        /* Font utama */
+        --font-secondary: "Roboto Slab", serif;
+        /* Font sekunder untuk elemen penting */
       }
 
       body {
-        font-family: var(
-          --font-primary
-        ); /* Gunakan Poppins sebagai font utama */
-        margin: 0;
-        padding: 20px;
-        min-height: 100vh;
-        background: var(--background);
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      body {
-        font-family: var(
-          --font-primary
-        ); /* Gunakan Poppins sebagai font utama */
+        font-family: var(--font-primary);
+        /* Gunakan Poppins sebagai font utama */
         margin: 0;
         padding: 20px;
         min-height: 100vh;
@@ -79,17 +71,20 @@
         border: 2px solid #e0e0e0;
         border-radius: 30px;
         font-size: 16px;
-        transition: all 0.3s ease-in-out; /* Animasi smooth */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bayangan awal */
+        transition: all 0.3s ease-in-out;
+        /* Animasi smooth */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* Bayangan awal */
       }
 
       .search-input:focus,
       .search-input:hover {
-        border-color: var(
-          --secondary-color
-        ); /* Ubah warna border saat fokus/hover */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Bayangan lebih dramatis */
-        transform: translateY(-2px); /* Angkat input */
+        border-color: var(--secondary-color);
+        /* Ubah warna border saat fokus/hover */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        /* Bayangan lebih dramatis */
+        transform: translateY(-2px);
+        /* Angkat input */
       }
 
       /* Search Button */
@@ -106,14 +101,19 @@
         justify-content: center;
         min-width: 120px;
         font-family: var(--font-secondary);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Bayangan awal */
-        transition: all 0.3s ease-in-out; /* Animasi smooth */
-        transform-style: preserve-3d; /* Aktifkan mode 3D */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        /* Bayangan awal */
+        transition: all 0.3s ease-in-out;
+        /* Animasi smooth */
+        transform-style: preserve-3d;
+        /* Aktifkan mode 3D */
       }
 
       .search-button:hover {
-        transform: translateY(-3px); /* Angkat tombol */
-        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Bayangan lebih dramatis */
+        transform: translateY(-3px);
+        /* Angkat tombol */
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        /* Bayangan lebih dramatis */
       }
 
       /* Spinner */
@@ -130,14 +130,17 @@
 
       /* Filter Section */
       .filter-section {
-        background: white;
+        background: rgba(255, 255, 255, 0);
         padding: 10px;
         border-radius: 15px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         margin-bottom: 10px;
-        position: sticky; /* Tambahkan sticky */
-        top: 0px; /* Jarak dari bagian atas layar */
-        z-index: 10; /* Pastikan elemen tetap di atas elemen lain */
+        position: sticky;
+        /* Tambahkan sticky */
+        top: 5px;
+        /* Jarak dari bagian atas layar */
+        z-index: 10;
+        /* Pastikan elemen tetap di atas elemen lain */
       }
 
       /* Search Input untuk Filter Data */
@@ -149,6 +152,7 @@
         font-size: 16px;
         transition: all 0.3s ease-in-out;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
       }
 
       .filter-section .search-input:focus,
@@ -165,25 +169,26 @@
       }
 
       .card {
-        background-color: rgba(
-          255,
-          255,
-          255,
-          0.7
-        ); /* Putih dengan transparansi */
+        background-color: rgba(255, 255, 255, 0.7);
+        /* Putih dengan transparansi */
         color: var(--primary-color);
         border-radius: 15px;
         padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Bayangan awal */
-        transition: all 0.3s ease-in-out; /* Animasi smooth */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        /* Bayangan awal */
+        transition: all 0.3s ease-in-out;
+        /* Animasi smooth */
         position: relative;
         overflow: hidden;
-        transform-style: preserve-3d; /* Aktifkan mode 3D */
+        transform-style: preserve-3d;
+        /* Aktifkan mode 3D */
       }
 
       .card:hover {
-        transform: translateY(-10px) rotateX(5deg); /* Angkat dan putar sedikit */
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2); /* Bayangan lebih dramatis */
+        transform: translateY(-10px) rotateX(5deg);
+        /* Angkat dan putar sedikit */
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+        /* Bayangan lebih dramatis */
       }
 
       .card::before {
@@ -203,20 +208,19 @@
       }
 
       .label {
-        color: var(--primary-color);
+        color: #777;
         font-weight: 600;
-        display: block;
         margin-bottom: 5px;
         font-size: 0.9em;
-        font-family: var(
-          --font-secondary
-        ); /* Gunakan Roboto Slab untuk label */
+        font-family: var(--font-secondary);
+        /* Gunakan Roboto Slab untuk label */
       }
 
       .value {
         color: #2c3e50;
         font-size: 1.1em;
-        font-family: var(--font-primary); /* Gunakan Poppins untuk nilai */
+        font-family: var(--font-primary);
+        /* Gunakan Poppins untuk nilai */
       }
 
       .card-row {
@@ -227,16 +231,16 @@
       }
 
       .badge {
-        background-color: rgba(109, 235, 25, 0.144); /* Putih transparan */
-        color: var(--primary-color);
+        background-color: rgba(109, 235, 25, 0.144);
+        /* Putih transparan */
+        color: #777;
         padding: 5px 10px;
         border-radius: 15px;
         font-size: 0.9em;
         font-weight: bold;
 
-        font-family: var(
-          --font-secondary
-        ); /* Gunakan Roboto Slab untuk badges */
+        font-family: var(--font-secondary);
+        /* Gunakan Roboto Slab untuk badges */
       }
 
       /* Deskripsi */
@@ -245,7 +249,8 @@
         font-size: 1em;
         color: var(--primary-color);
         font-weight: 600;
-        font-family: var(--font-primary); /* Gunakan Poppins untuk deskripsi */
+        font-family: var(--font-primary);
+        /* Gunakan Poppins untuk deskripsi */
       }
 
       .qty {
@@ -261,25 +266,38 @@
       .timestamp {
         font-size: 0.9em;
         color: #777;
-        font-family: var(--font-primary); /* Gunakan Poppins untuk timestamp */
+        font-family: var(--font-primary);
+        /* Gunakan Poppins untuk timestamp */
       }
 
       .edit-icon-circle {
-        display: flex; /* Mengatur posisi ikon di tengah */
-        align-items: center; /* Pusat vertikal */
-        justify-content: center; /* Pusat horizontal */
-        width: 30px; /* Lebar lingkaran */
-        height: 30px; /* Tinggi lingkaran */
-        background-color: #0d6efd; /* Warna biru Bootstrap default */
-        border-radius: 50%; /* Membuat bentuk lingkaran */
-        color: white; /* Warna ikon putih */
-        font-size: 1.2rem; /* Ukuran ikon */
-        cursor: pointer; /* Menunjukkan bahwa ini dapat diklik */
-        transition: background-color 0.3s ease; /* Efek hover halus */
+        display: flex;
+        /* Mengatur posisi ikon di tengah */
+        align-items: center;
+        /* Pusat vertikal */
+        justify-content: center;
+        /* Pusat horizontal */
+        width: 30px;
+        /* Lebar lingkaran */
+        height: 30px;
+        /* Tinggi lingkaran */
+        background-color: #0d6efd;
+        /* Warna biru Bootstrap default */
+        border-radius: 50%;
+        /* Membuat bentuk lingkaran */
+        color: white;
+        /* Warna ikon putih */
+        font-size: 1.2rem;
+        /* Ukuran ikon */
+        cursor: pointer;
+        /* Menunjukkan bahwa ini dapat diklik */
+        transition: background-color 0.3s ease;
+        /* Efek hover halus */
       }
 
       .edit-icon-circle:hover {
-        background-color: #0b5ed7; /* Warna hover lebih gelap */
+        background-color: #0b5ed7;
+        /* Warna hover lebih gelap */
       }
 
       /* Modal Styling */
@@ -356,21 +374,26 @@
       /* Flexbox Styling for Horizontal Group */
       .horizontal-group {
         display: flex;
-        gap: 15px; /* Spacing between PLU and Barcode */
-        margin-bottom: 15px; /* Space below the group */
+        gap: 15px;
+        /* Spacing between PLU and Barcode */
+        margin-bottom: 15px;
+        /* Space below the group */
       }
 
       .input-group {
-        flex: 1; /* Make both input groups take equal width */
+        flex: 1;
+        /* Make both input groups take equal width */
       }
 
       .input-group label {
         display: block;
-        margin-bottom: 5px; /* Space between label and input */
+        margin-bottom: 5px;
+        /* Space between label and input */
       }
 
       .input-group input {
-        font-size: 16px; /* Prevent zooming on mobile */
+        font-size: 16px;
+        /* Prevent zooming on mobile */
         padding: 8px;
         width: 100%;
         box-sizing: border-box;
@@ -382,9 +405,31 @@
         margin: 10% auto;
         padding: 20px;
         border-radius: 8px;
-        width: 90%; /* Full width on small devices */
-        max-width: 400px; /* Maximum width for larger devices */
+        width: 90%;
+        /* Full width on small devices */
+        max-width: 400px;
+        /* Maximum width for larger devices */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Using Flexbox */
+      #cek-selisih {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .cek-button {
+        text-align: center;
+      }
+
+      /* Optional: Button styling */
+      .btn-warning {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
       }
 
       @media (max-width: 600px) {
@@ -395,7 +440,8 @@
 
         input[type="text"],
         input[type="number"] {
-          font-size: 16px; /* Ensure font size is large enough */
+          font-size: 16px;
+          /* Ensure font size is large enough */
           padding: 10px;
         }
 
@@ -409,6 +455,7 @@
         from {
           transform: rotate(0deg);
         }
+
         to {
           transform: rotate(360deg);
         }
@@ -421,6 +468,7 @@
       }
     </style>
   </head>
+
   <body>
     <div class="container">
       <!-- Search Section (Input Rak) -->
@@ -445,7 +493,7 @@
           type="text"
           id="dataFilter"
           class="search-input"
-          placeholder=" 🔎 Cari berdasarkan PLU, Barcode, atau Deskripsi..."
+          placeholder=" 🔎 Cari barang"
           onkeyup="filterCards()"
         />
       </div>
@@ -494,6 +542,19 @@
         Tidak ada data yang ditemukan
       </div>
     </div>
+    <!-- Card Container -->
+    <div class="button-container" id="cek-selisih">
+      <!--Button cek selisih-->
+      <div class="cek-button">
+        <button
+          type="button"
+          class="btn btn-warning"
+          onclick="redirectTo('next-page.html')"
+        >
+          Input On Hand
+        </button>
+      </div>
+    </div>
 
     <script>
       let allCardsData = [];
@@ -510,6 +571,9 @@
           return;
         }
 
+        // Clear local storage *before* fetching new data
+        localStorage.removeItem("cardData");
+
         button.disabled = true;
         spinner.style.display = "inline-block";
         document.getElementById("noResults").style.display = "none";
@@ -518,6 +582,10 @@
           .then((response) => response.json())
           .then((data) => {
             allCardsData = data;
+
+            // Save data to local storage *after* successful fetch
+            localStorage.setItem("cardData", JSON.stringify(data));
+
             renderCards(data);
             document.getElementById("dataFilter").value = "";
           })
@@ -530,6 +598,7 @@
             spinner.style.display = "none";
           });
       }
+
       function renderCards(data) {
         const container = document.getElementById("resultContainer");
         container.innerHTML = "";
@@ -675,6 +744,17 @@
         // Update the timestamp
         currentCard.timestamp = getCurrentTimestamp();
 
+        // Find the index of the current card in allCardsData
+        const cardIndex = allCardsData.findIndex(
+          (item) =>
+            item.plu === currentCard.plu && item.barcode === currentCard.barcode
+        );
+
+        if (cardIndex !== -1) {
+          allCardsData[cardIndex] = { ...currentCard }; // Update allCardsData
+          localStorage.setItem("cardData", JSON.stringify(allCardsData)); // Update local storage
+        }
+
         // Re-render the cards to reflect the updated quantity and timestamp
         renderCards(allCardsData);
 
@@ -710,6 +790,15 @@
           }
         });
 
+      // Load data from local storage on page load
+      window.addEventListener("DOMContentLoaded", (event) => {
+        const storedData = localStorage.getItem("cardData");
+        if (storedData) {
+          allCardsData = JSON.parse(storedData);
+          renderCards(allCardsData);
+        }
+      });
+
       // Prevent zooming on input focus
       document.querySelectorAll("input").forEach((input) => {
         input.addEventListener("focus", () => {
@@ -730,6 +819,10 @@
             );
         });
       });
+
+      function redirectTo(url) {
+        window.location.href = url;
+      }
     </script>
   </body>
 </html>
