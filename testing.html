@@ -353,6 +353,29 @@
         cursor: pointer;
       }
 
+      /* Flexbox Styling for Horizontal Group */
+      .horizontal-group {
+        display: flex;
+        gap: 15px; /* Spacing between PLU and Barcode */
+        margin-bottom: 15px; /* Space below the group */
+      }
+
+      .input-group {
+        flex: 1; /* Make both input groups take equal width */
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 5px; /* Space between label and input */
+      }
+
+      .input-group input {
+        font-size: 16px; /* Prevent zooming on mobile */
+        padding: 8px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
       /* Responsive Modal Styling */
       .modal-content {
         background-color: white;
@@ -433,11 +456,17 @@
           <span class="close">&times;</span>
           <h3>Edit Data</h3>
           <form id="editForm">
-            <label for="plu">PLU:</label>
-            <input type="text" id="plu" readonly />
-
-            <label for="barcode">Barcode:</label>
-            <input type="text" id="barcode" readonly />
+            <!-- PLU and Barcode in one row -->
+            <div class="horizontal-group">
+              <div class="input-group">
+                <label for="plu">PLU:</label>
+                <input type="text" id="plu" readonly />
+              </div>
+              <div class="input-group">
+                <label for="barcode">Barcode:</label>
+                <input type="text" id="barcode" readonly />
+              </div>
+            </div>
 
             <label for="description">Description:</label>
             <input type="text" id="description" readonly />
