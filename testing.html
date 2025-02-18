@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Uji Coba GET dan POST</title>
+</head>
+<body>
+
+<h1>Uji Coba GET</h1>
+<form id="getForm">
+  Rak: <input type="text" name="rak" value="R001"><br>
+  <button type="button" onclick="getData()">Kirim GET</button>
+</form>
+<div id="getResult"></div>
+
+<h1>Uji Coba POST</h1>
+<form id="postForm">
+  Rak: <input type="text" name="rak" value="R002"><br>
+  PLU: <input type="text" name="plu" value="123"><br>
+  Barcode: <input type="text" name="barcode" value="456"><br>
+  Deskripsi: <input type="text" name="description" value="Produk Baru"><br>
+  Jumlah: <input type="number" name="qty" value="1"><br>
+  <button type="button" onclick="postData()">Kirim POST</button>
+</form>
+<div id="postResult"></div>
+
+<script>
+  const url = "https://script.google.com/macros/s/AKfycbxJIovGoDOXGlUv2MrN-jJR4H0L0Ql30508dt3kNIXEM9oJ6rmi5ydOCMPeeCa3x38V/exec"; // Ganti dengan URL aplikasi web Anda
+
+
+  function postData() {
+    const data = {
+      rak: document.forms["postForm"]["rak"].value,
+      plu: document.forms["postForm"]["plu"].value,
+      barcode: document.forms["postForm"]["barcode"].value,
+      description: document.forms["postForm"]["description"].value,
+      qty: document.forms["postForm"]["qty"].value,
+      timestamp: new Date().toISOString()
+    };
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("postResult").innerHTML = data;
+      });
+  }
+</script>
+
+</body>
+</html>
