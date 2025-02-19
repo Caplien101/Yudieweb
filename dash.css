@@ -1,0 +1,557 @@
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --text-light: #ffffff;
+  --shadow-intensity: 0.2;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+body {
+  min-height: 100vh;
+  background: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* General navbar styles */
+.navbar {
+  background: linear-gradient(145deg, var(--secondary-color), #34495e);
+  padding: 1rem 2rem;
+  position: sticky !important;
+  top: 0;
+  z-index: 1000;
+  transform-style: preserve-3d;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Hamburger Button */
+.hamburger {
+  display: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 5px;
+}
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: var(--text-light);
+  margin: 5px 0;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* Nav links */
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  transition: transform 0.3s ease;
+}
+.nav-item {
+  color: var(--text-light);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.nav-item:hover {
+  transform: translateZ(10px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Filter Section */
+.filter-section {
+  background: rgba(255, 255, 255, 0);
+  padding: 5px;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: flex-end; /* Align the filter section to the right */
+  flex-grow: 0; /* Take up remaining space */
+}
+
+/* Search Input */
+.filter-section .search-input {
+  width: 40px;
+  padding: 5px 5px;
+  border: 0px solid #e0e0e0;
+  border-radius: 30px;
+  font-size: 16px;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.filter-section .search-input:focus,
+.filter-section .search-input:hover {
+  border-color: var(--secondary-color);
+  box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  width: 150px;
+}
+
+/* Media query for responsive design */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block; /* Show hamburger only on small screens */
+  }
+
+  .nav-links {
+    display: none; /* Hide nav links on small screens by default */
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nav-links.active {
+    display: flex; /* Show nav links when hamburger is clicked */
+  }
+}
+
+/* Footer Improvements */
+.footer {
+  background: linear-gradient(145deg, var(--secondary-color), #34495e);
+  color: var(--text-light);
+  padding: 0.8rem;
+  margin-top: 1rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 1000;
+  text-align: center;
+}
+/* Responsive Design Enhancements */
+@media (max-width: 768px) {
+  *.container {
+    padding: 10px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .hamburger {
+    display: block;
+  }
+  .nav-links {
+    position: fixed;
+    top: 60px;
+    left: -100%;
+    width: 80%;
+    height: calc(100vh - 60px);
+    background: linear-gradient(145deg, var(--secondary-color), #34495e);
+    flex-direction: column;
+    padding: 2rem;
+    transition: all 0.4s ease;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    transform-style: preserve-3d;
+  }
+  .nav-links.active {
+    left: 0;
+  }
+  .nav-item {
+    transform: translateX(-20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .nav-links.active .nav-item {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  .hamburger.active span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger.active span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+  .search-container {
+    margin-left: auto; /* Push search button to the right */
+  }
+}
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.8rem;
+  }
+
+  .card-3d {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .btn-3d {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px;
+}
+/* Search Section */
+.search-section {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+/* Search Group */
+.search-group {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 0px;
+}
+
+/* Search Input */
+.search-input {
+  flex: 1;
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 30px;
+  font-size: 16px;
+  transition: all 0.3s ease-in-out;
+  /* Animasi smooth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Bayangan awal */
+}
+
+.search-input:focus,
+.search-input:hover {
+  border-color: var(--secondary-color);
+  /* Ubah warna border saat fokus/hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* Bayangan lebih dramatis */
+  transform: translateY(-2px);
+  /* Angkat input */
+}
+
+/* Search Button */
+.search-button {
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  font-family: var(--font-secondary);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Bayangan awal */
+  transition: all 0.3s ease-in-out;
+  /* Animasi smooth */
+  transform-style: preserve-3d;
+  /* Aktifkan mode 3D */
+}
+
+.search-button:hover {
+  transform: translateY(-3px);
+  /* Angkat tombol */
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  /* Bayangan lebih dramatis */
+}
+
+/* Spinner */
+.spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite !important;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal Styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: white;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+}
+
+.modal-content label {
+  display: block;
+  margin-top: 10px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.modal-buttons button {
+  padding: 9px 15px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#resetButton {
+  background-color: #f44336;
+  color: white;
+}
+
+#cancelButton {
+  background-color: #555;
+  color: white;
+}
+
+#saveButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Flexbox Styling for Horizontal Group */
+.horizontal-group {
+  display: flex;
+  gap: 15px;
+  /* Spacing between PLU and Barcode */
+  margin-bottom: 15px;
+  /* Space below the group */
+}
+
+.input-group {
+  flex: 1;
+  /* Make both input groups take equal width */
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  /* Space between label and input */
+}
+
+.input-group input {
+  font-size: 16px;
+  /* Prevent zooming on mobile */
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive Modal Styling */
+.modal-content {
+  background-color: white;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  /* Full width on small devices */
+  max-width: 400px;
+  /* Maximum width for larger devices */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Using Flexbox */
+#cek-selisih {
+  margin-top: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cek-button {
+  text-align: center;
+}
+
+/* Optional: Button styling */
+.btn-warning {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+#resultContainer {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Styling Kartu */
+.card {
+  background-color: rgba(255, 255, 255, 0.7);
+  color: var(--primary-color);
+  border-radius: 15px !important;
+  padding: 15px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+.card:hover {
+  transform: translateY(-10px) rotateX(5deg);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--secondary-color);
+}
+
+.card-item {
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.label {
+  color: #777;
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  font-family: var(--font-secondary);
+  /* Gunakan Roboto Slab untuk label */
+}
+
+.value {
+  color: #2c3e50;
+  font-size: 1.1em;
+  font-family: var(--font-primary);
+  /* Gunakan Poppins untuk nilai */
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.badge {
+  background-color: rgba(109, 235, 25, 0.144);
+  /* Putih transparan */
+  color: #777;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: bold;
+
+  font-family: var(--font-secondary);
+  /* Gunakan Roboto Slab untuk badges */
+}
+/* Deskripsi */
+.description {
+  flex: 1;
+  font-size: 1em;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-family: var(--font-primary);
+  /* Gunakan Poppins untuk deskripsi */
+}
+
+.qty {
+  font-size: 1.2em;
+  background-color: #f5f5f5;
+  padding: 5px;
+  border-radius: 15px;
+  color: #070707;
+  margin-left: 10px;
+}
+
+/* Timestamp */
+.timestamp {
+  font-size: 0.9em;
+  color: #777;
+  font-family: var(--font-primary);
+  /* Gunakan Poppins untuk timestamp */
+}
+
+.edit-icon-circle {
+  display: flex;
+  /* Mengatur posisi ikon di tengah */
+  align-items: center;
+  /* Pusat vertikal */
+  justify-content: center;
+  /* Pusat horizontal */
+  width: 30px;
+  /* Lebar lingkaran */
+  height: 30px;
+  /* Tinggi lingkaran */
+  background-color: #0d6efd;
+  /* Warna biru Bootstrap default */
+  border-radius: 50%;
+  /* Membuat bentuk lingkaran */
+  color: white;
+  /* Warna ikon putih */
+  font-size: 1.2rem;
+  /* Ukuran ikon */
+  cursor: pointer;
+  /* Menunjukkan bahwa ini dapat diklik */
+  transition: background-color 0.3s ease;
+  /* Efek hover halus */
+}
+
+.edit-icon-circle:hover {
+  background-color: #0b5ed7;
+  /* Warna hover lebih gelap */
+}

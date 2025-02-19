@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selisih Table</title>
+    <style>
+        /* Styling tabel agar lebih modern */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Supaya bisa di-scroll pada layar kecil */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling untuk header tabel */
+thead {
+    background-color: #007BFF;
+    color: white;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+/* Zebra stripes untuk baris tabel */
+tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+/* Hover effect untuk baris */
+tbody tr:hover {
+    background-color: #e0f3ff;
+}
+
+/* Style input qty */
+.qty-input {
+    width: 60px;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Tombol di bawah tabel */
+.button-container {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.action-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.action-button:hover {
+    background-color: #0056b3;
+}
+
+
+.selisih.positive { color: green; }
+.selisih.negative { color: red; }
+
+tr {
+    transition: all 0.3s ease-in-out;
+}
+.selisih-row-transition {
+        transition: all 0.5s ease-in-out;
+    }
+    
+min-width: 300px;
+   max-width: 80%; /* Menjaga toast tidak terlalu lebar di mobile */
+    
+    @keyframes rowExit {
+        0% { opacity: 1; transform: translateX(0); }
+        100% { opacity: 0; transform: translateX(100%); }
+    }
+
+/* Responsif untuk layar kecil */
+@media (max-width: 600px) {
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    .qty-input {
+        width: 50px;
+        font-size: 14px;
+    }
+
+    .action-button {
+        width: 100%;
+        font-size: 14px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <h2>Selisih Table</h2>
+    <table id="selisihTable">
+        <thead>
+            <tr>
+                <th>PLU</th>
+                <th>Description</th>
+                <th>Qty</th> <!-- Pastikan ini hanya teks, tanpa <input> -->
+                <th>On Hand</th>
+                <th>Selisih</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data akan dimasukkan di sini melalui JavaScript -->
+        </tbody>
+    </table>
+    
+    <div class="button-container">
+        <button class="action-button" onclick="handleButtonClick()">Klik Saya</button>
+    </div>
+    
+
+    <script src="tabelselisih.js"></script>
+</body>
+</html>

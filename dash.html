@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Responsive Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="dash.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto+Slab:wght@500;700&display=swap"
+      rel="stylesheet"/>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"/>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <button class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-links">
+                <div class="nav-item">Dashboard</div>
+                <div class="nav-item">Analytics</div>
+                <div class="nav-item">Reports</div>
+                <div class="nav-item">Settings</div>
+            </div>
+            <!-- Sticky Filter Data -->
+            <div class="filter-section">
+                <input type="text" id="dataFilter" class="search-input" placeholder=" 🔎 Cari barang" onkeyup="filterCards()" />
+            </div>
+        </div>
+    </nav>
+    <!-- kotak pencarian-->
+    <div class="container">
+    <div class="search-section">
+        <div class="search-group">
+          <input
+            type="text"
+            id="rakInput"
+            class="search-input"
+            placeholder="🔍 Masukkan Kode Rak..."/>
+          <button class="search-button" onclick="getData()">
+            <span>Cari Data</span>
+            <div class="spinner"></div>
+          </button>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div id="editModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Edit Data</h3>
+        <form id="editForm">
+          <!-- PLU and Barcode in one row -->
+          <div class="horizontal-group">
+            <div class="input-group">
+              <label for="plu">PLU:</label>
+              <input type="text" id="plu" readonly />
+            </div>
+            <div class="input-group">
+              <label for="barcode">Barcode:</label>
+              <input type="text" id="barcode" readonly />
+            </div>
+          </div>
+    
+          <label for="description">Description:</label>
+          <input type="text" id="description" readonly />
+    
+          <label for="oldQty">Old Qty:</label>
+          <input type="number" id="oldQty" readonly />
+    
+          <label for="newQty">New Qty:</label>
+          <input type="number" id="newQty" placeholder="Enter new quantity" />
+    
+          <div class="modal-buttons">
+            <button type="button" id="resetButton">Reset</button>
+            <button type="button" id="cancelButton">Cancel</button>
+            <button type="button" id="saveButton">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="container">
+      <!-- Result Container -->
+      <div class="card-container" id="resultContainer"></div>
+      <!-- No Results Message -->
+      <div id="noResults" class="no-data" style="display: none">
+        Tidak ada data yang ditemukan
+      </div>
+    </div>
+  </div>
+    <!-- Button Container -->
+    <div class="button-container" id="cek-selisih">
+      <!--Button cek selisih-->
+      <div class="cek-button">
+        <button type="button" class="btn btn-warning" onclick="redirectTo('next-page.html')">
+          Input On Hand
+        </button>
+      </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2024 3D Dashboard. All rights reserved.</p>
+    </footer>
+    <script src="dash.js"></script>
+</body>
+
+</html>

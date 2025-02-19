@@ -1,0 +1,145 @@
+/* Styling untuk On Hand Input */
+.on-hand {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    /* Jarak antara label dan input */
+}
+
+.on-hand label {
+    font-size: 0.9em;
+    color: #777;
+}
+
+.on-hand-input {
+    font-size: 1em;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 80px;
+    text-align: center;
+}
+
+.on-hand-input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    /* Highlight saat input aktif */
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    /* Efek bayangan */
+}
+
+/* Styling untuk container checkbox */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+/* Sembunyikan checkbox asli */
+.auto-onhand-checkbox {
+    display: none;
+}
+
+/* Styling untuk label checkbox (lingkaran) */
+.checkbox-label {
+    width: 20px;
+    height: 20px;
+    border: 2px solid blue;
+    border-radius: 50%; /* Bentuk lingkaran */
+    background-color:white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* Animasi halus */
+}
+
+/* Styling saat checkbox dicentang (true) */
+.auto-onhand-checkbox:checked + .checkbox-label {
+    background-color: green!important;
+    border-color: green; /* Border juga berubah menjadi hijau */
+}
+
+/* Styling tabel agar lebih modern */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Supaya bisa di-scroll pada layar kecil */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling untuk header tabel */
+thead {
+    background-color: #007BFF;
+    color: white;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+/* Zebra stripes untuk baris tabel */
+tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+/* Hover effect untuk baris */
+tbody tr:hover {
+    background-color: #e0f3ff;
+}
+
+/* Style input qty */
+.qty-input {
+    width: 60px;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Tombol di bawah tabel */
+.button-container {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.action-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.action-button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsif untuk layar kecil */
+@media (max-width: 600px) {
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    .qty-input {
+        width: 50px;
+        font-size: 14px;
+    }
+
+    .action-button {
+        width: 100%;
+        font-size: 14px;
+    }
+}
