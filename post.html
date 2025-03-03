@@ -343,7 +343,10 @@ async function sendDataToGoogleSheets() {
         // Tidak ada akses ke respons karena mode no-cors
         alert("Permintaan berhasil dikirim.");
 
-              // Ini akan me-refresh halaman
+              // Redirect ke halaman laporan
+        window.location.href = 'get.html'; // Ganti dengan nama file laporan
+        // Refresh halaman setelah data berhasil dikirim
+        location.reload(); // Ini akan me-refresh halaman
     } catch (error) {
         console.error("Error posting data:", error);
         alert(`Terjadi kesalahan saat mengirim data: ${error.message}`);
@@ -352,6 +355,7 @@ async function sendDataToGoogleSheets() {
         submitButton.disabled = false;
         submitSpinner.classList.add('d-none');
     }
+}
 }
 
 // Muat data dari local storage saat halaman dimuat
