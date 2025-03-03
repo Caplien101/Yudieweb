@@ -343,10 +343,7 @@ async function sendDataToGoogleSheets() {
         // Tidak ada akses ke respons karena mode no-cors
         alert("Permintaan berhasil dikirim.");
 
-             // Redirect ke halaman laporan
-        window.location.href = 'hasilselisih.html'; // Ganti dengan nama file laporan
-        // Refresh halaman setelah data berhasil dikirim
-        location.reload(); // Ini akan me-refresh halaman
+              // Ini akan me-refresh halaman
     } catch (error) {
         console.error("Error posting data:", error);
         alert(`Terjadi kesalahan saat mengirim data: ${error.message}`);
