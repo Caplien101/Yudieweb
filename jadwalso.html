@@ -47,89 +47,119 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Konfigurasi Google Sheet
-            const SHEET_ID = 'ID_SHEET_ANDA';
-            const SHEET_NAME = 'NAMA_SHEET_ANDA';
-            const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+document.addEventListener("DOMContentLoaded", function () {
+    // Konfigurasi Google Sheet
+    const SHEET_ID = '1fCzOCgHkZ9rLacKdROGXnM2mFHMxzJz0IQU9iyHWbss';
+    const SHEET_NAME = 'Sheet1';
+    const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
-            // Konfigurasi aplikasi
-            const itemsPerPage = 20;
-            let currentPage = 1;
-            let allData = [];
-            let filteredData = [];
+    // Konfigurasi aplikasi
+    const itemsPerPage = 20;
+    let currentPage = 1;
+    let allData = [];
+    let filteredData = [];
+    
+    // Elemen UI
+    const container = document.getElementById("data-container");
+    const pagination = document.getElementById("pagination");
+    const loadingOverlay = document.querySelector('.loading-overlay');
 
-            // Elemen UI
-            const container = document.getElementById("data-container");
-            const pagination = document.getElementById("pagination");
-            const loadingOverlay = document.querySelector('.loading-overlay');
+    // Fungsi untuk memuat data
+    async function loadData() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Gagal memuat data');
+            
+            const rawData = await response.json();
+            
+            // Validasi dan transformasi data
+            allData = rawData.map(item => ({
+                Rak: item.Rak || item.rak || '',
+                Ket: (item.Ket || item.ket || 'False').toString()
+            }));
+            
+            filteredData = [...allData];
+            renderData();
+            renderPagination();
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error: ' + error.message);
+        } finally {
+            loadingOverlay.style.display = 'none';
+        }
+    }
 
-            // Fungsi untuk memuat data dari Google Sheet
-            async function loadData() {
-                try {
-                    const response = await fetch(API_URL);
-                    if (!response.ok) throw new Error('Gagal memuat data');
-                    
-                    const rawData = await response.json();
-                    // Transformasi data ke format yang diinginkan
-                    allData = rawData.map(item => ({
-                        Rak: item.Rak || '',
-                        Ket: item.Ket || 'False'
-                    }));
-                    
-                    filteredData = [...allData];
-                    renderData();
-                    renderPagination();
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Gagal memuat data dari server');
-                } finally {
-                    loadingOverlay.style.display = 'none';
-                }
-            }
+    // Fungsi render data
+    function renderData() {
+        container.innerHTML = '';
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageData = filteredData.slice(start, end);
 
-            // Fungsi render data
-            function renderData() {
-                container.innerHTML = '';
-                const start = (currentPage - 1) * itemsPerPage;
-                const end = start + itemsPerPage;
-                const pageData = filteredData.slice(start, end);
+        pageData.forEach(item => {
+            const col = document.createElement("div");
+            col.className = "col";
+            col.innerHTML = `
+                <div class="rak-card card p-2 text-center small">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                            id="${item.Rak}" ${item.Ket === "True" ? "checked" : ""} 
+                            disabled style="pointer-events: none;">
+                        <label class="form-check-label fw-bold" for="${item.Rak}">
+                            ${item.Rak}
+                        </label>
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+    }
 
-                pageData.forEach(item => {
-                    const col = document.createElement("div");
-                    col.className = "col";
-                    col.innerHTML = `
-                        <div class="rak-card card p-2 text-center small">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                    id="${item.Rak}" ${item.Ket === "True" ? "checked" : ""} 
-                                    disabled style="pointer-events: none;">
-                                <label class="form-check-label fw-bold" for="${item.Rak}">
-                                    ${item.Rak}
-                                </label>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(col);
-                });
-            }
+    // Fungsi pagination yang sebelumnya hilang
+    function renderPagination() {
+        pagination.innerHTML = '';
+        const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+        
+        // Previous Button
+        pagination.appendChild(createPaginationItem('Sebelumnya', currentPage - 1, currentPage === 1));
+        
+        // Page Numbers
+        for (let i = 1; i <= pageCount; i++) {
+            pagination.appendChild(createPaginationItem(i, i, i === currentPage));
+        }
+        
+        // Next Button
+        pagination.appendChild(createPaginationItem('Selanjutnya', currentPage + 1, currentPage === pageCount));
+    }
 
-            // Fungsi pagination dan pencarian (tetap sama seperti sebelumnya)
-            // ... (fungsi renderPagination dan createPaginationItem dari kode sebelumnya)
-
-            document.getElementById("searchInput").addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                filteredData = allData.filter(item => 
-                    item.Rak.toLowerCase().includes(searchTerm)
-                );
-                currentPage = 1;
+    function createPaginationItem(text, page, isDisabled) {
+        const li = document.createElement("li");
+        li.className = `page-item ${isDisabled ? 'disabled' : ''} ${page === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<button class="page-link">${text}</button>`;
+        if (!isDisabled) {
+            li.addEventListener('click', () => {
+                currentPage = page;
                 renderData();
                 renderPagination();
             });
+        }
+        return li;
+    }
 
-            // Inisialisasi
-            loadData();
-        });
-    </script>
+    // Event listener untuk pencarian
+    document.getElementById("searchInput").addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        filteredData = allData.filter(item => 
+            item.Rak.toLowerCase().includes(searchTerm)
+        );
+        currentPage = 1;
+        renderData();
+        renderPagination();
+    });
+
+    // Inisialisasi
+    loadData();
+});
+</script>
 </body>
 </html>
