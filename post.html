@@ -356,10 +356,12 @@ async function sendDataToGoogleSheets() {
         // Nonaktifkan spinner dan aktifkan kembali tombol
         submitButton.disabled = false;
         submitSpinner.classList.add('d-none');
+
+      // Redirect ke halaman laporan
+        window.location.href = 'get.html'; // Ganti dengan nama file laporan
     }
 }        
-    // Redirect ke halaman laporan
-        window.location.href = 'get.html'; // Ganti dengan nama file laporan
+    
 
 // Muat data dari local storage saat halaman dimuat
 window.onload = loadFromLocalStorage;
