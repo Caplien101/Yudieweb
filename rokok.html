@@ -1,311 +1,358 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Stock Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        
-        
-        
-        .suggestion-box {
-            position: absolute;
-            background: white;
-            border: 1px solid #ccc;
-            width: 100%;
-            max-height: 150px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-        .suggestion-item {
-            padding: 8px;
-            cursor: pointer;
-        }
-        .suggestion-item:hover {
-            background: #f0f0f0;
-        }
-        
-        .table-container {
-    max-height: 500px; /* Batasi tinggi tabel agar bisa di-scroll vertikal */
-    overflow-y: auto; /* Aktifkan scroll vertikal */
-    margin-bottom: 15px;
-}
-
-table {
-    width: 100%; /* Pastikan tabel memenuhi container */
-    table-layout: fixed; /* Paksa tabel agar tidak melebar melebihi container */
-}
-
-th, td {
-    padding: 8px;
-    text-align: left;
-    vertical-align: middle;
-}
-
-th:nth-child(1), td:nth-child(1) { /* PLU */
-    width: 20%;
-    white-space: nowrap;
-}
-
-th:nth-child(2), td:nth-child(2) { /* Description */
-    width: 50%;
-    word-wrap: break-word;
-    white-space: normal; /* Izinkan teks turun ke baris berikutnya */
-    overflow-wrap: break-word;
-}
-
-th:nth-child(3), td:nth-child(3) { /* Qty */
-    width: 30%;
-    white-space: nowrap;
-}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Warehouse Stock Management</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    .suggestion-box {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    .suggestion-item {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .suggestion-item:hover {
+      background: #f0f0f0;
+    }
+    .table-container {
+      max-height: 500px; /* Batasi tinggi tabel agar bisa di-scroll vertikal */
+      overflow-y: auto; /* Aktifkan scroll vertikal */
+      margin-bottom: 15px;
+    }
+    table {
+      width: 100%; /* Pastikan tabel memenuhi container */
+      table-layout: fixed; /* Paksa tabel agar tidak melebar melebihi container */
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th:nth-child(1), td:nth-child(1) { /* PLU */
+      width: 20%;
+      white-space: nowrap;
+    }
+    th:nth-child(2), td:nth-child(2) { /* Description */
+      width: 50%;
+      word-wrap: break-word;
+      white-space: normal; /* Izinkan teks turun ke baris berikutnya */
+      overflow-wrap: break-word;
+    }
+    th:nth-child(3), td:nth-child(3) { /* Qty */
+      width: 30%;
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body>
-
-<div class="container mt-4">
+  <div class="container mt-4">
     <h3>Warehouse Stock Management</h3>
 
     <!-- Spinner saat load data -->
     <div id="loadingSpinner" class="text-center my-3">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <p>Loading data, please wait...</p>
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p>Loading data, please wait...</p>
     </div>
 
     <!-- Input Pencarian Produk -->
     <div class="mb-3 position-relative">
-        <label class="form-label">Cari Produk</label>
-        <input type="text" id="searchProduct" class="form-control" onkeyup="showSuggestions(this.value)">
-        <div id="suggestions" class="suggestion-box"></div>
+      <label class="form-label">Cari Produk</label>
+      <input
+        type="text"
+        id="searchProduct"
+        class="form-control"
+        onkeyup="showSuggestions(this.value)"
+      />
+      <div id="suggestions" class="suggestion-box"></div>
     </div>
 
     <!-- Input Pencarian di Tabel -->
     <div class="mb-3">
-        <label class="form-label">Cari Data dalam Tabel</label>
-        <input type="text" id="searchTable" class="form-control" onkeyup="searchTableData()">
+      <label class="form-label">Cari Data dalam Tabel</label>
+      <input
+        type="text"
+        id="searchTable"
+        class="form-control"
+        onkeyup="searchTableData()"
+      />
     </div>
 
     <!-- Table -->
     <div class="table-container">
-        <table class="table table-striped table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th>PLU</th>
-                    <th>Description</th>
-                    <th>Qty</th>
-                </tr>
-            </thead>
-            <tbody id="stockTableBody"></tbody>
-        </table>
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>PLU</th>
+            <th>Description</th>
+            <th>Qty</th>
+          </tr>
+        </thead>
+        <tbody id="stockTableBody"></tbody>
+      </table>
     </div>
 
     <!-- Button Send to Server dengan Spinner -->
     <div class="d-flex align-items-center">
-        <button class="btn btn-success me-2" onclick="sendToServer()">Send to Server</button>
-        <div id="sendingSpinner" class="spinner-border text-success" role="status" style="display: none;">
-            <span class="visually-hidden">Sending...</span>
-        </div>
+      <button class="btn btn-success me-2" onclick="sendToServer()">
+        Send to Server
+      </button>
+      <div
+        id="sendingSpinner"
+        class="spinner-border text-success"
+        role="status"
+        style="display: none;"
+      >
+        <span class="visually-hidden">Sending...</span>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Modal Add Data -->
-<div class="modal fade" id="addDataModal" tabindex="-1" aria-labelledby="addDataModalLabel" aria-hidden="true">
+  <!-- Modal Add Data -->
+  <div
+    class="modal fade"
+    id="addDataModal"
+    tabindex="-1"
+    aria-labelledby="addDataModalLabel"
+    aria-hidden="true"
+  >
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addDataModalLabel">Add New Data</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">PLU</label>
-                    <input type="text" id="pluInput" class="form-control" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <input type="text" id="descInput" class="form-control" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Qty</label>
-                    <input type="number" id="qtyInput" class="form-control">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="addData()">Save</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addDataModalLabel">Add New Data</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">PLU</label>
+            <input type="text" id="pluInput" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <input
+              type="text"
+              id="descInput"
+              class="form-control"
+              readonly
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Qty</label>
+            <input type="number" id="qtyInput" class="form-control" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="button" class="btn btn-primary" onclick="addData()">
+            Save
+          </button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzDV_BgJTgFn_NYsF3OmbFmY7HfCsrGkbjGmx5q8k_JqK0959x1FT66lfTYN2oyiStNrA/exec";
+  <script>
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbw3uuSv_yd6vHPyvD_VH8WaMxoiC_RTkVosQvV04P3HOI3KEB4dPijw1k3Ut9ZZcRY1WQ/exec";
 
-let products = [];
-let inventory = [];
+    let products = [];
+    let inventory = [];
 
-// **Fungsi untuk menampilkan / menyembunyikan spinner**
-function toggleSpinner(id, show) {
-    document.getElementById(id).style.display = show ? "block" : "none";
-}
+    // Fungsi untuk menampilkan / menyembunyikan spinner
+    function toggleSpinner(id, show) {
+      document.getElementById(id).style.display = show ? "block" : "none";
+    }
 
-// **Load Data saat Web Dimuat**
-document.addEventListener("DOMContentLoaded", function() {
-    toggleSpinner("loadingSpinner", true);
-    fetchProducts();
-    fetchInventory();
-});
+    // Load Data saat Web Dimuat
+    document.addEventListener("DOMContentLoaded", function () {
+      toggleSpinner("loadingSpinner", true);
+      fetchProducts();
+      fetchInventory();
+    });
 
-// **Fetch Data Produk untuk Suggestion**
-function fetchProducts() {
-    fetch(`${API_URL}?action=getProducts`)
-        .then(response => response.json())
-        .then(data => {
-            products = data;
+    // Fetch Data Produk untuk Suggestion
+    function fetchProducts() {
+      fetch(`${API_URL}?action=getProducts`)
+        .then((response) => response.json())
+        .then((data) => {
+          products = data;
         })
-        .catch(error => console.error("Error fetching products:", error))
-        .finally(() => toggleSpinner("loadingSpinner", false)); // Sembunyikan spinner setelah data diambil
-}
+        .catch((error) => console.error("Error fetching products:", error))
+        .finally(() => toggleSpinner("loadingSpinner", false));
+    }
 
-// **Fetch Data Inventory untuk Ditampilkan di Tabel**
-function fetchInventory() {
-    fetch(`${API_URL}?action=getInventory`)
-        .then(response => response.json())
-        .then(data => {
-            inventory = data;
-            localStorage.setItem("warehouseStock", JSON.stringify(data));
-            loadData();
+    // Fetch Data Inventory untuk Ditampilkan di Tabel
+    function fetchInventory() {
+      fetch(`${API_URL}?action=getInventory`)
+        .then((response) => response.json())
+        .then((data) => {
+          inventory = data;
+          localStorage.setItem("warehouseStock", JSON.stringify(data));
+          loadData();
         })
-        .catch(error => console.error("Error fetching inventory:", error))
-        .finally(() => toggleSpinner("loadingSpinner", false)); // Sembunyikan spinner setelah data diambil
-}
+        .catch((error) => console.error("Error fetching inventory:", error))
+        .finally(() => toggleSpinner("loadingSpinner", false));
+    }
 
-// **Menampilkan Suggestion Saat Mengetik di Search Box**
-function showSuggestions(value) {
-    let suggestions = document.getElementById("suggestions");
-    suggestions.innerHTML = "";
+    // Menampilkan Suggestion Saat Mengetik di Search Box
+    function showSuggestions(value) {
+      let suggestions = document.getElementById("suggestions");
+      suggestions.innerHTML = "";
 
-    if (!value) return;
+      if (!value) return;
 
-    let filtered = products.filter(p => p.description.toLowerCase().includes(value.toLowerCase()));
+      let filtered = products.filter((p) =>
+        p.description.toLowerCase().includes(value.toLowerCase())
+      );
 
-    filtered.forEach(product => {
+      filtered.forEach((product) => {
         let div = document.createElement("div");
         div.classList.add("suggestion-item");
         div.textContent = `${product.description}`;
         div.onclick = () => selectProduct(product);
         suggestions.appendChild(div);
-    });
-}
+      });
+    }
 
-// **Memilih Produk & Menampilkan Modal**
-function selectProduct(product) {
-    document.getElementById("searchProduct").value = product.description;
-    document.getElementById("pluInput").value = product.plu;
-    document.getElementById("descInput").value = product.description;
-    document.getElementById("suggestions").innerHTML = "";
+    // Memilih Produk & Menampilkan Modal
+    function selectProduct(product) {
+      document.getElementById("searchProduct").value = product.description;
+      document.getElementById("pluInput").value = product.plu;
+      document.getElementById("descInput").value = product.description;
+      document.getElementById("suggestions").innerHTML = "";
 
-    let modal = new bootstrap.Modal(document.getElementById("addDataModal"));
-    modal.show();
-}
+      let modal = new bootstrap.Modal(document.getElementById("addDataModal"));
+      modal.show();
+    }
 
-// **Menambahkan Data ke Tabel & Local Storage**
-function addData() {
-    let plu = document.getElementById("pluInput").value;
-    let description = document.getElementById("descInput").value;
-    let qty = document.getElementById("qtyInput").value;
+    // Menambahkan Data ke Tabel & Local Storage
+    function addData() {
+      let plu = document.getElementById("pluInput").value;
+      let description = document.getElementById("descInput").value;
+      let qty = document.getElementById("qtyInput").value;
 
-    if (qty === "" || qty <= 0) {
+      if (qty === "" || qty <= 0) {
         alert("Qty harus diisi!");
         return;
+      }
+
+      let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
+      data.push({ plu, description, qty });
+      localStorage.setItem("warehouseStock", JSON.stringify(data));
+
+      loadData();
+
+      // Reset Input & Tutup Modal
+      document.getElementById("qtyInput").value = "";
+      let modalElement = document.getElementById("addDataModal");
+      let modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
     }
 
-    let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
-    data.push({ plu, description, qty });
-    localStorage.setItem("warehouseStock", JSON.stringify(data));
-
-    loadData();
-
-    // Reset Input & Tutup Modal
-    document.getElementById("qtyInput").value = "";
-    let modalElement = document.getElementById("addDataModal");
-    let modalInstance = bootstrap.Modal.getInstance(modalElement);
-    modalInstance.hide();
-}
-
-// **Fungsi untuk Mencari Data dalam Tabel**
+    // Fungsi untuk Mencari Data dalam Tabel
     function searchTableData() {
-        let input = document.getElementById("searchTable").value.toLowerCase();
-        let table = document.getElementById("stockTableBody");
-        let rows = table.getElementsByTagName("tr");
+      let input = document.getElementById("searchTable").value.toLowerCase();
+      let table = document.getElementById("stockTableBody");
+      let rows = table.getElementsByTagName("tr");
 
-        for (let row of rows) {
-            let plu = row.getElementsByTagName("td")[0]?.textContent.toLowerCase();
-            let desc = row.getElementsByTagName("td")[1]?.textContent.toLowerCase();
+      for (let row of rows) {
+        let plu = row.getElementsByTagName("td")[0]?.textContent.toLowerCase();
+        let desc = row.getElementsByTagName("td")[1]?.textContent.toLowerCase();
 
-            if (plu.includes(input) || desc.includes(input)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
+        if (plu.includes(input) || desc.includes(input)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
         }
+      }
     }
-// **Menampilkan Data dari Local Storage ke Tabel**
-function loadData() {
-    let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
-    let tableBody = document.getElementById("stockTableBody");
-    tableBody.innerHTML = "";
 
-    data.forEach((item, index) => {
+    // Menampilkan Data dari Local Storage ke Tabel
+    function loadData() {
+      let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
+      let tableBody = document.getElementById("stockTableBody");
+      tableBody.innerHTML = "";
+
+      data.forEach((item, index) => {
         let row = `<tr>
             <td>${item.plu}</td>
             <td>${item.description}</td>
             <td><input type="number" class="form-control qty-input" data-index="${index}" value="${item.qty}" onchange="updateQty(this)"></td>
         </tr>`;
         tableBody.innerHTML += row;
-    });
-}
+      });
+    }
 
-// **Update Qty dalam Local Storage**
-function updateQty(input) {
-    let index = input.getAttribute("data-index");
-    let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
-    data[index].qty = input.value;
-    localStorage.setItem("warehouseStock", JSON.stringify(data));
-}
+    // Update Qty dalam Local Storage
+    function updateQty(input) {
+      let index = input.getAttribute("data-index");
+      let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
+      data[index].qty = input.value;
+      localStorage.setItem("warehouseStock", JSON.stringify(data));
+    }
 
-// **Menghapus Row dari Tabel & Local Storage**
-function deleteRow(index) {
-    let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
-    data.splice(index, 1);
-    localStorage.setItem("warehouseStock", JSON.stringify(data));
-    loadData();
-}
+    // Menghapus Row dari Tabel & Local Storage
+    function deleteRow(index) {
+      let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
+      data.splice(index, 1);
+      localStorage.setItem("warehouseStock", JSON.stringify(data));
+      loadData();
+    }
 
-// **Mengirim Data ke Google Sheets via GAS**
-function sendToServer() {
-    let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
-    
-    toggleSpinner("sendingSpinner", true); // Tampilkan spinner saat mengirim
+    // Mengirim Data ke Google Sheets via GAS menggunakan mode "no-cors"
+    function sendToServer() {
+      let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
 
-    fetch(`${API_URL}?action=updateInventory`, {
+      // Jika tidak ada data, jangan lakukan pengiriman
+      if (data.length === 0) {
+        alert("Tidak ada data untuk dikirim!");
+        return;
+      }
+
+      toggleSpinner("sendingSpinner", true); // Tampilkan spinner saat mengirim
+
+      fetch(`${API_URL}?action=updateInventory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.text())
-    .then(result => {
-        alert("Data berhasil dikirim ke server!");
-        localStorage.removeItem("warehouseStock");
-        fetchInventory(); // Refresh tabel setelah update
-    })
-    .catch(error => console.error("Error sending data:", error))
-    .finally(() => toggleSpinner("sendingSpinner", false)); // Sembunyikan spinner setelah selesai
-}
-</script>
+        body: JSON.stringify(data),
+        mode: "no-cors" // Menggunakan no-cors agar tidak terjadi error CORS
+      })
+        .then(() => {
+          alert("Data berhasil dikirim ke server!");
+          localStorage.removeItem("warehouseStock");
+          fetchInventory(); // Refresh tabel setelah update
+        })
+        .catch((error) => {
+          console.error("Error sending data:", error);
+          alert("Terjadi kesalahan saat mengirim data.");
+        })
+        .finally(() => toggleSpinner("sendingSpinner", false));
+    }
+  </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
