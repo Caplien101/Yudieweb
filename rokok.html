@@ -175,7 +175,7 @@
   </div>
 
   <script>
-    const API_URL ="https://script.google.com/macros/s/AKfycbzvpu16nGqiTBZGjcUgB8KOh_tahnjkdPeeyzCsUWx6Mv2aNIf1AxFkDgPpqfEiFoeh2g/exec";
+    const API_URL ="https://script.google.com/macros/s/AKfycbzlEnAQIAgg7x9fMrAclg41YE5hGdlKlns1vdOFWSSEBPkOpBOT5PdsPIleLOyJh8uwLw/exec";
 
     let products = [];
     let inventory = [];
@@ -203,16 +203,17 @@
         .finally(() => toggleSpinner("loadingSpinner", false));
     }
 
-    // Fetch Data Inventory untuk Ditampilkan di Tabel
     function fetchInventory() {
-      fetch(`${API_URL}?action=getInventory`)
-        .then((response) => response.json())
-        .then((data) => {
-          inventory = data;
-          localStorage.setItem("warehouseStock", JSON.stringify(data));
-          loadData();
-        })
-        .catch((error) => console.error("Error fetching inventory:", error))
+  fetch(`${API_URL}?action=getInventory`)
+    .then(response => response.json())
+    .then(data => {
+      inventory = data;
+      localStorage.setItem("warehouseStock", JSON.stringify(data));
+      loadData();
+    })
+    .catch(error => console.error("Error fetching inventory:", error))
+
+        
         .finally(() => toggleSpinner("loadingSpinner", false));
     }
 
