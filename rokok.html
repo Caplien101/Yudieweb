@@ -53,6 +53,22 @@
       width: 30%;
       white-space: nowrap;
     }
+  /* Tambahkan di style */
+.alert-custom {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  min-width: 300px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.alert-show {
+  opacity: 1;
+}
+    
   </style>
 </head>
 <body>
@@ -66,7 +82,15 @@
       </div>
       <p>Loading data, please wait...</p>
     </div>
-
+  
+    <!-- Tambahkan di bawah container -->
+<div id="customAlert" class="alert alert-custom alert-dismissible fade" role="alert">
+  <div class="d-flex align-items-center">
+    <div id="alertIcon"></div>
+    <span id="alertMessage" class="ms-2"></span>
+  </div>
+  <button type="button" class="btn-close" onclick="hideAlert()"></button>
+</div>    
     <!-- Input Pencarian Produk -->
     <div class="mb-3 position-relative">
       <label class="form-label">Cari Produk</label>
@@ -106,18 +130,13 @@
 
     <!-- Button Send to Server dengan Spinner -->
     <div class="d-flex align-items-center">
-      <button class="btn btn-success me-2" onclick="sendToServer()">
-        Send to Server
-      </button>
-      <div
-        id="sendingSpinner"
-        class="spinner-border text-success"
-        role="status"
-        style="display: none;"
-      >
-        <span class="visually-hidden">Sending...</span>
-      </div>
-    </div>
+      <!-- Di bagian button -->
+<div class="d-flex align-items-center gap-2">
+  <button class="btn btn-success" onclick="sendToServer()" id="sendButton">
+    <span id="buttonText">Send to Server</span>
+    <span id="buttonSpinner" class="spinner-border spinner-border-sm" role="status" style="display: none;"></span>
+  </button>
+</div>
   </div>
 
   <!-- Modal Add Data -->
@@ -203,7 +222,7 @@
         .finally(() => toggleSpinner("loadingSpinner", false));
     }
 
-    function fetchInventory() {
+   function fetchInventory() {
   fetch(`${API_URL}?action=getInventory`)
     .then(response => response.json())
     .then(data => {
@@ -211,11 +230,12 @@
       localStorage.setItem("warehouseStock", JSON.stringify(data));
       loadData();
     })
-    .catch(error => console.error("Error fetching inventory:", error))
-
-        
-        .finally(() => toggleSpinner("loadingSpinner", false));
-    }
+    .catch(error => {
+      console.error("Error fetching inventory:", error);
+      showAlert('Gagal memuat data inventory', 'danger');
+    })
+    .finally(() => toggleSpinner("loadingSpinner", false));
+}
 
     // Menampilkan Suggestion Saat Mengetik di Search Box
     function showSuggestions(value) {
@@ -322,35 +342,72 @@
       loadData();
     }
 
-    // Mengirim Data ke Google Sheets via GAS menggunakan mode "no-cors"
-    function sendToServer() {
-      let data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
+   // Fungsi untuk menampilkan alert
+function showAlert(message, type = 'success') {
+  const alert = document.getElementById('customAlert');
+  const icon = document.getElementById('alertIcon');
+  const msg = document.getElementById('alertMessage');
+  
+  alert.className = `alert alert-custom alert-${type} alert-show`;
+  icon.innerHTML = type === 'success' ? 
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-success"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' :
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-danger"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
+  
+  msg.textContent = message;
+  setTimeout(() => alert.classList.add('show'), 10);
+  setTimeout(hideAlert, 5000);
+}
 
-      // Jika tidak ada data, jangan lakukan pengiriman
-      if (data.length === 0) {
-        alert("Tidak ada data untuk dikirim!");
-        return;
-      }
+function hideAlert() {
+  document.getElementById('customAlert').classList.remove('show');
+}
 
-      toggleSpinner("sendingSpinner", true); // Tampilkan spinner saat mengirim
+// Perbaikan fungsi sendToServer dengan CORS handling
+function sendToServer() {
+  const data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
+  const sendButton = document.getElementById('sendButton');
+  const buttonText = document.getElementById('buttonText');
+  const buttonSpinner = document.getElementById('buttonSpinner');
 
-      fetch(`${API_URL}?action=updateInventory`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        mode: "no-cors" // Menggunakan no-cors agar tidak terjadi error CORS
-      })
-        .then(() => {
-          alert("Data berhasil dikirim ke server!");
-          localStorage.removeItem("warehouseStock");
-          fetchInventory(); // Refresh tabel setelah update
-        })
-        .catch((error) => {
-          console.error("Error sending data:", error);
-          alert("Terjadi kesalahan saat mengirim data.");
-        })
-        .finally(() => toggleSpinner("sendingSpinner", false));
+  if (data.length === 0) {
+    showAlert('Tidak ada data untuk dikirim!', 'danger');
+    return;
+  }
+
+  // Disable button dan tampilkan spinner
+  sendButton.disabled = true;
+  buttonText.textContent = 'Sending...';
+  buttonSpinner.style.display = 'inline-block';
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.status === "success") {
+      showAlert('Data berhasil dikirim ke server!');
+      localStorage.removeItem("warehouseStock");
+      fetchInventory();
+    } else {
+      throw new Error(result.message || 'Gagal mengirim data');
     }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showAlert(error.message || 'Terjadi kesalahan saat mengirim data', 'danger');
+  })
+  .finally(() => {
+    // Reset button state
+    sendButton.disabled = false;
+    buttonText.textContent = 'Send to Server';
+    buttonSpinner.style.display = 'none';
+  });
+}
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
