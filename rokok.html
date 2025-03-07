@@ -68,6 +68,28 @@
 .alert-show {
   opacity: 1;
 }
+
+    /* Tambahkan di stylesheet */
+#sendButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  display: none;
+}
+
+.alert-network-error {
+  background: #fff3cd;
+  border-color: #ffeeba;
+  color: #856404;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
     
   </style>
 </head>
@@ -222,19 +244,24 @@
         .finally(() => toggleSpinner("loadingSpinner", false));
     }
 
-   function fetchInventory() {
-  fetch(`${API_URL}?action=getInventory`)
-    .then(response => response.json())
-    .then(data => {
-      inventory = data;
-      localStorage.setItem("warehouseStock", JSON.stringify(data));
-      loadData();
-    })
-    .catch(error => {
-      console.error("Error fetching inventory:", error);
-      showAlert('Gagal memuat data inventory', 'danger');
-    })
-    .finally(() => toggleSpinner("loadingSpinner", false));
+   async function fetchInventory() {
+  try {
+    const response = await fetch(`${API_URL}?action=getInventory`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    inventory = data;
+    localStorage.setItem("warehouseStock", JSON.stringify(data));
+    loadData();
+  } catch (error) {
+    console.error("Error fetching inventory:", error);
+    showAlert(`Gagal memuat data: ${error.message}`, 'danger');
+  } finally {
+    toggleSpinner("loadingSpinner", false);
+  }
 }
 
     // Menampilkan Suggestion Saat Mengetik di Search Box
@@ -363,7 +390,7 @@ function hideAlert() {
 }
 
 // Perbaikan fungsi sendToServer dengan CORS handling
-function sendToServer() {
+async function sendToServer() {
   const data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
   const sendButton = document.getElementById('sendButton');
   const buttonText = document.getElementById('buttonText');
@@ -374,39 +401,53 @@ function sendToServer() {
     return;
   }
 
-  // Disable button dan tampilkan spinner
-  sendButton.disabled = true;
-  buttonText.textContent = 'Sending...';
-  buttonSpinner.style.display = 'inline-block';
+  try {
+    // Update button state
+    sendButton.disabled = true;
+    buttonText.textContent = 'Mengirim...';
+    buttonSpinner.style.display = 'inline-block';
 
-  fetch(API_URL, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-  .then(response => response.json())
-  .then(result => {
-    if (result.status === "success") {
-      showAlert('Data berhasil dikirim ke server!');
-      localStorage.removeItem("warehouseStock");
-      fetchInventory();
-    } else {
-      throw new Error(result.message || 'Gagal mengirim data');
+    // Preflight request handler
+    const preflight = await fetch(API_URL, {
+      method: 'OPTIONS',
+      headers: {
+        'Access-Control-Request-Method': 'POST',
+        'Origin': window.location.origin
+      }
+    });
+
+    // Main request
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(data),
+      credentials: 'omit'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  })
-  .catch(error => {
+
+    const result = await response.json();
+    
+    if (result.status === "success") {
+      showAlert('Data berhasil dikirim!');
+      localStorage.removeItem("warehouseStock");
+      await fetchInventory();
+    } else {
+      throw new Error(result.message || 'Gagal mengupdate data');
+    }
+  } catch (error) {
     console.error('Error:', error);
-    showAlert(error.message || 'Terjadi kesalahan saat mengirim data', 'danger');
-  })
-  .finally(() => {
-    // Reset button state
+    showAlert(`Gagal mengirim data: ${error.message}`, 'danger');
+  } finally {
     sendButton.disabled = false;
     buttonText.textContent = 'Send to Server';
     buttonSpinner.style.display = 'none';
-  });
+  }
 }
   </script>
 
