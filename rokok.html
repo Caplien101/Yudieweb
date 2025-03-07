@@ -390,6 +390,7 @@ function hideAlert() {
 }
 
 // Perbaikan fungsi sendToServer dengan CORS handling
+// Perbaikan fungsi sendToServer
 async function sendToServer() {
   const data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
   const sendButton = document.getElementById('sendButton');
@@ -402,34 +403,21 @@ async function sendToServer() {
   }
 
   try {
-    // Update button state
     sendButton.disabled = true;
     buttonText.textContent = 'Mengirim...';
     buttonSpinner.style.display = 'inline-block';
 
-    // Preflight request handler
-    const preflight = await fetch(API_URL, {
-      method: 'OPTIONS',
-      headers: {
-        'Access-Control-Request-Method': 'POST',
-        'Origin': window.location.origin
-      }
-    });
+    // Gunakan URL khusus untuk deploy
+    const deployUrl = 'https://script.google.com/macros/s/AKfycbwtZXQP2F70cerYtuREHi3kI85cIAARqUubtCqyQu0CeETqou8UIIZdx5-DsUy7kzzXTQ/exec';
 
-    // Main request
-    const response = await fetch(API_URL, {
+    const response = await fetch(deployUrl, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
-        "Accept": "application/json"
       },
       body: JSON.stringify(data),
-      credentials: 'omit'
+      referrerPolicy: 'no-referrer'
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
 
     const result = await response.json();
     
@@ -442,7 +430,7 @@ async function sendToServer() {
     }
   } catch (error) {
     console.error('Error:', error);
-    showAlert(`Gagal mengirim data: ${error.message}`, 'danger');
+    showAlert(`Gagal mengirim: ${error.message}`, 'danger');
   } finally {
     sendButton.disabled = false;
     buttonText.textContent = 'Send to Server';
