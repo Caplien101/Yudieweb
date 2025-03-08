@@ -55,9 +55,11 @@
     }
   /* Tambahkan di style */
 .alert-custom {
-  position: fixed;
-  top: 20px;
-  right: 20px;
+ position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: fadeOut 3s ease-in forwards;
   z-index: 9999;
   min-width: 300px;
   opacity: 0;
