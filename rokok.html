@@ -421,6 +421,8 @@ async function sendToServer() {
       body: JSON.stringify({ 
         operation: 'batch-update',
         items: data 
+      }),
+    });
 
     const result = await response.json();
     
