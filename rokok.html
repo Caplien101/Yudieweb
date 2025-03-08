@@ -393,16 +393,13 @@ function hideAlert() {
 async function sendToServer() {
   const rawData = localStorage.getItem("warehouseStock");
   const data = JSON.parse(rawData) || [];
-  
-  // Validasi struktur data
-  const isValid = data.every(item => {
-    return 'plu' in item && 'description' in item && 'qty' in item;
-  });
-  
-  if (!isValid) {
-    showAlert('Format data tidak valid!', 'danger');
-    return;
-  }
+
+  // Validasi data sebelum dikirim
+  const validatedData = data.map(item => ({
+    plu: Number(item.plu), // Pastikan PLU numeric
+    description: String(item.description).trim(),
+    qty: Number(item.qty)
+  }));
 
   try {
     sendButton.disabled = true;
@@ -412,15 +409,15 @@ async function sendToServer() {
     // Gunakan URL khusus untuk deploy
     const deployUrl = 'https://script.google.com/macros/s/AKfycbzLS3mwhJCcwOHkjyg16BLg8TbEyGiuHKiPAWxMr0RlOnigMy_blvWW-riLfjzFcmYqHA/exec';
 
-    const response = await fetch(deployUrl, {
+     const response = await fetch(deployUrl, {
       method: 'POST',
       redirect: 'follow',
       headers: { 
-        'Content-Type': 'application/json', // Ubah ke application/json
+        'Content-Type': 'text/plain;charset=utf-8' // Tetap pakai text/plain
       },
-      body: JSON.stringify({ 
-        operation: 'batch-update',
-        items: data 
+      body: JSON.stringify({
+        operation: 'inventory-update',
+        items: validatedData
       }),
     });
 
