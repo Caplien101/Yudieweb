@@ -390,15 +390,17 @@ function hideAlert() {
 }
 
 // Perbaikan fungsi sendToServer dengan CORS handling
-// Perbaikan fungsi sendToServer
 async function sendToServer() {
-  const data = JSON.parse(localStorage.getItem("warehouseStock")) || [];
-  const sendButton = document.getElementById('sendButton');
-  const buttonText = document.getElementById('buttonText');
-  const buttonSpinner = document.getElementById('buttonSpinner');
-
-  if (data.length === 0) {
-    showAlert('Tidak ada data untuk dikirim!', 'danger');
+  const rawData = localStorage.getItem("warehouseStock");
+  const data = JSON.parse(rawData) || [];
+  
+  // Validasi struktur data
+  const isValid = data.every(item => {
+    return 'plu' in item && 'description' in item && 'qty' in item;
+  });
+  
+  if (!isValid) {
+    showAlert('Format data tidak valid!', 'danger');
     return;
   }
 
@@ -411,12 +413,14 @@ async function sendToServer() {
     const deployUrl = 'https://script.google.com/macros/s/AKfycbzLS3mwhJCcwOHkjyg16BLg8TbEyGiuHKiPAWxMr0RlOnigMy_blvWW-riLfjzFcmYqHA/exec';
 
     const response = await fetch(deployUrl, {
-     method: 'POST',
-     redirect: 'follow',
-     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(data),
-      referrerPolicy: 'no-referrer'
-    });
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 
+        'Content-Type': 'application/json', // Ubah ke application/json
+      },
+      body: JSON.stringify({ 
+        operation: 'batch-update',
+        items: data 
 
     const result = await response.json();
     
