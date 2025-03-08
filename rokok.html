@@ -411,10 +411,9 @@ async function sendToServer() {
     const deployUrl = 'https://script.google.com/macros/s/AKfycbwL9VHRNxIXzWH1hAv83ZCLtEUFYFoHGhmcd3tVwGq3I6EHtH-WQqTLsZFT3THThDglIw/exec';
 
     const response = await fetch(deployUrl, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-      },
+     method: 'POST',
+     redirect: 'follow',
+     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(data),
       referrerPolicy: 'no-referrer'
     });
