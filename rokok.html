@@ -55,20 +55,27 @@
     }
   /* Tambahkan di style */
 .alert-custom {
- position: fixed;
-  top: 50%;
+  position: fixed;
+  top: 20px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   animation: fadeOut 3s ease-in forwards;
   z-index: 9999;
   min-width: 300px;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  pointer-events: auto;
 }
 
 .alert-show {
   opacity: 1;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
     /* Tambahkan di stylesheet */
@@ -378,17 +385,24 @@ function showAlert(message, type = 'success') {
   const msg = document.getElementById('alertMessage');
   
   alert.className = `alert alert-custom alert-${type} alert-show`;
+  alert.style.display = 'block';
+  
   icon.innerHTML = type === 'success' ? 
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-success"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' :
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-danger"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
   
   msg.textContent = message;
-  setTimeout(() => alert.classList.add('show'), 10);
-  setTimeout(hideAlert, 2000);
+  
+  setTimeout(() => {
+    alert.classList.remove('alert-show');
+    setTimeout(() => alert.style.display = 'none', 300);
+  }, 3000);
 }
 
 function hideAlert() {
-  document.getElementById('customAlert').classList.remove('show');
+  const alert = document.getElementById('customAlert');
+  alert.classList.remove('alert-show');
+  setTimeout(() => alert.style.display = 'none', 300);
 }
 
 // Perbaikan fungsi sendToServer dengan CORS handling
