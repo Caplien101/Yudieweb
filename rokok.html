@@ -225,7 +225,7 @@
   </div>
 
   <script>
-    const API_URL ="https://script.google.com/macros/s/AKfycbwtZXQP2F70cerYtuREHi3kI85cIAARqUubtCqyQu0CeETqou8UIIZdx5-DsUy7kzzXTQ/exec";
+    const API_URL ="https://script.google.com/macros/s/AKfycbxQjmZF9wBUfe_1bhSlvPhH_CQSVWz5z9gd7FKS4yfRtzYyFG11Xex5ZQoC7B0LMni4XQ/exec";
 
     let products = [];
     let inventory = [];
@@ -423,19 +423,18 @@ async function sendToServer() {
     buttonSpinner.style.display = 'inline-block';
 
     // Gunakan URL khusus untuk deploy
-    const deployUrl = 'https://script.google.com/macros/s/AKfycbzLS3mwhJCcwOHkjyg16BLg8TbEyGiuHKiPAWxMr0RlOnigMy_blvWW-riLfjzFcmYqHA/exec';
-
-     const response = await fetch(deployUrl, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 
-        'Content-Type': 'text/plain;charset=utf-8' // Tetap pakai text/plain
-      },
-      body: JSON.stringify({
-        operation: 'inventory-update',
-        items: validatedData
-      }),
-    });
+   
+    const response = await fetch(API_URL, { // <--- PASTIKAN PAKAI API_URL
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify({
+      operation: 'inventory-update',
+      items: validatedData
+    }),
+  });
 
     const result = await response.json();
     
