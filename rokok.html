@@ -169,15 +169,17 @@
     let inventory = { headers: [], data: [] };
 
     window.onload = async () => {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbxRiEJZ9q_B1AW2P1nXrbgK4oZbhx4uhHhQNKE1moQnTXuuVLw8mprxSQGSsMGz1-itsg/exec');
-      const data = await response.json();
-      
-      datasheet = data.datasheet;
-      inventory = data.inventory;
-      
-      localStorage.setItem('inventory', JSON.stringify(inventory.data));
-      renderTables();
-    };
+    const response = await fetch('https://script.google.com/macros/s/AKfycbxRiEJZ9q_B1AW2P1nXrbgK4oZbhx4uhHhQNKE1moQnTXuuVLw8mprxSQGSsMGz1-itsg/exec');
+    const data = await response.json();
+
+    datasheet = data.datasheet;
+    inventory = data.inventory;
+
+    localStorage.setItem('datasheet', JSON.stringify(datasheet.data));  // ✅ Tambahkan ini
+    localStorage.setItem('inventory', JSON.stringify(inventory.data));
+
+    renderTables();
+};
 
     function renderTables() {
       renderTable('datasheet', datasheet);
@@ -221,16 +223,17 @@ function updateQty(index, value) {
         return;
     }
 
-    let datasheet = JSON.parse(localStorage.getItem("datasheet")) || [];
-    
-    let suggestions = datasheet.filter(row =>
-        row.some(cell => cell.toString().toLowerCase().includes(searchTerm))
-    ).slice(0, 5); // Batasi 5 hasil
+    let datasheetData = JSON.parse(localStorage.getItem("datasheet")) || [];
+
+    let suggestions = datasheetData
+        .filter(row => row.some(cell => String(cell).toLowerCase().includes(searchTerm)))
+        .slice(0, 5);
 
     if (suggestions.length > 0) {
         suggestions.forEach(item => {
             let suggestionItem = document.createElement("div");
             suggestionItem.textContent = `${item[0]} - ${item[1]} - ${item[2]}`;
+            suggestionItem.classList.add("suggestion-item");
             suggestionItem.onclick = function () {
                 openInventoryModal(item);
                 suggestionBox.style.display = "none";
@@ -303,9 +306,14 @@ document.addEventListener("click", function (e) {
     });
 
     window.updateQty = (index, value) => {
-      inventory.data[index][inventory.headers.length-1] = parseInt(value) || 0;
-      localStorage.setItem('inventory', JSON.stringify(inventory.data));
-    };
+    inventory.data[index][inventory.headers.length - 1] = parseInt(value) || 0;
+    
+    // ✅ Simpan perubahan ke localStorage
+    localStorage.setItem('inventory', JSON.stringify(inventory.data));
+
+    // ✅ Render ulang tabel agar update terlihat
+    renderTable("inventory", { headers: inventory.headers, data: inventory.data });
+};
 
     function showAlert(id) {
       document.getElementById(id).style.display = "block";
