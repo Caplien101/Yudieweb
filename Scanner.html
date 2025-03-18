@@ -107,7 +107,20 @@
 </head>
 <body>
     <div class="container">
-        <h3 class="text-center mb-4 fw-bold text-primary">Entry Data</h3>
+        <!-- Tambahkan dropdown filter rak di bawah header -->
+<h3 class="text-center mb-4 fw-bold text-primary">Entry Data</h3>
+<!-- Di bagian dropdown rak -->
+<div class="row mb-3">
+    <div class="col-md-3">
+        <select id="rakFilter" class="form-select">
+            <option value="">Pilih Rak</option>
+            <option value="AT1">AT1</option>
+            <option value="FE5">FE5</option>
+            <option value="FE4">FE4</option>
+        </select>
+    </div>
+</div>
+</div>
 
         <!-- Scanner Overlay -->
         <div class="scanner-container">
@@ -168,128 +181,204 @@
     </button>
 
     <script>
-   let scanner;
-    const startScannerBtn = document.getElementById("startScanner");
-    const scannerContainer = document.querySelector(".scanner-container");
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ14bYNZ3F2E36Rd5kuE9T0-pIhwr-ZwUwre3FYlbmAGsnTTvwCcQz6pI56mIiEvakAzsNuv1WGCM6B/pub?gid=0&single=true&output=csv';
 
-    async function startScanner() {
-        try {
-            scannerContainer.style.display = "flex";
-            
-            if (!scanner) {
-                scanner = new Html5Qrcode("reader");
-            }
+let productDatabase = [];
+let filteredProductDatabase = [];
 
-            // Cek dukungan kamera
-            const cameras = await Html5Qrcode.getCameras();
-            if (cameras.length === 0) {
-                throw new Error("Tidak ditemukan kamera");
-            }
-
-            await scanner.start(
-                { facingMode: "environment" },
-                { 
-                    fps: 10, 
-                    qrbox: { 
-                        width: 250, 
-                        height: 250 
-                    },
-                    experimentalFeatures: {
-                        useBarCodeDetectorIfSupported: true
-                    }
-                },
-                (decodedText) => {
-                    processBarcode(decodedText);
-                    stopScanner();
-                },
-                (errorMessage) => {
-                    // Hanya log error tanpa alert
-                    console.warn(`Scan Error: ${errorMessage}`);
-                }
-            );
-            
-        } catch (err) {
-            console.error(err);
-            stopScanner();
-            alert(`Gagal memulai scanner: ${err.message}`);
-        }
-    }
-
-    function stopScanner() {
-        scannerContainer.style.display = "none";
-        if (scanner) {
-            scanner.stop().then(() => {
-                scanner = null;
-            }).catch(err => console.error(err));
-        }
-    }
-
-    function processBarcode(barcode) {
-        const trimmedBarcode = barcode.slice(0, -1);
-        const product = productDatabase.find(item => item.barcode === trimmedBarcode);
-
-        barcodeInput.value = "";
-        pluInput.value = "";
-        descInput.value = "";
-        dataCard.style.display = "none";
-
-        if (product) {
-            barcodeInput.value = product.barcode;
-            pluInput.value = product.plu;
-            descInput.value = product.description;
-            dataCard.style.display = "block";
-        } else {
-            alert("Produk tidak ditemukan!");
-        }
-    }
-
-    
-
-    function saveData() {
-        const plu = pluInput.value;
-        const description = descInput.value;
-        const qty = parseInt(qtyInput.value);
-
-        if (!plu || !description || !qty) {
-            alert("Harap isi semua field!");
-            return;
-        }
-
-        const existingRow = Array.from(dataTable.rows).find(row => row.cells[0].textContent === plu);
+async function loadProductData() {
+    try {
+        console.log("Memuat data dari Google Sheet...");
         
-        if (existingRow) {
-            const currentQty = parseInt(existingRow.cells[2].textContent);
-            existingRow.cells[2].textContent = currentQty + qty;
-        } else {
-            const newRow = dataTable.insertRow();
-            newRow.innerHTML = `
-                <td>${plu}</td>
-                <td>${description}</td>
-                <td>${qty}</td>
-                <!-- Hapus tombol hapus -->
-            `;
-        }
+        const response = await fetch(GOOGLE_SHEET_URL);
+        const csvData = await response.text();
+        console.log("Data CSV diterima:", csvData);
 
-        dataCard.style.display = "none";
-        barcodeInput.value = "";
-        pluInput.value = "";
-        descInput.value = "";
-        qtyInput.value = 1;
+        const rows = csvData.split('\n').filter(row => row.trim() !== '');
+        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+
+        productDatabase = rows.slice(1).map(row => {
+            const cells = row.split(',').map(c => c.trim());
+            return {
+                rak: cells[0] || '',
+                plu: cells[1] || '',
+                barcode: cells[2] || '',
+                description: cells[3] || ''
+            };
+        }).filter(item => item.rak && item.barcode); // Pastikan rak dan barcode tidak kosong
+
+        console.log("Data produk yang berhasil diproses:", productDatabase);
+
+        // Simpan data lengkap ke localStorage
+        localStorage.setItem('productData', JSON.stringify(productDatabase));
+
+        initRakFilter();
+    } catch (error) {
+        console.error('Gagal memuat data:', error);
+        alert('Error: Gagal memuat data dari Google Sheet!');
     }
+}
 
-        
+function initRakFilter() {
+    const rakFilter = document.getElementById('rakFilter');
+    rakFilter.innerHTML = '<option value="">Pilih Rak</option>';
 
-    startScannerBtn.addEventListener("click", startScanner);
+    // Ambil daftar rak unik
+    const raks = [...new Set(productDatabase.map(item => item.rak.trim()))]
+        .filter(rak => rak) // Hapus rak yang kosong
+        .sort((a, b) => a.localeCompare(b));
 
-    window.addEventListener('error', (e) => {
-        if (e.target.src.includes('jsondata.js')) {
-            alert("Error: File data produk tidak dapat dimuat!");
-        }
+    console.log("Rak yang ditemukan:", raks);
+
+    raks.forEach(rak => {
+        const option = document.createElement('option');
+        option.value = rak;
+        option.textContent = rak;
+        rakFilter.appendChild(option);
     });
-</script>
 
-<!-- Letakkan jsondata.js SEBELUM script.js -->
-<script src="jsondata.js"></script>
-<script src="script.js"></script>
+    // Event listener saat rak dipilih
+    rakFilter.addEventListener('change', () => {
+        const selectedRak = rakFilter.value;
+
+        if (selectedRak) {
+            filteredProductDatabase = productDatabase.filter(item => item.rak === selectedRak);
+        } else {
+            filteredProductDatabase = [...productDatabase];
+        }
+
+        console.log("Data setelah filter rak:", filteredProductDatabase);
+        
+        // Simpan hasil filter ke localStorage
+        localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
+    });
+
+    filteredProductDatabase = [...productDatabase]; // Default: semua data
+}
+
+let scanner;
+const startScannerBtn = document.getElementById("startScanner");
+const scannerContainer = document.querySelector(".scanner-container");
+
+async function startScanner() {  
+    try {  
+        scannerContainer.style.display = "flex";  
+          
+        if (!scanner) {  
+            scanner = new Html5Qrcode("reader");  
+        }  
+
+        // Cek dukungan kamera  
+        const cameras = await Html5Qrcode.getCameras();  
+        if (cameras.length === 0) {  
+            throw new Error("Tidak ditemukan kamera");  
+        }  
+
+        await scanner.start(  
+            { facingMode: "environment" },  
+            {   
+                fps: 10,   
+                qrbox: {   
+                    width: 250,   
+                    height: 250   
+                },  
+                experimentalFeatures: {  
+                    useBarCodeDetectorIfSupported: true  
+                }  
+            },  
+            (decodedText) => {  
+                processBarcode(decodedText);  
+                stopScanner();  
+            },  
+            (errorMessage) => {  
+                // Hanya log error tanpa alert  
+                console.warn(`Scan Error: ${errorMessage}`);  
+            }  
+        );  
+          
+    } catch (err) {  
+        console.error(err);  
+        stopScanner();  
+        alert(`Gagal memulai scanner: ${err.message}`);  
+    }  
+}  
+
+function stopScanner() {  
+    scannerContainer.style.display = "none";  
+    if (scanner) {  
+        scanner.stop().then(() => {  
+            scanner = null;  
+        }).catch(err => console.error(err));  
+    }  
+}  
+
+// Modifikasi fungsi processBarcode
+
+function processBarcode(barcode) {
+const trimmedBarcode = barcode.slice(0, -1);
+const product = filteredProductDatabase.find(item => item.barcode === trimmedBarcode);
+
+barcodeInput.value = "";  
+    pluInput.value = "";  
+    descInput.value = "";  
+    dataCard.style.display = "none";  
+
+    if (product) {  
+        barcodeInput.value = product.barcode;  
+        pluInput.value = product.plu;  
+        descInput.value = product.description;  
+        dataCard.style.display = "block";  
+    } else {  
+        alert("Produk tidak ditemukan!");  
+    }  
+}  
+
+  
+
+function saveData() {  
+    const plu = pluInput.value;  
+    const description = descInput.value;  
+    const qty = parseInt(qtyInput.value);  
+
+    if (!plu || !description || !qty) {  
+        alert("Harap isi semua field!");  
+        return;  
+    }  
+
+    const existingRow = Array.from(dataTable.rows).find(row => row.cells[0].textContent === plu);  
+      
+    if (existingRow) {  
+        const currentQty = parseInt(existingRow.cells[2].textContent);  
+        existingRow.cells[2].textContent = currentQty + qty;  
+    } else {  
+        const newRow = dataTable.insertRow();  
+        newRow.innerHTML = `  
+            <td>${plu}</td>  
+            <td>${description}</td>  
+            <td>${qty}</td>  
+          
+        `;  
+    }  
+
+    dataCard.style.display = "none";  
+    barcodeInput.value = "";  
+    pluInput.value = "";  
+    descInput.value = "";  
+    qtyInput.value = 1;  
+}  
+
+      
+
+startScannerBtn.addEventListener("click", startScanner);  
+
+window.addEventListener('error', (e) => {  
+    if (e.target.src.includes('jsondata.js')) {  
+        alert("Error: File data produk tidak dapat dimuat!");  
+    }  
+});
+
+// Panggil fungsi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', loadProductData);
+</script>
 </body>
 </html>
