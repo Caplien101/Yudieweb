@@ -11,18 +11,15 @@
             --primary-color: #2563eb;
             --hover-color: #1d4ed8;
         }
-
         body {
             background-color: #f8f9fa;
             padding: 16px;
         }
-
         .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 0 12px;
         }
-
         .scanner-container {
             position: fixed;
             top: 0;
@@ -36,13 +33,11 @@
             align-items: center;
             justify-content: center;
         }
-
         #reader {
             width: 100%;
             max-width: 400px;
             margin: 20px auto;
         }
-
         .scan-results {
             background: white;
             border-radius: 12px;
@@ -50,9 +45,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-top: 24px;
         }
-
-       
-
         .floating-btn {
             position: fixed;
             bottom: 24px;
@@ -69,334 +61,299 @@
             transition: all 0.2s ease;
             z-index: 100;
         }
-
         .floating-btn:hover {
             background: var(--hover-color);
             transform: scale(1.1);
         }
-
         .scanner-icon {
             width: 24px;
             height: 24px;
             filter: invert(1);
         }
-
         @media (max-width: 768px) {
             .form-row > .col {
                 margin-bottom: 12px;
             }
-            
             .table-responsive {
                 overflow-x: auto;
             }
-            
             .data-card .btn {
                 width: 100%;
                 margin-top: 8px;
             }
         }
-        
         @media (max-width: 767px) {
-    .scan-results .row .col-12 {
-        width: 100%;
-    }
-    
-    /* Barcode & PLU dibuat bertumpuk */
-    .scan-results .col-12.col-md-6 {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
-
-    /* Qty dan Tombol Simpan menjadi full width */
-    .scan-results .col-12.col-md-4 {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
-
-    /* Memberi sedikit margin bawah pada input agar lebih rapi */
-    .scan-results .form-control {
-        margin-bottom: 10px;
-    }
-}
-.table-container {
-    max-height: 75vh; /* Maksimum tinggi tabel 3/4 layar */
-    overflow-y: auto; /* Aktifkan scroll vertikal */
-    border: 1px solid #dee2e6; /* Tambahkan border untuk estetika */
-    border-radius: 8px;
-}
-
+            .scan-results .row .col-12 {
+                width: 100%;
+            }
+            /* Barcode & PLU dibuat bertumpuk */
+            .scan-results .col-12.col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            /* Qty dan Tombol Simpan menjadi full width */
+            .scan-results .col-12.col-md-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            /* Memberi sedikit margin bawah pada input agar lebih rapi */
+            .scan-results .form-control {
+                margin-bottom: 10px;
+            }
+        }
+        .table-container {
+            max-height: 75vh; /* Maksimum tinggi tabel 3/4 layar */
+            overflow-y: auto; /* Aktifkan scroll vertikal */
+            border: 1px solid #dee2e6; /* Tambahkan border untuk estetika */
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Tambahkan dropdown filter rak di bawah header -->
-<h3 class="text-center mb-4 fw-bold text-primary">Entry Data</h3>
-
-<!-- Input rak + Button dalam satu baris -->
-<div class="row mb-3 align-items-center">
-    <div class="col-md-6">
-        <div class="input-group">
-            <input type="text" id="rakFilter" class="form-control" placeholder="Masukkan Rak (contoh: AT1)" aria-label="Rak Filter">
-            <button id="btnGetData" class="btn btn-primary" type="button">Get Data</button>
+        <!-- Header -->
+        <h3 class="text-center mb-4 fw-bold text-primary">Entry Data</h3>
+        <!-- Input rak + Button dalam satu baris -->
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" id="rakFilter" class="form-control" placeholder="Masukkan Rak (contoh: AT1)" aria-label="Rak Filter">
+                    <button id="btnGetData" class="btn btn-primary" type="button">Get Data</button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
         <!-- Scanner Overlay -->
         <div class="scanner-container">
             <div id="reader"></div>
             <button class="btn btn-light mt-3" onclick="stopScanner()">Tutup Scanner</button>
         </div>
-
-    <!-- Hasil Scan -->
-<div class="scan-results" id="scanResults" style="display: none;">
-    <h5 class="mb-3 fw-semibold">Data Produk</h5>
-    <div class="data-card p-3 border rounded shadow-sm" id="dataCard">
-        <div class="row g-3">
-            <!-- Barcode & PLU -->
-            <div class="col-12 col-md-6">
-                <label class="form-label">Barcode</label>
-                <input type="text" class="form-control" id="barcodeInput" readonly>
+        <!-- Hasil Scan -->
+        <div class="scan-results" id="scanResults" style="display: none;">
+            <h5 class="mb-3 fw-semibold">Data Produk</h5>
+            <div class="data-card p-3 border rounded shadow-sm" id="dataCard">
+                <div class="row g-3">
+                    <!-- Barcode & PLU -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Barcode</label>
+                        <input type="text" class="form-control" id="barcodeInput" readonly>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">PLU</label>
+                        <input type="text" class="form-control" id="pluInput" readonly>
+                    </div>
+                    <!-- Deskripsi -->
+                    <div class="col-12">
+                        <label class="form-label">Deskripsi</label>
+                        <input type="text" class="form-control" id="descInput" readonly>
+                    </div>
+                    <!-- Qty -->
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Qty</label>
+                        <input type="number" class="form-control" id="qtyInput" value="1" min="1">
+                    </div>
+                    <!-- Tombol Simpan Data -->
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="saveData()">Simpan Data</button>
+                    </div>
+                </div>
             </div>
-            <div class="col-12 col-md-6">
-                <label class="form-label">PLU</label>
-                <input type="text" class="form-control" id="pluInput" readonly>
-            </div>
-
-            <!-- Deskripsi -->
-            <div class="col-12">
-                <label class="form-label">Deskripsi</label>
-                <input type="text" class="form-control" id="descInput" readonly>
-            </div>
-
-            <!-- Qty -->
-            <div class="col-12 col-md-4">
-                <label class="form-label">Qty</label>
-                <input type="number" class="form-control" id="qtyInput" value="1" min="1">
-            </div>
-
-            <!-- Tombol Simpan Data -->
-            <div class="col-12 col-md-4 d-flex align-items-end">
-                <button class="btn btn-primary w-100" onclick="saveData()">Simpan Data</button>
+        </div>
+        <!-- Tabel Data -->
+        <div class="mt-4">
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>PLU</th>
+                            <th>Deskripsi</th>
+                            <th>Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable"></tbody>
+                </table>
             </div>
         </div>
     </div>
-</div>
-
-        <!-- Tabel Data -->
-        <div class="mt-4">
-    <div class="table-container">
-        <table class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>PLU</th>
-                    <th>Deskripsi</th>
-                    <th>Qty</th>
-                </tr>
-            </thead>
-            <tbody id="dataTable"></tbody>
-        </table>
-    </div>
-</div>
-    </div>
-    
-    
     <!-- Next Button -->
     <div class="mt-4 text-center">
-    <button id="nextPageBtn" class="btn btn-success">Next Page</button>
-</div>
-
+        <button id="nextPageBtn" class="btn btn-success">Next Page</button>
+    </div>
     <!-- Floating Button -->
-    <button id="startScanner" class="floating-btn"> <!-- ID diperbaiki -->
+    <button id="startScanner" class="floating-btn">
         <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgN2g0YTEgMSAwIDAgMSAxIDF2NG0tNiAwSDhhMSAxIDAgMCAxLTEtMVY4bTAgOWg0YTEgMSAwIDAgMSAxIDF2NG0tNiAwSDhhMSAxIDAgMCAxLTEtMXYtNCIvPjwvc3ZnPg==" class="scanner-icon">
     </button>
-
     <script>
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ14bYNZ3F2E36Rd5kuE9T0-pIhwr-ZwUwre3FYlbmAGsnTTvwCcQz6pI56mIiEvakAzsNuv1WGCM6B/pub?gid=0&single=true&output=csv';
+        let filteredProductDatabase = [];
 
-let filteredProductDatabase = [];
+        // Fungsi untuk memuat data produk
+        async function loadProductData(selectedRak) {
+            if (!selectedRak) {
+                console.log("Rak kosong, tidak ada data yang dimuat.");
+                return;
+            }
 
-// Fungsi untuk memuat data produk
-async function loadProductData(selectedRak) {
-  if (!selectedRak) {
-    console.log("Rak kosong, tidak ada data yang dimuat.");
-    return; // Tidak melanjutkan proses jika rak kosong
-  }
+            // Bersihkan localStorage dan tabel sebelum memuat data baru
+            localStorage.removeItem('filteredProductData');
+            const dataTable = document.getElementById("dataTable");
+            while (dataTable.rows.length > 0) {
+                dataTable.deleteRow(0);
+            }
 
-  try {
-    console.log(`Memuat data untuk Rak: ${selectedRak}`);
-    const response = await fetch(GOOGLE_SHEET_URL);
-    const csvData = await response.text();
-    const rows = csvData.split('\n').filter(row => row.trim() !== '');
-    const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+            try {
+                console.log(`Memuat data untuk Rak: ${selectedRak}`);
+                const response = await fetch(GOOGLE_SHEET_URL);
+                const csvData = await response.text();
+                const rows = csvData.split('\n').filter(row => row.trim() !== '');
+                const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+                const productDatabase = rows.slice(1).map(row => {
+                    const cells = row.split(',').map(c => c.trim());
+                    return {
+                        rak: cells[0] || '',
+                        plu: cells[1] || '',
+                        barcode: cells[2] || '',
+                        description: cells[3] || ''
+                    };
+                });
 
-    const productDatabase = rows.slice(1).map(row => {
-      const cells = row.split(',').map(c => c.trim());
-      return {
-        rak: cells[0] || '',
-        plu: cells[1] || '',
-        barcode: cells[2] || '',
-        description: cells[3] || ''
-      };
-    });
+                // Filter data berdasarkan rak yang diketik
+                filteredProductDatabase = productDatabase.filter(item => {
+                    if (item.rak && item.rak.toLowerCase) {
+                        return item.rak.toLowerCase() === selectedRak.toLowerCase();
+                    }
+                    return false;
+                });
 
-    // Filter data berdasarkan rak yang diketik
-    filteredProductDatabase = productDatabase.filter(item => {
-      if (item.rak && item.rak.toLowerCase) {
-        return item.rak.toLowerCase() === selectedRak.toLowerCase();
-      }
-      return false;
-    });
+                console.log("Data setelah filter rak:", filteredProductDatabase);
 
-    console.log("Data setelah filter rak:", filteredProductDatabase);
+                // Masukkan data ke dalam tabel
+                filteredProductDatabase.forEach(item => {
+                    const row = dataTable.insertRow();
+                    row.innerHTML = `
+                        <td>${item.plu}</td>
+                        <td>${item.description}</td>
+                        <td>0</td>
+                    `;
+                });
 
-    // Masukkan data ke dalam tabel
-    const dataTable = document.getElementById("dataTable");
-    filteredProductDatabase.forEach(item => {
-      const row = dataTable.insertRow();
-      row.innerHTML = `
-        <td>${item.plu}</td>
-        <td>${item.description}</td>
-        <td>0</td>
-      `;
-    });
+                // Simpan hasil filter ke localStorage
+                localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
+            } catch (error) {
+                console.error('Gagal memuat data:', error);
+                alert('Error: Gagal memuat data dari Google Sheet!');
+            }
+        }
 
-    // Simpan hasil filter ke localStorage
-    localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
+        document.getElementById('btnGetData').addEventListener('click', function () {
+            let selectedRak = document.getElementById('rakFilter').value.trim();
+            if (!selectedRak) {
+                console.log('Textbox kosong, tidak ada data yang dimuat.');
+                return;
+            }
+            loadProductData(selectedRak);
+        });
+        
+        // Event listener untuk klik baris tabel
+const dataTable = document.getElementById("dataTable");
+dataTable.addEventListener('click', function (event) {
+    const row = event.target.closest('tr'); // Temukan baris terdekat
+    if (!row) return; // Jika tidak ada baris, hentikan proses
 
-  } catch (error) {
-    console.error('Gagal memuat data:', error);
-    alert('Error: Gagal memuat data dari Google Sheet!');
-  }
-}
+    // Ambil nilai dari kolom PLU dan Deskripsi di baris yang diklik
+    const plu = row.cells[0].textContent;
+    const description = row.cells[1].textContent;
 
-document.getElementById('btnGetData').addEventListener('click', function () {
-    let selectedRak = document.getElementById('rakFilter').value.trim();
+    // Cari produk berdasarkan PLU di filteredProductDatabase
+    const product = filteredProductDatabase.find(item => item.plu === plu);
 
-    // Jika textbox kosong, tidak lakukan apa-apa
-    if (!selectedRak) {
-        console.log('Textbox kosong, tidak ada data yang dimuat.');
-        return; // Tidak melanjutkan proses jika textbox kosong
-    }
-
-    // Hapus data lama dari localStorage
-    localStorage.removeItem('filteredProductData');
-
-    // Hapus semua baris dari tabel sebelum memuat data baru
-    const dataTable = document.getElementById("dataTable");
-    while (dataTable.rows.length > 0) {
-        dataTable.deleteRow(0);
-    }
-
-    // Panggil fungsi loadProductData dengan rak yang dipilih
-    loadProductData(selectedRak);
-});
-
-// Event listener untuk tombol "Get Data"
-document.getElementById('btnGetData').addEventListener('click', function () {
-    let selectedRak = document.getElementById('rakFilter').value.trim();
-
-    // Jika textbox kosong, tidak lakukan apa-apa
-    if (!selectedRak) {
-        console.log('Textbox kosong, tidak ada data yang dimuat.');
-        return;  // Tidak melanjutkan proses jika textbox kosong
-    }
-
-    // Jika ada input rak, panggil fungsi loadProductData dengan rak yang dipilih
-    loadProductData(selectedRak);
-});
-
-let scanner;
-const startScannerBtn = document.getElementById("startScanner");
-const scannerContainer = document.querySelector(".scanner-container");
-
-async function startScanner() {  
-    try {  
-        scannerContainer.style.display = "flex";  
-          
-        if (!scanner) {  
-            scanner = new Html5Qrcode("reader");  
-        }  
-
-        // Cek dukungan kamera  
-        const cameras = await Html5Qrcode.getCameras();  
-        if (cameras.length === 0) {  
-            throw new Error("Tidak ditemukan kamera");  
-        }  
-
-        // Mulai pemindaian barcode dengan pengaturan yang benar
-        await scanner.start(  
-            { facingMode: "environment" },  
-            {   
-                fps: 10,   
-                qrbox: {   
-                    width: 250,   
-                    height: 250   
-                },  
-                experimentalFeatures: {  
-                    useBarCodeDetectorIfSupported: true  // Hanya menggunakan deteksi barcode
-                }
-            },  
-            (decodedText) => {  
-                processBarcode(decodedText);  
-                stopScanner();  
-            },  
-            (errorMessage) => {  
-                // Hanya log error tanpa alert  
-                console.warn(`Scan Error: ${errorMessage}`);  
-            }  
-        );  
-          
-    } catch (err) {  
-        console.error(err);  
-        stopScanner();  
-        alert(`Gagal memulai scanner: ${err.message}`);  
-    }  
-}  
-
-function stopScanner() {  
-    scannerContainer.style.display = "none";  
-    if (scanner) {  
-        scanner.stop().then(() => {  
-            scanner = null;  
-        }).catch(err => console.error(err));  
-    }  
-}  
-
-// Fungsi untuk memproses barcode yang dipindai
-function processBarcode(barcode) {
-    // Trim 1 karakter terakhir dari barcode
-    const trimmedBarcode = barcode.slice(0, -1);
-
-    // Cari produk berdasarkan barcode yang telah di-trim
-    const product = filteredProductDatabase.find(item => item.barcode === trimmedBarcode);
-
-    // Reset field input
-    const barcodeInput = document.getElementById("barcodeInput");
-    const pluInput = document.getElementById("pluInput");
-    const descInput = document.getElementById("descInput");
-    const scanResults = document.getElementById("scanResults");
-
-    barcodeInput.value = "";
-    pluInput.value = "";
-    descInput.value = "";
-    scanResults.style.display = "none"; // Sembunyikan card secara default
-
-    // Jika produk ditemukan, tampilkan datanya di form
+    // Isi input di scanResults dengan data produk
     if (product) {
-        barcodeInput.value = product.barcode;
-        pluInput.value = product.plu;
-        descInput.value = product.description;
-        scanResults.style.display = "block"; // Tampilkan card jika data ditemukan
+        document.getElementById("barcodeInput").value = product.barcode || "-";
+        document.getElementById("pluInput").value = product.plu || "-";
+        document.getElementById("descInput").value = product.description || "-";
+
+        // Tampilkan scanResults
+        const scanResults = document.getElementById("scanResults");
+        scanResults.style.display = "block";
     } else {
         alert("Produk tidak ditemukan!");
     }
-}
+});
 
-// Event listener untuk tombol scan
-startScannerBtn.addEventListener("click", startScanner);
+        let scanner;
+        const startScannerBtn = document.getElementById("startScanner");
+        const scannerContainer = document.querySelector(".scanner-container");
 
-function saveData() {
+        async function startScanner() {
+            try {
+                scannerContainer.style.display = "flex";
+                if (!scanner) {
+                    scanner = new Html5Qrcode("reader");
+                }
+
+                const cameras = await Html5Qrcode.getCameras();
+                if (cameras.length === 0) {
+                    throw new Error("Tidak ditemukan kamera");
+                }
+
+                await scanner.start(
+                    { facingMode: "environment" },
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 },
+                        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                    },
+                    (decodedText) => {
+                        processBarcode(decodedText);
+                        stopScanner();
+                    },
+                    (errorMessage) => {
+                        console.warn(`Scan Error: ${errorMessage}`);
+                    }
+                );
+            } catch (err) {
+                console.error(err);
+                stopScanner();
+                alert(`Gagal memulai scanner: ${err.message}`);
+            }
+        }
+
+        function stopScanner() {
+            scannerContainer.style.display = "none";
+            if (scanner) {
+                scanner.stop().then(() => {
+                    scanner = null;
+                }).catch(err => console.error(err));
+            }
+        }
+
+        function processBarcode(barcode) {
+            const trimmedBarcode = barcode.slice(0, -1);
+            const product = filteredProductDatabase.find(item => item.barcode === trimmedBarcode);
+
+            const barcodeInput = document.getElementById("barcodeInput");
+            const pluInput = document.getElementById("pluInput");
+            const descInput = document.getElementById("descInput");
+            const scanResults = document.getElementById("scanResults");
+
+            barcodeInput.value = "";
+            pluInput.value = "";
+            descInput.value = "";
+            scanResults.style.display = "none";
+
+            if (product) {
+                barcodeInput.value = product.barcode;
+                pluInput.value = product.plu;
+                descInput.value = product.description;
+                scanResults.style.display = "block";
+            } else {
+                alert("Produk tidak ditemukan!");
+            }
+        }
+
+        startScannerBtn.addEventListener("click", startScanner);
+
+        function saveData() {
     const barcodeInput = document.getElementById("barcodeInput");
     const pluInput = document.getElementById("pluInput");
     const descInput = document.getElementById("descInput");
@@ -406,62 +363,88 @@ function saveData() {
 
     const plu = pluInput.value;
     const description = descInput.value;
+    const barcode = barcodeInput.value; // Ambil nilai barcode
     const qty = parseInt(qtyInput.value);
 
-    // Validasi input
     if (!plu || !description || !qty) {
         alert("Harap isi semua field!");
         return;
     }
 
-    // Cari baris yang sudah ada berdasarkan PLU
+    // Cari produk berdasarkan PLU di tabel
     const existingRow = Array.from(dataTable.rows).find(row => row.cells[0].textContent === plu);
-    if (existingRow) {
-        const currentQty = parseInt(existingRow.cells[2].textContent);
-        existingRow.cells[2].textContent = currentQty + qty;
-    } else {
-        // Tambahkan baris baru jika PLU belum ada
-        const newRow = dataTable.insertRow();
-        newRow.innerHTML = `
-            <td>${plu}</td>
-            <td>${description}</td>
-            <td>${qty}</td>
-        `;
+
+    if (!existingRow) {
+        // Jika produk tidak ditemukan, tolak penambahan
+        alert("Produk tidak ditemukan di database. Penambahan produk baru ditolak.");
+        return;
     }
 
-    // Sembunyikan card setelah data disimpan
-    scanResults.style.display = "none";
+    // Jika produk ditemukan, perbarui nilai Qty
+    const currentQty = parseInt(existingRow.cells[2].textContent);
+    existingRow.cells[2].textContent = currentQty + qty;
 
-    // Reset nilai input
+    // Ambil nilai Rak dari filteredProductDatabase berdasarkan PLU
+    const product = filteredProductDatabase.find(item => item.plu === plu);
+    const rak = product ? product.rak : '-'; // Gunakan nilai default '-' jika tidak ditemukan
+
+    // Sembunyikan hasil scan
+    scanResults.style.display = "none";
     barcodeInput.value = "";
     pluInput.value = "";
     descInput.value = "";
     qtyInput.value = 1;
+
+    // Perbarui localStorage dengan nilai Rak, Barcode, dan Qty
+    updateLocalStorage(rak, plu, barcode, description, currentQty + qty);
 }
 
-startScannerBtn.addEventListener("click", startScanner);
+   function updateLocalStorage(rak, plu, barcode, description, qty) {
+    // Ambil data produk dari localStorage
+    let products = JSON.parse(localStorage.getItem('filteredProductData')) || [];
 
-window.addEventListener('error', (e) => {
-    if (e.target.src.includes('jsondata.js')) {
-        alert("Error: File data produk tidak dapat dimuat!");
+    // Cari produk berdasarkan PLU
+    const productIndex = products.findIndex(item => item.plu === plu);
+
+    if (productIndex !== -1) {
+        // Jika produk sudah ada, perbarui nilai Qty
+        products[productIndex].qty = qty;
+    } else {
+        // Jika produk belum ada, tambahkan sebagai objek baru
+        products.push({
+            rak: rak,
+            plu: plu,
+            barcode: barcode,
+            description: description,
+            qty: qty
+        });
     }
-});
 
-document.getElementById('nextPageBtn').addEventListener('click', function () {
-    // Ambil data dari localStorage
+    // Simpan data produk yang diperbarui ke localStorage
+    localStorage.setItem('filteredProductData', JSON.stringify(products));
+}
+
+   
+
+        document.getElementById('nextPageBtn').addEventListener('click', function () {
+    // Ambil data produk dari localStorage
     const filteredProductData = localStorage.getItem('filteredProductData');
-
     if (!filteredProductData) {
         alert("Tidak ada data yang dapat dibawa ke halaman berikutnya!");
         return;
     }
 
-    // Simpan data ke sessionStorage agar tersedia di halaman berikutnya
+    // Parse data dari JSON
+    const products = JSON.parse(filteredProductData);
+
+ 
+
+    // Simpan data ke sessionStorage untuk digunakan di halaman berikutnya
     sessionStorage.setItem('filteredProductData', filteredProductData);
 
     // Redirect ke halaman berikutnya
     window.location.href = 'next-page.html';
 });
-</script>
+    </script>
 </body>
 </html>
