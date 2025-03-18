@@ -1,73 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto+Slab:wght@500;700&display=swap"
-        rel="stylesheet" />
-        <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto+Slab:wght@500;700&display=swap"
-        rel="stylesheet"/>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-        crossorigin="anonymous"/>
-    <link rel="stylesheet" href="dash.css" />
-    <link rel="stylesheet" href="next-page.css" />
-    <title>Next Page</title>
+    <title>Halaman Berikutnya</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --hover-color: #1d4ed8;
+        }
+        body {
+            background-color: #f8f9fa;
+            padding: 16px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 12px;
+        }
+        .table-container {
+            max-height: 75vh; /* Maksimum tinggi tabel 3/4 layar */
+            overflow-y: auto; /* Aktifkan scroll vertikal */
+            border: 1px solid #dee2e6; /* Tambahkan border untuk estetika */
+            border-radius: 8px;
+        }
+    </style>
 </head>
-
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <button class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <div class="nav-links">
-                <div class="nav-item">Dashboard</div>
-                <div class="nav-item">Analytics</div>
-                <div class="nav-item">Reports</div>
-                <div class="nav-item">Settings</div>
-            </div>
+    <div class="container mt-4">
+        <h3 class="text-center mb-4 fw-bold text-primary">Data Produk dari Halaman Sebelumnya</h3>
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>PLU</th>
+                        <th>Deskripsi</th>
+                        <th>Qty</th>
+                        <th>OH</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable"></tbody>
+            </table>
         </div>
-    </nav>
 
-    
-    <div class="container">
-        <!-- Result Container -->
-        <div class="card-container" id="resultContainer"></div>
-        <!-- No Results Message -->
-        <div id="noResults" class="no-data" style="display: none">
-          Tidak ada data yang ditemukan
+        <!-- Tombol Next Page -->
+        <div class="mt-4 text-end">
+            <button id="nextPageBtn" class="btn btn-success">Next Page</button>
         </div>
-      </div>
     </div>
 
-     <!-- Button Container -->
-     <div class="button-container" id="toggleViewButton">
-        <!--Button cek selisih-->
-        <div class="cek-button">
-           <button type="button" class="btn btn-warning" onclick="redirectTo('tabelselisih.html')">
-            Cek Selisih
-          </button>
-        </div>
-      </div>
-    
+    <script>
+        // Ambil data dari sessionStorage
+        const filteredProductData = sessionStorage.getItem('filteredProductData');
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>© 2024 3D Dashboard. All rights reserved.</p>
-    </footer>
-    <script src="next-page.js"></script>
+        if (!filteredProductData) {
+            alert("Tidak ada data yang ditemukan!");
+        } else {
+            // Parse data dari JSON
+            const products = JSON.parse(filteredProductData);
+
+            // Masukkan data ke dalam tabel
+            const dataTable = document.getElementById("dataTable");
+            products.forEach((item, index) => {
+                const row = dataTable.insertRow();
+                row.innerHTML = `
+                    <td>${item.plu}</td>
+                    <td>${item.description}</td>
+                    <td>${item.qty || 0}</td>
+                    <td><input type="number" class="form-control oh-input" value="${item.oh || 0}" min="0" data-index="${index}"></td>
+                `;
+            });
+
+            // Tambahkan event listener untuk setiap input OH
+            const ohInputs = document.querySelectorAll('.oh-input');
+            ohInputs.forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const index = event.target.dataset.index;
+                    const newOH = parseInt(event.target.value);
+                    products[index].oh = newOH;
+
+                    // Perbarui data di sessionStorage
+                    sessionStorage.setItem('filteredProductData', JSON.stringify(products));
+                });
+            });
+        }
+
+        // Event listener untuk tombol "Next Page"
+        document.getElementById('nextPageBtn').addEventListener('click', function () {
+            // Ambil data dari sessionStorage
+            const filteredProductData = sessionStorage.getItem('filteredProductData');
+
+            if (!filteredProductData) {
+                alert("Tidak ada data yang dapat dibawa ke halaman berikutnya!");
+                return;
+            }
+
+            // Simpan data ke sessionStorage agar tersedia di halaman berikutnya
+            sessionStorage.setItem('filteredProductData', filteredProductData);
+
+            // Redirect ke halaman berikutnya
+            window.location.href = 'another-page.html';
+        });
+    </script>
 </body>
-
 </html>
