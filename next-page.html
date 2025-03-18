@@ -33,16 +33,15 @@
         <h3 class="text-center mb-4 fw-bold text-primary">Data Produk dari Halaman Sebelumnya</h3>
         <div class="table-container">
             <table class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>PLU</th>
-                        <th>Deskripsi</th>
-                        <th>Qty</th>
-                        <th>OH</th>
-                    </tr>
-                </thead>
-                <tbody id="dataTable"></tbody>
-            </table>
+    <thead class="table-light">
+        <tr>
+            <th>PLU</th>
+            <th>Deskripsi</th>
+            <th>OH</th>
+        </tr>
+    </thead>
+    <tbody id="dataTable"></tbody>
+</table>
         </div>
 
         <!-- Tombol Next Page -->
@@ -52,57 +51,79 @@
     </div>
 
     <script>
+        
         // Ambil data dari sessionStorage
-        const filteredProductData = sessionStorage.getItem('filteredProductData');
+const filteredProductData = sessionStorage.getItem('filteredProductData');
 
-        if (!filteredProductData) {
-            alert("Tidak ada data yang ditemukan!");
-        } else {
-            // Parse data dari JSON
-            const products = JSON.parse(filteredProductData);
+if (!filteredProductData) {
+    alert("Tidak ada data yang ditemukan!");
+} else {
+    // Parse data dari JSON
+    const products = JSON.parse(filteredProductData);
 
-            // Masukkan data ke dalam tabel
-            const dataTable = document.getElementById("dataTable");
-            products.forEach((item, index) => {
-                const row = dataTable.insertRow();
-                row.innerHTML = `
-                    <td>${item.plu}</td>
-                    <td>${item.description}</td>
-                    <td>${item.qty || 0}</td>
-                    <td><input type="number" class="form-control oh-input" value="${item.oh || 0}" min="0" data-index="${index}"></td>
-                `;
-            });
+    // Masukkan data ke dalam tabel
+    const dataTable = document.getElementById("dataTable");
+    products.forEach((item, index) => {
+        const row = dataTable.insertRow();
+        row.innerHTML = `
+            <td>${item.plu}</td>
+            <td>${item.description}</td>
+            <td><input type="number" class="form-control oh-input" value="${item.oh || 0}" min="0" data-index="${index}"></td>
+        `;
+    });
 
-            // Tambahkan event listener untuk setiap input OH
-            const ohInputs = document.querySelectorAll('.oh-input');
-            ohInputs.forEach(input => {
-                input.addEventListener('change', (event) => {
-                    const index = event.target.dataset.index;
-                    const newOH = parseInt(event.target.value);
-                    products[index].oh = newOH;
+    // Simpan data produk ke variabel global
+    window.products = products;
 
-                    // Perbarui data di sessionStorage
-                    sessionStorage.setItem('filteredProductData', JSON.stringify(products));
-                });
-            });
-        }
+    // Event listener untuk input OH
+    const ohInputs = document.querySelectorAll('.oh-input');
+    ohInputs.forEach(input => {
+        input.addEventListener('change', (event) => {
+            const index = event.target.dataset.index;
+            const newOH = parseInt(event.target.value);
 
-        // Event listener untuk tombol "Next Page"
-        document.getElementById('nextPageBtn').addEventListener('click', function () {
-            // Ambil data dari sessionStorage
-            const filteredProductData = sessionStorage.getItem('filteredProductData');
-
-            if (!filteredProductData) {
-                alert("Tidak ada data yang dapat dibawa ke halaman berikutnya!");
+            if (isNaN(newOH) || newOH < 0) {
+                alert("Nilai OH harus berupa angka positif!");
+                event.target.value = products[index].oh || 0; // Kembalikan ke nilai sebelumnya
                 return;
             }
 
-            // Simpan data ke sessionStorage agar tersedia di halaman berikutnya
-            sessionStorage.setItem('filteredProductData', filteredProductData);
+            // Update nilai OH di data produk
+            products[index].oh = newOH;
 
-            // Redirect ke halaman berikutnya
-            window.location.href = 'another-page.html';
+            // Perbarui data di sessionStorage
+            sessionStorage.setItem('filteredProductData', JSON.stringify(products));
         });
+    });
+}
+
+        // Event listener untuk tombol "Next Page"
+        document.getElementById('nextPageBtn').addEventListener('click', function () {
+    // Ambil data dari sessionStorage
+    const filteredProductData = sessionStorage.getItem('filteredProductData');
+
+    if (!filteredProductData) {
+        alert("Tidak ada data yang dapat dibawa ke halaman berikutnya!");
+        return;
+    }
+
+    // Parse data dari JSON
+    const products = JSON.parse(filteredProductData);
+
+    // Tampilkan struktur data di console
+    console.log("Struktur data yang akan dikirim:", products);
+
+   
+
+    // Simpan data ke sessionStorage untuk digunakan di Halaman 3
+    sessionStorage.setItem('filteredProductData', JSON.stringify(products));
+
+    // Redirect ke Halaman 3
+    window.location.href = 'another-page.html';
+});
+        
+        const selectedRak = sessionStorage.getItem('selectedRak') || '-';
+console.log("Rak yang dipilih:", selectedRak);
     </script>
 </body>
 </html>
