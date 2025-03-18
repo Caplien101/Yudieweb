@@ -55,25 +55,18 @@
             color: red;
             font-weight: bold;
         }
+        .hidden-row {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-4">
         <h3 class="text-center mb-4 fw-bold text-primary">Data Produk Akhir</h3>
-        <div class="table-container">
-            <table class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>PLU</th>
-                        <th>Deskripsi</th>
-                        <th>Qty</th>
-                        <th>OH</th>
-                        <th>Revisi Qty</th>
-                        <th>Selisih</th>
-                    </tr>
-                </thead>
-                <tbody id="dataTable"></tbody>
-            </table>
+
+        <!-- Tombol Tampilkan Item Selisih -->
+        <div class="mb-3 text-center">
+            <button id="filterButton" class="btn btn-primary">Tampilkan Item Selisih</button>
         </div>
 
         <!-- Card untuk Menampilkan Detail -->
@@ -109,7 +102,26 @@
                 </div>
             </div>
         </div>
+
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>PLU</th>
+                        <th>Deskripsi</th>
+                        <th>Qty</th>
+                        <th>OH</th>
+                        <th>Revisi Qty</th>
+                        <th>Selisih</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable"></tbody>
+            </table>
+        </div>
     </div>
+    <div class="mb-3 mt-3 text-center">
+    <button id="sendDataButton" class="btn btn-success">Send Data to Server</button>
+</div>
 
     <script>
         // Ambil data dari sessionStorage
@@ -216,7 +228,85 @@
                     detailCard.style.display = 'none';
                 }, 300); // Sinkronkan dengan durasi transisi (0.3s)
             });
+
+            // Filter Button Logic
+            let isFiltered = false;
+            const filterButton = document.getElementById('filterButton');
+            filterButton.addEventListener('click', () => {
+                isFiltered = !isFiltered; // Toggle status filter
+
+                // Ubah teks tombol sesuai mode
+                filterButton.textContent = isFiltered ? 'Tampilkan Semua' : 'Tampilkan Item Selisih';
+
+                // Iterasi setiap baris tabel
+                Array.from(dataTable.rows).forEach(row => {
+                    const selisihCell = row.cells[5];
+                    const selisihValue = parseFloat(selisihCell.textContent);
+
+                    // Tampilkan atau sembunyikan baris berdasarkan selisih
+                    if (isFiltered && selisihValue === 0) {
+                        row.classList.add('hidden-row'); // Sembunyikan baris
+                    } else {
+                        row.classList.remove('hidden-row'); // Tampilkan baris
+                    }
+                });
+            });
         }
+        
+        document.getElementById('sendDataButton').addEventListener('click', async () => {
+    // Ambil data terbaru dari sessionStorage
+    const filteredProductData = sessionStorage.getItem('filteredProductData');
+    
+    if (!filteredProductData) {
+        alert("Tidak ada data yang ditemukan!");
+        return;
+    }
+    
+    const products = JSON.parse(filteredProductData);
+
+    // Siapkan data yang akan dikirim
+    const dataToSend = products.map(product => ({
+        rak: product.rak || "-", // Ambil dari data asli
+        plu: product.plu,
+        barcode: product.barcode || "-", // Ambil dari data asli
+        description: product.description,
+        qty: product.qty || 0,
+        oh: product.oh || 0,
+        revisiQty: product.revisiQty || product.qty || 0,
+        selisih: (product.revisiQty || product.qty || 0) - (product.oh || 0)
+    }));
+
+    // Tampilkan data di konsol untuk inspeksi
+    console.log("Data yang dikirim:", JSON.stringify(dataToSend, null, 2));
+
+    // Kirim data ke server
+    const googleAppsScriptUrl = 'https://script.google.com/macros/s/AKfycby1_IYhyGXWEwNXYwzRcWeSlvLPf6h7b9YwLBAY54fOZCcugih1ZzCRdg7nJqhjTzoZuw/exec';
+try {
+    const response = await fetch(googleAppsScriptUrl, {
+        method: 'POST',
+        body: JSON.stringify(dataToSend),
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+        }
+    });
+
+    if (response.ok) {
+        // Bersihkan sessionStorage/localStorage
+        sessionStorage.removeItem('filteredProductData'); // Hapus data spesifik
+        localStorage.clear(); // Atau hapus semua data storage
+        
+        // Tampilkan alert dan redirect
+        alert("Data berhasil dikirim!");
+        window.location.href = 'Scanner.html'; // Ganti dengan path yang benar
+    } else {
+        alert("Gagal mengirim data. Status: " + response.status);
+    }
+} catch (error) {
+    alert("Error: " + error.message);
+}
+});
+    
+        
     </script>
 </body>
 </html>
