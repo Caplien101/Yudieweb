@@ -114,14 +114,7 @@
         <!-- Header -->
         <h3 class="text-center mb-4 fw-bold text-primary">Entry Data</h3>
         <!-- Input rak + Button dalam satu baris -->
-        <div class="row mb-3 align-items-center">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <input type="text" id="rakFilter" class="form-control" placeholder="Masukkan Rak (contoh: AT1)" aria-label="Rak Filter">
-                    <button id="btnGetData" class="btn btn-primary" type="button">Get Data</button>
-                </div>
-            </div>
-        </div>
+        <div class="row mb-3 align-items-center"> <div class="col-md-6"> <div class="input-group"> <!-- Input untuk filter rak --> <input type="text" id="rakFilter" class="form-control" placeholder="Masukkan Rak (contoh: AT1)" aria-label="Rak Filter"> <!-- Tombol dengan spinner --> <button id="btnGetData" class="btn btn-primary" type="button"> Get Data <span id="loadingSpinner" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true" style="display: none;"></span> </button> </div> </div> </div>
         <!-- Scanner Overlay -->
         <div class="scanner-container">
             <div id="reader"></div>
@@ -184,74 +177,95 @@
     </button>
     <script>
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ14bYNZ3F2E36Rd5kuE9T0-pIhwr-ZwUwre3FYlbmAGsnTTvwCcQz6pI56mIiEvakAzsNuv1WGCM6B/pub?gid=0&single=true&output=csv';
-        let filteredProductDatabase = [];
+let filteredProductDatabase = [];
+let isLoading = false; // Flag untuk mencegah pemanggilan ganda
 
-        // Fungsi untuk memuat data produk
-        async function loadProductData(selectedRak) {
-            if (!selectedRak) {
-                console.log("Rak kosong, tidak ada data yang dimuat.");
-                return;
-            }
+// Fungsi untuk memuat data produk
+async function loadProductData(selectedRak) {
+    if (!selectedRak) {
+        console.log("Rak kosong, tidak ada data yang dimuat.");
+        return;
+    }
 
-            // Bersihkan localStorage dan tabel sebelum memuat data baru
-            localStorage.removeItem('filteredProductData');
-            const dataTable = document.getElementById("dataTable");
-            while (dataTable.rows.length > 0) {
-                dataTable.deleteRow(0);
-            }
+    // Bersihkan localStorage dan tabel sebelum memuat data baru
+    localStorage.removeItem('filteredProductData');
+    const dataTable = document.getElementById("dataTable");
+    while (dataTable.rows.length > 1) { // Hapus semua baris kecuali header
+        dataTable.deleteRow(1);
+    }
 
-            try {
-                console.log(`Memuat data untuk Rak: ${selectedRak}`);
-                const response = await fetch(GOOGLE_SHEET_URL);
-                const csvData = await response.text();
-                const rows = csvData.split('\n').filter(row => row.trim() !== '');
-                const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-                const productDatabase = rows.slice(1).map(row => {
-                    const cells = row.split(',').map(c => c.trim());
-                    return {
-                        rak: cells[0] || '',
-                        plu: cells[1] || '',
-                        barcode: cells[2] || '',
-                        description: cells[3] || ''
-                    };
-                });
-
-                // Filter data berdasarkan rak yang diketik
-                filteredProductDatabase = productDatabase.filter(item => {
-                    if (item.rak && item.rak.toLowerCase) {
-                        return item.rak.toLowerCase() === selectedRak.toLowerCase();
-                    }
-                    return false;
-                });
-
-                console.log("Data setelah filter rak:", filteredProductDatabase);
-
-                // Masukkan data ke dalam tabel
-                filteredProductDatabase.forEach(item => {
-                    const row = dataTable.insertRow();
-                    row.innerHTML = `
-                        <td>${item.plu}</td>
-                        <td>${item.description}</td>
-                        <td>0</td>
-                    `;
-                });
-
-                // Simpan hasil filter ke localStorage
-                localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
-            } catch (error) {
-                console.error('Gagal memuat data:', error);
-                alert('Error: Gagal memuat data dari Google Sheet!');
-            }
-        }
-
-        document.getElementById('btnGetData').addEventListener('click', function () {
-            let selectedRak = document.getElementById('rakFilter').value.trim();
-            if (!selectedRak) {
-                console.log('Textbox kosong, tidak ada data yang dimuat.');
-                return;
-            }
-            loadProductData(selectedRak);
+    try {
+        console.log(`Memuat data untuk Rak: ${selectedRak}`);
+        const response = await fetch(GOOGLE_SHEET_URL);
+        const csvData = await response.text();
+        const rows = csvData.split('\n').filter(row => row.trim() !== '');
+        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+        const productDatabase = rows.slice(1).map(row => {
+            const cells = row.split(',').map(c => c.trim());
+            return {
+                rak: cells[0] || '',
+                plu: cells[1] || '',
+                barcode: cells[2] || '',
+                description: cells[3] || ''
+            };
         });
+
+        // Filter data berdasarkan rak yang diketik
+        filteredProductDatabase = productDatabase.filter(item => {
+            if (item.rak && item.rak.toLowerCase) {
+                return item.rak.toLowerCase() === selectedRak.toLowerCase();
+            }
+            return false;
+        });
+
+        console.log("Data setelah filter rak:", filteredProductDatabase);
+
+        // Masukkan data ke dalam tabel
+        filteredProductDatabase.forEach(item => {
+            const row = dataTable.insertRow();
+            row.innerHTML = `
+                <td>${item.plu}</td>
+                <td>${item.description}</td>
+                <td>0</td>
+            `;
+        });
+
+        // Simpan hasil filter ke localStorage
+        localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
+    } catch (error) {
+        console.error('Gagal memuat data:', error);
+        alert('Error: Gagal memuat data dari Google Sheet!');
+    }
+}
+
+document.getElementById('btnGetData').addEventListener('click', function () {
+    const button = document.getElementById('btnGetData');
+    const spinner = document.getElementById('loadingSpinner');
+    let selectedRak = document.getElementById('rakFilter').value.trim();
+
+    if (!selectedRak) {
+        console.log('Textbox kosong, tidak ada data yang dimuat.');
+        return;
+    }
+
+    if (isLoading) {
+        console.log('Proses sedang berjalan, harap tunggu...');
+        return;
+    }
+
+    // Aktifkan spinner dan nonaktifkan tombol
+    isLoading = true;
+    button.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    // Panggil fungsi loadProductData
+    loadProductData(selectedRak).finally(() => {
+        // Matikan spinner dan aktifkan kembali tombol
+        isLoading = false;
+        button.disabled = false;
+        spinner.style.display = 'none';
+    });
+});
         
         // Event listener untuk klik baris tabel
 const dataTable = document.getElementById("dataTable");
