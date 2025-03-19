@@ -58,6 +58,10 @@
         .hidden-row {
             display: none;
         }
+        
+        .hidden-column {
+    display: none; /* Sembunyikan kolom */
+}
     </style>
 </head>
 <body>
@@ -106,21 +110,25 @@
         <div class="table-container">
             <table class="table table-hover">
                 <thead class="table-light">
-                    <tr>
-                        <th>PLU</th>
-                        <th>Deskripsi</th>
-                        <th>Qty</th>
-                        <th>OH</th>
-                        <th>Revisi Qty</th>
-                        <th>Selisih</th>
-                    </tr>
-                </thead>
-                <tbody id="dataTable"></tbody>
+    <tr>
+        <th>PLU</th>
+        <th>Deskripsi</th>
+        <th class="hidden-column">Qty</th> <!-- Sembunyikan kolom Qty -->
+        <th>OH</th>
+        <th>Revisi Qty</th>
+        <th>Selisih</th>
+    </tr>
+</thead>
+<tbody id="dataTable"></tbody>
             </table>
         </div>
     </div>
     <div class="mb-3 mt-3 text-center">
-    <button id="sendDataButton" class="btn btn-success">Send Data to Server</button>
+  <!-- Tombol dengan spinner -->
+<button id="sendDataButton" class="btn btn-primary">
+    Kirim Data
+    <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+</button>
 </div>
 
     <script>
@@ -136,19 +144,18 @@
             // Masukkan data ke dalam tabel
             const dataTable = document.getElementById("dataTable");
             products.forEach((item, index) => {
-                // Hitung selisih awal (Qty - OH)
-                const selisih = (item.qty || 0) - (item.oh || 0);
-
-                const row = dataTable.insertRow();
-                row.innerHTML = `
-                    <td>${item.plu}</td>
-                    <td>${item.description}</td>
-                    <td>${item.qty || 0}</td>
-                    <td>${item.oh || 0}</td>
-                    <td><input type="number" class="form-control revisi-qty-input" value="${item.revisiQty || item.qty || 0}" min="0" readonly></td>
-                    <td class="${selisih > 0 ? 'positive' : selisih < 0 ? 'negative' : ''}">${selisih}</td>
-                `;
-            });
+    // Hitung selisih awal (Qty - OH)
+    const selisih = (item.qty || 0) - (item.oh || 0);
+    const row = dataTable.insertRow();
+    row.innerHTML = `
+        <td>${item.plu}</td>
+        <td>${item.description}</td>
+        <td class="hidden-column">${item.qty || 0}</td> <!-- Sembunyikan kolom Qty -->
+        <td>${item.oh || 0}</td>
+        <td><input type="number" class="form-control revisi-qty-input" value="${item.revisiQty || item.qty || 0}" min="0" readonly></td>
+        <td class="${selisih > 0 ? 'positive' : selisih < 0 ? 'negative' : ''}">${selisih}</td>
+    `;
+});
 
             // Event listener untuk klik baris tabel
             dataTable.addEventListener('click', function (event) {
@@ -254,56 +261,70 @@
         }
         
         document.getElementById('sendDataButton').addEventListener('click', async () => {
-    // Ambil data terbaru dari sessionStorage
-    const filteredProductData = sessionStorage.getItem('filteredProductData');
-    
-    if (!filteredProductData) {
-        alert("Tidak ada data yang ditemukan!");
-        return;
-    }
-    
-    const products = JSON.parse(filteredProductData);
+    // Ambil elemen tombol dan spinner
+    const button = document.getElementById('sendDataButton');
+    const spinner = document.getElementById('spinner');
 
-    // Siapkan data yang akan dikirim
-    const dataToSend = products.map(product => ({
-        rak: product.rak || "-", // Ambil dari data asli
-        plu: product.plu,
-        barcode: product.barcode || "-", // Ambil dari data asli
-        description: product.description,
-        qty: product.qty || 0,
-        oh: product.oh || 0,
-        revisiQty: product.revisiQty || product.qty || 0,
-        selisih: (product.revisiQty || product.qty || 0) - (product.oh || 0)
-    }));
+    // Nonaktifkan tombol dan tampilkan spinner
+    button.disabled = true; // Nonaktifkan tombol
+    spinner.style.display = 'inline-block'; // Tampilkan spinner
+    button.innerHTML = 'Mengirim Data... '; // Ubah teks tombol
 
-    // Tampilkan data di konsol untuk inspeksi
-    console.log("Data yang dikirim:", JSON.stringify(dataToSend, null, 2));
+    try {
+        // Ambil data terbaru dari sessionStorage
+        const filteredProductData = sessionStorage.getItem('filteredProductData');
 
-    // Kirim data ke server
-    const googleAppsScriptUrl = 'https://script.google.com/macros/s/AKfycby1_IYhyGXWEwNXYwzRcWeSlvLPf6h7b9YwLBAY54fOZCcugih1ZzCRdg7nJqhjTzoZuw/exec';
-try {
-    const response = await fetch(googleAppsScriptUrl, {
-        method: 'POST',
-        body: JSON.stringify(dataToSend),
-        headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
+        if (!filteredProductData) {
+            alert("Tidak ada data yang ditemukan!");
+            return;
         }
-    });
 
-    if (response.ok) {
-        // Bersihkan sessionStorage/localStorage
-        sessionStorage.removeItem('filteredProductData'); // Hapus data spesifik
-        localStorage.clear(); // Atau hapus semua data storage
-        
-        // Tampilkan alert dan redirect
-        alert("Data berhasil dikirim!");
-        window.location.href = 'Scanner.html'; // Ganti dengan path yang benar
-    } else {
-        alert("Gagal mengirim data. Status: " + response.status);
+        const products = JSON.parse(filteredProductData);
+
+        // Siapkan data yang akan dikirim
+        const dataToSend = products.map(product => ({
+            rak: product.rak || "-", // Ambil dari data asli
+            plu: product.plu,
+            barcode: product.barcode || "-", // Ambil dari data asli
+            description: product.description,
+            qty: product.qty || 0,
+            oh: product.oh || 0,
+            revisiQty: product.revisiQty || product.qty || 0,
+            selisih: (product.revisiQty || product.qty || 0) - (product.oh || 0)
+        }));
+
+        // Tampilkan data di konsol untuk inspeksi
+        console.log("Data yang dikirim:", JSON.stringify(dataToSend, null, 2));
+
+        // Kirim data ke server
+        const googleAppsScriptUrl = 'https://script.google.com/macros/s/AKfycby1_IYhyGXWEwNXYwzRcWeSlvLPf6h7b9YwLBAY54fOZCcugih1ZzCRdg7nJqhjTzoZuw/exec';
+        const response = await fetch(googleAppsScriptUrl, {
+            method: 'POST',
+            body: JSON.stringify(dataToSend),
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            }
+        });
+
+        if (response.ok) {
+            // Bersihkan sessionStorage/localStorage
+            sessionStorage.removeItem('filteredProductData'); // Hapus data spesifik
+            localStorage.clear(); // Atau hapus semua data storage
+
+            // Tampilkan alert dan redirect
+            alert("Data berhasil dikirim!");
+            window.location.href = 'Scanner.html'; // Ganti dengan path yang benar
+        } else {
+            alert("Gagal mengirim data. Status: " + response.status);
+        }
+    } catch (error) {
+        alert("Error: " + error.message);
+    } finally {
+        // Aktifkan kembali tombol dan sembunyikan spinner
+        button.disabled = false; // Aktifkan tombol
+        spinner.style.display = 'none'; // Sembunyikan spinner
+        button.innerHTML = 'Kirim Data'; // Kembalikan teks tombol
     }
-} catch (error) {
-    alert("Error: " + error.message);
-}
 });
     
         
