@@ -139,7 +139,7 @@
                             readonly
                         />
                     </div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-6" style="display: none;">
                         <label class="form-label">OH</label>
                         <input
                             type="text"
@@ -184,7 +184,7 @@
                             <th>Deskripsi</th>
                             <th class="hidden-column">Qty</th>
                             <!-- Sembunyikan kolom Qty -->
-                            <th>OH</th>
+                            <th class="hidden-column">OH</th>
                             <th>Revisi Qty</th>
                             <th>Selisih</th>
                         </tr>
@@ -244,7 +244,7 @@
                     <td class="hidden-column">${
                         item.qty || 0
                     }</td> <!-- Sembunyikan kolom Qty -->
-                    <td>${item.oh || 0}</td>
+                    <td class="hidden-column">${item.oh || 0}</td>
                     <td><input type="number" class="form-control revisi-qty-input" value="${
                         item.revisiQty || item.qty || 0
                     }" min="0" readonly></td>
