@@ -11,9 +11,6 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
         }
-        html {
-    text-size-adjust: 100%; /* Mencegah browser mengubah ukuran font */
-}
         .card {
             background: linear-gradient(45deg, #ffffff, #e0eafc);
             border: none;
@@ -25,12 +22,12 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         .card-title {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #2c3e50;
         }
         .card-text {
-            font-size: 0.9rem;
             color: #34495e;
+            font-size: 0.8rem;
         }
         .edit-icon {
             font-size: 1.2rem;
@@ -82,10 +79,10 @@
     z-index: 1060; /* Pastikan muncul di atas modal */
 }
 
-/* Tambahkan di bagian style */
-#cardContainer {
-    min-height: 75vh; /* 3/4 tinggi layar */
-    overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
+    /* Tambahkan di bagian style */
+    #tableContainer {
+    min-height: 80vh; /* 3/4 tinggi layar */
+    overflow-y: auto; /* Tambahkan scroll jika konten melebihi       tinggi */
     margin-bottom: 20px; /* Optional: jarak bawah */
 }
 
@@ -116,6 +113,31 @@
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     z-index: 1050;
+}
+/* Gaya untuk baris tabel yang dapat diklik */
+.table tbody tr:hover {
+    background-color: #e9f7ef; /* Warna latar belakang saat hover */
+    cursor: pointer; /* Ubah kursor menjadi pointer */
+}
+
+/* Efek highlight saat baris diklik */
+.table tbody tr:focus {
+    outline: none;
+    background-color: #d4edda; /* Warna latar belakang saat diklik */
+}
+
+
+/* Gaya untuk freeze header tabel */
+#tableContainer {
+    max-height: 75vh; /* Sesuaikan tinggi maksimal tabel */
+    overflow-y: auto; /* Aktifkan scroll vertikal */
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Opsi: tambahkan bayangan untuk pemisah */
 }
         
     </style>
@@ -166,10 +188,19 @@
 </div>
  <br>
         
-        <!-- Ganti card container dengan struktur berikut -->
-<div id="cardContainer" class="row g-4" 
-     style="height: 75vh; overflow-y: auto; margin-top: 5px; margin-bottom: 10px;">
-    <!-- Cards akan muncul di sini -->
+        <div id="tableContainer" class="mt-4">
+    <table class="table table-bordered table-hover">
+        <thead class="table-secondary">
+            <tr>
+                <th>PLU</th>
+                <th>Description</th>
+                <th>Qty</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data rows -->
+        </tbody>
+    </table>
 </div>
 
         <!-- Add Data Modal -->
@@ -302,57 +333,41 @@
 
         function displayData(searchTerm = '') {
     const storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
-    let filteredData = storedData.filter(item => parseInt(item.qty) > 0);
-    
+    let filteredData = storedData
+        .map((item, originalIndex) => ({ ...item, originalIndex })) // Simpan indeks asli
+        .filter(item => parseInt(item.qty) > 0);
+
     // Filter berdasarkan pencarian
-    if(searchTerm) {
+    if (searchTerm) {
         searchTerm = searchTerm.toLowerCase();
-        filteredData = filteredData.filter(item => 
+        filteredData = filteredData.filter(item =>
             item.description.toLowerCase().includes(searchTerm) ||
-            item.rak.toLowerCase().includes(searchTerm) ||
-            item.plu.toLowerCase().includes(searchTerm) ||
-            item.barcode.toLowerCase().includes(searchTerm)
+            item.plu.toLowerCase().includes(searchTerm)
         );
     }
-    
-    const container = document.getElementById("cardContainer");
-    container.innerHTML = "";
-    
+
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
     filteredData.forEach((item) => {
-        // Dapatkan indeks asli di storedData
-        const originalIndex = storedData.indexOf(item);
-        
-        const card = `
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <!-- Info Row -->
-                        <div class="row mb-3 info-row">
-                            <div class="col">${item.rak}</div>
-                            <div class="col">${item.plu}</div>
-                            <div class="col">${item.barcode}</div>
-                        </div>
-                        <!-- Description -->
-                        <div class="row mb-3 data-row">
-                            ${item.description}
-                        </div>
-                        <!-- Qty & Timestamp -->
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <span class="badge bg-primary">Qty: ${item.qty}</span>
-                            </div>
-                            <div class="col-auto text-end">
-                                <small class="text-muted">${item.timestamp}</small>
-                                <i class="fas fa-edit edit-icon ms-3" 
-                                   onclick="showEditModal(${originalIndex})"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        container.innerHTML += card;
+        const row = `
+            <tr data-original-index="${item.originalIndex}" 
+                style="cursor: pointer;"
+                onclick="showEditModal(${item.originalIndex})">
+                <td>${item.plu}</td>
+                <td>${item.description}</td>
+                <td>${item.qty}</td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
     });
 }
+    
+    function handleRowClick(event) {
+    const rowIndex = event.currentTarget.getAttribute("data-index");
+    showEditModal(rowIndex);
+}
+        
         
         function performSearch() {
     const searchTerm = document.getElementById('searchInput').value;
@@ -503,6 +518,15 @@ document.getElementById('addModal').addEventListener('shown.bs.modal', function 
     // Tampilkan toast
     const toast = new bootstrap.Toast(document.getElementById('successToast'));
     toast.show();
+}
+
+function showEditModal(index) {
+    currentIndex = index; // Simpan indeks data yang akan diedit
+    const storedData = JSON.parse(localStorage.getItem("inventoryData"));
+    document.getElementById('editDesc').value = storedData[currentIndex].description;
+    document.getElementById('editQty').value = storedData[currentIndex].qty;
+    const modal = new bootstrap.Modal(document.getElementById('editModal'));
+    modal.show();
 }
 
         async function updateGoogleSheet() {
