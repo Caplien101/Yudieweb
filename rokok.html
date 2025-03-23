@@ -1,357 +1,551 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <title>Rokok Inventory Management</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    #datasheetTable { display: none; }
-    .editable input { width: 80px; }
-    .modal-input { margin-bottom: 15px; }
-
-    /* Button dengan spinner */
-    .button-loading {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .suggestion-list {
-    position: absolute;
-    width: 100%;
-    background: white;
-    border: 1px solid #ddd;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-}
-
-.suggestion-list div {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.suggestion-list div:hover {
-    background: #f1f1f1;
-}
-    .spinner {
-        display: none;
-        width: 1rem;
-        height: 1rem;
-        margin-right: 8px;
-        border: 2px solid #fff;
-        border-top: 2px solid transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    .button-loading.loading .spinner {
-        display: inline-block;
-    }
-
-    /* Animasi Spinner */
-    @keyframes spin {
-        100% { transform: rotate(360deg); }
-    }
-
-    /* Custom Alert Bootstrap */
-    .custom-alert {
-        padding: 12px 16px;
-        border-radius: 6px;
-        font-size: 14px;
-        display: none;
-        text-align: center;
-        margin-top: 10px;
-    }
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    /* Membuat tabel responsif */
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-    }
-    .table-responsive table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .table-responsive th, .table-responsive td {
-        white-space: nowrap;
-        text-align: left;
-        padding: 8px;
-        border: 1px solid #dee2e6;
-    }
-    @media (max-width: 768px) {
-        .table-responsive th, .table-responsive td {
-            font-size: 12px;
-            padding: 6px;
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inventory Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
-    }
-  </style>
+        .card {
+            background: linear-gradient(45deg, #ffffff, #e0eafc);
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-size: 1.25rem;
+            color: #2c3e50;
+        }
+        .card-text {
+            color: #34495e;
+        }
+        .edit-icon {
+            font-size: 1.2rem;
+            color: #1890ff;
+            transition: color 0.3s;
+        }
+        .edit-icon:hover {
+            color: #40a9ff;
+        }
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            background: #1890ff;
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        .btn-primary {
+            background: #1890ff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+        .info-row {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .data-row {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+      /* CSS tambahan untuk modal konfirmasi */
+        .modal-confirm .modal-header {
+            background: #ffc107;
+            color: white;
+        }
+        .modal-confirm .btn-danger {
+            background: #dc3545;
+            border: none;
+        }
+        .modal-confirm .btn-danger:hover {
+            background: #bd2130;
+        }
+        
+        .toast-container {
+    z-index: 1060; /* Pastikan muncul di atas modal */
+}
+
+/* Tambahkan di bagian style */
+#cardContainer {
+    min-height: 75vh; /* 3/4 tinggi layar */
+    overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
+    margin-bottom: 20px; /* Optional: jarak bawah */
+}
+
+/* Perbaiki padding untuk card agar lebih rapi */
+.card-body {
+    padding: 1.25rem;
+}
+
+#uploadSpinnerContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+}
+
+#loadingSpinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+}
+        
+    </style>
 </head>
 <body>
-  <div class="container mt-4">
-    <div id="alertSuccess" class="custom-alert alert-success">Data berhasil dikirim!</div>
-    <div id="alertDanger" class="custom-alert alert-danger">Gagal mengirim data!</div>
-
-    <div class="mb-3 position-relative">
-    <input type="text" id="searchBox" class="form-control" placeholder="Cari PLU, Barcode, atau Deskripsi">
-    <div id="suggestionList" class="suggestion-list"></div>
+    <div class="container mt-5">
+        <h3 class="text-center text-primary mb-4">Data Rokok</h3>
+        
+        <!-- Search Section -->
+<div class="row mb-4">
+    <div class="col-md-6 offset-md-3">
+        <div class="input-group">
+            <input type="text" id="searchInput" class="form-control" 
+                   placeholder="Cari berdasarkan deskripsi, rak, PLU, atau barcode...">
+            <button class="btn btn-primary" type="button" onclick="performSearch()">
+                <i class="fas fa-search"></i> Cari
+            </button>
+        </div>
+    </div>
+</div>
+        
+        <!-- Pindahkan uploadSpinner ke luar dari loadingSpinner -->
+<div class="text-center mb-4" id="loadingSpinner">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="mt-2">Mengambil data Google Sheets...</div>
 </div>
 
-    <div class="table-responsive">
-      <input type="text" id="inventorySearch" class="form-control mb-2" placeholder="Cari di Inventory">
-      <table class="table table-bordered" id="inventoryTable">
-        <thead class="table-dark" id="inventoryHeader"></thead>
-        <tbody id="inventoryBody"></tbody>
-      </table>
+<!-- Tambahkan uploadSpinner di luar container loading awal -->
+<div id="uploadSpinnerContainer" class="text-center mt-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Mengunggah...</span>
     </div>
-
-    <button id="btnKirim" class="btn btn-success button-loading" onclick="sendToGoogleSheet()">
-      <div class="spinner"></div> Kirim Data ke Google Sheet
+    <div class="mt-2">Mengirim data ke Google Sheets...</div>
+</div>
+        
+        
+       
+        <!-- Di bagian tombol Update -->
+<div class="text-center mt-4">
+    <button class="btn btn-success btn-md me-2" data-bs-toggle="modal" data-bs-target="#addModal">
+        <i class="fas fa-plus me-2"></i> Add Data
     </button>
-  </div>
-
-  <table id="datasheetTable">
-    <thead id="datasheetHeader"></thead>
-    <tbody id="datasheetBody"></tbody>
-  </table>
-<!-- Modal untuk Menambah Inventory -->
-<div class="modal fade" id="inventoryModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Tambah Inventory</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="inventoryForm">
-          <div class="mb-3">
-            <label class="form-label">PLU</label>
-            <input type="text" class="form-control" id="modalPlu" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Barcode</label>
-            <input type="text" class="form-control" id="modalBarcode" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Deskripsi</label>
-            <input type="text" class="form-control" id="modalDesc" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Qty</label>
-            <input type="number" class="form-control" id="modalQty" min="1" required>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="saveToInventory()">Simpan</button>
-      </div>
-    </div>
-  </div>
+    <button class="btn btn-primary btn-md" onclick="updateGoogleSheet()">
+        <i class="fas fa-cloud-upload-alt me-2"></i> Update
+    </button>  
 </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    let datasheet = { headers: [], data: [] };
-    let inventory = { headers: [], data: [] };
+ <br>
+        
+        <!-- Ganti card container dengan struktur berikut -->
+<div id="cardContainer" class="row g-4" 
+     style="height: 75vh; overflow-y: auto; margin-top: 5px; margin-bottom: 10px;">
+    <!-- Cards akan muncul di sini -->
+</div>
 
-    window.onload = async () => {
-    const response = await fetch('https://script.google.com/macros/s/AKfycbxRiEJZ9q_B1AW2P1nXrbgK4oZbhx4uhHhQNKE1moQnTXuuVLw8mprxSQGSsMGz1-itsg/exec');
-    const data = await response.json();
+        <!-- Add Data Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Tambah Data Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="addSearch" class="form-label">Cari Produk</label>
+                        <input type="text" class="form-control" id="addSearch" placeholder="Cari berdasarkan deskripsi...">
+                        <div id="searchSuggestions" class="list-group mt-2" style="display: none;"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addRak" class="form-label">Rak</label>
+                        <input type="text" class="form-control" id="addRak" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addPlu" class="form-label">PLU</label>
+                        <input type="text" class="form-control" id="addPlu" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addBarcode" class="form-label">Barcode</label>
+                        <input type="text" class="form-control" id="addBarcode" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addDesc" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="addDesc" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addQty" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="addQty" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewData()">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    datasheet = data.datasheet;
-    inventory = data.inventory;
-
-    localStorage.setItem('datasheet', JSON.stringify(datasheet.data));  // ✅ Tambahkan ini
-    localStorage.setItem('inventory', JSON.stringify(inventory.data));
-
-    renderTables();
-};
-
-    function renderTables() {
-      renderTable('datasheet', datasheet);
-      renderTable('inventory', inventory);
-    }
-
-    function renderTable(type, { headers, data }) {
-    const tableId = `${type}Table`;
-    document.getElementById(`${type}Header`).innerHTML = `
-        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
-    `;
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Edit Data</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="editDesc" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="editDesc" placeholder="Masukkan deskripsi">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editQty" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="editQty" placeholder="Masukkan jumlah baru">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary" onclick="saveEdit()">Simpan</button>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div>
     
-    const tbody = document.getElementById(`${type}Body`);
-    tbody.innerHTML = data.map((row, index) => `
-        <tr>
-          ${row.map((cell, cellIndex) => `
-            <td ${type === 'inventory' && cellIndex === headers.length-1 ? 'class="editable"' : ''}>
-              ${type === 'inventory' && cellIndex === headers.length-1 ? 
-                `<input type="number" value="${cell}" min="0" onchange="updateQty(${index}, this.value)">` : 
-                cell}
-            </td>
-          `).join('')}
-        </tr>
-    `).join('');
+  
+    
+    <!-- Toast Notification -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <!-- Toast untuk penyimpanan lokal -->
+    <div id="successToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="toast-body">
+            <i class="fas fa-check-circle me-2"></i>Data berhasil disimpan!
+        </div>
+    </div>
+
+    <!-- Toast untuk Google Sheets -->
+    <div id="googleSheetToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="toast-body">
+            <i class="fas fa-cloud-upload-alt me-2"></i>Data berhasil diunggah ke Google Sheets!
+        </div>
+    </div>
+</div>
+
+    <script>
+        let tempNewData = {}; // Untuk menyimpan data sementara
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSHm4hTsSoDmwByuUCOLt2iitKhfzVDpvi1myu9IL8u1Ts_COKx6_zoiVsbp1djUQnwAsSUKxNwOy-Z/pub?gid=0&single=true&output=csv";
+        let currentIndex = null;
+
+        function fetchData() {
+            fetch(sheetUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const parsedData = csvToJson(data);
+                    localStorage.setItem("inventoryData", JSON.stringify(parsedData));
+                    displayData();
+                    document.getElementById("loadingSpinner").style.display = "none";
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        }
+
+        function csvToJson(csv) {
+            const rows = csv.split("\n")
+                .map(row => row.trim())
+                .filter(row => row);
+            const headers = rows.shift().split(",");
+            return rows.map(row => {
+                const values = row.split(",");
+                return {
+                    rak: values[0],
+                    plu: values[1],
+                    barcode: values[2],
+                    description: values[3],
+                    qty: values[4],
+                    timestamp: values[5] || new Date().toLocaleString()
+                };
+            });
+        }
+
+        function displayData(searchTerm = '') {
+    const storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
+    let filteredData = storedData.filter(item => parseInt(item.qty) > 0);
+    
+    // Filter berdasarkan pencarian
+    if(searchTerm) {
+        searchTerm = searchTerm.toLowerCase();
+        filteredData = filteredData.filter(item => 
+            item.description.toLowerCase().includes(searchTerm) ||
+            item.rak.toLowerCase().includes(searchTerm) ||
+            item.plu.toLowerCase().includes(searchTerm) ||
+            item.barcode.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    const container = document.getElementById("cardContainer");
+    container.innerHTML = "";
+    
+    filteredData.forEach((item) => {
+        // Dapatkan indeks asli di storedData
+        const originalIndex = storedData.indexOf(item);
+        
+        const card = `
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <!-- Info Row -->
+                        <div class="row mb-3 info-row">
+                            <div class="col">${item.rak}</div>
+                            <div class="col">${item.plu}</div>
+                            <div class="col">${item.barcode}</div>
+                        </div>
+                        <!-- Description -->
+                        <div class="row mb-3 data-row">
+                            ${item.description}
+                        </div>
+                        <!-- Qty & Timestamp -->
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span class="badge bg-primary">Qty: ${item.qty}</span>
+                            </div>
+                            <div class="col-auto text-end">
+                                <small class="text-muted">${item.timestamp}</small>
+                                <i class="fas fa-edit edit-icon ms-3" 
+                                   onclick="showEditModal(${originalIndex})"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        container.innerHTML += card;
+    });
+}
+        
+        function performSearch() {
+    const searchTerm = document.getElementById('searchInput').value;
+    displayData(searchTerm);
 }
 
-// Fungsi update qty secara langsung di tabel inventory
-function updateQty(index, value) {
-    let inventoryData = JSON.parse(localStorage.getItem("inventory")) || [];
-    inventoryData[index][3] = parseInt(value) || 0;
-    localStorage.setItem("inventory", JSON.stringify(inventoryData));
-}
+// Pencarian otomatis saat mengetik
+document.getElementById('searchInput').addEventListener('input', performSearch);
 
-    document.getElementById("searchBox").addEventListener("input", function () {
-    let searchTerm = this.value.toLowerCase();
-    let suggestionBox = document.getElementById("suggestionList");
-    suggestionBox.innerHTML = "";
-
-    if (searchTerm.length < 2) {
-        suggestionBox.style.display = "none";
-        return;
-    }
-
-    let datasheetData = JSON.parse(localStorage.getItem("datasheet")) || [];
-
-    let suggestions = datasheetData
-        .filter(row => row.some(cell => String(cell).toLowerCase().includes(searchTerm)))
-        .slice(0, 5);
-
-    if (suggestions.length > 0) {
-        suggestions.forEach(item => {
-            let suggestionItem = document.createElement("div");
-            suggestionItem.textContent = `${item[0]} - ${item[1]} - ${item[2]}`;
-            suggestionItem.classList.add("suggestion-item");
-            suggestionItem.onclick = function () {
-                openInventoryModal(item);
-                suggestionBox.style.display = "none";
-            };
-            suggestionBox.appendChild(suggestionItem);
-        });
-        suggestionBox.style.display = "block";
-    } else {
-        suggestionBox.style.display = "none";
-    }
-});
-
-function saveToInventory() {
-    let plu = document.getElementById("modalPlu").value;
-    let barcode = document.getElementById("modalBarcode").value;
-    let description = document.getElementById("modalDesc").value;
-    let qty = parseInt(document.getElementById("modalQty").value) || 1;
-
-    // Ambil data inventory dari localStorage
-    let inventoryData = JSON.parse(localStorage.getItem("inventory")) || [];
-
-    // Cek apakah data sudah ada dalam tabel inventory
-    let existingIndex = inventoryData.findIndex(item => item[0] === plu);
-
-    if (existingIndex !== -1) {
-        // Jika sudah ada, update qty
-        inventoryData[existingIndex][3] += qty;
-        alert("Data sudah tersedia, Qty telah diperbarui.");
-    } else {
-        // Jika belum ada, tambahkan data baru
-        let newRow = [plu, barcode, description, qty];
-        inventoryData.push(newRow);
-        inventory.data.push(newRow); // Update ke inventory utama
-        alert("Data berhasil ditambahkan ke inventory.");
-    }
-
-    // Simpan ke localStorage
-    localStorage.setItem("inventory", JSON.stringify(inventoryData));
-
-    // Render ulang tabel
-    renderTable("inventory", { headers: inventory.headers, data: inventoryData });
-
-    // Tutup modal setelah penyimpanan
-    bootstrap.Modal.getInstance(document.getElementById("inventoryModal")).hide();
-}
-
-// Fungsi untuk Membuka Modal dengan Data Terpilih
-function openInventoryModal(data) {
-    document.getElementById("modalPlu").value = data[0];
-    document.getElementById("modalBarcode").value = data[1];
-    document.getElementById("modalDesc").value = data[2];
-    document.getElementById("modalQty").value = 1; // Default 1
-
-    let modal = new bootstrap.Modal(document.getElementById("inventoryModal"));
+        function showEditModal(originalIndex) {
+    currentIndex = originalIndex; // Simpan indeks asli
+    const storedData = JSON.parse(localStorage.getItem("inventoryData"));
+    
+    // Ambil data langsung dari storedData menggunakan indeks asli
+    document.getElementById('editDesc').value = storedData[currentIndex].description;
+    document.getElementById('editQty').value = storedData[currentIndex].qty;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
 }
-
-// Sembunyikan suggestion saat klik di luar
-document.addEventListener("click", function (e) {
-    if (!document.getElementById("searchBox").contains(e.target)) {
-        document.getElementById("suggestionList").style.display = "none";
+            
+          // Fungsi untuk menangani pencarian produk
+document.getElementById('addSearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
+    const suggestions = storedData.filter(item => 
+        item.description.toLowerCase().includes(searchTerm)
+    );
+    
+    const suggestionsDiv = document.getElementById('searchSuggestions');
+    suggestionsDiv.innerHTML = '';
+    
+    if(searchTerm && suggestions.length > 0) {
+        suggestionsDiv.style.display = 'block';
+        suggestions.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'list-group-item list-group-item-action';
+            div.textContent = item.description;
+            div.onclick = () => selectSuggestion(item);
+            suggestionsDiv.appendChild(div);
+        });
+    } else {
+        suggestionsDiv.style.display = 'none';
     }
 });
 
+// Saat memilih suggestion, tampilkan qty dari data yang ada
+function selectSuggestion(item) {
+    document.getElementById('addRak').value = item.rak;
+    document.getElementById('addPlu').value = item.plu;
+    document.getElementById('addBarcode').value = item.barcode;
+    document.getElementById('addDesc').value = item.description;
+    document.getElementById('addQty').value = item.qty; // Tampilkan qty dari local storage
+    document.getElementById('searchSuggestions').style.display = 'none';
+    document.getElementById('addSearch').value = item.description;
+}
 
-    document.getElementById('inventorySearch').addEventListener('input', (e) => {
-      const term = e.target.value.toLowerCase();
-      const filtered = inventory.data.filter(row => row.some(cell => cell.toString().toLowerCase().includes(term)));
-      renderTable('inventory', { ...inventory, data: filtered });
-    });
-
-    window.updateQty = (index, value) => {
-    inventory.data[index][inventory.headers.length - 1] = parseInt(value) || 0;
+// Fungsi simpan data yang memprioritaskan update jika data sudah ada
+function saveNewData() {
+    const rak = document.getElementById('addRak').value || '-';
+    const plu = document.getElementById('addPlu').value || '-';
+    const barcode = document.getElementById('addBarcode').value || '-';
+    const desc = document.getElementById('addDesc').value;
+    const qty = document.getElementById('addQty').value || 0;
     
-    // ✅ Simpan perubahan ke localStorage
-    localStorage.setItem('inventory', JSON.stringify(inventory.data));
-
-    // ✅ Render ulang tabel agar update terlihat
-    renderTable("inventory", { headers: inventory.headers, data: inventory.data });
-};
-
-    function showAlert(id) {
-      document.getElementById(id).style.display = "block";
-      setTimeout(() => {
-        document.getElementById(id).style.display = "none";
-      }, 3000);
+    if(!desc) {
+        alert("Deskripsi harus diisi!");
+        return;
     }
+    
+    let storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
+    
+    // Cek apakah data sudah ada
+    const existingIndex = storedData.findIndex(item => 
+        item.rak === rak &&
+        item.plu === plu &&
+        item.barcode === barcode &&
+        item.description === desc
+    );
+    
+    if(existingIndex !== -1) {
+        // Lakukan update jika data sudah ada
+        storedData[existingIndex].qty = qty.toString();
+        storedData[existingIndex].timestamp = new Date().toLocaleString();
+    } else {
+        // Tambah data baru jika belum ada
+        const newItem = {
+            rak: rak,
+            plu: plu,
+            barcode: barcode,
+            description: desc,
+            qty: qty.toString(),
+            timestamp: new Date().toLocaleString()
+        };
+        storedData.push(newItem);
+    }
+    
+    localStorage.setItem("inventoryData", JSON.stringify(storedData));
+    
+    // Perbarui tampilan
+    const searchTerm = document.getElementById('searchInput').value;
+    displayData(searchTerm);
+    
+    // Tutup modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+    modal.hide();
+    
+    // Tampilkan toast
+    const toast = new bootstrap.Toast(document.getElementById('successToast'));
+    toast.show();
+}
 
-    window.sendToGoogleSheet = async () => {
-    const btn = document.getElementById("btnKirim");
-    btn.classList.add("loading");
-    btn.disabled = true;
+// Reset form saat modal ditampilkan
+document.getElementById('addModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById('addSearch').value = '';
+    document.getElementById('addRak').value = '';
+    document.getElementById('addPlu').value = '';
+    document.getElementById('addBarcode').value = '';
+    document.getElementById('addDesc').value = '';
+    document.getElementById('addQty').value = 0;
+    document.getElementById('searchSuggestions').style.display = 'none';
+});
 
+        function saveEdit() {
+    const newDesc = document.getElementById('editDesc').value;
+    const newQty = document.getElementById('editQty').value;
+    const timestamp = new Date().toLocaleString();
+    
+    // Ambil data dari local storage
+    let storedData = JSON.parse(localStorage.getItem("inventoryData"));
+    
+    // Perbarui data menggunakan indeks asli
+    storedData[currentIndex].description = newDesc;
+    storedData[currentIndex].qty = newQty;
+    storedData[currentIndex].timestamp = timestamp;
+    
+    // Simpan kembali ke local storage
+    localStorage.setItem("inventoryData", JSON.stringify(storedData));
+    
+    // Perbarui tampilan dengan mempertahankan filter pencarian
+    const searchTerm = document.getElementById('searchInput').value;
+    displayData(searchTerm);
+    
+    // Tutup modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+    modal.hide();
+    
+    // Tampilkan toast
+    const toast = new bootstrap.Toast(document.getElementById('successToast'));
+    toast.show();
+}
+
+        async function updateGoogleSheet() {
+    const storedData = JSON.parse(localStorage.getItem("inventoryData"));
+    if (!storedData || storedData.length === 0) {
+        alert("Tidak ada data untuk dikirim!");
+        return;
+    }
+    
+    // Tampilkan spinner upload
+    document.getElementById('uploadSpinnerContainer').style.display = 'block';
+    
     try {
-        // Pastikan inventory.data berisi data terbaru
-        inventory.data = JSON.parse(localStorage.getItem("inventory")) || [];
+        // Konversi ke CSV
+        const headers = ["rak", "plu", "barcode", "description", "qty", "timestamp"];
+        const csvRows = storedData.map(item => 
+            `${item.rak},${item.plu},${item.barcode},${item.description},${item.qty},${item.timestamp}`
+        );
+        const csvContent = `${headers.join(",")}\n${csvRows.join("\n")}`;
 
-        const response = await fetch('https://script.google.com/macros/s/AKfycbxRiEJZ9q_B1AW2P1nXrbgK4oZbhx4uhHhQNKE1moQnTXuuVLw8mprxSQGSsMGz1-itsg/exec', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwQcWuwFzu76BeDUgNk1ySHYSMBWZvTeac7FfWYQGPpYV8QB8sJq7vWMkwzaoZEGxYU/exec', {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(inventory.data)
+            body: csvContent
         });
 
         if (response.ok) {
-            showAlert("alertSuccess");
-            localStorage.removeItem('inventory');
-            inventory.data = []; // Hapus data setelah dikirim
-            renderTable("inventory", { headers: inventory.headers, data: [] });
+            const toast = new bootstrap.Toast(document.getElementById('googleSheetToast'));
+            toast.show();
         } else {
-            throw new Error('Gagal mengupdate data');
+            alert(`Gagal: ${response.statusText}`);
         }
     } catch (error) {
-        showAlert("alertDanger");
+        console.error("Error:", error);
+        alert("Terjadi kesalahan jaringan");
     } finally {
-        btn.classList.remove("loading");
-        btn.disabled = false;
+        // Sembunyikan spinner upload
+        document.getElementById('uploadSpinnerContainer').style.display = 'none';
     }
-};
-  </script>
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+            localStorage.removeItem("inventoryData");
+            fetchData();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
