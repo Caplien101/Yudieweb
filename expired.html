@@ -143,12 +143,24 @@
     z-index: 1;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Opsi: tambahkan bayangan untuk pemisah */
 }
-        
+
+   /* Styling untuk alert */
+#expiredAlert {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+#expiredAlert div {
+    margin-bottom: 1rem; /* Jarak antara teks dan tombol */
+}    
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h3 class="text-center text-primary mb-4">Data Expired Gudang RAPJ</h3>
+    <div class="container mt-3">
+        <h3 class="text-start text-primary mb-4">REKAP EXPIRED DATE RAPJ</h3>
 
         <!-- Search Section -->
         <div class="row mb-4">
@@ -193,19 +205,28 @@
 
         <!-- Table -->
         <div id="tableContainer" class="mt-4">
-            <table class="table table-bordered table-hover">
-                <thead class="table-secondary">
-                    <tr>
-                        <th>PLU</th>
-                        <th>Description</th>
-                        <th>Qty</th>
-                        <th>Expired</th> <!-- Kolom baru -->
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Data rows -->
-                </tbody>
-            </table>
+<!-- Alert Bootstrap -->
+<div id="expiredAlert" class="alert alert-danger text-center mt-3" role="alert" style="display: none;">
+    <div>
+        <strong>Perhatian!</strong> Mohon untuk cek expired date terlebih dahulu.
+    </div>
+    <button type="button" id="closeAlertButton" class="btn btn-primary btn-sm mt-3">OK</button>
+</div>
+
+<!-- Tabel -->
+<table class="table table-bordered table-hover">
+    <thead class="table-secondary">
+        <tr>
+            <th>PLU</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th onclick="sortTableByExp()">Expired</th> <!-- Kolom exp dengan sorting -->
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <!-- Data rows -->
+    </tbody>
+</table>
         </div>
 
         <!-- Add Data Modal -->
@@ -295,7 +316,7 @@
         <!-- Toast untuk penyimpanan lokal -->
         <div id="successToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
             <div class="toast-body">
-                <i class="fas fa-check-circle me-2"></i>Data berhasil disimpan!
+                <i class="fas fa-check-circle"></i>Data berhasil disimpan!
             </div>
         </div>
         <!-- Toast untuk Google Sheets -->
@@ -310,8 +331,7 @@
         let tempNewData = {}; // Untuk menyimpan data sementara
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEfIT84Gf2hzFAl4i2FWAv0D04JSAd6M5kFLMfEz97h2JlbYCZypm9Zp8XC09kHF03YjsKD4q5H6vy/pub?gid=0&single=true&output=csv";
 let currentIndex = null;
-
-// Fungsi untuk mengambil data dari Google Sheets
+// Menampilkan alert setelah data berhasil di-fetch
 function fetchData() {
     fetch(sheetUrl)
         .then(response => response.text())
@@ -320,8 +340,35 @@ function fetchData() {
             localStorage.setItem("inventoryData", JSON.stringify(parsedData));
             displayData();
             document.getElementById("loadingSpinner").style.display = "none";
+
+            // Menampilkan alert
+            document.getElementById("expiredAlert").style.display = "block";
         })
         .catch(error => console.error("Error fetching data:", error));
+}
+
+// Fungsi untuk menutup alert saat tombol OK diklik
+document.getElementById("closeAlertButton").addEventListener("click", function () {
+    document.getElementById("expiredAlert").style.display = "none";
+});
+
+// Fungsi untuk sorting kolom exp
+function sortTableByExp() {
+    const table = document.querySelector("#tableBody");
+    const rows = Array.from(table.querySelectorAll("tr"));
+
+    // Mengurutkan baris berdasarkan nilai kolom exp (tanggal kadaluarsa)
+    rows.sort((a, b) => {
+        const expA = a.cells[3].innerText || '9999-12-31'; // Default ke tanggal jauh di masa depan jika kosong
+        const expB = b.cells[3].innerText || '9999-12-31';
+        return new Date(expA) - new Date(expB); // Ascending order
+    });
+
+    // Menghapus semua baris lama
+    table.innerHTML = "";
+
+    // Menambahkan baris yang sudah diurutkan kembali ke tabel
+    rows.forEach(row => table.appendChild(row));
 }
 
 // Fungsi untuk mengonversi CSV ke JSON
