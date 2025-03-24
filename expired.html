@@ -149,111 +149,113 @@
 <body>
     <div class="container mt-5">
         <h3 class="text-center text-primary mb-4">Data Expired Gudang RAPJ</h3>
-        
-        <!-- Search Section -->
-<div class="row mb-4">
-    <div class="col-md-6 offset-md-3">
-        <div class="input-group">
-            <input type="text" id="searchInput" class="form-control" 
-                   placeholder="Cari berdasarkan deskripsi, rak, PLU, atau barcode...">
-            <button class="btn btn-primary" type="button" onclick="performSearch()">
-                <i class="fas fa-search"></i> Cari
-            </button>
-        </div>
-    </div>
-</div>
-        
-        <!-- Pindahkan uploadSpinner ke luar dari loadingSpinner -->
-<div class="text-center mb-4" id="loadingSpinner">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-    <div class="mt-2">Mengambil data Google Sheets...</div>
-</div>
 
-<!-- Tambahkan uploadSpinner di luar container loading awal -->
-<div id="uploadSpinnerContainer" class="text-center mt-4" style="display: none;">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Mengunggah...</span>
-    </div>
-    <div class="mt-2">Mengirim data ke Google Sheets...</div>
-</div>
-        
-        
-       
-        <!-- Di bagian tombol Update -->
-<div class="text-center mt-4">
-    
-    
-    <button class="btn btn-success btn-md me-2" data-bs-toggle="modal" data-bs-target="#addModal">
-        <i class="fas fa-plus me-2"></i> Add Data
-    </button>
-    <button class="btn btn-primary btn-md me-2" onclick="updateGoogleSheet()">
-        <i class="fas fa-cloud-upload-alt me-2"></i> Update
-    </button>  
-</div>
- <br>
-        
+        <!-- Search Section -->
+        <div class="row mb-4">
+            <div class="col-md-6 offset-md-3">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" 
+                           placeholder="Cari berdasarkan deskripsi, rak, PLU, atau barcode...">
+                    <button class="btn btn-primary" type="button" onclick="performSearch()">
+                        <i class="fas fa-search"></i> Cari
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="text-center mb-4" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-2">Mengambil data Google Sheets...</div>
+        </div>
+
+        <!-- Upload Spinner -->
+        <div id="uploadSpinnerContainer" class="text-center mt-4" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Mengunggah...</span>
+            </div>
+            <div class="mt-2">Mengirim data ke Google Sheets...</div>
+        </div>
+
+        <!-- Tombol Update -->
+        <div class="text-center mt-4">
+            <button class="btn btn-success btn-md me-2" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="fas fa-plus me-2"></i> Add Data
+            </button>
+            <button class="btn btn-primary btn-md me-2" onclick="updateGoogleSheet()">
+                <i class="fas fa-cloud-upload-alt me-2"></i> Update
+            </button>  
+        </div>
+
+        <br>
+
+        <!-- Table -->
         <div id="tableContainer" class="mt-4">
-    <table class="table table-bordered table-hover">
-    <thead class="table-secondary">
-        <tr>
-            <th>PLU</th>
-            <th>Description</th>
-            <th>Qty</th>
-            <th>Expired</th> <!-- Kolom baru -->
-        </tr>
-    </thead>
-    <tbody id="tableBody">
-        <!-- Data rows -->
-    </tbody>
-</table>
-</div>
+            <table class="table table-bordered table-hover">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>PLU</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Expired</th> <!-- Kolom baru -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data rows -->
+                </tbody>
+            </table>
+        </div>
 
         <!-- Add Data Modal -->
-<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addModalLabel">Tambah Data Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="addSearch" class="form-label">Cari Produk</label>
-                        <input type="text" class="form-control" id="addSearch" placeholder="Cari berdasarkan deskripsi...">
-                        <div id="searchSuggestions" class="list-group mt-2" style="display: none;"></div>
+        <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addModalLabel">Tambah Data Baru</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="mb-3">
-                        <label for="addRak" class="form-label">Rak</label>
-                        <input type="text" class="form-control" id="addRak" readonly>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="addSearch" class="form-label">Cari Produk</label>
+                                <input type="text" class="form-control" id="addSearch" placeholder="Cari berdasarkan deskripsi...">
+                                <div id="searchSuggestions" class="list-group mt-2" style="display: none;"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addRak" class="form-label">Rak</label>
+                                <input type="text" class="form-control" id="addRak" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addPlu" class="form-label">PLU</label>
+                                <input type="text" class="form-control" id="addPlu" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addBarcode" class="form-label">Barcode</label>
+                                <input type="text" class="form-control" id="addBarcode" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addDesc" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="addDesc" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addQty" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="addQty" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="addExp" class="form-label">Expired</label>
+                                <input type="date" class="form-control" id="addExp" placeholder="Masukkan tanggal kadaluarsa">
+                            </div>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="addPlu" class="form-label">PLU</label>
-                        <input type="text" class="form-control" id="addPlu" readonly>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary" onclick="saveNewData()">Simpan</button>
                     </div>
-                    <div class="mb-3">
-                        <label for="addBarcode" class="form-label">Barcode</label>
-                        <input type="text" class="form-control" id="addBarcode" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addDesc" class="form-label">Description</label>
-                        <input type="text" class="form-control" id="addDesc" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addQty" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="addQty" value="0">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="saveNewData()">Simpan</button>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
         <!-- Edit Modal -->
         <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -264,21 +266,21 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-    <form>
-        <div class="mb-3">
-            <label for="editDesc" class="form-label">Description</label>
-            <input type="text" class="form-control" id="editDesc" placeholder="Masukkan deskripsi">
-        </div>
-        <div class="mb-3">
-            <label for="editQty" class="form-label">Quantity</label>
-            <input type="number" class="form-control" id="editQty" placeholder="Masukkan jumlah baru">
-        </div>
-        <div class="mb-3">
-            <label for="editExp" class="form-label">Expired</label>
-            <input type="date" class="form-control" id="editExp" placeholder="Masukkan tanggal kadaluarsa">
-        </div>
-    </form>
-</div>
+                        <form>
+                            <div class="mb-3">
+                                <label for="editDesc" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="editDesc" placeholder="Masukkan deskripsi">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editQty" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="editQty" placeholder="Masukkan jumlah baru">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editExp" class="form-label">Expired</label>
+                                <input type="date" class="form-control" id="editExp" placeholder="Masukkan tanggal kadaluarsa">
+                            </div>
+                        </form>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="button" class="btn btn-primary" onclick="saveEdit()">Simpan</button>
@@ -287,44 +289,43 @@
             </div>
         </div>
     </div>
-    
-  
-    
-    <!-- Toast Notification -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <!-- Toast untuk penyimpanan lokal -->
-    <div id="successToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
-        <div class="toast-body">
-            <i class="fas fa-check-circle me-2"></i>Data berhasil disimpan!
-        </div>
-    </div>
 
-    <!-- Toast untuk Google Sheets -->
-    <div id="googleSheetToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
-        <div class="toast-body">
-            <i class="fas fa-cloud-upload-alt me-2"></i>Data berhasil diunggah ke Google Sheets!
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <!-- Toast untuk penyimpanan lokal -->
+        <div id="successToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i>Data berhasil disimpan!
+            </div>
+        </div>
+        <!-- Toast untuk Google Sheets -->
+        <div id="googleSheetToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+            <div class="toast-body">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Data berhasil diunggah ke Google Sheets!
+            </div>
         </div>
     </div>
-</div>
 
     <script>
         let tempNewData = {}; // Untuk menyimpan data sementara
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzTJgb2tErnopQPEtZrW71mlcfOrxN_-tkFd0zsD-_MY-x1VwD3l-AyKrFFXztQ2h1v9x5GLsnZxcj/pub?gid=0&single=true&output=csv";
-        let currentIndex = null;
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEfIT84Gf2hzFAl4i2FWAv0D04JSAd6M5kFLMfEz97h2JlbYCZypm9Zp8XC09kHF03YjsKD4q5H6vy/pub?gid=0&single=true&output=csv";
+let currentIndex = null;
 
-        function fetchData() {
-            fetch(sheetUrl)
-                .then(response => response.text())
-                .then(data => {
-                    const parsedData = csvToJson(data);
-                    localStorage.setItem("inventoryData", JSON.stringify(parsedData));
-                    displayData();
-                    document.getElementById("loadingSpinner").style.display = "none";
-                })
-                .catch(error => console.error("Error fetching data:", error));
-        }
+// Fungsi untuk mengambil data dari Google Sheets
+function fetchData() {
+    fetch(sheetUrl)
+        .then(response => response.text())
+        .then(data => {
+            const parsedData = csvToJson(data);
+            localStorage.setItem("inventoryData", JSON.stringify(parsedData));
+            displayData();
+            document.getElementById("loadingSpinner").style.display = "none";
+        })
+        .catch(error => console.error("Error fetching data:", error));
+}
 
-        function csvToJson(csv) {
+// Fungsi untuk mengonversi CSV ke JSON
+function csvToJson(csv) {
     const rows = csv.split("\n")
         .map(row => row.trim())
         .filter(row => row);
@@ -337,18 +338,19 @@
             barcode: values[2],
             description: values[3],
             qty: values[4],
-            exp: values[5], // Tambahkan kolom exp
+            exp: values[5] || '-', // Tambahkan kolom exp dengan nilai default '-'
             timestamp: values[6] || new Date().toLocaleString()
         };
     });
 }
 
-        function displayData(searchTerm = '') {
+// Fungsi untuk menampilkan data di tabel
+function displayData(searchTerm = '') {
     const storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
     let filteredData = storedData
         .map((item, originalIndex) => ({ ...item, originalIndex }))
         .filter(item => parseInt(item.qty) > 0);
-    
+
     if (searchTerm) {
         searchTerm = searchTerm.toLowerCase();
         filteredData = filteredData.filter(item =>
@@ -373,22 +375,16 @@
         tbody.innerHTML += row;
     });
 }
-    
-    function handleRowClick(event) {
-    const rowIndex = event.currentTarget.getAttribute("data-index");
-    showEditModal(rowIndex);
-}
-        
-        
-        function performSearch() {
+
+// Fungsi untuk menangani pencarian
+function performSearch() {
     const searchTerm = document.getElementById('searchInput').value;
     displayData(searchTerm);
 }
-
-// Pencarian otomatis saat mengetik
 document.getElementById('searchInput').addEventListener('input', performSearch);
 
-        function showEditModal(originalIndex) {
+// Fungsi untuk menampilkan modal edit
+function showEditModal(originalIndex) {
     currentIndex = originalIndex;
     const storedData = JSON.parse(localStorage.getItem("inventoryData"));
     document.getElementById('editDesc').value = storedData[currentIndex].description;
@@ -397,19 +393,17 @@ document.getElementById('searchInput').addEventListener('input', performSearch);
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
 }
-            
-          // Fungsi untuk menangani pencarian produk
-document.getElementById('addSearch').addEventListener('input', function() {
+
+// Fungsi untuk menangani pencarian produk di modal add data
+document.getElementById('addSearch').addEventListener('input', function () {
     const searchTerm = this.value.toLowerCase();
     const storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
-    const suggestions = storedData.filter(item => 
+    const suggestions = storedData.filter(item =>
         item.description.toLowerCase().includes(searchTerm)
     );
-    
     const suggestionsDiv = document.getElementById('searchSuggestions');
     suggestionsDiv.innerHTML = '';
-    
-    if(searchTerm && suggestions.length > 0) {
+    if (searchTerm && suggestions.length > 0) {
         suggestionsDiv.style.display = 'block';
         suggestions.forEach(item => {
             const div = document.createElement('div');
@@ -423,68 +417,64 @@ document.getElementById('addSearch').addEventListener('input', function() {
     }
 });
 
-// Saat memilih suggestion, tampilkan qty dari data yang ada
+// Fungsi untuk memilih suggestion di modal add data
 function selectSuggestion(item) {
     document.getElementById('addRak').value = item.rak;
     document.getElementById('addPlu').value = item.plu;
     document.getElementById('addBarcode').value = item.barcode;
     document.getElementById('addDesc').value = item.description;
     document.getElementById('addQty').value = item.qty; // Tampilkan qty dari local storage
+    document.getElementById('addExp').value = item.exp || ''; // Tampilkan exp
     document.getElementById('searchSuggestions').style.display = 'none';
     document.getElementById('addSearch').value = item.description;
 }
 
-// Fungsi simpan data yang memprioritaskan update jika data sudah ada
+// Fungsi untuk menyimpan data baru
 function saveNewData() {
     const rak = document.getElementById('addRak').value || '-';
     const plu = document.getElementById('addPlu').value || '-';
     const barcode = document.getElementById('addBarcode').value || '-';
     const desc = document.getElementById('addDesc').value;
     const qty = document.getElementById('addQty').value || 0;
-    
-    if(!desc) {
+    const exp = document.getElementById('addExp').value || '-'; // Ambil nilai exp
+
+    if (!desc) {
         alert("Deskripsi harus diisi!");
         return;
     }
-    
+
     let storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
-    
-    // Cek apakah data sudah ada
-    const existingIndex = storedData.findIndex(item => 
+    const existingIndex = storedData.findIndex(item =>
         item.rak === rak &&
         item.plu === plu &&
         item.barcode === barcode &&
         item.description === desc
     );
-    
-    if(existingIndex !== -1) {
-        // Lakukan update jika data sudah ada
+
+    if (existingIndex !== -1) {
         storedData[existingIndex].qty = qty.toString();
+        storedData[existingIndex].exp = exp; // Update exp
         storedData[existingIndex].timestamp = new Date().toLocaleString();
     } else {
-        // Tambah data baru jika belum ada
         const newItem = {
             rak: rak,
             plu: plu,
             barcode: barcode,
             description: desc,
             qty: qty.toString(),
+            exp: exp, // Tambahkan exp
             timestamp: new Date().toLocaleString()
         };
         storedData.push(newItem);
     }
-    
+
     localStorage.setItem("inventoryData", JSON.stringify(storedData));
-    
-    // Perbarui tampilan
     const searchTerm = document.getElementById('searchInput').value;
     displayData(searchTerm);
-    
-    // Tutup modal
+
     const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
     modal.hide();
-    
-    // Tampilkan toast
+
     const toast = new bootstrap.Toast(document.getElementById('successToast'));
     toast.show();
 }
@@ -497,10 +487,12 @@ document.getElementById('addModal').addEventListener('shown.bs.modal', function 
     document.getElementById('addBarcode').value = '';
     document.getElementById('addDesc').value = '';
     document.getElementById('addQty').value = 0;
+    document.getElementById('addExp').value = ''; // Reset exp
     document.getElementById('searchSuggestions').style.display = 'none';
 });
 
-        function saveEdit() {
+// Fungsi untuk menyimpan perubahan pada data yang diedit
+function saveEdit() {
     const newDesc = document.getElementById('editDesc').value;
     const newQty = document.getElementById('editQty').value;
     const newExp = document.getElementById('editExp').value; // Ambil nilai exp
@@ -523,34 +515,23 @@ document.getElementById('addModal').addEventListener('shown.bs.modal', function 
     toast.show();
 }
 
-function showEditModal(index) {
-    currentIndex = index; // Simpan indeks data yang akan diedit
-    const storedData = JSON.parse(localStorage.getItem("inventoryData"));
-    document.getElementById('editDesc').value = storedData[currentIndex].description;
-    document.getElementById('editQty').value = storedData[currentIndex].qty;
-    const modal = new bootstrap.Modal(document.getElementById('editModal'));
-    modal.show();
-}
-
-        async function updateGoogleSheet() {
+// Fungsi untuk mengirim data ke Google Sheets
+async function updateGoogleSheet() {
     const storedData = JSON.parse(localStorage.getItem("inventoryData"));
     if (!storedData || storedData.length === 0) {
         alert("Tidak ada data untuk dikirim!");
         return;
     }
-    
-    // Tampilkan spinner upload
+
     document.getElementById('uploadSpinnerContainer').style.display = 'block';
-    
     try {
-        // Konversi ke CSV
-        const headers = ["rak", "plu", "barcode", "description", "qty", "timestamp"];
-        const csvRows = storedData.map(item => 
-            `${item.rak},${item.plu},${item.barcode},${item.description},${item.qty},${item.timestamp}`
+        const headers = ["rak", "plu", "barcode", "description", "qty", "exp", "timestamp"];
+        const csvRows = storedData.map(item =>
+            `${item.rak},${item.plu},${item.barcode},${item.description},${item.qty},${item.exp},${item.timestamp}`
         );
         const csvContent = `${headers.join(",")}\n${csvRows.join("\n")}`;
 
-        const response = await fetch('https://script.google.com/macros/s/AKfycbwb_f5AbC3_Osv_Wgqk9_qkK4SV1jKIJ7dTw7pjS-83_wFgq9oJ5PELM29SR0SAOQi2/exec', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzo6TYd8kZVDiKv8PF3L8mxDP6_96wiSrB4Tfoh9kFx7mNE3ft2JKS0BulcWc6hDcotuA/exec', {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
             body: csvContent
@@ -566,16 +547,15 @@ function showEditModal(index) {
         console.error("Error:", error);
         alert("Terjadi kesalahan jaringan");
     } finally {
-        // Sembunyikan spinner upload
         document.getElementById('uploadSpinnerContainer').style.display = 'none';
     }
 }
 
-
+// Inisialisasi aplikasi
 document.addEventListener('DOMContentLoaded', () => {
-            localStorage.removeItem("inventoryData");
-            fetchData();
-        });
+    localStorage.removeItem("inventoryData");
+    fetchData();
+});
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
