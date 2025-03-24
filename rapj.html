@@ -179,10 +179,14 @@
        
         <!-- Di bagian tombol Update -->
 <div class="text-center mt-4">
+    <button class="btn btn-danger btn-md me-2" onclick="window.location.href='expired.html'">
+    <i class="fas fa-exclamation-triangle me-2"></i> Expired
+</button>  
+    
     <button class="btn btn-success btn-md me-2" data-bs-toggle="modal" data-bs-target="#addModal">
         <i class="fas fa-plus me-2"></i> Add Data
     </button>
-    <button class="btn btn-primary btn-md" onclick="updateGoogleSheet()">
+    <button class="btn btn-primary btn-md me-2" onclick="updateGoogleSheet()">
         <i class="fas fa-cloud-upload-alt me-2"></i> Update
     </button>  
 </div>
