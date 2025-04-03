@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Form</title>
+</head>
+<body>
+  <h1>Form Pengiriman Data</h1>
+  <form id="dataForm"></form>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzhhUbJzcRPVEnuyffbDKgFizHcvj_6ciN8EkrWxUUqMtMDpOJoZR3HdGGyY12VvNJJ/exec'; // Ganti dengan URL web app dari Google Apps Script
+
+    // Fungsi untuk mendapatkan header dari Google Sheets
+    async function fetchHeaders() {
+      try {
+        const response = await fetch(scriptURL);
+        const headers = await response.json();
+
+        const form = document.getElementById('dataForm');
+        headers.forEach(header => {
+          const label = document.createElement('label');
+          label.setAttribute('for', header);
+          label.textContent = header + ':';
+
+          const input = document.createElement('input');
+          input.setAttribute('type', 'text');
+          input.setAttribute('id', header);
+          input.setAttribute('name', header);
+          input.setAttribute('required', true);
+
+          form.appendChild(label);
+          form.appendChild(document.createElement('br'));
+          form.appendChild(input);
+          form.appendChild(document.createElement('br'));
+        });
+
+        // Tambahkan tombol submit
+        const submitButton = document.createElement('button');
+        submitButton.setAttribute('type', 'submit');
+        submitButton.textContent = 'Kirim';
+        form.appendChild(submitButton);
+
+        // Handle form submission
+        form.addEventListener('submit', e => {
+          e.preventDefault();
+          fetch(scriptURL, { 
+            method: 'POST',
+            body: new FormData(form)
+          })
+          .then(response => response.json())
+          .then(data => {
+            alert('Data berhasil dikirim!');
+            form.reset();
+          })
+          .catch(error => console.error('Error:', error));
+        });
+      } catch (error) {
+        console.error('Error fetching headers:', error);
+      }
+    }
+
+    // Panggil fungsi untuk mengambil header saat halaman dimuat
+    fetchHeaders();
+  </script>
+</body>
+</html>
