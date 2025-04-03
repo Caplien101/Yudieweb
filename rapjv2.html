@@ -636,14 +636,11 @@ async function updateGoogleSheet() {
             originalIndex: item.originalIndex
         }));
         
-        const response = await fetch('https://script.google.com/macros/s/AKfycbwwVWMbDwtS7nC_39vXBwRZb4L0X08vFoiappBJPjYg7xsv9DABvw9Lr0jLv2UqKUQM/exec', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzx5YeyrDnxNlUbD4ubzfEfberT7l1rkZ2l3O1F987DJ40bL8nj6jtmKcOXY5PkGEo/exec', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: "deltaUpdate",
-                changes: changes 
-            })
-        });
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ changes: modifiedData })
+});
 
         if (response.ok) {
             // Reset modification flags on success
