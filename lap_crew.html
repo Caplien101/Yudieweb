@@ -3,61 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Form</title>
+  <title>Laporan Crew</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Custom CSS untuk overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7); /* Background semi-transparan */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1050; /* Z-index tinggi agar berada di atas elemen lain */
+      visibility: hidden; /* Hidden by default */
+      opacity: 0; /* Transisi fade-in */
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .overlay.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .overlay-message {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .overlay-message h4 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #28a745; /* Warna hijau untuk sukses */
+    }
+
+    .overlay-message button {
+      margin-top: 1rem;
+    }
+  </style>
 </head>
-<body>
-  <h1>Form Pengiriman Data</h1>
-  <form id="dataForm"></form>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Form Laporan Crew C940</h1>
+
+    <!-- Alert untuk Loading -->
+    <div id="loadingAlert" class="alert alert-info d-none" role="alert">
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      Mengambil data dari Google Sheets...
+    </div>
+
+    <!-- Tempat untuk Menampilkan Form Dinamis -->
+    <div id="dynamicFormContainer" class="card p-4 shadow-sm">
+      <p class="text-center">Memuat form...</p>
+    </div>
+  </div>
+
+  <!-- Overlay untuk Pesan Sukses -->
+  <div id="successOverlay" class="overlay">
+    <div class="overlay-message">
+      <h4>Kirim Data Sukses</h4>
+      <button class="btn btn-primary" onclick="hideSuccessOverlay()">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (Optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzhhUbJzcRPVEnuyffbDKgFizHcvj_6ciN8EkrWxUUqMtMDpOJoZR3HdGGyY12VvNJJ/exec'; // Ganti dengan URL web app dari Google Apps Script
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyzWwSXDc3ODsYAZMCAA13uhF-gCBLERbBjiF6gfMU349U18tjvEu1T279VQZrY1Zd4/exec'; // Ganti dengan URL web app Anda
 
-    // Fungsi untuk mendapatkan header dari Google Sheets
+    // Fungsi untuk menampilkan loading alert
+    function showLoadingAlert() {
+      document.getElementById('loadingAlert').classList.remove('d-none');
+    }
+
+    // Fungsi untuk menyembunyikan loading alert
+    function hideLoadingAlert() {
+      document.getElementById('loadingAlert').classList.add('d-none');
+    }
+
+    // Fungsi untuk menampilkan overlay pesan sukses
+    function showSuccessOverlay() {
+      document.getElementById('successOverlay').classList.add('show');
+    }
+
+    // Fungsi untuk menyembunyikan overlay pesan sukses
+    function hideSuccessOverlay() {
+      document.getElementById('successOverlay').classList.remove('show');
+    }
+
+    // Fungsi untuk mengambil header dari Google Apps Script
     async function fetchHeaders() {
+      showLoadingAlert(); // Tampilkan loading alert
       try {
         const response = await fetch(scriptURL);
         const headers = await response.json();
 
-        const form = document.getElementById('dataForm');
-        headers.forEach(header => {
+        const container = document.getElementById('dynamicFormContainer');
+        container.innerHTML = ''; // Bersihkan kontainer sebelumnya
+
+        // Buat form baru berdasarkan header
+        const form = document.createElement('form');
+        form.setAttribute('action', '#'); // Kirim data melalui JavaScript
+        form.classList.add('row', 'g-3'); // Layout form dengan Bootstrap
+
+        // Kolom Pertama: Tanggal Otomatis
+        const dateDiv = document.createElement('div');
+        dateDiv.classList.add('col-md-6');
+
+        const dateLabel = document.createElement('label');
+        dateLabel.setAttribute('for', 'Tanggal');
+        dateLabel.textContent = 'Tanggal';
+        dateLabel.classList.add('form-label');
+
+        const dateInput = document.createElement('input');
+        dateInput.setAttribute('type', 'text');
+        dateInput.setAttribute('id', 'Tanggal');
+        dateInput.setAttribute('name', headers[0]); // Sesuaikan dengan header pertama
+        dateInput.setAttribute('readonly', true); // Read-only karena otomatis diisi
+        dateInput.classList.add('form-control');
+        dateInput.value = new Date().toLocaleDateString(); // Isi dengan tanggal hari ini
+
+        dateDiv.appendChild(dateLabel);
+        dateDiv.appendChild(dateInput);
+        form.appendChild(dateDiv);
+
+        // Kolom Kedua: Pilihan (Malam, Siang, Pagi)
+        const timeDiv = document.createElement('div');
+        timeDiv.classList.add('col-md-6');
+
+        const timeLabel = document.createElement('label');
+        timeLabel.setAttribute('for', 'Waktu');
+        timeLabel.textContent = 'Shift';
+        timeLabel.classList.add('form-label');
+
+        const timeSelect = document.createElement('select');
+        timeSelect.setAttribute('id', 'Shift');
+        timeSelect.setAttribute('name', headers[1]); // Sesuaikan dengan header kedua
+        timeSelect.classList.add('form-select');
+
+        const waktuOptions = ['Pilih Shift', 'Malam', 'Siang', 'Pagi'];
+        waktuOptions.forEach(optionText => {
+          const option = document.createElement('option');
+          option.value = optionText === 'Pilih Shift' ? '' : optionText;
+          option.textContent = optionText;
+          timeSelect.appendChild(option);
+        });
+
+        timeDiv.appendChild(timeLabel);
+        timeDiv.appendChild(timeSelect);
+        form.appendChild(timeDiv);
+
+        // Kolom Ketiga: Input Teks
+        const nameDiv = document.createElement('div');
+        nameDiv.classList.add('col-md-6');
+
+        const nameLabel = document.createElement('label');
+        nameLabel.setAttribute('for', 'Nama');
+        nameLabel.textContent = headers[2]; // Sesuaikan dengan header ketiga
+        nameLabel.classList.add('form-label');
+
+        const nameInput = document.createElement('input');
+        nameInput.setAttribute('type', 'text');
+        nameInput.setAttribute('id', 'Nama');
+        nameInput.setAttribute('name', headers[2]); // Sesuaikan dengan header ketiga
+        nameInput.setAttribute('required', true);
+        nameInput.classList.add('form-control');
+
+        nameDiv.appendChild(nameLabel);
+        nameDiv.appendChild(nameInput);
+        form.appendChild(nameDiv);
+
+        // Kolom Keempat dan Seterusnya: Input Angka
+        headers.slice(3).forEach((header, index) => {
+          const div = document.createElement('div');
+          div.classList.add('col-md-6'); // Kolom 6 grid Bootstrap
+
           const label = document.createElement('label');
           label.setAttribute('for', header);
-          label.textContent = header + ':';
+          label.textContent = header;
+          label.classList.add('form-label');
 
           const input = document.createElement('input');
-          input.setAttribute('type', 'text');
+          input.setAttribute('type', 'number'); // Input angka
           input.setAttribute('id', header);
           input.setAttribute('name', header);
           input.setAttribute('required', true);
+          input.classList.add('form-control');
 
-          form.appendChild(label);
-          form.appendChild(document.createElement('br'));
-          form.appendChild(input);
-          form.appendChild(document.createElement('br'));
+          div.appendChild(label);
+          div.appendChild(input);
+          form.appendChild(div);
         });
 
-        // Tambahkan tombol submit
+        // Tambahkan tombol submit dengan spinner
+        const buttonDiv = document.createElement('div');
+        buttonDiv.classList.add('col-12', 'd-grid');
+
         const submitButton = document.createElement('button');
         submitButton.setAttribute('type', 'submit');
-        submitButton.textContent = 'Kirim';
-        form.appendChild(submitButton);
+        submitButton.classList.add('btn', 'btn-primary');
+        submitButton.innerHTML = 'Kirim <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>';
+        buttonDiv.appendChild(submitButton);
 
-        // Handle form submission
-        form.addEventListener('submit', e => {
-          e.preventDefault();
-          fetch(scriptURL, { 
-            method: 'POST',
-            body: new FormData(form)
-          })
-          .then(response => response.json())
-          .then(data => {
-            alert('Data berhasil dikirim!');
-            form.reset();
-          })
-          .catch(error => console.error('Error:', error));
+        form.appendChild(buttonDiv);
+
+        // Tambahkan event listener untuk handle pengiriman data
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault(); // Mencegah reload halaman
+
+          const spinner = submitButton.querySelector('.spinner-border');
+          spinner.classList.remove('d-none'); // Tampilkan spinner
+          submitButton.disabled = true; // Nonaktifkan tombol
+
+          try {
+            const formData = new FormData(form);
+            const response = await fetch(scriptURL, {
+              method: 'POST',
+              body: new URLSearchParams(formData), // Konversi FormData ke format URL-encoded
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+              showSuccessOverlay(); // Tampilkan overlay pesan sukses
+              form.reset(); // Reset form setelah berhasil
+              dateInput.value = new Date().toLocaleDateString(); // Perbarui tanggal
+            } else {
+              alert('Terjadi kesalahan saat mengirim data.');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat mengirim data.');
+          } finally {
+            spinner.classList.add('d-none'); // Sembunyikan spinner
+            submitButton.disabled = false; // Aktifkan kembali tombol
+          }
         });
+
+        // Tambahkan form ke kontainer
+        container.appendChild(form);
       } catch (error) {
         console.error('Error fetching headers:', error);
+        document.getElementById('dynamicFormContainer').innerHTML = `
+          <div class="alert alert-danger" role="alert">
+            Gagal memuat form. Silakan coba lagi.
+          </div>
+        `;
+      } finally {
+        hideLoadingAlert(); // Sembunyikan loading alert
       }
     }
 
