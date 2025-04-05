@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Penjualan</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+  /* Gaya yang diperbarui untuk card yang lebih profesional */
+  .card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .card-title {
+    color: #2c3e50;
+    font-weight: 500;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #eee;
+  }
+  
+  .metric-label {
+    font-weight: 400;
+    color: #555;
+    flex: 1;
+  }
+  
+  .metric-value {
+    font-weight: 450;
+    color: #2c3e50;
+    text-align: right;
+    margin-left: 10px;
+  }
+  
+  .achievement {
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+  }
+  
+  /* Styling untuk metric-value dengan gap-positive */
+.metric-value .gap-positive {
+  font-size: 0.8rem; /* Ukuran teks lebih kecil */
+  color: #28a745; /* Warna teks hijau untuk positif */
+  background-color: rgba(40, 167, 69, 0.1); /* Background transparan hijau */
+  padding: 2px 6px; /* Padding agar terlihat rapi */
+  border-radius: 8px; /* Radius border agar terlihat lebih halus */
+}
+
+/* Styling untuk metric-value dengan gap-negative */
+.metric-value .gap-negative {
+  font-size: 0.8rem; /* Ukuran teks lebih kecil */
+  color: #dc3545; /* Warna teks merah untuk negatif */
+  background-color: rgba(220, 53, 69, 0.1); /* Background transparan merah */
+  padding: 2px 6px; /* Padding agar terlihat rapi */
+  border-radius: 8px; /* Radius border agar terlihat lebih halus */
+}
+  
+  
+  
+  .card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Ubah minmax ke 250px */
+  gap: 15px; /* Kurangi jarak antar kartu */
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h1 class="text-center mb-4">Dashboard Penjualan</h1>
+
+    <!-- Filter Tanggal dan Nama -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <label for="nama-filter" class="form-label">Nama Lengkap</label>
+        <select id="nama-filter" class="form-select">
+          <option value="">-- Pilih Nama --</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="start-date" class="form-label">Dari Tanggal</label>
+        <input type="date" class="form-control" id="start-date">
+      </div>
+      <div class="col-md-3">
+        <label for="end-date" class="form-label">Sampai Tanggal</label>
+        <input type="date" class="form-control" id="end-date">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button id="filter-button" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </div>
+
+    <!-- Spinner Loading -->
+    <div id="loading-spinner" class="text-center my-3" style="display: none;">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="row" id="dashboard-cards"></div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Import Data -->
+  <script>
+    // Variabel global untuk menyimpan data
+    let salesData = [];
+    let targetData = [];
+
+    // Fetch data dari Google Apps Script
+    async function fetchData() {
+      const spinner = document.getElementById('loading-spinner');
+      spinner.style.display = 'block';
+
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwa-I3mMhQYnKmXB0xUzLB2ZkfkoN0pXEy4EBdCPFDp_zyjpSsh6pHzXp4Mkekww4xe/exec');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        salesData = data.salesData;
+        targetData = data.targetData;
+
+        // Populate dropdown nama dan render dashboard setelah data dimuat
+        populateNamaDropdown(salesData);
+        renderDashboard(salesData, targetData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        alert('Gagal memuat data. Silakan coba lagi.');
+      } finally {
+        spinner.style.display = 'none';
+      }
+    }
+
+    // Populate dropdown nama saat awal
+    function populateNamaDropdown(data) {
+      const namaSelect = document.getElementById('nama-filter');
+      const namaSet = new Set();
+
+      data.forEach(item => {
+        if (item['Nama Lengkap']) {
+          namaSet.add(item['Nama Lengkap'].trim());
+        }
+      });
+
+      const namaList = Array.from(namaSet).sort();
+      namaList.forEach(nama => {
+        const option = document.createElement('option');
+        option.value = nama;
+        option.textContent = nama;
+        namaSelect.appendChild(option);
+      });
+    }
+
+    // Menghitung metrik dari data penjualan
+    function calculateMetrics(filteredData) {
+      const totalSales = filteredData.reduce((sum, item) => sum + (Number(item.Sales) || 0), 0);
+      const totalStd = filteredData.reduce((sum, item) => sum + (Number(item.Std) || 0), 0);
+      const totalPulsa = filteredData.reduce((sum, item) => sum + (Number(item.Pulsa) || 0), 0);
+      const totalPwp = filteredData.reduce((sum, item) => sum + (Number(item.Pwp) || 0), 0);
+      const totalSertis = filteredData.reduce((sum, item) => sum + (Number(item.Sertis) || 0), 0);
+      const totalPsm = filteredData.reduce(
+        (sum, item) =>
+          sum +
+          (Number(item.Ultra) || 0) +
+          (Number(item.Aqua) || 0) +
+          (Number(item.Ichitan) || 0) +
+          (Number(item.Sosro) || 0) +
+          (Number(item.Sedaap) || 0) +
+          (Number(item.Chitato) || 0) +
+          (Number(item.Lemonilo) || 0) +
+          (Number(item.Sweety) || 0) +
+          (Number(item.Pepsodent) || 0) +
+          (Number(item.Nivea) || 0),
+        0
+      );
+
+      return { totalSales, totalStd, totalPulsa, totalPwp, totalSertis, totalPsm };
+    }
+
+    // Menghitung pencapaian persentase
+    function calculateAchievement(actual, target) {
+      if (target === 0) return "N/A";
+      return ((actual / target) * 100).toFixed(2) + "%";
+    }
+
+    // Menghitung gap antara actual dan target
+    function calculateGap(actual, target) {
+      const gap = actual - target;
+      return gap >= 0
+        ? `<span class="gap-positive">+${gap.toLocaleString()}</span>`
+        : `<span class="gap-negative">${gap.toLocaleString()}</span>`;
+    }
+
+    // Render dashboard
+    function renderDashboard(data, targetDataFiltered) {
+    const container = document.getElementById('dashboard-cards');
+    container.innerHTML = '';
+
+    if (data.length === 0) {
+      container.innerHTML = '<div class="col-12"><div class="alert alert-info">Tidak ada data untuk ditampilkan berdasarkan filter yang dipilih.</div></div>';
+      return;
+    }
+
+    const { totalSales, totalStd, totalPulsa, totalPwp, totalSertis, totalPsm } = calculateMetrics(data);
+
+    // Calculate targets
+    const targetSales = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Sales || 0), 0);
+    const targetStd = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Std || 0), 0);
+    const targetPulsa = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Pulsa || 0), 0);
+    const targetPwp = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Pwp || 0), 0);
+    const targetSertis = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Sertis || 0), 0);
+    const targetPsm = targetDataFiltered.reduce((sum, item) =>
+      sum +
+      parseInt(item.Ultra || 0) +
+      parseInt(item.Aqua || 0) +
+      parseInt(item.Ichitan || 0) +
+      parseInt(item.Sosro || 0) +
+      parseInt(item.Sedaap || 0) +
+      parseInt(item.Chitato || 0) +
+      parseInt(item.Lemonilo || 0) +
+      parseInt(item.Sweety || 0) +
+      parseInt(item.Pepsodent || 0) +
+      parseInt(item.Nivea || 0), 0
+    );
+
+    // Format nilai dengan separator ribuan
+    const formatNumber = num => num.toLocaleString('id-ID');
+    const formatCurrency = num => 'Rp' + num.toLocaleString('id-ID');
+
+    container.innerHTML = `
+      <!-- Target Card -->
+      <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">TARGET</h5>
+            <div class="metric-item">
+              <span class="metric-label">Sales</span>
+              <span class="metric-value">${formatCurrency(targetSales)}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">STD</span>
+              <span class="metric-value">${formatNumber(targetStd)}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Pulsa</span>
+              <span class="metric-value">${formatCurrency(targetPulsa)}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">PWP</span>
+              <span class="metric-value">${formatNumber(targetPwp)}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Sertis</span>
+              <span class="metric-value">${formatNumber(targetSertis)}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">PSM</span>
+              <span class="metric-value">${formatNumber(targetPsm)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Card -->
+      <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">PENJUALAN</h5>
+            <div class="metric-item">
+              <span class="metric-label">Sales</span>
+              <span class="metric-value">
+                ${formatCurrency(totalSales)}
+                <span class="achievement ${totalSales >= targetSales ? 'gap-positive' : 'gap-negative'}">
+                  ${calculateAchievement(totalSales, targetSales)}
+                </span>
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">STD</span>
+              <span class="metric-value">
+                ${formatNumber(totalStd)}
+                <span class="achievement ${totalStd >= targetStd ? 'gap-positive' : 'gap-negative'}">
+                  ${calculateAchievement(totalStd, targetStd)}
+                </span>
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Pulsa</span>
+              <span class="metric-value">
+                ${formatCurrency(totalPulsa)}
+                <span class="achievement ${totalPulsa >= targetPulsa ? 'gap-positive' : 'gap-negative'}">
+                  ${calculateAchievement(totalPulsa, targetPulsa)}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Focus Product Card -->
+      <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">FOKUS PRODUK</h5>
+            <div class="metric-item">
+              <span class="metric-label">PWP</span>
+              <span class="metric-value">
+                ${formatNumber(totalPwp)}
+                <span class="achievement ${totalPwp >= targetPwp ? 'gap-positive' : 'gap-negative'}">
+                  ${calculateAchievement(totalPwp, targetPwp)}
+                </span>
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Sertis</span>
+              <span class="metric-value">
+                ${formatNumber(totalSertis)}
+                <span class="achievement ${totalSertis >= targetSertis ? 'gap-positive' : 'gap-negative'}">
+                  ${calculateAchievement(totalSertis, targetSertis)}
+                </span>
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">PSM</span>
+              <span class="metric-value">
+                ${formatNumber(totalPsm)}
+                <span class="achievement ${totalPsm >= targetPsm ? 'gap-positive' : 'gap-negative'}">
+                  ${calculateAchievement(totalPsm, targetPsm)}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gap Card -->
+      <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">GAP (Actual vs Target)</h5>
+            <div class="metric-item">
+              <span class="metric-label">Sales</span>
+              <span class="metric-value ${totalSales >= targetSales ? 'gap-positive' : 'gap-negative'}">
+                ${calculateGap(totalSales, targetSales)}
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">STD</span>
+              <span class="metric-value ${totalStd >= targetStd ? 'gap-positive' : 'gap-negative'}">
+                ${calculateGap(totalStd, targetStd)}
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Pulsa</span>
+              <span class="metric-value ${totalPulsa >= targetPulsa ? 'gap-positive' : 'gap-negative'}">
+                ${calculateGap(totalPulsa, targetPulsa)}
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">PWP</span>
+              <span class="metric-value ${totalPwp >= targetPwp ? 'gap-positive' : 'gap-negative'}">
+                ${calculateGap(totalPwp, targetPwp)}
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Sertis</span>
+              <span class="metric-value ${totalSertis >= targetSertis ? 'gap-positive' : 'gap-negative'}">
+                ${calculateGap(totalSertis, targetSertis)}
+              </span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">PSM</span>
+              <span class="metric-value ${totalPsm >= targetPsm ? 'gap-positive' : 'gap-negative'}">
+                ${calculateGap(totalPsm, targetPsm)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+     
+
+ // Fungsi untuk mengubah string tanggal menjadi objek Date
+function parseDate(dateString) {
+  if (!dateString) return null;
+  
+  // Jika format ISO (dari JSON: 2025-04-28T17:00:00.000Z)
+  if (dateString.includes('T')) {
+    const isoDate = new Date(dateString);
+    if (!isNaN(isoDate.getTime())) {
+      return isoDate;
+    }
+  }
+  
+  // Jika format dari date picker HTML (YYYY-MM-DD)
+  if (dateString.includes('-') && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return new Date(dateString);
+  }
+  
+  // Jika format dengan slash (DD/MM/YYYY)
+  if (dateString.includes('/')) {
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      // Perhatikan urutan: bulan di index 1 (0-based)
+      return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+  }
+  
+  // Coba parse langsung sebagai Date
+  const parsedDate = new Date(dateString);
+  if (!isNaN(parsedDate.getTime())) {
+    return parsedDate;
+  }
+  
+  console.warn('Format tanggal tidak dikenali:', dateString);
+  return null;
+}
+
+// Fungsi untuk membandingkan tanggal tanpa memperdulikan waktu
+function isSameDate(date1, date2) {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+}
+
+// Fungsi applyFilter yang sudah diperbaiki
+function applyFilter() {
+  const spinner = document.getElementById('loading-spinner');
+  spinner.style.display = 'block';
+
+  setTimeout(() => {
+    try {
+      // Ambil nilai dari filter
+      const startDateInput = document.getElementById('start-date').value;
+      const endDateInput = document.getElementById('end-date').value;
+      const namaFilter = document.getElementById('nama-filter').value.trim();
+
+      // Parse tanggal filter
+      const startDate = startDateInput ? new Date(startDateInput) : null;
+      const endDate = endDateInput ? new Date(endDateInput) : null;
+
+      // Filter sales data
+      let filteredSalesData = salesData;
+      
+      // Filter berdasarkan nama
+      if (namaFilter) {
+        filteredSalesData = filteredSalesData.filter(item => 
+          item['Nama Lengkap'] && item['Nama Lengkap'].trim() === namaFilter
+        );
+      }
+
+      // Filter berdasarkan tanggal
+      if (startDate && endDate) {
+        filteredSalesData = filteredSalesData.filter(item => {
+          const itemDate = parseDate(item.Tanggal);
+          if (!itemDate) return false;
+          
+          // Normalisasi waktu ke 00:00:00 untuk perbandingan
+          const itemDateOnly = new Date(itemDate);
+          itemDateOnly.setHours(0, 0, 0, 0);
+          
+          const startDateOnly = new Date(startDate);
+          startDateOnly.setHours(0, 0, 0, 0);
+          
+          const endDateOnly = new Date(endDate);
+          endDateOnly.setHours(23, 59, 59, 999); // Sampai akhir hari
+          
+          return itemDateOnly >= startDateOnly && itemDateOnly <= endDateOnly;
+        });
+      }
+
+      // Filter target data
+      let filteredTargetData = targetData;
+      
+      if (startDate && endDate) {
+        filteredTargetData = filteredTargetData.filter(item => {
+          const itemDate = parseDate(item.Tanggal);
+          if (!itemDate) return false;
+          
+          const itemDateOnly = new Date(itemDate);
+          itemDateOnly.setHours(0, 0, 0, 0);
+          
+          const startDateOnly = new Date(startDate);
+          startDateOnly.setHours(0, 0, 0, 0);
+          
+          const endDateOnly = new Date(endDate);
+          endDateOnly.setHours(23, 59, 59, 999);
+          
+          return itemDateOnly >= startDateOnly && itemDateOnly <= endDateOnly;
+        });
+      }
+
+      // Render dashboard
+      renderDashboard(filteredSalesData, filteredTargetData);
+      
+    } catch (error) {
+      console.error('Error in applyFilter:', error);
+      alert('Terjadi kesalahan saat memfilter data.');
+    } finally {
+      spinner.style.display = 'none';
+    }
+  }, 300);
+}
+
+    // Jalankan saat halaman selesai dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchData(); // Ambil data dari Google Apps Script
+      document.getElementById('filter-button').addEventListener('click', applyFilter);
+    });
+  </script>
+</body>
+</html>
