@@ -161,24 +161,29 @@
         form.appendChild(timeDiv);
 
         // Kolom Ketiga: Input Teks
-        const nameDiv = document.createElement('div');
-        nameDiv.classList.add('col-md-6');
+const nameDiv = document.createElement('div');
+nameDiv.classList.add('col-md-6');
 
-        const nameLabel = document.createElement('label');
-        nameLabel.setAttribute('for', 'Nama');
-        nameLabel.textContent = headers[2]; // Sesuaikan dengan header ketiga
-        nameLabel.classList.add('form-label');
+const nameLabel = document.createElement('label');
+nameLabel.setAttribute('for', 'Nama');
+nameLabel.textContent = headers[2]; // Sesuaikan dengan header ketiga
+nameLabel.classList.add('form-label');
 
-        const nameInput = document.createElement('input');
-        nameInput.setAttribute('type', 'text');
-        nameInput.setAttribute('id', 'Nama');
-        nameInput.setAttribute('name', headers[2]); // Sesuaikan dengan header ketiga
-        nameInput.setAttribute('required', true);
-        nameInput.classList.add('form-control');
+const nameInput = document.createElement('input');
+nameInput.setAttribute('type', 'text');
+nameInput.setAttribute('id', 'Nama');
+nameInput.setAttribute('name', headers[2]); // Sesuaikan dengan header ketiga
+nameInput.setAttribute('required', true);
+nameInput.classList.add('form-control');
 
-        nameDiv.appendChild(nameLabel);
-        nameDiv.appendChild(nameInput);
-        form.appendChild(nameDiv);
+// Validasi input hanya huruf kapital
+nameInput.addEventListener('input', (e) => {
+  e.target.value = e.target.value.toUpperCase(); // Ubah input ke huruf kapital
+});
+
+nameDiv.appendChild(nameLabel);
+nameDiv.appendChild(nameInput);
+form.appendChild(nameDiv);
 
         // Kolom Keempat dan Seterusnya: Input Angka
         headers.slice(3).forEach((header, index) => {
