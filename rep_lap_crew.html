@@ -220,7 +220,7 @@ function renderDashboard(data, targetDataFiltered) {
   }
 
   const headers = Object.keys(data[0] || {});
-  const psmColumns = headers.slice(7); // Ambil kolom indeks 7 dan seterusnya sebagai PSM
+  const psmColumns = headers.slice(8); // Ambil kolom indeks 8 dan seterusnya sebagai PSM
   const { totalSales, totalStd, totalPulsa, totalPwp, totalSertis, totalPsm } = calculateMetrics(data);
 
   // Calculate targets
@@ -511,6 +511,38 @@ function applyFilter() {
     }
   }, 300);
 }
+
+// Menghitung total PSM per nama
+function calculatePsmByNama(filteredData, psmColumns) {
+  const psmByNama = {};
+
+  filteredData.forEach(item => {
+    const nama = item['Nama Lengkap']?.trim();
+    if (!nama) return;
+
+    if (!psmByNama[nama]) {
+      psmByNama[nama] = 0;
+    }
+
+    // Hitung total PSM untuk nama tersebut
+    psmByNama[nama] += psmColumns.reduce((sum, column) => 
+      sum + (Number(item[column]) || 0), 0);
+  });
+
+  // Ubah menjadi array untuk diurutkan
+  const rankedPsm = Object.entries(psmByNama).map(([nama, total]) => ({
+    nama,
+    total
+  }));
+
+  // Urutkan berdasarkan total PSM (descending)
+  rankedPsm.sort((a, b) => b.total - a.total);
+
+  return rankedPsm;
+}
+
+
+
 
 // Jalankan saat halaman selesai dimuat
 document.addEventListener('DOMContentLoaded', () => {
