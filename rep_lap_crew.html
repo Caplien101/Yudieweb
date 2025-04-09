@@ -181,7 +181,7 @@ function populateNamaDropdown(data) {
 // Menghitung metrik dari data penjualan
 function calculateMetrics(filteredData) {
   const headers = Object.keys(filteredData[0] || {});
-  const psmColumns = headers.slice(7); // Ambil kolom indeks 7 dan seterusnya sebagai PSM
+  const psmColumns = headers.slice(8); // Ambil kolom indeks 8 dan seterusnya sebagai PSM
   const totalSales = filteredData.reduce((sum, item) => sum + (Number(item.Sales) || 0), 0);
   const totalStd = filteredData.reduce((sum, item) => sum + (Number(item.Std) || 0), 0);
   const totalPulsa = filteredData.reduce((sum, item) => sum + (Number(item.Pulsa) || 0), 0);
