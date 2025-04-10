@@ -487,7 +487,15 @@ container.innerHTML += `
   <div class="col-12 col-md-6 col-lg-4 mb-4">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title">DETAIL PENJUALAN PSM</h5>
+    <!-- Elemen Label dan Tombol -->
+    <div class="d-flex align-items-start">
+      <!-- Label -->
+      <h5 class="card-title mb-0 me-3">DETAIL PENJUALAN PSM</h5>
+      
+      <!-- Tombol -->
+      <a href="detail_psm.html" class="btn-md btn-primary">Lihat Detail</a>
+    </div>
+  
         <div class="metric-item">
           <span class="metric-label">Total PSM</span>
           <span class="metric-value">${formatNumber(totalPsm)}</span>
@@ -660,3 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 </body>
 </html>
+
+
+
+
