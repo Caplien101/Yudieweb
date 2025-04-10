@@ -76,6 +76,7 @@
   display: flex;
   flex-direction: column;
   margin-top: 12px;
+  color: blue;
 }
 
 .seller-entry {
@@ -89,12 +90,12 @@
 
 .seller-name {
   font-size: 0.85rem;
-  color: #006400;
+  color: #555;
 }
 
 .seller-metrics {
   font-size: 0.85rem;
-  color: #006400;
+  color: #555;
 }
 
 .badge {
@@ -299,7 +300,7 @@ function renderPsmDetails(filteredSalesData, filteredTargetData) {
               </span>
             </div>
             <div class="top-seller">
-              <span class="metric-label">Top Crew :</span>
+              <span class="metric-label" style="font-weight:bold; color: #28a745 ;">Top Crew </span>
               <div class="metric-value">
                 ${topSellersHtml || '-'}
               </div>
