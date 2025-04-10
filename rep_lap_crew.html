@@ -6,6 +6,8 @@
   <title>Dashboard Penjualan</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
   /* Gaya yang diperbarui untuk card yang lebih profesional */
   .card {
@@ -89,6 +91,67 @@
   gap: 15px; /* Kurangi jarak antar kartu */
   margin-top: 20px;
 }
+
+/* Gaya untuk baris peringkat */
+.rank-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.rank-name {
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.rank-value {
+  font-weight: 600;
+  text-align: right;
+  margin-left: 10px;
+}
+
+/* Gaya untuk 3 peringkat teratas */
+.rank-top {
+  background-color: rgba(40, 167, 69, 0.1); /* Latar belakang hijau muda */
+  border-left: 4px solid #28a745; /* Garis kiri hijau */
+  padding-left: 8px;
+}
+
+.rank-top .rank-icon {
+  color: #28a745; /* Ikon hijau */
+}
+
+/* Gaya untuk 3 peringkat terbawah */
+.rank-bottom {
+  background-color: rgba(220, 53, 69, 0.1); /* Latar belakang merah muda */
+  border-left: 4px solid #dc3545; /* Garis kiri merah */
+  padding-left: 8px;
+}
+
+.rank-bottom .rank-icon {
+  color: #dc3545; /* Ikon merah */
+}
+
+/* Gaya umum untuk ikon */
+.rank-icon {
+  font-size: 1rem;
+  margin-left: 8px;
+}
+
+/* Gaya untuk baris peringkat tengah (bukan 3 teratas atau 3 terbawah) */
+.rank-middle {
+  background-color: rgba(255, 193, 7, 0.1); /* Latar belakang kuning muda */
+  border-left: 4px solid #ffc107; /* Garis kiri kuning */
+  padding-left: 8px;
+}
+
+.rank-middle .rank-icon {
+  color: #ffc107; /* Ikon kuning */
+}
+
 </style>
 </head>
 <body>
@@ -210,10 +273,11 @@ function calculateGap(actual, target) {
     : `<span class="gap-negative">${gap.toLocaleString()}</span>`;
 }
 
-// Render dashboard
+// Render card untuk detail penjualan PSM dan peringkat
 function renderDashboard(data, targetDataFiltered) {
   const container = document.getElementById('dashboard-cards');
   container.innerHTML = '';
+
   if (data.length === 0) {
     container.innerHTML = '<div class="col-12"><div class="alert alert-info">Tidak ada data untuk ditampilkan berdasarkan filter yang dipilih.</div></div>';
     return;
@@ -231,13 +295,14 @@ function renderDashboard(data, targetDataFiltered) {
   const targetSertis = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Sertis || 0), 0);
 
   // Calculate target PSM
-  const targetPsm = psmColumns.reduce((sum, column) => 
+  const targetPsm = psmColumns.reduce((sum, column) =>
     sum + targetDataFiltered.reduce((acc, item) => acc + parseInt(item[column] || 0), 0), 0);
 
   // Format nilai dengan separator ribuan
   const formatNumber = num => num.toLocaleString('id-ID');
   const formatCurrency = num => 'Rp' + num.toLocaleString('id-ID');
 
+  // Render card untuk TARGET, ACTUAL, FOKUS PRODUK, dan GAP
   container.innerHTML = `
     <!-- Target Card -->
     <div class="col-12 col-md-6 col-lg-4 mb-4">
@@ -392,8 +457,51 @@ function renderDashboard(data, targetDataFiltered) {
       </div>
     </div>
   `;
-}
 
+  // Render card untuk detail penjualan PSM dan peringkat
+const rankedPsm = calculatePsmByNama(data, psmColumns);
+const topRankHtml = rankedPsm.map((item, index) => {
+  // Tentukan apakah ini termasuk 3 peringkat teratas, tengah, atau terbawah
+  const isTop = index < 3; // 3 peringkat teratas
+  const isBottom = index >= rankedPsm.length - 3; // 3 peringkat terbawah
+  const isMiddle = !isTop && !isBottom; // Peringkat tengah
+
+  // Tentukan kelas CSS dan ikon berdasarkan posisi
+  const rankClass = isTop
+    ? 'rank-top'
+    : (isBottom ? 'rank-bottom' : 'rank-middle');
+  const rankIcon = isTop
+    ? '<i class="fas fa-thumbs-up rank-icon"></i>'
+    : (isBottom ? '<i class="fas fa-thumbs-down rank-icon"></i>' : '<i class="fas fa-exclamation-triangle rank-icon"></i>');
+
+  return `
+    <div class="rank-item ${rankClass}">
+      <span class="rank-name">${index + 1}. ${item.nama}</span>
+      <span class="rank-value">${formatNumber(item.total)} ${rankIcon}</span>
+    </div>
+  `;
+}).join('');
+
+container.innerHTML += `
+  <!-- PSM Details Card -->
+  <div class="col-12 col-md-6 col-lg-4 mb-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">DETAIL PENJUALAN PSM</h5>
+        <div class="metric-item">
+          <span class="metric-label">Total PSM</span>
+          <span class="metric-value">${formatNumber(totalPsm)}</span>
+        </div>
+        <h6 class="mt-3">Peringkat Penjualan PSM</h6>
+        <div>
+          ${topRankHtml || '<div class="text-muted">Tidak ada data PSM.</div>'}
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+}
+  
 // Fungsi untuk mengubah string tanggal menjadi objek Date
 function parseDate(dateString) {
   if (!dateString) return null;
