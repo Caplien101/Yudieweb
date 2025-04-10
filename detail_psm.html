@@ -190,34 +190,44 @@ function getBadgeClass(percentage) {
     return 'badge bg-danger'; // Merah untuk pencapaian ≤ 40%
   }
 }
+
+
+// Fungsi untuk mengelompokkan data berdasarkan nama
+function groupBySeller(data, column) {
+  const grouped = {};
+  data.forEach(item => {
+    const sellerName = item['Nama Lengkap'];
+    const value = parseInt(item[column] || 0);
+    if (!grouped[sellerName]) {
+      grouped[sellerName] = { nama: sellerName, total: 0 };
+    }
+    grouped[sellerName].total += value;
+  });
+  return Object.values(grouped);
+}
    
-    // Menghitung metrik PSM berdasarkan filter
 // Menghitung metrik PSM berdasarkan filter
 function calculatePsmMetrics(filteredSalesData, filteredTargetData, psmColumns) {
   const psmMetrics = {};
   psmColumns.forEach(column => {
     const target = filteredTargetData.reduce((sum, item) => sum + parseInt(item[column] || 0), 0);
     const actual = filteredSalesData.reduce((sum, item) => sum + parseInt(item[column] || 0), 0);
-
-    // Hitung target per seller (pembagian integer)
     const targetPerSeller = Math.floor(target / 3); // Target dibagi 3 bagian
-
-    // Hitung pencapaian umum: actual ÷ target
     const achievement = target === 0
       ? '>100%' // Jika target 0, pencapaian >100%
       : ((actual / target) * 100).toFixed(2) + '%';
 
-    // Hitung dua nama dengan penjualan terbanyak beserta actual dan persentase
-    const topSellers = filteredSalesData
-      .filter(item => item[column])
-      .sort((a, b) => parseInt(b[column]) - parseInt(a[column]))
-      .slice(0, 2)
+    // Mengelompokkan data berdasarkan nama
+    const topSellers = groupBySeller(filteredSalesData, column)
+      .filter(item => item.total > 0) // Hanya ambil seller dengan penjualan > 0
+      .sort((a, b) => b.total - a.total) // Sortir berdasarkan total penjualan (descending)
+      .slice(0, 2) // Ambil dua nama dengan penjualan tertinggi
       .map(item => ({
-        nama: item['Nama Lengkap'],
-        actual: parseInt(item[column]),
+        nama: toProperCase(item.nama),
+        actual: item.total,
         percentage: targetPerSeller === 0
           ? '>100%'
-          : ((parseInt(item[column]) / targetPerSeller) * 100).toFixed(2) + '%' // Pencapaian per seller
+          : ((item.total / targetPerSeller) * 100).toFixed(2) + '%' // Pencapaian per seller
       }));
 
     psmMetrics[column] = {
@@ -241,8 +251,6 @@ function toProperCase(text) {
     .join(' '); // Gabungkan kembali kata-kata dengan spasi
 }
 
-
- // Render detail penjualan PSM
 // Render detail penjualan PSM
 function renderPsmDetails(filteredSalesData, filteredTargetData) {
   const container = document.getElementById('psm-details');
@@ -383,4 +391,4 @@ function renderPsmDetails(filteredSalesData, filteredTargetData) {
     });
   </script>
 </body>
-</html>
+</html>    
