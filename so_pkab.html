@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gudang so ac</title>
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Data Kartonan PKAB</h1>
+
+        <!-- Search Input -->
+        <div class="search-container">
+            <input type="text" id="search-input" class="form-control" placeholder="Cari berdasarkan PLU atau DESCRIPTION...">
+        </div>
+
+        <!-- Table -->
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>PLU</th>
+                    <th>DESCRIPTION</th>
+                    <th>RAPJ</th>
+                    <th>TOKO</th>
+                    <th>CONV</th>
+                    <th>TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+                <!-- Data akan dimuat di sini -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap 5.3.3 JS (Optional, if needed for other features) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // URL Google Sheets yang telah diperbaiki
+        const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTeNi8kpmnJB-TkkZu56WRlgWKZRijZofyVrvdQNbQ-sj3Gm4hGzsyBHczDzwjagZhzNspvpDYoUWl8/pub?gid=1582917917&single=true&output=csv';
+
+        // Fungsi untuk mengambil data dari Google Sheets
+        async function fetchData() {
+            try {
+                const response = await fetch(googleSheetUrl);
+                if (!response.ok) {
+                    throw new Error('Gagal memuat data dari Google Sheets.');
+                }
+
+                // Parsing CSV menjadi array
+                const csvData = await response.text();
+                const rows = csvData.split('\n').map(row => row.split(','));
+
+                // Mengisi tabel dengan data
+                const tableBody = document.querySelector('#data-table-body');
+                rows.forEach((row, index) => {
+                    if (index === 0) return; // Lewati baris header
+                    if (row.length < 6) return; // Pastikan ada cukup kolom
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row[0]}</td>
+                        <td>${row[1]}</td>
+                        <td>${row[2]}</td>
+                        <td>${row[3]}</td>
+                        <td>${row[4]}</td>
+                        <td>${row[5]}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Aktifkan fitur pencarian setelah data dimuat
+                enableSearch();
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan saat memuat data.');
+            }
+        }
+
+        // Fungsi untuk mengaktifkan fitur pencarian
+        function enableSearch() {
+            const searchInput = document.getElementById('search-input');
+            const rows = document.querySelectorAll('#data-table-body tr');
+
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+
+                rows.forEach(row => {
+                    const plu = row.cells[0].textContent.toLowerCase();
+                    const description = row.cells[1].textContent.toLowerCase();
+
+                    // Tampilkan baris jika cocok dengan PLU atau DESCRIPTION
+                    if (plu.includes(query) || description.includes(query)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }    
+
+        // Memuat data saat halaman dimuat
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
+</html>
