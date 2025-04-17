@@ -104,11 +104,76 @@
           <input type="number" id="modalRetur" class="form-control mb-2" readonly>
 
           <!-- Tanggal Expired -->
-          <label for="modalExpired" class="form-label">Tanggal Expired</label>
-          <input type="date" class="form-control mb-2" id="modalExpired" required>
+          <label class="form-label">Tanggal Expired</label>
+          <div class="row g-2">
+            <div class="col">
+              <select id="modalTanggal" class="form-select">
+                <!-- Options for dates 1-31 -->
+                <option value="01" selected>01</option>
+                <option value="02">02</option>
+                <option value="03">03</option>
+                <option value="04">04</option>
+                <option value="05">05</option>
+                <option value="06">06</option>
+                <option value="07">07</option>
+                <option value="08">08</option>
+                <option value="09">09</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28">28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+              </select>
+            </div>
+            <div class="col">
+              <select id="modalBulan" class="form-select">
+                <!-- Options for months 1-12 -->
+                <option value="01" selected>Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+            <div class="col">
+              <select id="modalTahun" class="form-select">
+                <!-- Options for years 2025-2030 -->
+                <option value="2025" selected>2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="2030">2030</option>
+              </select>
+            </div>
+          </div>
 
           <!-- Tanggal Retur -->
-          <label for="modalTanggalRetur" class="form-label">Tanggal Retur</label>
+          <label for="modalTanggalRetur" class="form-label mt-2">Tanggal Retur</label>
           <input type="date" class="form-control mb-2" id="modalTanggalRetur" readonly>
 
           <!-- Quantity -->
@@ -184,9 +249,12 @@
             document.getElementById('modalUmur').value = item.umur;
             document.getElementById('modalRetur').value = item.retur;
 
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('modalExpired').value = today;
-            document.getElementById('modalQty').value = 1;
+            // Default tanggal expired ke hari ini
+            const today = new Date();
+            document.getElementById('modalTanggal').value = String(today.getDate()).padStart(2, '0');
+            document.getElementById('modalBulan').value = String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('modalTahun').value = '2025'; // Default tahun 2025
+
             calculateReturDate();
 
             modal.show();
@@ -199,10 +267,14 @@
     });
 
     // Kalkulasi retur date
-    document.getElementById('modalExpired').addEventListener('input', calculateReturDate);
     function calculateReturDate() {
-      const expired = new Date(document.getElementById('modalExpired').value);
+      const tanggal = document.getElementById('modalTanggal').value;
+      const bulan = document.getElementById('modalBulan').value;
+      const tahun = document.getElementById('modalTahun').value;
+
+      const expired = new Date(`${tahun}-${bulan}-${tanggal}`);
       const returHari = parseInt(document.getElementById('modalRetur').value);
+
       if (!isNaN(expired) && !isNaN(returHari)) {
         const returDate = new Date(expired);
         returDate.setDate(returDate.getDate() - returHari);
@@ -217,7 +289,12 @@
       const description = document.getElementById('modalDescription').value;
       const umur = document.getElementById('modalUmur').value;
       const retur = document.getElementById('modalRetur').value;
-      const expired = document.getElementById('modalExpired').value;
+
+      const tanggal = document.getElementById('modalTanggal').value;
+      const bulan = document.getElementById('modalBulan').value;
+      const tahun = document.getElementById('modalTahun').value;
+      const expired = `${tahun}-${bulan}-${tanggal}`;
+
       const tglRetur = document.getElementById('modalTanggalRetur').value;
       const qty = parseInt(document.getElementById('modalQty').value);
 
