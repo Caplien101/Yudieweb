@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Expired Barang</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Custom styles */
+    #suggestions {
+      position: absolute;
+      z-index: 1000;
+      background: white;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-height: 150px; /* Batas tinggi maksimum */
+      overflow-y: auto; /* Aktifkan scroll vertikal */
+      border-radius: 4px; /* Sudut melengkung */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Bayangan untuk efek modern */
+    }
+
+    #suggestions div {
+      padding: 8px 12px; /* Padding untuk teks di dalam suggestion */
+      cursor: pointer;
+      border-bottom: 1px solid #eee; /* Garis pemisah antar item */
+    }
+
+    #suggestions div:hover {
+      background-color: #f0f8ff; /* Warna latar belakang saat hover */
+    }
+
+    /* Responsive table */
+    @media (max-width: 768px) {
+      .table-responsive {
+        overflow-x: auto;
+      }
+      .table th,
+      .table td {
+        white-space: nowrap;
+      }
+    }
+
+    /* Fullscreen modal on small screens */
+    @media (max-width: 576px) {
+      .modal-dialog {
+        margin: 1rem;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="p-4">
+  <h4 class="text-center">Form Input Expired Barang</h4>
+
+  <div class="mb-3 position-relative">
+    <label for="searchInput" class="form-label">Cari Produk (berdasarkan description)</label>
+    <input type="text" class="form-control" id="searchInput" autocomplete="off" placeholder="Ketik nama produk...">
+    <div id="suggestions" class="border rounded mt-1"></div>
+  </div>
+
+  <button id="downloadExcel" class="btn btn-success mb-3 w-100" disabled>Download Excel</button>
+
+  <!-- Responsive Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered mt-2">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>PLU</th>
+          <th>Description</th>
+          <th class="d-none">Umur</th> <!-- Hidden column -->
+          <th class="d-none">Retur Hari</th> <!-- Hidden column -->
+          <th>Expired</th>
+          <th>Retur</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="inputModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <form id="modalForm" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Input Data Expired</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- PLU -->
+          <label for="modalPlu" class="form-label">PLU</label>
+          <input type="text" id="modalPlu" class="form-control mb-2" readonly>
+
+          <!-- Description -->
+          <label for="modalDescription" class="form-label">Description</label>
+          <input type="text" id="modalDescription" class="form-control mb-2" readonly>
+
+          <!-- Umur -->
+          <label for="modalUmur" class="form-label">Umur (hari)</label>
+          <input type="number" id="modalUmur" class="form-control mb-2" readonly>
+
+          <!-- Retur Hari -->
+          <label for="modalRetur" class="form-label">Retur Hari</label>
+          <input type="number" id="modalRetur" class="form-control mb-2" readonly>
+
+          <!-- Tanggal Expired -->
+          <label for="modalExpired" class="form-label">Tanggal Expired</label>
+          <input type="date" class="form-control mb-2" id="modalExpired" required>
+
+          <!-- Tanggal Retur -->
+          <label for="modalTanggalRetur" class="form-label">Tanggal Retur</label>
+          <input type="date" class="form-control mb-2" id="modalTanggalRetur" readonly>
+
+          <!-- Quantity -->
+          <label for="modalQty" class="form-label">Quantity</label>
+          <input type="number" class="form-control mb-2" id="modalQty" required value="1" min="1">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary w-100" type="submit">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <script>
+    let sheetData = [];
+    let rowCount = 0;
+    const tableBody = document.getElementById("tableBody");
+    const modal = new bootstrap.Modal(document.getElementById("inputModal"));
+    const form = document.getElementById("modalForm");
+    const allData = [];
+
+    // Ambil data dari Google Sheet (TSV)
+    window.onload = async function () {
+      const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQY_IPyjCK59h08LV_2IXaPX4WzOn3RThgBsH94G1SzpbndWdJPowz-Pt_e18so9qb8_zJcVG7lxMa_/pub?gid=77192805&single=true&output=tsv';
+
+      try {
+        const response = await fetch(sheetUrl);
+        const text = await response.text();
+        const rows = text.trim().split('\n').map(r => r.split('\t'));
+
+        // index: 0 = PLU, 1 = description, 2 = umur, 3 = retur hari
+        sheetData = rows.slice(1).map(r => ({
+          plu: r[0] || '',
+          description: r[1] || '',
+          umur: parseInt(r[2]) || 0,
+          retur: parseInt(r[3]) || 0
+        })).filter(item => item.description);
+
+        console.log('Data loaded:', sheetData.length);
+      } catch (e) {
+        console.error('Gagal ambil data dari sheet:', e);
+      }
+    };
+
+    // Suggestion
+    const searchInput = document.getElementById('searchInput');
+    const suggestions = document.getElementById('suggestions');
+
+    searchInput.addEventListener('input', () => {
+      const val = searchInput.value.toLowerCase();
+      suggestions.innerHTML = '';
+      if (!val || sheetData.length === 0) return;
+
+      const matches = sheetData
+        .filter(item => item.description && item.description.toLowerCase().includes(val))
+        .slice(0, );
+
+      if (matches.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.textContent = 'Tidak ditemukan';
+        suggestions.appendChild(emptyDiv);
+      } else {
+        matches.forEach(item => {
+          const div = document.createElement('div');
+          div.textContent = item.description;
+          div.classList.add('border-bottom');
+          div.addEventListener('click', () => {
+            document.getElementById('modalPlu').value = item.plu;
+            document.getElementById('modalDescription').value = item.description;
+            document.getElementById('modalUmur').value = item.umur;
+            document.getElementById('modalRetur').value = item.retur;
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('modalExpired').value = today;
+            document.getElementById('modalQty').value = 1;
+            calculateReturDate();
+
+            modal.show();
+            suggestions.innerHTML = '';
+            searchInput.value = '';
+          });
+          suggestions.appendChild(div);
+        });
+      }
+    });
+
+    // Kalkulasi retur date
+    document.getElementById('modalExpired').addEventListener('input', calculateReturDate);
+    function calculateReturDate() {
+      const expired = new Date(document.getElementById('modalExpired').value);
+      const returHari = parseInt(document.getElementById('modalRetur').value);
+      if (!isNaN(expired) && !isNaN(returHari)) {
+        const returDate = new Date(expired);
+        returDate.setDate(returDate.getDate() - returHari);
+        document.getElementById('modalTanggalRetur').value = returDate.toISOString().split('T')[0];
+      }
+    }
+
+    // Simpan dan tampilkan
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const plu = document.getElementById('modalPlu').value;
+      const description = document.getElementById('modalDescription').value;
+      const umur = document.getElementById('modalUmur').value;
+      const retur = document.getElementById('modalRetur').value;
+      const expired = document.getElementById('modalExpired').value;
+      const tglRetur = document.getElementById('modalTanggalRetur').value;
+      const qty = parseInt(document.getElementById('modalQty').value);
+
+      for (let i = 0; i < qty; i++) {
+        rowCount++;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${rowCount}</td>
+          <td>${plu}</td>
+          <td>${description}</td>
+          <td class="d-none">${umur}</td> <!-- Hidden column -->
+          <td class="d-none">${retur}</td> <!-- Hidden column -->
+          <td>${expired}</td>
+          <td>${tglRetur}</td>
+        `;
+        tableBody.appendChild(row);
+        allData.push({ No: rowCount, PLU: plu, Description: description, Expired: expired, ReturDate: tglRetur });
+      }
+
+      document.getElementById('downloadExcel').disabled = false;
+      modal.hide();
+      form.reset();
+    });
+
+    // Download Excel
+    document.getElementById('downloadExcel').addEventListener('click', () => {
+      const ws = XLSX.utils.json_to_sheet(allData.map(item => ({
+        No: item.No,
+        PLU: item.PLU,
+        Description: item.Description,
+        Expired: item.Expired,
+        Retur: item.ReturDate
+      })));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Expired");
+      XLSX.writeFile(wb, "data_expired.xlsx");
+    });
+  </script>
+</body>
+</html>
