@@ -267,20 +267,78 @@
     });
 
     // Kalkulasi retur date
-    function calculateReturDate() {
-      const tanggal = document.getElementById('modalTanggal').value;
-      const bulan = document.getElementById('modalBulan').value;
-      const tahun = document.getElementById('modalTahun').value;
+    // Kalkulasi retur date
+function calculateReturDate() {
+  // Ambil nilai dari input tanggal expired
+  const tanggal = document.getElementById('modalTanggal').value;
+  const bulan = document.getElementById('modalBulan').value;
+  const tahun = document.getElementById('modalTahun').value;
 
-      const expired = new Date(`${tahun}-${bulan}-${tanggal}`);
-      const returHari = parseInt(document.getElementById('modalRetur').value);
+  // Buat objek Date untuk tanggal expired
+  const expired = new Date(`${tahun}-${bulan}-${tanggal}`);
 
-      if (!isNaN(expired) && !isNaN(returHari)) {
-        const returDate = new Date(expired);
-        returDate.setDate(returDate.getDate() - returHari);
-        document.getElementById('modalTanggalRetur').value = returDate.toISOString().split('T')[0];
-      }
-    }
+  // Ambil nilai retur hari
+  const returHari = parseInt(document.getElementById('modalRetur').value);
+
+  // Validasi input
+  if (isNaN(expired.getTime()) || isNaN(returHari)) {
+    console.error("Tanggal expired atau retur hari tidak valid.");
+    return;
+  }
+
+  // Hitung tanggal retur dengan mengurangi retur hari dari tanggal expired
+  const returDate = new Date(expired);
+  returDate.setDate(returDate.getDate() - returHari);
+
+  // Format tanggal retur ke YYYY-MM-DD dan set ke input tanggal retur
+  document.getElementById('modalTanggalRetur').value = returDate.toISOString().split('T')[0];
+}
+
+// Tambah event listener untuk input tanggal, bulan, dan tahun
+document.getElementById('modalTanggal').addEventListener('change', calculateReturDate);
+document.getElementById('modalBulan').addEventListener('change', calculateReturDate);
+document.getElementById('modalTahun').addEventListener('change', calculateReturDate);
+
+// Panggil calculateReturDate saat modal ditampilkan
+searchInput.addEventListener('input', () => {
+  const val = searchInput.value.toLowerCase();
+  suggestions.innerHTML = '';
+  if (!val || sheetData.length === 0) return;
+  const matches = sheetData
+    .filter(item => item.description && item.description.toLowerCase().includes(val))
+    .slice(0, 10); // Batasi hasil pencarian maksimal 10 item
+  if (matches.length === 0) {
+    const emptyDiv = document.createElement('div');
+    emptyDiv.textContent = 'Tidak ditemukan';
+    suggestions.appendChild(emptyDiv);
+  } else {
+    matches.forEach(item => {
+      const div = document.createElement('div');
+      div.textContent = item.description;
+      div.classList.add('border-bottom');
+      div.addEventListener('click', () => {
+        document.getElementById('modalPlu').value = item.plu;
+        document.getElementById('modalDescription').value = item.description;
+        document.getElementById('modalUmur').value = item.umur;
+        document.getElementById('modalRetur').value = item.retur;
+
+        // Default tanggal expired ke hari ini
+        const today = new Date();
+        document.getElementById('modalTanggal').value = String(today.getDate()).padStart(2, '0');
+        document.getElementById('modalBulan').value = String(today.getMonth() + 1).padStart(2, '0');
+        document.getElementById('modalTahun').value = '2025'; // Default tahun 2025
+
+        // Hitung tanggal retur saat modal ditampilkan
+        calculateReturDate();
+
+        modal.show();
+        suggestions.innerHTML = '';
+        searchInput.value = '';
+      });
+      suggestions.appendChild(div);
+    });
+  }
+});
 
     // Simpan dan tampilkan
     form.addEventListener('submit', function (e) {
