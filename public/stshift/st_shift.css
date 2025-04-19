@@ -1,1 +1,21 @@
 
+ /* Custom styles */
+    .suggestion-list {
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      display: none;
+    }
+    .suggestion-item {
+      padding: 5px;
+      cursor: pointer;
+    }
+    .suggestion-item:hover {
+      background-color: #f0f0f0;
+    }
+    
+    @media (min-width: 768px) {
+  .d-none-on-mobile {
+    display: table-cell !important;
+  }
+}
