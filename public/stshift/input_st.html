@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Input Data</title>
+  <!-- Bootstrap 5.3.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style></style>
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    <h1 class="text-center mb-4">Form Input Data</h1>
 
+    <!-- Lokasi Dropdown -->
+    <div class="mb-3">
+      <label for="lokasi" class="form-label">Lokasi:</label>
+      <select id="lokasi" class="form-select">
+        <option value="">Pilih Lokasi</option>
+        <!-- Generate options from 900 to 920 -->
+        <script>
+          for (let i = 900; i <= 920; i++) {
+            document.write(`<option value="${i}">${i}</option>`);
+          }
+        </script>
+      </select>
+    </div>
+
+    <!-- Description Input with Suggestions -->
+    <div class="mb-3">
+      <label for="description" class="form-label">Description:</label>
+      <input type="text" id="description" class="form-control" placeholder="Cari description...">
+      <div class="suggestion-list" id="suggestionList"></div>
+    </div>
+
+    <!-- Send to Google Sheet Button -->
+    <button id="sendToGoogleSheet" class="btn btn-primary w-100">Send to Google Sheet</button>
+
+    <!-- Progress Bar -->
+    <div id="progressContainer" class="mt-3 d-none">
+      <p id="progressText" class="mb-2">Progress: 0/0</p>
+      <div class="progress">
+        <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+    </div>
+
+    <!-- Notification Alert -->
+    <div id="notification" class="alert alert-success mt-3 d-none" role="alert">
+      Data berhasil dikirim!
+    </div>
+
+    <!-- Spinner -->
+    <div id="spinner" class="d-flex justify-content-center align-items-center position-fixed top-0 start-0 w-100 h-100 bg-white opacity-75 d-none">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <table id="dataTable" class="table table-bordered mt-4">
+  <thead class="table-dark">
+    <tr>
+      <th class="d-none">Lokasi</th> <!-- Sembunyikan -->
+      <th class="d-none">Rak</th> <!-- Sembunyikan -->
+      <th>PLU</th>
+      <th class="d-none">Barcode</th> <!-- Sembunyikan -->
+      <th>Description</th>
+      <th>Qty</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Data will be dynamically added here -->
+  </tbody>
+</table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">Edit Qty</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Description:</strong> <span id="modalDescription"></span></p>
+            <label for="modalQty" class="form-label">Qty:</label>
+            <input type="number" id="modalQty" class="form-control" value="1">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button id="saveModal" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5.3.3 JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
