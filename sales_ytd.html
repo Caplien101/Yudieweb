@@ -55,7 +55,7 @@
       
         @media (max-width: 768px) {
           .badge {
-            font-size: 0.5rem;
+            font-size: 0.7rem;
             padding: 0.1rem 0.2rem;
           }
           table td, table th {
@@ -63,6 +63,20 @@
             padding: 0.3rem;
           }
         }
+
+        @media (max-width: 768px) {
+  table {
+    min-width: 100%;
+    display: block;
+    white-space: normal; /* Mengizinkan wrap konten */
+  }
+  
+  table td, table th {
+    /*white-space: normal; /* Konten bisa wrap */
+    font-size: 0.7rem;
+    /*word-break: break-word; /* Memastikan kata panjang bisa dipotong */
+  }
+}
       </style>
 
       
