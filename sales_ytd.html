@@ -79,29 +79,56 @@
       }
 
       /* Badge styles */
-      .badge-container {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        margin-top: 4px;
-        align-items: flex-end; /* Rata kanan badge container */
-      }
+     /* Badge styles */
+.badge-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 3px;
+  align-items: flex-end;
+}
 
-      .badge {
-        display: inline-block;
-        font-size: 0.7rem;
-        padding: 0.2rem 0.4rem;
-        border-radius: 5px;
-      }
+.badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 500;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Positive (plus) badge */
+.badge.bg-success {
+  background-color: rgba(40, 167, 69, 0.15) !important;
+  color: #1e7e34 !important;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+/* Negative (minus) badge */
+.badge.bg-danger {
+  background-color: rgba(220, 53, 69, 0.12) !important;
+  color: #c82333 !important;
+  border: 1px solid rgba(220, 53, 69, 0.25);
+}
+
+/* Hover effects */
+.badge.bg-success:hover {
+  background-color: rgba(40, 167, 69, 0.25) !important;
+}
+
+.badge.bg-danger:hover {
+  background-color: rgba(220, 53, 69, 0.2) !important;
+}
 
       @media (max-width: 768px) {
         .badge {
-          font-size: 0.7rem;
+          font-size: 0.6rem;
           padding: 0.1rem 0.2rem;
         }
         table td,
         table th {
-          font-size: 13px;
+          font-size: 14px;
           padding: 0.3rem;
         }
       }
@@ -116,7 +143,7 @@
         table td,
         table th {
           /*white-space: normal; /* Konten bisa wrap */
-          font-size: 0.7rem;
+          font-size: 0.6rem;
           /*word-break: break-word; /* Memastikan kata panjang bisa dipotong */
         }
       }
