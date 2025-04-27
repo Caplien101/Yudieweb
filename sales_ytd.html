@@ -350,7 +350,7 @@
           const rows = groupedData[monthKey];
           const filteredRows = rows.filter((row) => row.ACTUAL && row.STD);
 
-          const monthlyTarget = rows.reduce((sum, row) => sum + (row["  SPD TARGET"] || 0), 0);
+          const monthlyTarget = rows.reduce((sum, row) => sum + (row["SPD TARGET"] || 0), 0);
           const monthlyActual = filteredRows.reduce((sum, row) => sum + (row.ACTUAL || 0), 0);
           const monthlyStd = filteredRows.reduce((sum, row) => sum + (row.STD || 0), 0);
           const monthlyGap = monthlyActual - monthlyTarget;
