@@ -3,399 +3,797 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Google Sheets</title>
+  <title>Sales Performance Dashboard</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- Google Fonts - Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2c3e50;
+      --success-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --light-bg: #f8f9fa;
+      --dark-bg: #343a40;
+      --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
     body {
-      padding: 20px;
       font-family: "Poppins", sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
     }
+    
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      color: white;
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+      border-radius: 0 0 10px 10px;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .dashboard-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-subtitle {
+      font-weight: 300;
+      opacity: 0.9;
+    }
+    
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      margin-bottom: 1.5rem;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      background-color: var(--secondary-color);
+      color: white;
+      border-radius: 10px 10px 0 0 !important;
+      font-weight: 600;
+      padding: 1rem 1.25rem;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .table {
+      margin-bottom: 0;
+    }
+    
+    .table thead th {
+      background-color: var(--secondary-color);
+      color: white;
+      font-weight: 500;
+      border-bottom: none;
+      padding: 0.75rem 1rem;
+    }
+    
+    .table tbody tr {
+      transition: var(--transition);
+    }
+    
+    .table tbody tr:hover {
+      background-color: rgba(52, 152, 219, 0.1);
+    }
+    
+    .table td, .table th {
+      vertical-align: middle;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    .table tfoot th, .table tfoot td {
+      font-weight: 600;
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .positive {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+    
+    .negative {
+      color: var(--danger-color);
+      font-weight: 500;
+    }
+    
+    .neutral {
+      color: var(--warning-color);
+      font-weight: 500;
+    }
+    
     .chart-container {
-      margin-top: 20px;
+      position: relative;
+      height: 300px;
+      margin-bottom: 2rem;
     }
-    /* CSS untuk tabel */
-    .table-container table td {
-      font-size: 13px; /* Ukuran font default untuk sel tabel */
+    
+    .summary-card {
+      text-align: center;
+      padding: 1.5rem;
     }
-    /* CSS untuk header tabel */
-    .table-container thead th {
-      font-size: 14px; /* Ukuran font untuk header */
+    
+    .summary-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
     }
-    /* CSS untuk footer tabel */
-    tfoot th,
-    tfoot td {
-      font-size: 13px; /* Ukuran font untuk footer */
+    
+    .summary-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+    
+    .form-select {
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      border: 1px solid #ced4da;
+      box-shadow: none;
+    }
+    
+    .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+    }
+    
+    .badge-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .badge-success {
+      background-color: var(--success-color);
+    }
+    
+    .badge-warning {
+      background-color: var(--warning-color);
+    }
+    
+    .badge-danger {
+      background-color: var(--danger-color);
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 1rem 0;
+      }
+      
+      .dashboard-title {
+        font-size: 1.5rem;
+      }
+      
+      .summary-card {
+        padding: 1rem;
+      }
+      
+      .summary-value {
+        font-size: 1.5rem;
+      }
+      
+      .table td, .table th {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+      }
+    }
+    
+    /* Media Query for small screens (mobile devices) */
+@media (max-width: 768px) {
+  .summary-card {
+    margin-bottom: 1rem; /* Jarak antar card */
+    width: 100%; /* Membuat card penuh lebar layar */
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-card {
+    margin-bottom: 1rem; /* Jarak antar card */
+    padding: 1.5rem; /* Padding internal card */
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-value {
+    font-size: 1rem; /* Ukuran font yang lebih kecil untuk mobile */
+  }
+  .summary-label {
+    font-size: 0.8rem; /* Ukuran font label yang lebih kecil */
+  }
+}
   </style>
 </head>
 <body>
+  <!-- Dashboard Header -->
+  <header class="dashboard-header">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1 class="dashboard-title">Sales Performance Dashboard</h1>
+          <p class="dashboard-subtitle">C940 - 2025 Report</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <div class="dropdown mb-3">
+            <label for="month-select" class="form-label text-white mb-1">Select Month:</label>
+            <select id="month-select" class="form-select">
+              <!-- Month options will be loaded here dynamically -->
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
   <div class="container">
-    <h1 class="text-center">Report Sales 2025 [C940]</h1>
-    <!-- Dropdown Bulan -->
-    <div class="month-dropdown mb-4">
-      <label for="month-select" class="form-label">Pilih Bulan:</label>
-      <select id="month-select" class="form-select">
-        <!-- Opsi bulan akan dimuat di sini secara dinamis -->
-      </select>
+    
+
+    <!-- Data Table -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-table me-2"></i>Daily Sales Data</span>
+        <div class="badge bg-light text-dark">
+          <span class="badge-indicator badge-success"></span>
+          Above Target
+          <span class="badge-indicator badge-warning ms-2"></span>
+          Below Target
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-container">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>DATE</th>
+                <th>TARGET</th>
+                <th>ACTUAL</th>
+                <th>%</th>
+                <th>GAP</th>
+                <th>STD</th>
+              </tr>
+            </thead>
+            <tbody id="data-table-body">
+              <!-- Data will be loaded here -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="6">Monthly Summary</th>
+              </tr>
+              <tr>
+                <th>Net Sales</th>
+                <th id="net-sales-target">-</th>
+                <th id="net-sales-actual">-</th>
+                <th id="net-sales-percentage">-</th>
+                <th id="net-sales-gap">-</th>
+                <th id="net-sales-std">-</th>
+              </tr>
+              <tr>
+                <th>Daily Average</th>
+                <th id="average-target">-</th>
+                <th id="average-actual">-</th>
+                <th id="average-percentage">-</th>
+                <th id="average-gap">-</th>
+                <th id="average-std">-</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
     </div>
-    <!-- Tabel Data -->
-    <div class="table-container">
-      <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-          <tr>
-            <th>TANGGAL</th>
-            <th>TARGET</th>
-            <th>ACTUAL</th>
-            <th>%</th>
-            <th>GAP</th> <!-- Kolom GAP -->
-            <th>STD</th>
-          </tr>
-        </thead>
-        <tbody id="data-table-body">
-          <!-- Data akan dimuat di sini -->
-        </tbody>
-        <tfoot>
-          <tr>
-            <th colspan="6">Net Sales</th> <!-- Ubah colspan menjadi 6 -->
-          </tr>
-          <tr>
-            <th></th>
-            <th id="net-sales-target"></th>
-            <th id="net-sales-actual"></th>
-            <th id="net-sales-percentage"></th>
-            <th id="net-sales-gap"></th> <!-- Footer untuk GAP -->
-            <th id="net-sales-std"></th>
-          </tr>
-          <tr>
-            <th colspan="6">Average</th> <!-- Ubah colspan menjadi 6 -->
-          </tr>
-          <tr>
-            <th></th>
-            <th id="average-target"></th>
-            <th id="average-actual"></th>
-            <th id="average-percentage"></th>
-            <th id="average-gap"></th> <!-- Footer untuk GAP -->
-            <th id="average-std"></th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <!-- Grafik Rata-Rata ACTUAL -->
-    <div class="chart-container">
-      <canvas id="averageActualChart"></canvas>
-    </div>
-    <!-- Grafik Rata-Rata STD -->
-    <div class="chart-container">
-      <canvas id="averageStdChart"></canvas>
+
+    <!-- Charts -->
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-chart-bar me-2"></i>Monthly Actual Sales Trend
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="averageActualChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-chart-line me-2"></i>Monthly STD Performance
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="averageStdChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="mt-5 py-3 bg-light">
+    <div class="container text-center">
+      <p class="mb-0 text-muted small">
+        &copy; 2025 Sales Performance Dashboard. Data updated: <span id="last-updated">-</span>
+      </p>
+    </div>
+  </footer>
+
   <!-- Bootstrap JS and dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // URL Web App Google Apps Script
-    const googleSheetUrl =
-      "https://script.google.com/macros/s/AKfycbwW3U_8jWbubdENCQ-NbrKZv1wVvZ76n4tO_rV7TYxVbJSfEwS1x-PqL13SPpxtG0Ib/exec";
-    // Variabel global untuk menyimpan data JSON
-    let allData = [];
-    let groupedData = {};
+  // URL Web App Google Apps Script
+const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwW3U_8jWbubdENCQ-NbrKZv1wVvZ76n4tO_rV7TYxVbJSfEwS1x-PqL13SPpxtG0Ib/exec";
 
-    // Fungsi untuk memuat data dari Google Sheets
-    async function fetchData() {
+// Variables to store data
+let allData = [];
+let groupedData = {};
+let lastUpdated = '';
+let actualChart = null;
+let stdChart = null;
+
+// Main function to fetch and process data
+async function fetchData() {
+  try {
+    showLoading(true);
+    console.log("Starting data fetch...");
+    const response = await fetch(googleSheetUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("Data received:", data);
+
+    // Normalize data structure
+    if (Array.isArray(data)) {
+      allData = data.map(item => ({
+        TANGGAL: item.TANGGAL || "",
+        SPD_TARGET: item["SPD TARGET"] || 0,
+        ACTUAL: item.ACTUAL || 0,
+        STD: item.STD || 0
+      }));
+    } else {
+      throw new Error("Invalid data format. Expected array.");
+    }
+    if (allData.length === 0) {
+      throw new Error("No valid data received");
+    }
+
+    // Group data by month
+    groupedData = groupDataByMonth(allData);
+    console.log("Grouped data:", groupedData);
+
+    // Populate month dropdown
+    populateMonthDropdown(Object.keys(groupedData));
+
+    // Display first month's data
+    const firstMonth = Object.keys(groupedData)[0];
+    displayDataForMonth(firstMonth);
+    drawCharts();
+  } catch (error) {
+    console.error("Error in fetchData:", error);
+    showError(`Failed to load data: ${error.message}`);
+  } finally {
+    showLoading(false);
+  }
+}
+
+// Group data by month
+function groupDataByMonth(data) {
+  const grouped = {};
+  data.forEach(item => {
+    if (!item.TANGGAL) return;
+    const [year, month] = item.TANGGAL.split('-');
+    const monthKey = `${year}-${month}`;
+    if (!grouped[monthKey]) {
+      grouped[monthKey] = [];
+    }
+    grouped[monthKey].push(item);
+  });
+  return grouped;
+}
+
+// Display data for specific month
+function displayDataForMonth(monthKey) {
+  const rows = groupedData[monthKey] || [];
+  const tableBody = document.getElementById("data-table-body");
+  if (!tableBody) return;
+  tableBody.innerHTML = "";
+
+  let totals = {
+    target: 0,
+    actual: 0,
+    std: 0,
+    gap: 0
+  };
+  let validActualCount = 0;
+  let validStdCount = 0;
+
+  rows.forEach(row => {
+    const gap = (row.ACTUAL || 0) - row.SPD_TARGET;
+
+    // Update totals
+    totals.target += row.SPD_TARGET;
+    totals.actual += row.ACTUAL || 0;
+    totals.std += row.STD || 0;
+    totals.gap += gap;
+
+    // Hitung jumlah data valid
+    if (row.ACTUAL) validActualCount++;
+    if (row.STD) validStdCount++;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.TANGGAL}</td>
+      <td>${formatCurrency(row.SPD_TARGET)}</td>
+      <td>${formatCurrency(row.ACTUAL)}</td>
+      <td class="${getPercentageClass(row.ACTUAL, row.SPD_TARGET)}">
+        ${calculatePercentage(row.ACTUAL, row.SPD_TARGET)}
+      </td>
+      <td class="${getGapClass(gap)}">${formatCurrency(gap)}</td>
+      <td>${row.STD}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+
+  // Update footer
+  updateFooter("net-sales", totals);
+  const avgTarget = totals.target / rows.length;
+  const avgActual = validActualCount > 0 ? totals.actual / validActualCount : 0;
+  updateFooter("average", {
+    target: avgTarget,
+    actual: avgActual,
+    std: validStdCount > 0 ? totals.std / validStdCount : 0,
+    gap: avgActual - avgTarget
+  });
+}
+
+// Draw charts with complete error handling and dynamic calculation
+function drawCharts() {
+  try {
+    // Check if charts elements exist
+    const actualChartEl = document.getElementById('averageActualChart');
+    const stdChartEl = document.getElementById('averageStdChart');
+    if (!actualChartEl || !stdChartEl) {
+      console.error('Chart elements not found');
+      return;
+    }
+
+    // Destroy existing charts if they exist
+    if (typeof actualChart !== 'undefined' && actualChart) {
+      actualChart.destroy();
+    }
+    if (typeof stdChart !== 'undefined' && stdChart) {
+      stdChart.destroy();
+    }
+
+    // Validate groupedData
+    if (!groupedData || typeof groupedData !== 'object') {
+      throw new Error('Invalid data format: groupedData not found');
+    }
+
+    const months = Object.keys(groupedData).sort();
+    if (months.length === 0) {
+      console.warn('No data available to render charts');
+      return;
+    }
+
+    const currentDate = new Date();
+    const currentYearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+    const currentDay = currentDate.getDate();
+
+    // Process actual sales data
+    const actualData = months.map(month => {
       try {
-        const response = await fetch(googleSheetUrl);
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
+        const items = groupedData[month];
+        if (!Array.isArray(items)) return 0;
+
+        const validItems = items.filter(item => {
+          return item &&
+            item.ACTUAL !== null &&
+            item.ACTUAL !== undefined &&
+            item.TANGGAL &&
+            isValidDate(item.TANGGAL);
+        });
+
+        const totalActual = validItems.reduce((sum, item) => {
+          const value = Number(item.ACTUAL);
+          return sum + (isNaN(value) ? 0 : value);
+        }, 0);
+
+        if (month === currentYearMonth) {
+          const daysWithData = validItems.length;
+          const daysPassed = Math.min(currentDay, daysWithData);
+          return daysPassed > 0 ? totalActual / daysPassed : 0;
+        } else {
+          const [year, monthNum] = month.split('-');
+          const daysInMonth = getDaysInMonth(parseInt(year), parseInt(monthNum));
+          return daysInMonth > 0 ? totalActual / daysInMonth : 0;
         }
-        allData = await response.json();
-        // Kelompokkan data berdasarkan bulan
-        groupedData = groupDataByMonth(allData);
-        // Isi dropdown bulan
-        populateMonthDropdown(Object.keys(groupedData));
-        // Hitung rata-rata ACTUAL dan STD setiap bulan
-        const monthlyAverages = calculateMonthlyAverages(groupedData);
-        // Gambar grafik
-        drawCharts(monthlyAverages);
-        // Tampilkan data untuk bulan pertama secara default
-        const firstMonth = Object.keys(groupedData)[0];
-        displayDataForMonth(firstMonth);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        alert("Gagal memuat data. Silakan coba lagi nanti.");
+        console.error(`Error processing month ${month}:`, error);
+        return 0;
       }
-    }
+    });
 
-    // Fungsi untuk mengelompokkan data berdasarkan bulan
-    function groupDataByMonth(data) {
-      const grouped = {};
-      data.forEach((row) => {
-        const dateParts = row.TANGGAL.split("-");
-        const year = dateParts[0];
-        const month = dateParts[1];
-        const monthKey = `${year}-${month}`; // Format YYYY-MM
-        if (!grouped[monthKey]) {
-          grouped[monthKey] = [];
+    // Process STD data with same logic
+    const stdData = months.map(month => {
+      try {
+        const items = groupedData[month];
+        if (!Array.isArray(items)) return 0;
+
+        const validItems = items.filter(item => {
+          return item &&
+            item.STD !== null &&
+            item.STD !== undefined &&
+            item.TANGGAL &&
+            isValidDate(item.TANGGAL);
+        });
+
+        const totalStd = validItems.reduce((sum, item) => {
+          const value = Number(item.STD);
+          return sum + (isNaN(value) ? 0 : value);
+        }, 0);
+
+        if (month === currentYearMonth) {
+          const daysWithData = validItems.length;
+          const daysPassed = Math.min(currentDay, daysWithData);
+          return daysPassed > 0 ? totalStd / daysPassed : 0;
+        } else {
+          const [year, monthNum] = month.split('-');
+          const daysInMonth = getDaysInMonth(parseInt(year), parseInt(monthNum));
+          return daysInMonth > 0 ? totalStd / daysInMonth : 0;
         }
-        grouped[monthKey].push(row);
-      });
-      return grouped;
-    }
-
-    // Fungsi untuk mengisi dropdown bulan
-    function populateMonthDropdown(monthKeys) {
-      const selectElement = document.getElementById("month-select");
-      selectElement.innerHTML = ""; // Kosongkan dropdown sebelum memuat opsi baru
-      monthKeys.forEach((monthKey) => {
-        const option = document.createElement("option");
-        option.value = monthKey;
-        option.textContent = formatMonth(monthKey);
-        selectElement.appendChild(option);
-      });
-      // Tambahkan event listener untuk dropdown
-      selectElement.addEventListener("change", (event) => {
-        const selectedMonth = event.target.value;
-        displayDataForMonth(selectedMonth);
-      });
-    }
-
-    // Fungsi untuk menampilkan data untuk bulan tertentu
-    function displayDataForMonth(monthKey) {
-      const rows = groupedData[monthKey];
-      const tableBody = document.getElementById("data-table-body");
-      tableBody.innerHTML = ""; // Kosongkan tabel sebelum memuat data baru
-
-      // Filter data: Hanya baris dengan ACTUAL dan STD tidak kosong
-      const filteredRows = rows.filter((row) => row.ACTUAL && row.STD);
-
-      // Variabel untuk perhitungan total
-      let totalTarget = 0; // Total SPD TARGET untuk semua baris
-      let totalActual = 0; // Total ACTUAL untuk baris dengan nilai tidak kosong
-      let totalStd = 0;    // Total STD untuk baris dengan nilai tidak kosong
-      let totalGap = 0;    // Total GAP untuk baris dengan nilai tidak kosong
-
-      // Proses semua baris untuk ditampilkan di tabel
-      rows.forEach((row) => {
-        const tr = document.createElement("tr");
-
-        // TANGGAL
-        const tanggalCell = document.createElement("td");
-        tanggalCell.textContent = row.TANGGAL || "-";
-        tr.appendChild(tanggalCell);
-
-        // SPD TARGET
-        const spdTargetCell = document.createElement("td");
-        const spdTargetValue = row["  SPD TARGET"];
-        spdTargetCell.textContent = spdTargetValue ? spdTargetValue.toLocaleString() : "-";
-        tr.appendChild(spdTargetCell);
-
-        // ACTUAL
-        const actualCell = document.createElement("td");
-        const actualValue = row.ACTUAL;
-        actualCell.textContent = actualValue ? actualValue.toLocaleString() : "-";
-        tr.appendChild(actualCell);
-
-        // %
-        const percentageCell = document.createElement("td");
-        const percentageValue =
-          spdTargetValue && actualValue ? ((actualValue / spdTargetValue) * 100).toFixed(2) : "-";
-        percentageCell.textContent = percentageValue !== "-" ? `${percentageValue}%` : "-";
-        if (percentageValue !== "-") {
-          percentageCell.style.color = parseFloat(percentageValue) >= 100 ? "green" : "red";
-        }
-        tr.appendChild(percentageCell);
-
-        // GAP
-        const gapCell = document.createElement("td");
-        const gapValue = actualValue && spdTargetValue ? actualValue - spdTargetValue : null;
-        gapCell.textContent = gapValue !== null ? gapValue.toLocaleString() : "-";
-        if (gapValue !== null) {
-          gapCell.style.color = gapValue > 0 ? "green" : gapValue < 0 ? "red" : "black";
-        }
-        tr.appendChild(gapCell);
-
-        // STD
-        const stdCell = document.createElement("td");
-        const stdValue = row.STD;
-        stdCell.textContent = stdValue !== null ? stdValue : "-";
-        tr.appendChild(stdCell);
-
-        // Tambahkan nilai ke total
-        totalTarget += spdTargetValue || 0;
-        if (filteredRows.includes(row)) {
-          totalActual += actualValue || 0;
-          totalStd += stdValue || 0;
-          totalGap += gapValue || 0; // Tambahkan GAP jika ada
-        }
-
-        tableBody.appendChild(tr);
-      });
-
-      // Hitung NET SALES
-      const netSalesPercentage =
-        totalTarget > 0 ? ((totalActual / totalTarget) * 100).toFixed(2) : "-";
-
-      // Hitung AVERAGE
-      const averageTarget = rows.length > 0 ? (totalTarget / rows.length).toFixed(0) : "-";
-      const averageActual =
-        filteredRows.length > 0 ? (totalActual / filteredRows.length).toFixed(0) : "-";
-      const averagePercentage =
-        averageTarget > 0 ? ((averageActual / averageTarget) * 100).toFixed(2) : "-";
-      const averageStd =
-        filteredRows.length > 0 ? (totalStd / filteredRows.length).toFixed(0) : "-";
-      const averageGap =
-        filteredRows.length > 0 ? (totalGap / filteredRows.length).toFixed(0) : "-";
-
-      // Format angka dengan pemisah ribuan
-      const formatNumber = (num) =>
-        num !== "-" ? parseInt(num).toLocaleString("id-ID") : "-";
-
-      // Update footer
-      document.getElementById("net-sales-target").textContent = formatNumber(totalTarget);
-      document.getElementById("net-sales-actual").textContent = formatNumber(totalActual);
-      document.getElementById("net-sales-gap").textContent = formatNumber(totalGap); // Footer GAP
-      document.getElementById("net-sales-gap").style.color =
-        totalGap > 0 ? "green" : totalGap < 0 ? "red" : "black"; // Warna GAP
-      document.getElementById("net-sales-std").textContent = formatNumber(totalStd);
-
-      document.getElementById("average-target").textContent = formatNumber(averageTarget);
-      document.getElementById("average-actual").textContent = formatNumber(averageActual);
-      document.getElementById("average-gap").textContent = formatNumber(averageGap); // Footer GAP
-      document.getElementById("average-gap").style.color =
-        averageGap > 0 ? "green" : averageGap < 0 ? "red" : "black"; // Warna GAP
-      document.getElementById("average-std").textContent = formatNumber(averageStd);
-
-      // Warna untuk NET SALES Percentage
-      const netSalesPercentageCell = document.getElementById("net-sales-percentage");
-      netSalesPercentageCell.textContent =
-        netSalesPercentage !== "-" ? `${netSalesPercentage}%` : "-";
-      if (netSalesPercentage !== "-") {
-        netSalesPercentageCell.style.color =
-          parseFloat(netSalesPercentage) >= 100 ? "green" : "red";
+      } catch (error) {
+        console.error(`Error processing month ${month}:`, error);
+        return 0;
       }
+    });
 
-      // Warna untuk AVERAGE Percentage
-      const averagePercentageCell = document.getElementById("average-percentage");
-      averagePercentageCell.textContent =
-        averagePercentage !== "-" ? `${averagePercentage}%` : "-";
-      if (averagePercentage !== "-") {
-        averagePercentageCell.style.color =
-          parseFloat(averagePercentage) >= 100 ? "green" : "red";
+    // Format month labels for display
+    const monthLabels = months.map(month => {
+      try {
+        return formatMonth(month);
+      } catch {
+        return month; // fallback to raw value if formatting fails
       }
+    });
+
+    // Create Actual Sales Chart
+    const actualCtx = actualChartEl.getContext('2d');
+    actualChart = new Chart(actualCtx, {
+      type: 'bar',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Actual Sales',
+          data: actualData,
+          backgroundColor: 'rgba(52, 152, 219, 0.7)',
+          borderColor: 'rgba(52, 152, 219, 1)',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: getChartOptions('Actual Sales (Monthly Average)')
+    });
+
+    // Create STD Chart
+    const stdCtx = stdChartEl.getContext('2d');
+    stdChart = new Chart(stdCtx, {
+      type: 'line',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Average STD',
+          data: stdData,
+          borderColor: 'rgba(231, 76, 60, 1)',
+          backgroundColor: 'rgba(231, 76, 60, 0.1)',
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: getChartOptions('STD Performance (Monthly Average)')
+    });
+  } catch (error) {
+    console.error('Error in drawCharts:', error);
+    showError('Failed to render charts. Please try again.');
+  }
+}
+
+// Helper functions
+function getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
+
+function isValidDate(dateString) {
+  if (!dateString) return false;
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+}
+
+function formatMonth(monthKey) {
+  const [year, month] = monthKey.split('-');
+  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  return `${monthNames[parseInt(month) - 1]} ${year}`;
+}
+
+function getChartOptions(title) {
+  return {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: title,
+        font: {
+          size: 14,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => `Rp${ctx.raw.toLocaleString('id-ID')}`
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: value => `Rp${value.toLocaleString('id-ID')}`
+        }
+      }
+    },
+    maintainAspectRatio: false
+  };
+}
+
+function showError(message) {
+  console.error(message);
+  alert(message);
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(value);
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat('id-ID').format(value);
+}
+
+function calculatePercentage(actual, target) {
+  return target ? `${((actual / target) * 100).toFixed(2)}%` : "0%";
+}
+
+function getPercentageClass(actual, target) {
+  const percentage = target ? (actual / target) * 100 : 0;
+  return percentage >= 100 ? 'positive' :
+    percentage >= 80 ? 'neutral' : 'negative';
+}
+
+function getGapClass(gap) {
+  return gap > 0 ? 'positive' : gap < 0 ? 'negative' : '';
+}
+
+function updateFooter(prefix, { target, actual, std, gap }) {
+  document.getElementById(`${prefix}-target`).textContent = formatCurrency(target);
+  document.getElementById(`${prefix}-actual`).textContent = formatCurrency(actual);
+
+  const percentageElement = document.getElementById(`${prefix}-percentage`);
+  percentageElement.textContent = calculatePercentage(actual, target);
+  percentageElement.className = getPercentageClass(actual, target);
+
+  document.getElementById(`${prefix}-gap`).textContent = formatCurrency(gap);
+  document.getElementById(`${prefix}-gap`).className = getGapClass(gap);
+
+  document.getElementById(`${prefix}-std`).textContent = formatNumber(std);
+}
+
+function populateMonthDropdown(monthKeys) {
+  const selectElement = document.getElementById('month-select');
+  if (!selectElement) return;
+  selectElement.innerHTML = '';
+
+  monthKeys.sort().reverse().forEach(monthKey => {
+    const option = document.createElement('option');
+    option.value = monthKey;
+    option.textContent = formatMonth(monthKey);
+    selectElement.appendChild(option);
+  });
+
+  selectElement.addEventListener('change', (event) => {
+    const selectedMonth = event.target.value;
+    displayDataForMonth(selectedMonth);
+  });
+}
+
+function showLoading(loading) {
+  const loader = document.getElementById('loading-indicator');
+  if (!loader && loading) {
+    const loaderDiv = document.createElement('div');
+    loaderDiv.id = 'loading-indicator';
+    loaderDiv.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center';
+    loaderDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    loaderDiv.style.zIndex = '9999';
+    loaderDiv.innerHTML = `
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="ms-3 text-white">Memuat data...</div>
+    `;
+    document.body.appendChild(loaderDiv);
+  } else if (loader && !loading) {
+    loader.remove();
+  }
+}
+
+function showError(message) {
+  const existingAlert = document.querySelector('.alert.alert-danger');
+  if (existingAlert) existingAlert.remove();
+
+  const alertDiv = document.createElement('div');
+  alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+  alertDiv.style.zIndex = '9999';
+  alertDiv.innerHTML = `
+    <i class="fas fa-exclamation-circle me-2"></i>
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+  document.body.appendChild(alertDiv);
+
+  setTimeout(() => {
+    if (alertDiv.parentNode) {
+      alertDiv.remove();
     }
+  }, 10000);
+}
 
-    // Fungsi untuk memformat nama bulan dari YYYY-MM
-    function formatMonth(monthKey) {
-      const [year, month] = monthKey.split("-");
-      const monthNames = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
-      ];
-      return `${monthNames[parseInt(month) - 1]} ${year}`;
-    }
+// Initialize when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  // Check if all required elements exist
+  const requiredElements = [
+    'month-select', 'data-table-body',
+    'averageActualChart', 'averageStdChart'
+  ];
 
-    // Fungsi untuk menghitung rata-rata ACTUAL dan STD setiap bulan
-    function calculateMonthlyAverages(groupedData) {
-      const monthlyAverages = {
-        months: [],
-        averageActuals: [],
-        averageStds: [],
-      };
-      Object.keys(groupedData).forEach((monthKey) => {
-        const rows = groupedData[monthKey];
-        const filteredRows = rows.filter((row) => row.ACTUAL && row.STD);
+  const missingElements = requiredElements.filter(id => !document.getElementById(id));
+  if (missingElements.length > 0) {
+    console.error("Missing elements:", missingElements);
+    showError("Application error: Missing required elements");
+    return;
+  }
 
-        // Hitung rata-rata ACTUAL
-        const totalActual = filteredRows.reduce((sum, row) => sum + (row.ACTUAL || 0), 0);
-        const averageActual = filteredRows.length > 0 ? totalActual / filteredRows.length : 0;
-
-        // Hitung rata-rata STD
-        const totalStd = filteredRows.reduce((sum, row) => sum + (row.STD || 0), 0);
-        const averageStd = filteredRows.length > 0 ? totalStd / filteredRows.length : 0;
-
-        // Simpan hasil
-        monthlyAverages.months.push(formatMonth(monthKey));
-        monthlyAverages.averageActuals.push(averageActual.toFixed(2));
-        monthlyAverages.averageStds.push(averageStd.toFixed(2));
-      });
-      return monthlyAverages;
-    }
-
-    // Fungsi untuk menggambar grafik
-    function drawCharts(monthlyAverages) {
-      // Grafik rata-rata ACTUAL
-      const averageActualCtx = document.getElementById("averageActualChart").getContext("2d");
-      new Chart(averageActualCtx, {
-        type: "bar",
-        data: {
-          labels: monthlyAverages.months,
-          datasets: [
-            {
-              label: "SPD 2025",
-              data: monthlyAverages.averageActuals.map(Number),
-              backgroundColor: "rgba(75, 192, 192, 0.6)",
-              borderColor: "rgba(75, 192, 192, 1)",
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: "top" },
-            title: { display: true, text: "Average SPD C940" },
-          },
-          scales: {
-            y: { beginAtZero: true },
-          },
-        },
-      });
-
-      // Grafik rata-rata STD
-      const averageStdCtx = document.getElementById("averageStdChart").getContext("2d");
-      new Chart(averageStdCtx, {
-        type: "line",
-        data: {
-          labels: monthlyAverages.months,
-          datasets: [
-            {
-              label: "STD 2025",
-              data: monthlyAverages.averageStds.map(Number),
-              borderColor: "rgba(255, 99, 132, 1)",
-              backgroundColor: "rgba(255, 99, 132, 0.2)",
-              borderWidth: 2,
-              fill: true,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: "top" },
-            title: { display: true, text: "Average STD C940" },
-          },
-          scales: {
-            y: { beginAtZero: true },
-          },
-        },
-      });
-    }
-
-    // Panggil fungsi fetchData saat halaman dimuat
-    document.addEventListener("DOMContentLoaded", fetchData);
-  </script>
+  // Start data fetch
+  fetchData();
+});
+</script>
 </body>
-</html>
+</html>y
