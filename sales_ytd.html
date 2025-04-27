@@ -3,81 +3,178 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Report Bulanan</title>
+    <title>Monthly Sales Report</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
     <!-- Google Fonts - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
       :root {
         --primary-blue: #3a7bd5;
+        --primary-gradient: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
         --success-light: rgba(46, 204, 113, 0.15);
         --success-dark: #27ae60;
+        --success-gradient: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
         --danger-light: rgba(231, 76, 60, 0.15);
         --danger-dark: #c0392b;
+        --danger-gradient: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+        --warning-light: rgba(241, 196, 15, 0.15);
+        --warning-dark: #f39c12;
         --text-dark: #2c3e50;
+        --text-muted: #7f8c8d;
+        --bg-light: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
       }
 
       body {
         padding: 20px;
         font-family: "Poppins", sans-serif;
         color: var(--text-dark);
+        background-color: #f5f7fa;
       }
 
       /* Header Styles */
       .report-header {
         text-align: center;
-        margin: 30px 0;
+        margin: 30px 0 40px;
       }
       .report-title {
         font-weight: 700;
         color: var(--text-dark);
-        font-size: 1.8rem;
+        font-size: 2rem;
         position: relative;
         display: inline-block;
-        padding-bottom: 10px;
+        padding-bottom: 15px;
       }
       .report-title:after {
         content: '';
         position: absolute;
-        width: 50%;
+        width: 60%;
         height: 4px;
-        background: linear-gradient(90deg, var(--primary-blue), #00d2ff);
+        background: var(--primary-gradient);
         bottom: 0;
-        left: 25%;
+        left: 20%;
         border-radius: 2px;
+      }
+      .report-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-top: 10px;
+      }
+
+      /* Card Container */
+      .card-container {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 0;
+        margin-bottom: 30px;
+        overflow: hidden;
+        border: none;
+      }
+
+      /* Summary Cards */
+      .summary-card {
+        border-radius: var(--border-radius);
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border: none;
+        height: 100%;
+      }
+      .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      .summary-card .card-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+      }
+      .summary-card .card-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .summary-card .card-percentage {
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+      }
+      .summary-card .card-percentage i {
+        margin-right: 5px;
+        font-size: 1rem;
+      }
+      .summary-card.target {
+        background: rgba(58, 123, 213, 0.1);
+        border-left: 4px solid var(--primary-blue);
+      }
+      .summary-card.actual {
+        background: rgba(46, 204, 113, 0.1);
+        border-left: 4px solid var(--success-dark);
+      }
+      .summary-card.gap {
+        background: rgba(231, 76, 60, 0.1);
+        border-left: 4px solid var(--danger-dark);
+      }
+      .summary-card.std {
+        background: rgba(241, 196, 15, 0.1);
+        border-left: 4px solid var(--warning-dark);
       }
 
       /* Table Container */
       .table-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
+        border-radius: var(--border-radius);
         margin: 20px 0;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       }
 
       /* Table Styles */
       table {
         min-width: 100%;
         margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
       }
       table td,
       table th {
         font-size: 14px;
-        padding: 12px 15px;
+        padding: 16px 20px;
         vertical-align: middle;
+        border-top: 1px solid #e9ecef;
       }
       thead th {
         font-weight: 600;
-        background-color: #f8f9fa;
+        background-color: var(--primary-blue);
+        color: white;
+        border: none;
+        position: sticky;
+        top: 0;
+      }
+      thead th:first-child {
+        border-top-left-radius: var(--border-radius);
+      }
+      thead th:last-child {
+        border-top-right-radius: var(--border-radius);
       }
       tfoot th,
       tfoot td {
         font-weight: bold;
-        background-color: #f8f9fa;
+        background-color: var(--bg-light);
+      }
+      tfoot tr:last-child td:first-child {
+        border-bottom-left-radius: var(--border-radius);
+      }
+      tfoot tr:last-child td:last-child {
+        border-bottom-right-radius: var(--border-radius);
       }
 
       /* Alignment */
@@ -125,12 +222,13 @@
         font-weight: 500;
         letter-spacing: 0.5px;
         transition: all 0.3s ease;
-        border-radius: 8px;
-        padding: 10px 20px;
+        border-radius: 30px;
+        padding: 12px 24px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         position: relative;
         overflow: hidden;
         z-index: 1;
+        border: none;
       }
       .action-button:before {
         content: '';
@@ -151,14 +249,11 @@
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
       }
       .btn-primary {
-        background-color: var(--primary-blue);
-        border-color: var(--primary-blue);
-        background: linear-gradient(to right, var(--primary-blue), #00d2ff);
+        background: var(--primary-gradient);
+        border: none;
       }
       .btn-primary:hover {
-        background-color: #2c65b4;
-        border-color: #2c65b4;
-        background: linear-gradient(to right, #2c65b4, #00c6fb);
+        background: linear-gradient(135deg, #2c65b4 0%, #00c6fb 100%);
       }
 
       /* Table Hover Effect */
@@ -173,18 +268,58 @@
       #loading {
         display: none;
         text-align: center;
-        padding: 40px 0;
+        padding: 60px 0;
+      }
+      .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.2em;
       }
 
       /* Empty State */
       #empty-state {
         display: none;
         text-align: center;
-        padding: 40px 0;
+        padding: 60px 0;
       }
       #empty-state i {
-        font-size: 3rem;
-        color: #6c757d;
+        font-size: 4rem;
+        color: #bdc3c7;
+        margin-bottom: 20px;
+      }
+      #empty-state h5 {
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+      #empty-state p {
+        color: var(--text-muted);
+      }
+
+      /* Chart Container */
+      #chart-container {
+        height: 300px;
+        margin: 30px 0;
+      }
+
+      /* Progress Bar */
+      .progress-container {
+        margin: 30px 0;
+      }
+      .progress {
+        height: 10px;
+        border-radius: 5px;
+        background-color: #e9ecef;
+      }
+      .progress-bar {
+        background: var(--primary-gradient);
+        border-radius: 5px;
+      }
+      .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        color: var(--text-muted);
       }
 
       /* Mobile Responsiveness */
@@ -193,20 +328,32 @@
           padding: 10px;
         }
         .report-title {
-          font-size: 1.4rem;
+          font-size: 1.6rem;
         }
         table td, table th {
-          padding: 8px 10px;
+          padding: 12px 15px;
           font-size: 13px;
         }
         .action-button {
-          padding: 8px 16px;
+          padding: 10px 20px;
           font-size: 0.9rem;
         }
         .badge {
           font-size: 0.6rem;
           min-width: 50px;
         }
+        .summary-card .card-value {
+          font-size: 1.5rem;
+        }
+      }
+
+      /* Animation */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
       }
     </style>
   </head>
@@ -217,7 +364,7 @@
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mt-2">Memuat data...</p>
+        <p class="mt-3">Memuat data...</p>
       </div>
 
       <!-- Empty State -->
@@ -225,48 +372,123 @@
         <i class="bi bi-exclamation-circle"></i>
         <h5 class="mt-3">Data tidak tersedia</h5>
         <p class="text-muted">Tidak ada data yang dapat ditampilkan</p>
+        <button class="btn btn-primary mt-3 action-button" onclick="fetchData()">
+          <i class="bi bi-arrow-repeat me-2"></i>Coba Lagi
+        </button>
       </div>
 
       <!-- Main Content -->
       <div id="main-content">
-        <div class="report-header">
-          <h1 class="report-title">Sales Year To Date 2025 (C940)</h1>
+        <div class="report-header" data-aos="fade-down">
+          <h1 class="report-title">Sales Year To Date 2025</h1>
+          <p class="report-subtitle">Performance Report -  C940</p>
         </div>
         
+        <!-- Summary Cards -->
+        <div class="row" id="summary-cards" data-aos="fade-up">
+          <div class="col-md-3 mb-3">
+            <div class="summary-card target">
+              <div class="card-title">Total Target</div>
+              <div class="card-value" id="summary-target">-</div>
+              <div class="card-percentage">
+                <i class="bi bi-bullseye"></i>
+                <span>Yearly Target</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="summary-card actual">
+              <div class="card-title">Total Actual</div>
+              <div class="card-value" id="summary-actual">-</div>
+              <div class="card-percentage">
+                <i class="bi bi-graph-up-arrow text-success"></i>
+                <span id="summary-actual-percent">-</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="summary-card gap">
+              <div class="card-title">Total Gap</div>
+              <div class="card-value" id="summary-gap">-</div>
+              <div class="card-percentage">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Vs Target</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="summary-card std">
+              <div class="card-title">Total STD</div>
+              <div class="card-value" id="summary-std">-</div>
+              <div class="card-percentage">
+                <i class="bi bi-speedometer2"></i>
+                <span>Performance</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container" data-aos="fade-up" data-aos-delay="100">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Yearly Progress</span>
+            <span id="yearly-progress-percent">0%</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" id="yearly-progress-bar" role="progressbar" style="width: 0%"></div>
+          </div>
+          <div class="progress-labels">
+            <span>Jan</span>
+            <span>Dec</span>
+          </div>
+        </div>
+
+        <!-- Chart Container -->
+        <div class="card-container" data-aos="fade-up" data-aos-delay="150">
+          <div class="card-body">
+            <h5 class="card-title mt-4 ms-3">Monthly Performance Trend</h5>
+            <div id="chart-container">
+              <canvas id="performance-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
         <!-- Tabel Data -->
-        <div class="table-container">
-          <table class="table table-striped table-bordered">
-            <thead class="table-light">
-              <tr>
-                <th data-bs-toggle="tooltip" title="Periode bulan laporan">BULAN</th>
-                <th data-bs-toggle="tooltip" title="Target penjualan bulanan">SPD TARGET</th>
-                <th data-bs-toggle="tooltip" title="Realisasi penjualan aktual">ACTUAL</th>
-                <th data-bs-toggle="tooltip" title="Persentase pencapaian">%</th>
-                <th data-bs-toggle="tooltip" title="Selisih antara actual dan target">GAP</th>
-                <th data-bs-toggle="tooltip" title="Standar deviasi penjualan">STD</th>
-              </tr>
-            </thead>
-            <tbody id="monthly-data-table-body">
-              <!-- Data akan dimuat di sini -->
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Total</th>
-                <th id="total-target"></th>
-                <th id="total-actual"></th>
-                <th id="total-percentage"></th>
-                <th id="total-gap"></th>
-                <th id="total-std"></th>
-              </tr>
-            </tfoot>
-          </table>
+        <div class="card-container" data-aos="fade-up" data-aos-delay="200">
+          <div class="table-container">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Periode bulan laporan">BULAN</th>
+                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Target penjualan bulanan">TARGET</th>
+                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Realisasi penjualan aktual">ACTUAL</th>
+                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Persentase pencapaian">ACHIEVEMENT</th>
+                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Selisih antara actual dan target">GAP</th>
+                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Standar deviasi penjualan">STD</th>
+                </tr>
+              </thead>
+              <tbody id="monthly-data-table-body">
+                <!-- Data akan dimuat di sini -->
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total</th>
+                  <th id="total-target"></th>
+                  <th id="total-actual"></th>
+                  <th id="total-percentage"></th>
+                  <th id="total-gap"></th>
+                  <th id="total-std"></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
 
         <!-- Button Section -->
-        <div class="d-flex justify-content-center mt-4 mb-5">
-          <div class="d-grid gap-3 d-md-block">
-            <a href="sales.html" class="btn btn-primary action-button">
-              <i class="bi bi-arrow-right-circle-fill me-2"></i>Lihat Detail Per Bulan
+        <div class="d-flex justify-content-center mt-4 mb-5" data-aos="fade-up" data-aos-delay="250">
+          <div class="d-grid d-md-block">
+            <a href="sales.html" class="btn btn-primary action-button me-3">
+              <i class="bi bi-arrow-right-circle-fill"></i>Lihat Detail Per Bulan
             </a>
             
           </div>
@@ -276,13 +498,24 @@
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
+      // Initialize AOS animation
+      AOS.init({
+        duration: 800,
+        once: true
+      });
+
       // URL Web App Google Apps Script
       const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwW3U_8jWbubdENCQ-NbrKZv1wVvZ76n4tO_rV7TYxVbJSfEwS1x-PqL13SPpxtG0Ib/exec";
 
       // Variabel global untuk menyimpan data JSON
       let allData = [];
       let groupedData = {};
+      let performanceChart = null;
 
       // Fungsi untuk memuat data dari Google Sheets
       async function fetchData() {
@@ -301,8 +534,17 @@
           // Kelompokkan data berdasarkan bulan
           groupedData = groupDataByMonth(allData);
           
+          // Tampilkan data summary
+          updateSummaryCards();
+          
           // Tampilkan data bulanan
           displayMonthlyData();
+          
+          // Update progress bar
+          updateProgressBar();
+          
+          // Buat chart
+          createPerformanceChart();
           
           // Sembunyikan loading state
           document.getElementById('loading').style.display = 'none';
@@ -334,6 +576,123 @@
         return grouped;
       }
 
+      // Update summary cards
+      function updateSummaryCards() {
+        let totalTarget = 0;
+        let totalActual = 0;
+        let totalStd = 0;
+        let totalGap = 0;
+
+        Object.keys(groupedData).forEach((monthKey) => {
+          const rows = groupedData[monthKey];
+          const filteredRows = rows.filter((row) => row.ACTUAL && row.STD);
+
+          totalTarget += rows.reduce((sum, row) => sum + (row["SPD TARGET"] || 0), 0);
+          totalActual += filteredRows.reduce((sum, row) => sum + (row.ACTUAL || 0), 0);
+          totalStd += filteredRows.reduce((sum, row) => sum + (row.STD || 0), 0);
+        });
+
+        totalGap = totalActual - totalTarget;
+        const percentage = totalTarget > 0 ? ((totalActual / totalTarget) * 100).toFixed(2) : 0;
+
+        document.getElementById("summary-target").textContent = formatNumber(totalTarget);
+        document.getElementById("summary-actual").textContent = formatNumber(totalActual);
+        document.getElementById("summary-gap").textContent = formatNumber(totalGap);
+        document.getElementById("summary-std").textContent = formatNumber(totalStd);
+        
+        const percentageElement = document.getElementById("summary-actual-percent");
+        percentageElement.textContent = `${percentage}% of Target`;
+        if (percentage >= 100) {
+          percentageElement.classList.add("text-success");
+          percentageElement.classList.remove("text-danger");
+        } else {
+          percentageElement.classList.add("text-danger");
+          percentageElement.classList.remove("text-success");
+        }
+      }
+
+      // Update progress bar
+      function updateProgressBar() {
+        const months = Object.keys(groupedData);
+        const currentMonth = new Date().getMonth() + 1; // 1-12
+        const progressPercent = (currentMonth / 12) * 100;
+        
+        document.getElementById("yearly-progress-percent").textContent = `${Math.round(progressPercent)}%`;
+        document.getElementById("yearly-progress-bar").style.width = `${progressPercent}%`;
+      }
+
+      // Create performance chart
+      function createPerformanceChart() {
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        const months = Object.keys(groupedData).sort();
+        const monthNames = months.map(monthKey => formatMonth(monthKey));
+        
+        const targetData = months.map(monthKey => 
+          groupedData[monthKey].reduce((sum, row) => sum + (row["SPD TARGET"] || 0), 0)
+        );
+        
+        const actualData = months.map(monthKey => 
+          groupedData[monthKey].filter(row => row.ACTUAL).reduce((sum, row) => sum + (row.ACTUAL || 0), 0)
+        );
+
+        if (performanceChart) {
+          performanceChart.destroy();
+        }
+
+        performanceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: monthNames,
+            datasets: [
+              {
+                label: 'Target',
+                data: targetData,
+                borderColor: '#3a7bd5',
+                backgroundColor: 'rgba(58, 123, 213, 0.1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+              },
+              {
+                label: 'Actual',
+                data: actualData,
+                borderColor: '#27ae60',
+                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)'
+                }
+              },
+              x: {
+                grid: {
+                  display: false
+                }
+              }
+            }
+          }
+        });
+      }
+
       function displayMonthlyData() {
         const tableBody = document.getElementById("monthly-data-table-body");
         tableBody.innerHTML = "";
@@ -346,7 +705,12 @@
         let previousMonthActual = null;
         let previousMonthStd = null;
 
-        Object.keys(groupedData).forEach((monthKey, index) => {
+        // Sort months chronologically
+        const sortedMonths = Object.keys(groupedData).sort((a, b) => {
+          return new Date(a) - new Date(b);
+        });
+
+        sortedMonths.forEach((monthKey, index) => {
           const rows = groupedData[monthKey];
           const filteredRows = rows.filter((row) => row.ACTUAL && row.STD);
 
@@ -361,9 +725,10 @@
           totalGap += monthlyGap;
 
           const percentage = monthlyTarget > 0 ? ((monthlyActual / monthlyTarget) * 100).toFixed(2) : "-";
-          const formatNumber = (num) => num !== "-" ? parseInt(num).toLocaleString("id-ID") : "-";
 
           const tr = document.createElement("tr");
+          tr.className = "animate-fade-in";
+          tr.style.animationDelay = `${index * 0.05}s`;
 
           // BULAN
           const monthCell = document.createElement("td");
@@ -408,7 +773,7 @@
           percentageCell.textContent = percentage !== "-" ? `${percentage}%` : "-";
           if (percentage !== "-") {
             percentageCell.style.color = parseFloat(percentage) >= 100 ? "var(--success-dark)" : "var(--danger-dark)";
-            percentageCell.style.fontWeight = "500";
+            percentageCell.style.fontWeight = "600";
           }
           tr.appendChild(percentageCell);
 
@@ -420,7 +785,7 @@
           } else if (monthlyGap < 0) {
             gapCell.style.color = "var(--danger-dark)";
           }
-          gapCell.style.fontWeight = "500";
+          gapCell.style.fontWeight = "600";
           tr.appendChild(gapCell);
 
           // STD
@@ -458,22 +823,29 @@
         });
 
         // Update footer dengan total keseluruhan
-        document.getElementById("total-target").textContent = totalTarget.toLocaleString("id-ID");
-        document.getElementById("total-actual").textContent = totalActual.toLocaleString("id-ID");
+        document.getElementById("total-target").textContent = formatNumber(totalTarget);
+        document.getElementById("total-actual").textContent = formatNumber(totalActual);
         const totalPercentage = totalTarget > 0 ? ((totalActual / totalTarget) * 100).toFixed(2) : "-";
         const totalPercentageCell = document.getElementById("total-percentage");
         totalPercentageCell.textContent = totalPercentage !== "-" ? `${totalPercentage}%` : "-";
         if (totalPercentage !== "-") {
           totalPercentageCell.style.color = parseFloat(totalPercentage) >= 100 ? "var(--success-dark)" : "var(--danger-dark)";
+          totalPercentageCell.style.fontWeight = "600";
         }
-        document.getElementById("total-gap").textContent = totalGap.toLocaleString("id-ID");
-        document.getElementById("total-std").textContent = totalStd.toLocaleString("id-ID");
+        document.getElementById("total-gap").textContent = formatNumber(totalGap);
+        document.getElementById("total-std").textContent = formatNumber(totalStd);
 
         // Aktifkan tooltip
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
           return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+      }
+
+      // Format number with thousand separators
+      function formatNumber(num) {
+        if (num === "-" || isNaN(num)) return "-";
+        return parseInt(num).toLocaleString("id-ID");
       }
 
       // Fungsi format khusus untuk badges
@@ -493,10 +865,17 @@
       function formatMonth(monthKey) {
         const [year, month] = monthKey.split("-");
         const monthNames = [
-          "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-          "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+          "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+          "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
         ];
         return `${monthNames[parseInt(month) - 1]} ${year}`;
+      }
+
+      // Export to PDF function
+      function exportToPDF() {
+        // In a real implementation, you would use a library like jsPDF or html2pdf
+        alert("Fitur export PDF akan membuka preview dokumen untuk diunduh");
+        // This is just a placeholder for the actual PDF export functionality
       }
 
       // Panggil fungsi fetchData saat halaman dimuat
