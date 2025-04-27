@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4f46e5">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <title>SO SERAH TERIMA SHIFT</title>
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --light-bg: #f8fafc;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light-bg);
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .card-view {
+      box-shadow: var(--card-shadow);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background-color: #ffffff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid #e2e8f0;
+      height: 100%;
+    }
+
+    .card-view:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      background-color: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .card-view h5 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0;
+      color: #1e293b;
+    }
+
+    .card-body-scroll {
+      overflow-y: auto;
+      max-height: 80px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      background-color: #f8fafc;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .card-body-scroll p {
+      margin-bottom: 0;
+      color: #64748b;
+    }
+
+    .input-group {
+      margin-top: 8px;
+    }
+
+    .input-group-text {
+      background-color: #f1f5f9;
+      color: #475569;
+      font-weight: 500;
+      min-width: 80px;
+      justify-content: center;
+    }
+
+    .form-control {
+      border-left: 0;
+      background-color: #f8fafc;
+    }
+
+    .form-control:focus {
+      box-shadow: none;
+      border-color: #c7d2fe;
+      background-color: #ffffff;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+      font-weight: 500;
+    }
+
+    .btn-spaced {
+      margin: 20px auto;
+      display: block;
+      padding: 10px 24px;
+      min-width: 200px;
+    }
+
+    .alert-custom {
+      display: none;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+
+    .form-select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .loading-spinner {
+      width: 3rem;
+      height: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .card-view {
+        padding: 12px;
+      }
+      
+      .input-group-text {
+        min-width: 70px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-overlay">
+    <div class="spinner-border text-primary loading-spinner" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div id="content" class="container mt-4 mb-5">
+    <h2><i class="fas fa-exchange-alt me-2"></i>SO SERAH TERIMA SHIFT</h2>
+
+    <!-- Form Input -->
+    <form id="pluForm" class="mt-4 bg-white p-4 rounded-3 shadow-sm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="tanggal" class="form-label">Tanggal:</label>
+          <input type="date" class="form-control" id="tanggal" name="TANGGAL" required>
+        </div>
+
+        <div class="col-md-6">
+          <label for="shift" class="form-label">Shift:</label>
+          <select id="shift" class="form-select" name="SHIFT" required>
+            <option value="">Pilih Shift</option>
+            <option value="Shift 1">Shift 1</option>
+            <option value="Shift 2">Shift 2</option>
+            <option value="Shift 3">Shift 3</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tombol Ambil Data -->
+      <div class="d-grid gap-2 mt-3">
+        <button type="button" class="btn btn-primary" id="fetchDataBtn" disabled>
+          <span class="spinner-border spinner-border-sm d-none" id="fetchButtonSpinner" aria-hidden="true"></span>
+          <span role="status" id="fetchButtonText"><i class="fas fa-download me-2"></i>Ambil Data</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Group CardView Formulir -->
+    <div id="cardContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-4">
+      <!-- Data akan dimuat di sini oleh JavaScript -->
+    </div>
+
+    <!-- Alert untuk notifikasi -->
+    <div id="response" class="alert alert-success alert-custom" role="alert">
+      <i class="fas fa-check-circle me-2"></i>
+      <span id="alertMessage">Data berhasil dikirim!</span>
+    </div>
+
+    <!-- Tombol Simpan Data -->
+    <button type="button" class="btn btn-success btn-spaced" id="submitBtn" disabled>
+      <span class="spinner-border spinner-border-sm d-none" id="buttonSpinner" aria-hidden="true"></span>
+      <span role="status" id="buttonText"><i class="fas fa-save me-2"></i>Simpan Data</span>
+    </button>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwelfEQUFSYBTyQL9auKNT2ygx-0pVBhp_m9TdD-H-2wrgSRtYv-vVNnmmpNn_FkOHlIA/exec';
+    let formData = [];
+
+    // Initialize the application when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set today's date as default
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('tanggal').value = today;
+      
+      // Load from localStorage if available
+      loadFromLocalStorage();
+      checkFormValidity();
+      
+      // Add event listeners
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      // Form input listeners
+      document.getElementById('tanggal').addEventListener('change', function() {
+        checkFormValidity();
+        if (document.getElementById('shift').value) {
+          loadFromLocalStorage();
+        }
+      });
+
+      document.getElementById('shift').addEventListener('change', function() {
+        checkFormValidity();
+        if (document.getElementById('tanggal').value) {
+          loadFromLocalStorage();
+        }
+      });
+
+      // Button listeners
+      document.getElementById('fetchDataBtn').addEventListener('click', fetchData);
+      document.getElementById('submitBtn').addEventListener('click', submitForm);
+    }
+
+    function showLoading(show) {
+      document.querySelector('.loading-overlay').style.display = show ? 'flex' : 'none';
+    }
+
+    function fetchData() {
+      const fetchDataBtn = document.getElementById('fetchDataBtn');
+      const fetchButtonSpinner = document.getElementById('fetchButtonSpinner');
+      const fetchButtonText = document.getElementById('fetchButtonText');
+
+      fetchDataBtn.disabled = true;
+      fetchButtonSpinner.classList.remove('d-none');
+      fetchButtonText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memuat...';
+
+      showLoading(true);
+
+      fetch(scriptURL)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          renderCardData(data);
+          // Save fetched data to localStorage
+          localStorage.setItem('fetchedData', JSON.stringify(data));
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          showAlert('Gagal mengambil data. Silakan coba lagi.', 'danger');
+        })
+        .finally(() => {
+          fetchDataBtn.disabled = false;
+          fetchButtonSpinner.classList.add('d-none');
+          fetchButtonText.innerHTML = '<i class="fas fa-download me-2"></i>Ambil Data';
+          showLoading(false);
+          checkFormValidity();
+        });
+    }
+
+    function renderCardData(data) {
+      const cardContainer = document.getElementById('cardContainer');
+      cardContainer.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        cardContainer.innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-info text-center">
+              <i class="fas fa-info-circle me-2"></i>Tidak ada data yang tersedia.
+            </div>
+          </div>`;
+        return;
+      }
+
+      data.forEach((row, index) => { 
+        const card = document.createElement('div'); 
+        card.className = 'col'; 
+        card.innerHTML = ` 
+          <div class="card-view"> 
+            <div class="card-header">
+              <h5>${row[0] || 'N/A'}</h5> 
+            </div>
+            <div class="card-body-scroll"> 
+              <p>${row[1] || 'Deskripsi tidak tersedia'}</p> 
+            </div> 
+            <div class="input-group mb-2"> 
+              <span class="input-group-text">DISPLAY</span> 
+              <input type="number" class="form-control qty-input" value="${row[2] || 0}" name="DISPLAY" required id="display-${index}">
+            </div> 
+            <div class="input-group mb-2"> 
+              <span class="input-group-text">GUDANG</span> 
+              <input type="number" class="form-control qty-input" value="${row[3] || 0}" name="GUDANG" required id="gudang-${index}">
+            </div> 
+            <div class="input-group"> 
+              <span class="input-group-text">TOTAL</span> 
+              <input type="number" class="form-control qty-input" value="${row[4] || 0}" name="TOTAL" required id="total-${index}" readonly> 
+            </div> 
+          </div>`;
+
+        cardContainer.appendChild(card);
+
+        // Add event listeners to update the total and save to localStorage
+        const displayInput = document.getElementById(`display-${index}`);
+        const gudangInput = document.getElementById(`gudang-${index}`);
+        
+        const updateTotalAndSave = () => {
+          const displayValue = parseFloat(displayInput.value) || 0;
+          const gudangValue = parseFloat(gudangInput.value) || 0;
+          const totalField = document.getElementById(`total-${index}`);
+          totalField.value = displayValue + gudangValue;
+          
+          saveFormDataToLocal();
+          checkFormValidity();
+        };
+
+        displayInput.addEventListener('input', updateTotalAndSave);
+        gudangInput.addEventListener('input', updateTotalAndSave);
+      });
+    }
+
+    function saveFormDataToLocal() {
+      const tanggal = document.getElementById('tanggal').value;
+      const shift = document.getElementById('shift').value;
+      
+      if (!tanggal || !shift) return;
+
+      const cardContainer = document.getElementById('cardContainer');
+      const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
+
+      const dataToSave = cards.map(card => {
+        const inputs = card.getElementsByTagName('input');
+        return {
+          PLU: card.querySelector('h5')?.textContent || '',
+          DESCRIPTION: card.querySelector('p')?.textContent || '',
+          DISPLAY: inputs[0]?.value || '',
+          GUDANG: inputs[1]?.value || '',
+          TOTAL: inputs[2]?.value || ''
+        };
+      });
+
+      // Save with unique key based on date and shift
+      const storageKey = `so_serah_terima_${tanggal}_${shift}`;
+      localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+    }
+
+    function loadFromLocalStorage() {
+      const tanggal = document.getElementById('tanggal').value;
+      const shift = document.getElementById('shift').value;
+      
+      if (!tanggal || !shift) return;
+
+      const storageKey = `so_serah_terima_${tanggal}_${shift}`;
+      const savedData = localStorage.getItem(storageKey);
+
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          const cardContainer = document.getElementById('cardContainer');
+          const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
+
+          cards.forEach((card, index) => {
+            if (data[index]) {
+              const inputs = card.getElementsByTagName('input');
+              if (inputs[0]) inputs[0].value = data[index].DISPLAY || '';
+              if (inputs[1]) inputs[1].value = data[index].GUDANG || '';
+              if (inputs[2]) inputs[2].value = data[index].TOTAL || '';
+            }
+          });
+        } catch (e) {
+          console.error('Error parsing saved data:', e);
+        }
+      }
+    }
+
+    function submitForm(event) {
+      event.preventDefault();
+      
+      const tanggal = document.getElementById('tanggal').value;
+      const shift = document.getElementById('shift').value;
+      const cardContainer = document.getElementById('cardContainer');
+      const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
+
+      // Prepare form data
+      formData = cards.map(card => { 
+        const inputs = card.getElementsByTagName('input'); 
+        return { 
+          TANGGAL: tanggal, 
+          SHIFT: shift, 
+          PLU: card.querySelector('h5')?.textContent || '', 
+          DESCRIPTION: card.querySelector('p')?.textContent || '', 
+          DISPLAY: inputs[0]?.value || '', 
+          GUDANG: inputs[1]?.value || '', 
+          TOTAL: inputs[2]?.value || ''
+        };
+      });
+
+      const submitBtn = document.getElementById('submitBtn');
+      const buttonSpinner = document.getElementById('buttonSpinner');
+      const buttonText = document.getElementById('buttonText');
+
+      submitBtn.disabled = true;
+      buttonSpinner.classList.remove('d-none');
+      buttonText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
+      showLoading(true);
+
+      // Here you would typically send the data to your server
+      // For now, we'll simulate a successful submission
+      setTimeout(() => {
+        // Save the submitted data to localStorage
+        const storageKey = `submitted_so_${tanggal}_${shift}`;
+        localStorage.setItem(storageKey, JSON.stringify(formData));
+        
+        // Clear the form data from localStorage
+        localStorage.removeItem(`so_serah_terima_${tanggal}_${shift}`);
+        
+        showAlert('Data berhasil disimpan!', 'success');
+        
+        submitBtn.disabled = true;
+        buttonSpinner.classList.add('d-none');
+        buttonText.innerHTML = '<i class="fas fa-save me-2"></i>Simpan Data';
+        showLoading(false);
+
+        // Disable editing after submission
+        document.querySelectorAll('#cardContainer .qty-input').forEach(input => {
+          if (!input.readOnly) {
+            input.setAttribute('readonly', true);
+          }
+        });
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          window.location.href = 'cekonhand.html';
+        }, 3000);
+      }, 1500);
+    }
+
+    function checkFormValidity() {
+      const tanggal = document.getElementById('tanggal').value;
+      const shift = document.getElementById('shift').value;
+      const fetchDataBtn = document.getElementById('fetchDataBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      const displayInputs = document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"]');
+      const gudangInputs = document.querySelectorAll('#cardContainer .card-view input[name="GUDANG"]');
+
+      // Enable fetch button only if date and shift are selected
+      fetchDataBtn.disabled = !(tanggal && shift);
+
+      // Enable submit button only if all required fields are filled
+      const allInputsFilled = displayInputs.length > 0 && 
+                            Array.from(displayInputs).every(input => input.value.trim() !== '') &&
+                            Array.from(gudangInputs).every(input => input.value.trim() !== '');
+
+      submitBtn.disabled = !(tanggal && shift && allInputsFilled);
+    }
+
+    function showAlert(message, type = 'success') {
+      const alertElement = document.getElementById('response');
+      const alertMessage = document.getElementById('alertMessage');
+      
+      alertElement.className = `alert alert-${type} alert-custom`;
+      alertMessage.textContent = message;
+      
+      // Add appropriate icon based on alert type
+      let iconClass = 'fa-check-circle';
+      if (type === 'danger') iconClass = 'fa-exclamation-circle';
+      if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+      if (type === 'info') iconClass = 'fa-info-circle';
+      
+      alertMessage.innerHTML = `<i class="fas ${iconClass} me-2"></i>${message}`;
+      alertElement.style.display = 'block';
+      
+      // Hide alert after 5 seconds
+      setTimeout(() => {
+        alertElement.style.display = 'none';
+      }, 5000);
+    }
+  </script>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
