@@ -3,672 +3,950 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Penjualan</title>
+  <title>Dashboard Penjualan - Pramuka Bekasi C940</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-  /* Gaya yang diperbarui untuk card yang lebih profesional */
-  .card {
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%;
-  }
-  
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  }
-  
-  .card-title {
-    color: #2c3e50;
-    font-weight: 500;
-    border-bottom: 2px solid #f8f9fa;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    font-size: 1rem;
-  }
-  
-  .card-body {
-    padding: 1rem;
-  }
-  
-  .metric-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed #eee;
-  }
-  
-  .metric-label {
-    font-weight: 400;
-    color: #555;
-    flex: 1;
-  }
-  
-  .metric-value {
-    font-weight: 450;
-    color: #2c3e50;
-    text-align: right;
-    margin-left: 10px;
-  }
-  
-  .achievement {
-    font-size: 0.85rem;
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin-left: 8px;
-  }
-  
-  /* Styling untuk metric-value dengan gap-positive */
-.metric-value .gap-positive {
-  font-size: 0.8rem; /* Ukuran teks lebih kecil */
-  color: #28a745; /* Warna teks hijau untuk positif */
-  background-color: rgba(40, 167, 69, 0.1); /* Background transparan hijau */
-  padding: 2px 6px; /* Padding agar terlihat rapi */
-  border-radius: 8px; /* Radius border agar terlihat lebih halus */
-}
-
-/* Styling untuk metric-value dengan gap-negative */
-.metric-value .gap-negative {
-  font-size: 0.8rem; /* Ukuran teks lebih kecil */
-  color: #dc3545; /* Warna teks merah untuk negatif */
-  background-color: rgba(220, 53, 69, 0.1); /* Background transparan merah */
-  padding: 2px 6px; /* Padding agar terlihat rapi */
-  border-radius: 8px; /* Radius border agar terlihat lebih halus */
-}
-  
-  
-  
-  .card-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Ubah minmax ke 250px */
-  gap: 15px; /* Kurangi jarak antar kartu */
-  margin-top: 20px;
-}
-
-/* Gaya untuk baris peringkat */
-.rank-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  padding: 4px 0;
-}
-
-.rank-name {
-  font-weight: 500;
-  color: #333;
-  flex: 1;
-}
-
-.rank-value {
-  font-weight: 600;
-  text-align: right;
-  margin-left: 10px;
-}
-
-/* Gaya untuk 3 peringkat teratas */
-.rank-top {
-  background-color: rgba(40, 167, 69, 0.1); /* Latar belakang hijau muda */
-  border-left: 4px solid #28a745; /* Garis kiri hijau */
-  padding-left: 8px;
-}
-
-.rank-top .rank-icon {
-  color: #28a745; /* Ikon hijau */
-}
-
-/* Gaya untuk 3 peringkat terbawah */
-.rank-bottom {
-  background-color: rgba(220, 53, 69, 0.1); /* Latar belakang merah muda */
-  border-left: 4px solid #dc3545; /* Garis kiri merah */
-  padding-left: 8px;
-}
-
-.rank-bottom .rank-icon {
-  color: #dc3545; /* Ikon merah */
-}
-
-/* Gaya umum untuk ikon */
-.rank-icon {
-  font-size: 1rem;
-  margin-left: 8px;
-}
-
-/* Gaya untuk baris peringkat tengah (bukan 3 teratas atau 3 terbawah) */
-.rank-middle {
-  background-color: rgba(255, 193, 7, 0.1); /* Latar belakang kuning muda */
-  border-left: 4px solid #ffc107; /* Garis kiri kuning */
-  padding-left: 8px;
-}
-
-.rank-middle .rank-icon {
-  color: #ffc107; /* Ikon kuning */
-}
-
-</style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2c3e50;
+      --success-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --info-color: #1abc9c;
+      --light-color: #ecf0f1;
+      --dark-color: #34495e;
+      --white: #ffffff;
+      --gray: #95a5a6;
+      --light-gray: #f8f9fa;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--secondary-color);
+    }
+    
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dashboard-header h1 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-header p {
+      opacity: 0.9;
+      margin-bottom: 0;
+    }
+    
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      height: 100%;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      background-color: var(--white);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      color: var(--secondary-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 60px;
+    }
+    
+    .card-header .card-icon {
+      font-size: 1.25rem;
+      color: var(--primary-color);
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+    
+    .metric-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      min-height: 40px;
+    }
+    
+    .metric-item:last-child {
+      border-bottom: none;
+    }
+    
+    .metric-label {
+      font-weight: 500;
+      color: var(--dark-color);
+      flex: 1;
+    }
+    
+    .metric-value {
+      font-weight: 600;
+      text-align: right;
+      margin-left: 1rem;
+    }
+    
+    .badge-achievement {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 50px;
+      margin-left: 0.5rem;
+    }
+    
+    .badge-success {
+      background-color: rgba(46, 204, 113, 0.1);
+      color: var(--success-color);
+    }
+    
+    .badge-danger {
+      background-color: rgba(231, 76, 60, 0.1);
+      color: var(--danger-color);
+    }
+    
+    .badge-warning {
+      background-color: rgba(243, 156, 18, 0.1);
+      color: var(--warning-color);
+    }
+    
+    .rank-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      min-height: 40px;
+    }
+    
+    .rank-item:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+      transform: translateX(5px);
+    }
+    
+    .rank-name {
+      font-weight: 500;
+      flex: 1;
+    }
+    
+    .rank-value {
+      font-weight: 600;
+      margin-left: 1rem;
+    }
+    
+    .rank-icon {
+      margin-left: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .rank-top {
+      background-color: rgba(46, 204, 113, 0.1);
+      border-left: 4px solid var(--success-color);
+    }
+    
+    .rank-middle {
+      background-color: rgba(243, 156, 18, 0.1);
+      border-left: 4px solid var(--warning-color);
+    }
+    
+    .rank-bottom {
+      background-color: rgba(231, 76, 60, 0.1);
+      border-left: 4px solid var(--danger-color);
+    }
+    
+    .filter-card {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .filter-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--secondary-color);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      font-weight: 500;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9;
+      border-color: #2980b9;
+    }
+    
+    .btn-detail {
+      background-color: var(--white);
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-detail:hover {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+    
+    .form-control, .form-select {
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+    }
+    
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray);
+    }
+    
+    .progress-thin {
+      height: 6px;
+      border-radius: 3px;
+      margin-top: 0.5rem;
+    }
+    
+    .progress-bar {
+      background-color: var(--primary-color);
+    }
+    
+    .ranking-container {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    
+    .ranking-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .ranking-container::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+    
+    /* Equal height rows */
+    .row-eq-height {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .row-eq-height > [class*='col-'] {
+      display: flex;
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 1rem;
+      }
+      
+      .card-body {
+        padding: 1rem;
+      }
+      
+      .filter-card {
+        padding: 1rem;
+      }
+      
+      .card {
+        min-height: auto;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container mt-4">
-    <h1 class="text-start mb-4">Dashboard Pramuka Bekasi C940</h1>
-
-    <!-- Filter Tanggal dan Nama -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-4">
-        <label for="nama-filter" class="form-label">Nama Lengkap</label>
-        <select id="nama-filter" class="form-select">
-          <option value="">-- Pilih Nama --</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label for="start-date" class="form-label">Dari Tanggal</label>
-        <input type="date" class="form-control" id="start-date">
-      </div>
-      <div class="col-md-3">
-        <label for="end-date" class="form-label">Sampai Tanggal</label>
-        <input type="date" class="form-control" id="end-date">
-      </div>
-      <div class="col-md-2 d-flex align-items-end">
-        <button id="filter-button" class="btn btn-primary w-100">Filter</button>
+  <div class="container py-4">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1><i class="fas fa-chart-line me-2"></i>Dashboard Penjualan</h1>
+          <p>Pramuka Bekasi C940 - Real-time Sales Performance</p>
+        </div>
+        <div class="text-end">
+          <div id="current-date" class="fw-light"></div>
+          <div class="small">Last updated: <span id="last-updated">Loading...</span></div>
+        </div>
       </div>
     </div>
-
-    <!-- Spinner Loading -->
-    <div id="loading-spinner" class="text-center my-3" style="display: none;">
+    
+    <!-- Filter Section -->
+    <div class="filter-card">
+      <h5 class="filter-title"><i class="fas fa-filter me-2"></i>Filter Data</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="nama-filter" class="form-label">Nama Lengkap</label>
+          <select id="nama-filter" class="form-select">
+            <option value="">Semua Sales</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="start-date" class="form-label">Dari Tanggal</label>
+          <input type="date" class="form-control" id="start-date">
+        </div>
+        <div class="col-md-3">
+          <label for="end-date" class="form-label">Sampai Tanggal</label>
+          <input type="date" class="form-control" id="end-date">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button id="filter-button" class="btn btn-primary w-100">
+            <i class="fas fa-search me-1"></i> Filter
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="spinner-container" style="display: none;">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-
+    
     <!-- Dashboard Cards -->
-    <div class="row" id="dashboard-cards"></div>
+    <div class="row row-eq-height" id="dashboard-cards"></div>
   </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Import Data -->
   <script>
     // Variabel global untuk menyimpan data
-let salesData = [];
-let targetData = [];
+    let salesData = [];
+    let targetData = [];
+    let lastUpdatedTime = null;
 
-// Fetch data dari Google Apps Script
-async function fetchData() {
-  const spinner = document.getElementById('loading-spinner');
-  spinner.style.display = 'block';
-  try {
-    const response = await fetch('https://script.google.com/macros/s/AKfycbwa-I3mMhQYnKmXB0xUzLB2ZkfkoN0pXEy4EBdCPFDp_zyjpSsh6pHzXp4Mkekww4xe/exec');
-    if (!response.ok) {
-      throw new Error('Failed to fetch data');
+    // Format tanggal untuk ditampilkan
+    function formatDisplayDate(date) {
+      if (!date) return '';
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('id-ID', options);
     }
-    const data = await response.json();
-    salesData = data.salesData;
-    targetData = data.targetData;
 
-    // Populate dropdown nama dan render dashboard setelah data dimuat
-    populateNamaDropdown(salesData);
-    renderDashboard(salesData, targetData);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    alert('Gagal memuat data. Silakan coba lagi.');
-  } finally {
-    spinner.style.display = 'none';
-  }
-}
-
-// Populate dropdown nama saat awal
-function populateNamaDropdown(data) {
-  const namaSelect = document.getElementById('nama-filter');
-  const namaSet = new Set();
-  data.forEach(item => {
-    if (item['Nama Lengkap']) {
-      namaSet.add(item['Nama Lengkap'].trim());
+    // Format waktu untuk last updated
+    function formatTime(date) {
+      if (!date) return '';
+      return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     }
-  });
-  const namaList = Array.from(namaSet).sort();
-  namaList.forEach(nama => {
-    const option = document.createElement('option');
-    option.value = nama;
-    option.textContent = nama;
-    namaSelect.appendChild(option);
-  });
-}
 
-// Menghitung metrik dari data penjualan
-function calculateMetrics(filteredData) {
-  const headers = Object.keys(filteredData[0] || {});
-  const psmColumns = headers.slice(8); // Ambil kolom indeks 8 dan seterusnya sebagai PSM
-  const totalSales = filteredData.reduce((sum, item) => sum + (Number(item.Sales) || 0), 0);
-  const totalStd = filteredData.reduce((sum, item) => sum + (Number(item.Std) || 0), 0);
-  const totalPulsa = filteredData.reduce((sum, item) => sum + (Number(item.Pulsa) || 0), 0);
-  const totalPwp = filteredData.reduce((sum, item) => sum + (Number(item.Pwp) || 0), 0);
-  const totalSertis = filteredData.reduce((sum, item) => sum + (Number(item.Sertis) || 0), 0);
-
-  // Hitung total PSM
-  const totalPsm = psmColumns.reduce((sum, column) => 
-    sum + filteredData.reduce((acc, item) => acc + (Number(item[column]) || 0), 0), 0);
-
-  return { totalSales, totalStd, totalPulsa, totalPwp, totalSertis, totalPsm };
-}
-
-// Menghitung pencapaian persentase
-function calculateAchievement(actual, target) {
-  if (target === 0 && actual === 0) return "0%";
-  if (target === 0) return ">100%";
-  return ((actual / target) * 100).toFixed(2) + "%";
-}
-
-// Menghitung gap antara actual dan target
-function calculateGap(actual, target) {
-  const gap = actual - target;
-  return gap >= 0
-    ? `<span class="gap-positive">+${gap.toLocaleString()}</span>`
-    : `<span class="gap-negative">${gap.toLocaleString()}</span>`;
-}
-
-// Render card untuk detail penjualan PSM dan peringkat
-function renderDashboard(data, targetDataFiltered) {
-  const container = document.getElementById('dashboard-cards');
-  container.innerHTML = '';
-
-  if (data.length === 0) {
-    container.innerHTML = '<div class="col-12"><div class="alert alert-info">Tidak ada data untuk ditampilkan berdasarkan filter yang dipilih.</div></div>';
-    return;
-  }
-
-  const headers = Object.keys(data[0] || {});
-  const psmColumns = headers.slice(8); // Ambil kolom indeks 8 dan seterusnya sebagai PSM
-  const { totalSales, totalStd, totalPulsa, totalPwp, totalSertis, totalPsm } = calculateMetrics(data);
-
-  // Calculate targets
-  const targetSales = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Sales || 0), 0);
-  const targetStd = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Std || 0), 0);
-  const targetPulsa = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Pulsa || 0), 0);
-  const targetPwp = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Pwp || 0), 0);
-  const targetSertis = targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Sertis || 0), 0);
-
-  // Calculate target PSM
-  const targetPsm = psmColumns.reduce((sum, column) =>
-    sum + targetDataFiltered.reduce((acc, item) => acc + parseInt(item[column] || 0), 0), 0);
-
-  // Format nilai dengan separator ribuan
-  const formatNumber = num => num.toLocaleString('id-ID');
-  const formatCurrency = num => 'Rp' + num.toLocaleString('id-ID');
-
-  // Render card untuk TARGET, ACTUAL, FOKUS PRODUK, dan GAP
-  container.innerHTML = `
-    <!-- Target Card -->
-    <div class="col-12 col-md-6 col-lg-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">TARGET</h5>
-          <div class="metric-item">
-            <span class="metric-label">Sales</span>
-            <span class="metric-value">${formatCurrency(targetSales)}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">STD</span>
-            <span class="metric-value">${formatNumber(targetStd)}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Pulsa</span>
-            <span class="metric-value">${formatCurrency(targetPulsa)}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">PWP</span>
-            <span class="metric-value">${formatNumber(targetPwp)}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Sertis</span>
-            <span class="metric-value">${formatNumber(targetSertis)}</span>
-          </div>
-          ${psmColumns.length > 0 ? `
-            <div class="metric-item">
-              <span class="metric-label">PSM</span>
-              <span class="metric-value">${formatNumber(targetPsm)}</span>
-            </div>
-          ` : ''}
-        </div>
-      </div>
-    </div>
-    <!-- Sales Card -->
-    <div class="col-12 col-md-6 col-lg-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">ACTUAL</h5>
-          <div class="metric-item">
-            <span class="metric-label">Sales</span>
-            <span class="metric-value">
-              ${formatCurrency(totalSales)}
-              <span class="achievement ${totalSales >= targetSales ? 'gap-positive' : 'gap-negative'}">
-                ${calculateAchievement(totalSales, targetSales)}
-              </span>
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">STD</span>
-            <span class="metric-value">
-              ${formatNumber(totalStd)}
-              <span class="achievement ${totalStd >= targetStd ? 'gap-positive' : 'gap-negative'}">
-                ${calculateAchievement(totalStd, targetStd)}
-              </span>
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Pulsa</span>
-            <span class="metric-value">
-              ${formatCurrency(totalPulsa)}
-              <span class="achievement ${totalPulsa >= targetPulsa ? 'gap-positive' : 'gap-negative'}">
-                ${calculateAchievement(totalPulsa, targetPulsa)}
-              </span>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Focus Product Card -->
-    <div class="col-12 col-md-6 col-lg-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">FOKUS PRODUK</h5>
-          <div class="metric-item">
-            <span class="metric-label">PWP</span>
-            <span class="metric-value">
-              ${formatNumber(totalPwp)}
-              <span class="achievement ${totalPwp >= targetPwp ? 'gap-positive' : 'gap-negative'}">
-                ${calculateAchievement(totalPwp, targetPwp)}
-              </span>
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Sertis</span>
-            <span class="metric-value">
-              ${formatNumber(totalSertis)}
-              <span class="achievement ${totalSertis >= targetSertis ? 'gap-positive' : 'gap-negative'}">
-                ${calculateAchievement(totalSertis, targetSertis)}
-              </span>
-            </span>
-          </div>
-          ${psmColumns.length > 0 ? `
-            <div class="metric-item">
-              <span class="metric-label">PSM</span>
-              <span class="metric-value">
-                ${formatNumber(totalPsm)}
-                <span class="achievement ${totalPsm >= targetPsm ? 'gap-positive' : 'gap-negative'}">
-                  ${calculateAchievement(totalPsm, targetPsm)}
-                </span>
-              </span>
-            </div>
-          ` : ''}
-        </div>
-      </div>
-    </div>
-    <!-- Gap Card -->
-    <div class="col-12 col-md-6 col-lg-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">GAP (Actual vs Target)</h5>
-          <div class="metric-item">
-            <span class="metric-label">Sales</span>
-            <span class="metric-value ${totalSales >= targetSales ? 'gap-positive' : 'gap-negative'}">
-              ${calculateGap(totalSales, targetSales)}
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">STD</span>
-            <span class="metric-value ${totalStd >= targetStd ? 'gap-positive' : 'gap-negative'}">
-              ${calculateGap(totalStd, targetStd)}
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Pulsa</span>
-            <span class="metric-value ${totalPulsa >= targetPulsa ? 'gap-positive' : 'gap-negative'}">
-              ${calculateGap(totalPulsa, targetPulsa)}
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">PWP</span>
-            <span class="metric-value ${totalPwp >= targetPwp ? 'gap-positive' : 'gap-negative'}">
-              ${calculateGap(totalPwp, targetPwp)}
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Sertis</span>
-            <span class="metric-value ${totalSertis >= targetSertis ? 'gap-positive' : 'gap-negative'}">
-              ${calculateGap(totalSertis, targetSertis)}
-            </span>
-          </div>
-          ${psmColumns.length > 0 ? `
-            <div class="metric-item">
-              <span class="metric-label">PSM</span>
-              <span class="metric-value ${totalPsm >= targetPsm ? 'gap-positive' : 'gap-negative'}">
-                ${calculateGap(totalPsm, targetPsm)}
-              </span>
-            </div>
-          ` : ''}
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Render card untuk detail penjualan PSM dan peringkat
-const rankedPsm = calculatePsmByNama(data, psmColumns);
-const topRankHtml = rankedPsm.map((item, index) => {
-  // Tentukan apakah ini termasuk 3 peringkat teratas, tengah, atau terbawah
-  const isTop = index < 3; // 3 peringkat teratas
-  const isBottom = index >= rankedPsm.length - 3; // 3 peringkat terbawah
-  const isMiddle = !isTop && !isBottom; // Peringkat tengah
-
-  // Tentukan kelas CSS dan ikon berdasarkan posisi
-  const rankClass = isTop
-    ? 'rank-top'
-    : (isBottom ? 'rank-bottom' : 'rank-middle');
-  const rankIcon = isTop
-    ? '<i class="fas fa-thumbs-up rank-icon"></i>'
-    : (isBottom ? '<i class="fas fa-thumbs-down rank-icon"></i>' : '<i class="fas fa-exclamation-triangle rank-icon"></i>');
-
-  return `
-    <div class="rank-item ${rankClass}">
-      <span class="rank-name">${index + 1}. ${item.nama}</span>
-      <span class="rank-value">${formatNumber(item.total)} ${rankIcon}</span>
-    </div>
-  `;
-}).join('');
-
-container.innerHTML += `
-  <!-- PSM Details Card -->
-  <div class="col-12 col-md-6 col-lg-4 mb-4">
-    <div class="card">
-      <div class="card-body">
-    <!-- Elemen Label dan Tombol -->
-    <div class="d-flex align-items-start">
-      <!-- Label -->
-      <h5 class="card-title mb-0 me-3">DETAIL PENJUALAN PSM</h5>
+    // Update current date and time
+    function updateCurrentDateTime() {
+      const now = new Date();
+      document.getElementById('current-date').textContent = formatDisplayDate(now);
       
-      <!-- Tombol -->
-      <a href="detail_psm.html" class="btn-md btn-primary">Lihat Detail</a>
-    </div>
-  
+      if (lastUpdatedTime) {
+        document.getElementById('last-updated').textContent = formatTime(lastUpdatedTime);
+      }
+    }
+
+    // Fetch data dari Google Apps Script
+    async function fetchData() {
+      const spinner = document.getElementById('loading-spinner');
+      spinner.style.display = 'flex';
+      
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwa-I3mMhQYnKmXB0xUzLB2ZkfkoN0pXEy4EBdCPFDp_zyjpSsh6pHzXp4Mkekww4xe/exec');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        salesData = data.salesData;
+        targetData = data.targetData;
+        lastUpdatedTime = new Date();
+
+        // Update UI
+        updateCurrentDateTime();
+        
+        // Populate dropdown nama dan render dashboard setelah data dimuat
+        populateNamaDropdown(salesData);
+        renderDashboard(salesData, targetData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        showAlert('Gagal memuat data. Silakan coba lagi.', 'danger');
+      } finally {
+        spinner.style.display = 'none';
+      }
+    }
+
+    // Tampilkan alert
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      const container = document.querySelector('.container');
+      container.insertBefore(alertDiv, container.firstChild);
+    }
+
+    // Populate dropdown nama saat awal
+    function populateNamaDropdown(data) {
+      const namaSelect = document.getElementById('nama-filter');
+      namaSelect.innerHTML = '<option value="">Semua Crew</option>';
+      
+      const namaSet = new Set();
+      data.forEach(item => {
+        if (item['Nama Lengkap']) {
+          namaSet.add(item['Nama Lengkap'].trim());
+        }
+      });
+      
+      const namaList = Array.from(namaSet).sort();
+      namaList.forEach(nama => {
+        const option = document.createElement('option');
+        option.value = nama;
+        option.textContent = nama;
+        namaSelect.appendChild(option);
+      });
+    }
+
+    // Menghitung metrik dari data penjualan
+    function calculateMetrics(filteredData) {
+      const headers = Object.keys(filteredData[0] || {});
+      const psmColumns = headers.slice(8); // Ambil kolom indeks 8 dan seterusnya sebagai PSM
+      
+      const metrics = {
+        totalSales: 0,
+        totalStd: 0,
+        totalPulsa: 0,
+        totalPwp: 0,
+        totalSertis: 0,
+        totalPsm: 0,
+        count: filteredData.length
+      };
+
+      filteredData.forEach(item => {
+        metrics.totalSales += (Number(item.Sales) || 0);
+        metrics.totalStd += (Number(item.Std) || 0);
+        metrics.totalPulsa += (Number(item.Pulsa) || 0);
+        metrics.totalPwp += (Number(item.Pwp) || 0);
+        metrics.totalSertis += (Number(item.Sertis) || 0);
+        
+        // Hitung total PSM
+        psmColumns.forEach(column => {
+          metrics.totalPsm += (Number(item[column]) || 0);
+        });
+      });
+
+      return metrics;
+    }
+
+    // Menghitung pencapaian persentase
+    function calculateAchievement(actual, target) {
+      if (target === 0 && actual === 0) return { percentage: 0, class: 'secondary' };
+      if (target === 0) return { percentage: 100, class: 'success' };
+      
+      const percentage = (actual / target) * 100;
+      return {
+        percentage: percentage.toFixed(1),
+        class: percentage >= 100 ? 'success' : (percentage >= 80 ? 'warning' : 'danger')
+      };
+    }
+
+    // Menghitung gap antara actual dan target
+    function calculateGap(actual, target) {
+      const gap = actual - target;
+      return {
+        value: gap,
+        class: gap >= 0 ? 'success' : 'danger',
+        formatted: gap >= 0 ? `+${gap.toLocaleString()}` : gap.toLocaleString()
+      };
+    }
+
+    // Format nilai dengan separator ribuan
+    function formatNumber(num) {
+      return num.toLocaleString('id-ID');
+    }
+
+    // Format nilai mata uang
+    function formatCurrency(num) {
+      return 'Rp' + num.toLocaleString('id-ID');
+    }
+
+    // Render dashboard
+    function renderDashboard(data, targetDataFiltered) {
+      const container = document.getElementById('dashboard-cards');
+      container.innerHTML = '';
+
+      if (data.length === 0) {
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="card">
+              <div class="no-data">
+                <i class="fas fa-database fa-3x mb-3 text-muted"></i>
+                <h5>Tidak ada data</h5>
+                <p class="text-muted">Tidak ada data yang ditemukan berdasarkan filter yang dipilih.</p>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const headers = Object.keys(data[0] || {});
+      const psmColumns = headers.slice(8);
+      const metrics = calculateMetrics(data);
+
+      // Calculate targets
+      const targetMetrics = {
+        totalSales: targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Sales || 0), 0),
+        totalStd: targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Std || 0), 0),
+        totalPulsa: targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Pulsa || 0), 0),
+        totalPwp: targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Pwp || 0), 0),
+        totalSertis: targetDataFiltered.reduce((sum, item) => sum + parseInt(item.Sertis || 0), 0),
+        totalPsm: psmColumns.reduce((sum, column) =>
+          sum + targetDataFiltered.reduce((acc, item) => acc + parseInt(item[column] || 0), 0), 0)
+      };
+
+      // Render Summary Card
+      // Render Summary Card dengan Target Metrics
+container.innerHTML += `
+  <div class="col-md-6 col-xl-3 d-flex mb-4">
+    <div class="card w-100">
+      <div class="card-header">
+        <span><i class="fas fa-calendar-alt card-icon"></i> Target</span>
+      </div>
+      <div class="card-body">
         <div class="metric-item">
-          <span class="metric-label">Total PSM</span>
-          <span class="metric-value">${formatNumber(totalPsm)}</span>
+          <span class="metric-label">Sales</span>
+          <span class="metric-value">${formatCurrency(targetMetrics.totalSales)}</span>
         </div>
-        <h6 class="mt-3">Peringkat Penjualan PSM</h6>
-        <div>
-          ${topRankHtml || '<div class="text-muted">Tidak ada data PSM.</div>'}
+        <div class="metric-item">
+          <span class="metric-label">STD</span>
+          <span class="metric-value">${formatNumber(targetMetrics.totalStd)}</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">Pulsa</span>
+          <span class="metric-value">${formatCurrency(targetMetrics.totalPulsa)}</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">PWP</span>
+          <span class="metric-value">${formatCurrency(targetMetrics.totalPwp)}</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">Sertis</span>
+          <span class="metric-value">${formatCurrency(targetMetrics.totalSertis)}</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">PSM</span>
+          <span class="metric-value">${formatNumber(targetMetrics.totalPsm)}</span>
         </div>
       </div>
     </div>
   </div>
 `;
-}
-  
-// Fungsi untuk mengubah string tanggal menjadi objek Date
-function parseDate(dateString) {
-  if (!dateString) return null;
 
-  // Jika format ISO (dari JSON: 2025-04-28T17:00:00.000Z)
-  if (dateString.includes('T')) {
-    const isoDate = new Date(dateString);
-    if (!isNaN(isoDate.getTime())) {
-      return isoDate;
+      // Render Target vs Actual Card
+      const salesAchievement = calculateAchievement(metrics.totalSales, targetMetrics.totalSales);
+      container.innerHTML += `
+        <div class="col-md-6 col-xl-3 d-flex mb-4">
+          <div class="card w-100">
+            <div class="card-header">
+              <span><i class="fas fa-bullseye card-icon"></i> Target vs Actual</span>
+            </div>
+            <div class="card-body">
+              <div class="metric-item">
+                <span class="metric-label">Sales</span>
+                <span class="metric-value">
+                  ${formatCurrency(metrics.totalSales)}
+                  <span class="badge-achievement badge-${salesAchievement.class}">
+                    ${salesAchievement.percentage}%
+                  </span>
+                </span>
+              </div>
+              <div class="progress progress-thin">
+                <div class="progress-bar bg-${salesAchievement.class}" 
+                     style="width: ${Math.min(salesAchievement.percentage, 100)}%"></div>
+              </div>
+              
+              <div class="metric-item mt-3">
+                <span class="metric-label">STD</span>
+                <span class="metric-value">
+                  ${formatNumber(metrics.totalStd)}
+                  ${calculateAchievementHTML(metrics.totalStd, targetMetrics.totalStd)}
+                </span>
+              </div>
+              
+              <div class="metric-item">
+                <span class="metric-label">Pulsa</span>
+                <span class="metric-value">
+                  ${formatCurrency(metrics.totalPulsa)}
+                  ${calculateAchievementHTML(metrics.totalPulsa, targetMetrics.totalPulsa)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Render Focus Products Card
+      container.innerHTML += `
+        <div class="col-md-6 col-xl-3 d-flex mb-4">
+          <div class="card w-100">
+            <div class="card-header">
+              <span><i class="fas fa-star card-icon"></i> Fokus Produk</span>
+            </div>
+            <div class="card-body">
+              <div class="metric-item">
+                <span class="metric-label">PWP</span>
+                <span class="metric-value">
+                  ${formatNumber(metrics.totalPwp)}
+                  ${calculateAchievementHTML(metrics.totalPwp, targetMetrics.totalPwp)}
+                </span>
+              </div>
+              
+              <div class="metric-item">
+                <span class="metric-label">Sertis</span>
+                <span class="metric-value">
+                  ${formatNumber(metrics.totalSertis)}
+                  ${calculateAchievementHTML(metrics.totalSertis, targetMetrics.totalSertis)}
+                </span>
+              </div>
+              
+              ${psmColumns.length > 0 ? `
+                <div class="metric-item">
+                  <span class="metric-label">PSM</span>
+                  <span class="metric-value">
+                    ${formatNumber(metrics.totalPsm)}
+                    ${calculateAchievementHTML(metrics.totalPsm, targetMetrics.totalPsm)}
+                  </span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Render PSM Ranking Card
+      const rankedPsm = calculatePsmByNama(data, psmColumns);
+      const topRankHtml = rankedPsm.map((item, index) => {
+        const isTop = index < 3;
+        const isBottom = index >= rankedPsm.length - 3;
+        const rankClass = isTop ? 'rank-top' : (isBottom ? 'rank-bottom' : 'rank-middle');
+        const rankIcon = isTop ? 'fa-trophy' : (isBottom ? 'fa-exclamation-circle' : 'fa-chart-line');
+        
+        return `
+          <div class="rank-item ${rankClass}">
+            <span class="rank-name">${index + 1}. ${item.nama}</span>
+            <span class="rank-value">
+              ${formatNumber(item.total)}
+              <i class="fas ${rankIcon} rank-icon"></i>
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML += `
+        <div class="col-md-6 col-xl-3 d-flex mb-4">
+          <div class="card w-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="fas fa-ranking-star card-icon"></i> Peringkat PSM</span>
+              <a href="detail_psm.html" class="btn-detail">
+                <i class="fas fa-arrow-right me-1"></i> Detail
+              </a>
+            </div>
+            <div class="card-body">
+              <div class="metric-item">
+                <span class="metric-label">Total PSM</span>
+                <span class="metric-value">${formatNumber(metrics.totalPsm)}</span>
+              </div>
+              
+              <h6 class="mt-3 mb-2 text-muted">Top Performers</h6>
+              <div class="ranking-container">
+                ${topRankHtml || '<div class="text-muted small">Tidak ada data PSM.</div>'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Render Gap Analysis Card
+      const salesGap = calculateGap(metrics.totalSales, targetMetrics.totalSales);
+      const stdGap = calculateGap(metrics.totalStd, targetMetrics.totalStd);
+      const pulsaGap = calculateGap(metrics.totalPulsa, targetMetrics.totalPulsa);
+      const pwpGap = calculateGap(metrics.totalPwp, targetMetrics.totalPwp);
+      const sertisGap = calculateGap(metrics.totalSertis, targetMetrics.totalSertis);
+      const psmGap = calculateGap(metrics.totalPsm, targetMetrics.totalPsm);
+
+      container.innerHTML += `
+        <div class="col-12 d-flex mb-4">
+          <div class="card w-100">
+            <div class="card-header">
+              <span><i class="fas fa-chart-bar card-icon"></i> Gap Analysis (Actual vs Target)</span>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="metric-item">
+                    <span class="metric-label">Sales</span>
+                    <span class="metric-value text-${salesGap.class}">
+                      ${salesGap.formatted}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="metric-item">
+                    <span class="metric-label">STD</span>
+                    <span class="metric-value text-${stdGap.class}">
+                      ${stdGap.formatted}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="metric-item">
+                    <span class="metric-label">Pulsa</span>
+                    <span class="metric-value text-${pulsaGap.class}">
+                      ${pulsaGap.formatted}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="metric-item">
+                    <span class="metric-label">PWP</span>
+                    <span class="metric-value text-${pwpGap.class}">
+                      ${pwpGap.formatted}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="metric-item">
+                    <span class="metric-label">Sertis</span>
+                    <span class="metric-value text-${sertisGap.class}">
+                      ${sertisGap.formatted}
+                    </span>
+                  </div>
+                </div>
+                ${psmColumns.length > 0 ? `
+                <div class="col-md-4">
+                  <div class="metric-item">
+                    <span class="metric-label">PSM</span>
+                    <span class="metric-value text-${psmGap.class}">
+                      ${psmGap.formatted}
+                    </span>
+                  </div>
+                </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
-  }
 
-  // Jika format dari date picker HTML (YYYY-MM-DD)
-  if (dateString.includes('-') && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    return new Date(dateString);
-  }
-
-  // Jika format dengan slash (DD/MM/YYYY)
-  if (dateString.includes('/')) {
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-      // Perhatikan urutan: bulan di index 1 (0-based)
-      return new Date(parts[2], parts[1] - 1, parts[0]);
+    // Helper function untuk membuat HTML achievement
+    function calculateAchievementHTML(actual, target) {
+      const achievement = calculateAchievement(actual, target);
+      return `<span class="badge-achievement badge-${achievement.class}">${achievement.percentage}%</span>`;
     }
-  }
 
-  // Coba parse langsung sebagai Date
-  const parsedDate = new Date(dateString);
-  if (!isNaN(parsedDate.getTime())) {
-    return parsedDate;
-  }
-
-  console.warn('Format tanggal tidak dikenali:', dateString);
-  return null;
-}
-
-// Fungsi untuk membandingkan tanggal tanpa memperdulikan waktu
-function isSameDate(date1, date2) {
-  return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
-  );
-}
-
-// Fungsi applyFilter yang sudah diperbaiki
-function applyFilter() {
-  const spinner = document.getElementById('loading-spinner');
-  spinner.style.display = 'block';
-  setTimeout(() => {
-    try {
-      // Ambil nilai dari filter
-      const startDateInput = document.getElementById('start-date').value;
-      const endDateInput = document.getElementById('end-date').value;
-      const namaFilter = document.getElementById('nama-filter').value.trim();
-
-      // Parse tanggal filter
-      const startDate = startDateInput ? new Date(startDateInput) : null;
-      const endDate = endDateInput ? new Date(endDateInput) : null;
-
-      // Filter sales data
-      let filteredSalesData = salesData;
-
-      // Filter berdasarkan nama
-      if (namaFilter) {
-        filteredSalesData = filteredSalesData.filter(item => 
-          item['Nama Lengkap'] && item['Nama Lengkap'].trim() === namaFilter
-        );
+    // Fungsi untuk mengubah string tanggal menjadi objek Date
+    function parseDate(dateString) {
+      if (!dateString) return null;
+      
+      // Coba berbagai format tanggal
+      if (dateString.includes('T')) {
+        return new Date(dateString);
       }
+      
+      if (dateString.includes('-')) {
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+          return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+      }
+      
+      if (dateString.includes('/')) {
+        const parts = dateString.split('/');
+        if (parts.length === 3) {
+          return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+      }
+      
+      const parsedDate = new Date(dateString);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+      
+      console.warn('Format tanggal tidak dikenali:', dateString);
+      return null;
+    }
 
-      // Filter berdasarkan tanggal
-      if (startDate && endDate) {
-        filteredSalesData = filteredSalesData.filter(item => {
-          const itemDate = parseDate(item.Tanggal);
-          if (!itemDate) return false;
+    // Fungsi applyFilter
+    function applyFilter() {
+      const spinner = document.getElementById('loading-spinner');
+      spinner.style.display = 'flex';
+      
+      setTimeout(() => {
+        try {
+          // Ambil nilai dari filter
+          const startDateInput = document.getElementById('start-date').value;
+          const endDateInput = document.getElementById('end-date').value;
+          const namaFilter = document.getElementById('nama-filter').value.trim();
 
-          // Normalisasi waktu ke 00:00:00 untuk perbandingan
-          const itemDateOnly = new Date(itemDate);
-          itemDateOnly.setHours(0, 0, 0, 0);
-          const startDateOnly = new Date(startDate);
-          startDateOnly.setHours(0, 0, 0, 0);
-          const endDateOnly = new Date(endDate);
-          endDateOnly.setHours(23, 59, 59, 999); // Sampai akhir hari
+          // Parse tanggal filter
+          const startDate = startDateInput ? new Date(startDateInput) : null;
+          const endDate = endDateInput ? new Date(endDateInput) : null;
 
-          return itemDateOnly >= startDateOnly && itemDateOnly <= endDateOnly;
+          // Filter sales data
+          let filteredSalesData = salesData;
+
+          // Filter berdasarkan nama
+          if (namaFilter) {
+            filteredSalesData = filteredSalesData.filter(item => 
+              item['Nama Lengkap'] && item['Nama Lengkap'].trim() === namaFilter
+            );
+          }
+
+          // Filter berdasarkan tanggal
+          if (startDate && endDate) {
+            filteredSalesData = filteredSalesData.filter(item => {
+              const itemDate = parseDate(item.Tanggal);
+              if (!itemDate) return false;
+
+              const itemDateOnly = new Date(itemDate);
+              itemDateOnly.setHours(0, 0, 0, 0);
+              const startDateOnly = new Date(startDate);
+              startDateOnly.setHours(0, 0, 0, 0);
+              const endDateOnly = new Date(endDate);
+              endDateOnly.setHours(23, 59, 59, 999);
+
+              return itemDateOnly >= startDateOnly && itemDateOnly <= endDateOnly;
+            });
+          }
+
+          // Filter target data
+          let filteredTargetData = targetData;
+
+          if (startDate && endDate) {
+            filteredTargetData = filteredTargetData.filter(item => {
+              const itemDate = parseDate(item.Tanggal);
+              if (!itemDate) return false;
+
+              const itemDateOnly = new Date(itemDate);
+              itemDateOnly.setHours(0, 0, 0, 0);
+              const startDateOnly = new Date(startDate);
+              startDateOnly.setHours(0, 0, 0, 0);
+              const endDateOnly = new Date(endDate);
+              endDateOnly.setHours(23, 59, 59, 999);
+
+              return itemDateOnly >= startDateOnly && itemDateOnly <= endDateOnly;
+            });
+          }
+
+          // Render dashboard
+          renderDashboard(filteredSalesData, filteredTargetData);
+        } catch (error) {
+          console.error('Error in applyFilter:', error);
+          showAlert('Terjadi kesalahan saat memfilter data.', 'danger');
+        } finally {
+          spinner.style.display = 'none';
+        }
+      }, 300);
+    }
+
+    // Menghitung total PSM per nama
+    function calculatePsmByNama(filteredData, psmColumns) {
+      const psmByNama = {};
+
+      filteredData.forEach(item => {
+        const nama = item['Nama Lengkap']?.trim();
+        if (!nama) return;
+
+        if (!psmByNama[nama]) {
+          psmByNama[nama] = 0;
+        }
+
+        psmColumns.forEach(column => {
+          psmByNama[nama] += (Number(item[column]) || 0);
         });
-      }
+      });
 
-      // Filter target data
-      let filteredTargetData = targetData;
+      // Ubah menjadi array untuk diurutkan
+      const rankedPsm = Object.entries(psmByNama).map(([nama, total]) => ({
+        nama,
+        total
+      }));
 
-      if (startDate && endDate) {
-        filteredTargetData = filteredTargetData.filter(item => {
-          const itemDate = parseDate(item.Tanggal);
-          if (!itemDate) return false;
+      // Urutkan berdasarkan total PSM (descending)
+      rankedPsm.sort((a, b) => b.total - a.total);
 
-          const itemDateOnly = new Date(itemDate);
-          itemDateOnly.setHours(0, 0, 0, 0);
-          const startDateOnly = new Date(startDate);
-          startDateOnly.setHours(0, 0, 0, 0);
-          const endDateOnly = new Date(endDate);
-          endDateOnly.setHours(23, 59, 59, 999);
-
-          return itemDateOnly >= startDateOnly && itemDateOnly <= endDateOnly;
-        });
-      }
-
-      // Render dashboard
-      renderDashboard(filteredSalesData, filteredTargetData);
-    } catch (error) {
-      console.error('Error in applyFilter:', error);
-      alert('Terjadi kesalahan saat memfilter data.');
-    } finally {
-      spinner.style.display = 'none';
-    }
-  }, 300);
-}
-
-// Menghitung total PSM per nama
-function calculatePsmByNama(filteredData, psmColumns) {
-  const psmByNama = {};
-
-  filteredData.forEach(item => {
-    const nama = item['Nama Lengkap']?.trim();
-    if (!nama) return;
-
-    if (!psmByNama[nama]) {
-      psmByNama[nama] = 0;
+      return rankedPsm;
     }
 
-    // Hitung total PSM untuk nama tersebut
-    psmByNama[nama] += psmColumns.reduce((sum, column) => 
-      sum + (Number(item[column]) || 0), 0);
-  });
-
-  // Ubah menjadi array untuk diurutkan
-  const rankedPsm = Object.entries(psmByNama).map(([nama, total]) => ({
-    nama,
-    total
-  }));
-
-  // Urutkan berdasarkan total PSM (descending)
-  rankedPsm.sort((a, b) => b.total - a.total);
-
-  return rankedPsm;
-}
-
-
-
-
-// Jalankan saat halaman selesai dimuat
-document.addEventListener('DOMContentLoaded', () => {
-  fetchData(); // Ambil data dari Google Apps Script
-  document.getElementById('filter-button').addEventListener('click', applyFilter);
-});
+    // Jalankan saat halaman selesai dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set current date as default for end date filter
+      const today = new Date();
+      document.getElementById('end-date').valueAsDate = today;
+      
+      // Set start date as 7 days before today
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(today.getDate() - 7);
+      document.getElementById('start-date').valueAsDate = sevenDaysAgo;
+      
+      // Update current date/time and setup auto-update
+      updateCurrentDateTime();
+      setInterval(updateCurrentDateTime, 60000); // Update every minute
+      
+      // Fetch data and setup event listeners
+      fetchData();
+      document.getElementById('filter-button').addEventListener('click', applyFilter);
+    });
   </script>
 </body>
 </html>
-
-
-
-
