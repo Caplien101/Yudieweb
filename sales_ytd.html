@@ -3,587 +3,576 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Monthly Sales Report</title>
-    <!-- Bootstrap CSS -->
+    <title>Dynamic Sales Dashboard 2025</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
-    <!-- Google Fonts - Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <!-- AOS Animation -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
     <style>
       :root {
-        --primary-blue: #3a7bd5;
-        --primary-gradient: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
-        --success-light: rgba(46, 204, 113, 0.15);
-        --success-dark: #27ae60;
-        --success-gradient: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-        --danger-light: rgba(231, 76, 60, 0.15);
-        --danger-dark: #c0392b;
-        --danger-gradient: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
-        --warning-light: rgba(241, 196, 15, 0.15);
-        --warning-dark: #f39c12;
-        --text-dark: #2c3e50;
-        --text-muted: #7f8c8d;
-        --bg-light: #f8f9fa;
+        --primary-gradient: linear-gradient(135deg, #42a5f5, #ab47bc);
+        --card-gradient: linear-gradient(135deg, rgba(66, 165, 245, 0.1), rgba(171, 71, 188, 0.1));
+        --success-gradient: linear-gradient(135deg, #66bb6a, #81c784);
+        --danger-gradient: linear-gradient(135deg, #ef5350, #e57373);
+        --warning-gradient: linear-gradient(135deg, #ffca28, #ffd54f);
+        --text-light: #ffffff;
+        --text-dark: #212121;
+        --bg-dark: #1a1a2e;
+        --card-bg: #16213e;
         --border-radius: 12px;
-        --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        --shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       }
 
       body {
+        background: var(--bg-dark);
+        font-family: "Roboto", sans-serif;
+        color: var(--text-light);
         padding: 20px;
-        font-family: "Poppins", sans-serif;
-        color: var(--text-dark);
-        background-color: #f5f7fa;
+        overflow-x: hidden;
       }
 
-      /* Header Styles */
-      .report-header {
+      .dashboard-header {
         text-align: center;
-        margin: 30px 0 40px;
-      }
-      .report-title {
-        font-weight: 700;
-        color: var(--text-dark);
-        font-size: 2rem;
-        position: relative;
-        display: inline-block;
-        padding-bottom: 15px;
-      }
-      .report-title:after {
-        content: '';
-        position: absolute;
-        width: 60%;
-        height: 4px;
-        background: var(--primary-gradient);
-        bottom: 0;
-        left: 20%;
-        border-radius: 2px;
-      }
-      .report-subtitle {
-        color: var(--text-muted);
-        font-size: 1rem;
-        margin-top: 10px;
-      }
-
-      /* Card Container */
-      .card-container {
-        background: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        padding: 0;
-        margin-bottom: 30px;
-        overflow: hidden;
-        border: none;
-      }
-
-      /* Summary Cards */
-      .summary-card {
-        border-radius: var(--border-radius);
+        margin-bottom: 40px;
         padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        animation: fadeIn 0.8s ease-in-out;
+      }
+      .dashboard-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+      }
+      .dashboard-subtitle {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .filter-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        gap: 15px;
+      }
+      .filter-section select {
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
         border: none;
+        background: var(--card-bg);
+        color: var(--text-light);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .filter-section select:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
+      }
+      .filter-section select:focus {
+        outline: none;
+        box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
+      }
+      .filter-section .btn {
+        padding: 10px 25px;
+        border-radius: var(--border-radius);
+        background: var(--primary-gradient);
+        color: var(--text-light);
+        border: none;
+        font-weight: 500;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .filter-section .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(66, 165, 245, 0.7);
+      }
+
+      .summary-card {
+        background: var(--card-gradient);
+        padding: 25px;
+        border-radius: var(--border-radius);
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
         height: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+      .summary-card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 6s infinite;
+        z-index: 0;
       }
       .summary-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
       }
-      .summary-card .card-title {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--text-muted);
+      .summary-card .card-label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7);
         margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
       }
       .summary-card .card-value {
-        font-size: 1.8rem;
+        font-size: 2rem;
         font-weight: 700;
-        margin-bottom: 5px;
+        color: var(--text-light);
+        position: relative;
+        z-index: 1;
       }
-      .summary-card .card-percentage {
+      .summary-card .card-subtext {
         font-size: 0.9rem;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.6);
+        position: relative;
+        z-index: 1;
+      }
+      .summary-card.target { border-left: 4px solid #42a5f5; }
+      .summary-card.actual { border-left: 4px solid #66bb6a; }
+      .summary-card.gap { border-left: 4px solid #ef5350; }
+      .summary-card.std { border-left: 4px solid #ffca28; }
+
+      .chart-container {
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+      }
+      .chart-container::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+        animation: pulse 8s infinite;
+        z-index: 0;
+      }
+      .chart-container h5 {
+        font-size: 1.2rem;
         font-weight: 600;
-        display: flex;
-        align-items: center;
+        margin-bottom: 15px;
+        color: rgba(255, 255, 255, 0.9);
+        position: relative;
+        z-index: 1;
       }
-      .summary-card .card-percentage i {
-        margin-right: 5px;
-        font-size: 1rem;
-      }
-      .summary-card.target {
-        background: rgba(58, 123, 213, 0.1);
-        border-left: 4px solid var(--primary-blue);
-      }
-      .summary-card.actual {
-        background: rgba(46, 204, 113, 0.1);
-        border-left: 4px solid var(--success-dark);
-      }
-      .summary-card.gap {
-        background: rgba(231, 76, 60, 0.1);
-        border-left: 4px solid var(--danger-dark);
-      }
-      .summary-card.std {
-        background: rgba(241, 196, 15, 0.1);
-        border-left: 4px solid var(--warning-dark);
+      #chart-canvas {
+        height: 350px;
+        position: relative;
+        z-index: 1;
       }
 
-      /* Table Container */
       .table-container {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        border-radius: var(--border-radius);
-        margin: 20px 0;
       }
-
-      /* Table Styles */
       table {
-        min-width: 100%;
-        margin-bottom: 0;
+        width: 100%;
+        min-width: 900px; /* Lebar minimum hanya untuk desktop */
         border-collapse: separate;
         border-spacing: 0;
+        color: var(--text-light);
       }
-      table td,
-      table th {
-        font-size: 14px;
+      table th,
+      table td {
         padding: 16px 20px;
+        font-size: 0.95rem;
         vertical-align: middle;
-        border-top: 1px solid #e9ecef;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
-      thead th {
+      table th {
+        background: var(--primary-gradient);
         font-weight: 600;
-        background-color: var(--primary-blue);
-        color: white;
-        border: none;
         position: sticky;
         top: 0;
+        z-index: 1;
       }
-      thead th:first-child {
+      table th:first-child {
         border-top-left-radius: var(--border-radius);
       }
-      thead th:last-child {
+      table th:last-child {
         border-top-right-radius: var(--border-radius);
       }
-      tfoot th,
-      tfoot td {
-        font-weight: bold;
-        background-color: var(--bg-light);
+      table tbody tr {
+        transition: background 0.3s ease;
       }
-      tfoot tr:last-child td:first-child {
+      table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+      table tfoot th,
+      table tfoot td {
+        background: rgba(255, 255, 255, 0.03);
+        font-weight: 600;
+      }
+      table tfoot tr:last-child td:first-child {
         border-bottom-left-radius: var(--border-radius);
       }
-      tfoot tr:last-child td:last-child {
+      table tfoot tr:last-child td:last-child {
         border-bottom-right-radius: var(--border-radius);
       }
-
-      /* Alignment */
       table td:not(:first-child),
-      table th:not(:first-child),
-      table tfoot th:not(:first-child),
-      table tfoot td:not(:first-child) {
+      table th:not(:first-child) {
         text-align: right;
       }
 
-      /* Badge styles */
       .badge-container {
         display: flex;
         flex-direction: column;
-        gap: 4px;
-        margin-top: 4px;
+        gap: 8px;
+        margin-top: 8px;
         align-items: flex-end;
       }
       .badge {
-        font-size: 0.65rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        min-width: 60px;
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        line-height: 1.2;
+        transition: transform 0.3s ease;
+      }
+      .badge:hover {
+        transform: scale(1.1);
       }
       .badge.bg-success {
-        background-color: var(--success-light) !important;
-        color: var(--success-dark) !important;
-        border: 1px solid rgba(46, 204, 113, 0.3);
+        background: var(--success-gradient);
+        color: var(--text-light);
+        border: none;
       }
       .badge.bg-danger {
-        background-color: var(--danger-light) !important;
-        color: var(--danger-dark) !important;
-        border: 1px solid rgba(231, 76, 60, 0.25);
-      }
-
-      /* Button Styles */
-      .action-button {
-        font-family: "Poppins", sans-serif;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        border-radius: 30px;
-        padding: 12px 24px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        position: relative;
-        overflow: hidden;
-        z-index: 1;
+        background: var(--danger-gradient);
+        color: var(--text-light);
         border: none;
       }
-      .action-button:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: all 0.6s;
-        z-index: -1;
-      }
-      .action-button:hover:before {
-        left: 100%;
-      }
-      .action-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-      }
-      .btn-primary {
-        background: var(--primary-gradient);
-        border: none;
-      }
-      .btn-primary:hover {
-        background: linear-gradient(135deg, #2c65b4 0%, #00c6fb 100%);
-      }
 
-      /* Table Hover Effect */
-      tbody tr {
-        transition: all 0.3s ease;
-      }
-      tbody tr:hover {
-        background-color: rgba(58, 123, 213, 0.05);
-      }
-
-      /* Loading State */
       #loading {
         display: none;
         text-align: center;
         padding: 60px 0;
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
       }
       .spinner-border {
         width: 3rem;
         height: 3rem;
-        border-width: 0.2em;
+        border-width: 0.25em;
+        color: #42a5f5;
       }
 
-      /* Empty State */
       #empty-state {
         display: none;
         text-align: center;
         padding: 60px 0;
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
       }
       #empty-state i {
         font-size: 4rem;
-        color: #bdc3c7;
+        color: rgba(255, 255, 255, 0.3);
         margin-bottom: 20px;
       }
       #empty-state h5 {
         font-weight: 600;
-        color: var(--text-dark);
+        color: rgba(255, 255, 255, 0.9);
       }
       #empty-state p {
-        color: var(--text-muted);
+        color: rgba(255, 255, 255, 0.6);
       }
 
-      /* Chart Container */
-      #chart-container {
-        height: 300px;
-        margin: 30px 0;
-      }
-
-      /* Progress Bar */
-      .progress-container {
-        margin: 30px 0;
-      }
-      .progress {
-        height: 10px;
-        border-radius: 5px;
-        background-color: #e9ecef;
-      }
-      .progress-bar {
-        background: var(--primary-gradient);
-        border-radius: 5px;
-      }
-      .progress-labels {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 5px;
-        font-size: 0.8rem;
-        color: var(--text-muted);
-      }
-
-      /* Mobile Responsiveness */
-      @media (max-width: 768px) {
-        body {
-          padding: 10px;
-        }
-        .report-title {
-          font-size: 1.6rem;
-        }
-        table td, table th {
-          padding: 12px 15px;
-          font-size: 13px;
-        }
-        .action-button {
-          padding: 10px 20px;
-          font-size: 0.9rem;
-        }
-        .badge {
-          font-size: 0.6rem;
-          min-width: 50px;
-        }
-        .summary-card .card-value {
-          font-size: 1.5rem;
-        }
-      }
-
-      /* Animation */
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      .animate-fade-in {
-        animation: fadeIn 0.6s ease-out forwards;
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+
+      /* Mobile Responsiveness */
+      @media (max-width: 768px) {
+        body { padding: 10px; }
+        .dashboard-title { font-size: 1.8rem; }
+        .dashboard-subtitle { font-size: 1rem; }
+        .filter-section { flex-direction: column; gap: 10px; }
+        .filter-section select,
+        .filter-section .btn { width: 100%; font-size: 0.9rem; padding: 8px 16px; }
+        .summary-card .card-value { font-size: 1.5rem; }
+        .chart-container { padding: 15px; }
+        #chart-canvas { height: 250px; }
+
+        /* Penyesuaian tabel untuk mobile */
+        .table-container {
+          overflow-x: hidden; /* Menghilangkan scroll horizontal */
+        }
+        table {
+          min-width: 100%; /* Lebar tabel sesuai layar */
+          width: 100%; /* Pastikan tabel mengikuti lebar container */
+        }
+        .table-responsive-stack tr {
+          display: block;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          margin-bottom: 15px;
+          border-radius: var(--border-radius);
+          background: rgba(255, 255, 255, 0.03);
+          width: 100%; /* Pastikan baris mengikuti lebar container */
+          box-sizing: border-box; /* Pastikan padding tidak melebihi lebar */
+        }
+        .table-responsive-stack td {
+          display: block;
+          text-align: right !important;
+          padding: 8px 10px; /* Kurangi padding untuk efisiensi ruang */
+          border: none;
+          width: 100%; /* Pastikan sel mengikuti lebar baris */
+          box-sizing: border-box;
+          font-size: 0.8rem; /* Kurangi ukuran font untuk muat lebih baik */
+          overflow-wrap: break-word; /* Pastikan teks panjang membungkus */
+        }
+        .table-responsive-stack td:before {
+          content: attr(data-label);
+          float: left;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.7);
+          width: 40%;
+          text-align: left;
+          font-size: 0.8rem;
+        }
+        .table-responsive-stack td[data-label]:after {
+          content: "";
+          display: block;
+          clear: both;
+        }
+        .table-responsive-stack thead { display: none; }
+        .table-responsive-stack tfoot {
+          display: block;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          margin-bottom: 15px;
+          border-radius: var(--border-radius);
+          background: rgba(255, 255, 255, 0.03);
+          width: 100%; /* Pastikan footer mengikuti lebar container */
+        }
+        .table-responsive-stack tfoot td {
+          display: block;
+          text-align: right !important;
+          padding: 8px 10px;
+          border: none;
+          width: 100%;
+          box-sizing: border-box;
+          font-size: 0.8rem;
+          overflow-wrap: break-word;
+        }
+        .table-responsive-stack tfoot td:before {
+          content: attr(data-label);
+          float: left;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.7);
+          width: 40%;
+          text-align: left;
+          font-size: 0.8rem;
+        }
+        .badge {
+          font-size: 0.7rem; /* Kurangi ukuran badge */
+          padding: 4px 8px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- Loading State -->
       <div id="loading">
-        <div class="spinner-border text-primary" role="status">
+        <div class="spinner-border" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mt-3">Memuat data...</p>
+        <p class="mt-3">Fetching data...</p>
       </div>
 
-      <!-- Empty State -->
-      <div id="empty-state" class="text-center py-5">
-        <i class="bi bi-exclamation-circle"></i>
-        <h5 class="mt-3">Data tidak tersedia</h5>
-        <p class="text-muted">Tidak ada data yang dapat ditampilkan</p>
-        <button class="btn btn-primary mt-3 action-button" onclick="fetchData()">
-          <i class="bi bi-arrow-repeat me-2"></i>Coba Lagi
+      <div id="empty-state">
+        <i class="bi bi-exclamation-triangle"></i>
+        <h5 class="mt-3">No Data Available</h5>
+        <p>Please try again later.</p>
+        <button class="btn mt-3" onclick="fetchData()">
+          <i class="bi bi-arrow-clockwise me-2"></i>Retry
         </button>
       </div>
 
-      <!-- Main Content -->
       <div id="main-content">
-        <div class="report-header" data-aos="fade-down">
-          <h1 class="report-title">Sales Year To Date 2025</h1>
-          <p class="report-subtitle">Performance Report -  C940</p>
+        <div class="dashboard-header" data-aos="fade-down">
+          <h1 class="dashboard-title">Sales Dashboard 2025</h1>
+          <p class="dashboard-subtitle">Performance Insights - C940</p>
         </div>
-        
-        <!-- Summary Cards -->
-        <div class="row" id="summary-cards" data-aos="fade-up">
-          <div class="col-md-3 mb-3">
+
+        <div class="filter-section" data-aos="fade-up">
+          <select id="month-filter" onchange="filterDataByMonth()">
+            <option value="">All Months</option>
+          </select>
+          <a href="sales.html" class="btn">
+            <i class="bi bi-bar-chart-fill me-2"></i>Detailed View
+          </a>
+        </div>
+
+        <div class="row" data-aos="fade-up" data-aos-delay="100">
+          <div class="col-md-3 col-sm-6 mb-3">
             <div class="summary-card target">
-              <div class="card-title">Total Target</div>
+              <div class="card-label">Total Target</div>
               <div class="card-value" id="summary-target">-</div>
-              <div class="card-percentage">
-                <i class="bi bi-bullseye"></i>
-                <span>Yearly Target</span>
-              </div>
+              <div class="card-subtext">Yearly Goal</div>
             </div>
           </div>
-          <div class="col-md-3 mb-3">
+          <div class="col-md-3 col-sm-6 mb-3">
             <div class="summary-card actual">
-              <div class="card-title">Total Actual</div>
+              <div class="card-label">Total Actual</div>
               <div class="card-value" id="summary-actual">-</div>
-              <div class="card-percentage">
-                <i class="bi bi-graph-up-arrow text-success"></i>
-                <span id="summary-actual-percent">-</span>
-              </div>
+              <div class="card-subtext" id="summary-actual-percent">-</div>
             </div>
           </div>
-          <div class="col-md-3 mb-3">
+          <div class="col-md-3 col-sm-6 mb-3">
             <div class="summary-card gap">
-              <div class="card-title">Total Gap</div>
+              <div class="card-label">Total Gap</div>
               <div class="card-value" id="summary-gap">-</div>
-              <div class="card-percentage">
-                <i class="bi bi-arrow-left-right"></i>
-                <span>Vs Target</span>
-              </div>
+              <div class="card-subtext">Vs Target</div>
             </div>
           </div>
-          <div class="col-md-3 mb-3">
+          <div class="col-md-3 col-sm-6 mb-3">
             <div class="summary-card std">
-              <div class="card-title">Total STD</div>
+              <div class="card-label">Total STD</div>
               <div class="card-value" id="summary-std">-</div>
-              <div class="card-percentage">
-                <i class="bi bi-speedometer2"></i>
-                <span>Performance</span>
-              </div>
+              <div class="card-subtext">Performance</div>
             </div>
           </div>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="progress-container" data-aos="fade-up" data-aos-delay="100">
-          <div class="d-flex justify-content-between mb-2">
-            <span>Yearly Progress</span>
-            <span id="yearly-progress-percent">0%</span>
-          </div>
-          <div class="progress">
-            <div class="progress-bar" id="yearly-progress-bar" role="progressbar" style="width: 0%"></div>
-          </div>
-          <div class="progress-labels">
-            <span>Jan</span>
-            <span>Dec</span>
+        <div class="chart-container" data-aos="fade-up" data-aos-delay="150">
+          <h5>Performance Trend</h5>
+          <div id="chart-canvas">
+            <canvas id="performance-chart"></canvas>
           </div>
         </div>
 
-        <!-- Chart Container -->
-        <div class="card-container" data-aos="fade-up" data-aos-delay="150">
-          <div class="card-body">
-            <h5 class="card-title mt-4 ms-3">Monthly Performance Trend</h5>
-            <div id="chart-container">
-              <canvas id="performance-chart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabel Data -->
-        <div class="card-container" data-aos="fade-up" data-aos-delay="200">
-          <div class="table-container">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Periode bulan laporan">BULAN</th>
-                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Target penjualan bulanan">TARGET</th>
-                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Realisasi penjualan aktual">ACTUAL</th>
-                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Persentase pencapaian">ACHIEVEMENT</th>
-                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Selisih antara actual dan target">GAP</th>
-                  <th data-bs-toggle="tooltip" data-bs-placement="top" title="Standar deviasi penjualan">STD</th>
-                </tr>
-              </thead>
-              <tbody id="monthly-data-table-body">
-                <!-- Data akan dimuat di sini -->
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Total</th>
-                  <th id="total-target"></th>
-                  <th id="total-actual"></th>
-                  <th id="total-percentage"></th>
-                  <th id="total-gap"></th>
-                  <th id="total-std"></th>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <!-- Button Section -->
-        <div class="d-flex justify-content-center mt-4 mb-5" data-aos="fade-up" data-aos-delay="250">
-          <div class="d-grid d-md-block">
-            <a href="sales.html" class="btn btn-primary action-button me-3">
-              <i class="bi bi-arrow-right-circle-fill"></i>Lihat Detail Per Bulan
-            </a>
-            
-          </div>
+        <div class="table-container table-responsive-stack" data-aos="fade-up" data-aos-delay="200">
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Target</th>
+                <th>Actual</th>
+                <th>Achievement</th>
+                <th>Gap</th>
+                <th>STD</th>
+              </tr>
+            </thead>
+            <tbody id="monthly-data-table-body"></tbody>
+            <tfoot>
+              <tr>
+                <th data-label="Total">Total</th>
+                <td data-label="Target" id="total-target"></td>
+                <td data-label="Actual" id="total-actual"></td>
+                <td data-label="Achievement" id="total-percentage"></td>
+                <td data-label="Gap" id="total-gap"></td>
+                <td data-label="STD" id="total-std"></td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- AOS Animation -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-      // Initialize AOS animation
-      AOS.init({
-        duration: 800,
-        once: true
-      });
+      AOS.init({ duration: 800, once: true });
 
-      // URL Web App Google Apps Script
       const googleSheetUrl = "https://script.google.com/macros/s/AKfycbwW3U_8jWbubdENCQ-NbrKZv1wVvZ76n4tO_rV7TYxVbJSfEwS1x-PqL13SPpxtG0Ib/exec";
-
-      // Variabel global untuk menyimpan data JSON
       let allData = [];
       let groupedData = {};
       let performanceChart = null;
+      let currentMonthFilter = null;
 
-      // Fungsi untuk memuat data dari Google Sheets
       async function fetchData() {
         try {
-          // Tampilkan loading state
           document.getElementById('loading').style.display = 'block';
           document.getElementById('main-content').style.display = 'none';
           document.getElementById('empty-state').style.display = 'none';
 
           const response = await fetch(googleSheetUrl);
-          if (!response.ok) {
-            throw new Error("Failed to fetch data");
-          }
+          if (!response.ok) throw new Error("Failed to fetch data");
           allData = await response.json();
-          
-          // Kelompokkan data berdasarkan bulan
+
           groupedData = groupDataByMonth(allData);
-          
-          // Tampilkan data summary
+          populateMonthFilter();
           updateSummaryCards();
-          
-          // Tampilkan data bulanan
           displayMonthlyData();
-          
-          // Update progress bar
-          updateProgressBar();
-          
-          // Buat chart
           createPerformanceChart();
-          
-          // Sembunyikan loading state
+
           document.getElementById('loading').style.display = 'none';
           document.getElementById('main-content').style.display = 'block';
-          
         } catch (error) {
           console.error("Error fetching data:", error);
-          
-          // Tampilkan empty state jika error
           document.getElementById('loading').style.display = 'none';
           document.getElementById('main-content').style.display = 'none';
           document.getElementById('empty-state').style.display = 'block';
         }
       }
 
-      // Fungsi untuk mengelompokkan data berdasarkan bulan
       function groupDataByMonth(data) {
         const grouped = {};
         data.forEach((row) => {
           const dateParts = row.TANGGAL.split("-");
           const year = dateParts[0];
           const month = dateParts[1];
-          const monthKey = `${year}-${month}`; // Format YYYY-MM
-          if (!grouped[monthKey]) {
-            grouped[monthKey] = [];
-          }
+          const monthKey = `${year}-${month}`;
+          if (!grouped[monthKey]) grouped[monthKey] = [];
           grouped[monthKey].push(row);
         });
         return grouped;
       }
 
-      // Update summary cards
-      function updateSummaryCards() {
-        let totalTarget = 0;
-        let totalActual = 0;
-        let totalStd = 0;
-        let totalGap = 0;
+      function populateMonthFilter() {
+        const monthFilter = document.getElementById("month-filter");
+        const months = Object.keys(groupedData).sort();
+        monthFilter.innerHTML = '<option value="">All Months</option>';
+        months.forEach(monthKey => {
+          const option = document.createElement("option");
+          option.value = monthKey;
+          option.textContent = formatMonth(monthKey);
+          monthFilter.appendChild(option);
+        });
+      }
 
-        Object.keys(groupedData).forEach((monthKey) => {
+      function filterDataByMonth() {
+        currentMonthFilter = document.getElementById("month-filter").value;
+        updateSummaryCards();
+        displayMonthlyData();
+        createPerformanceChart();
+      }
+
+      function updateSummaryCards() {
+        let totalTarget = 0, totalActual = 0, totalStd = 0, totalGap = 0;
+        const months = currentMonthFilter ? [currentMonthFilter] : Object.keys(groupedData);
+
+        months.forEach((monthKey) => {
           const rows = groupedData[monthKey];
           const filteredRows = rows.filter((row) => row.ACTUAL && row.STD);
 
@@ -599,45 +588,23 @@
         document.getElementById("summary-actual").textContent = formatNumber(totalActual);
         document.getElementById("summary-gap").textContent = formatNumber(totalGap);
         document.getElementById("summary-std").textContent = formatNumber(totalStd);
-        
-        const percentageElement = document.getElementById("summary-actual-percent");
-        percentageElement.textContent = `${percentage}% of Target`;
-        if (percentage >= 100) {
-          percentageElement.classList.add("text-success");
-          percentageElement.classList.remove("text-danger");
-        } else {
-          percentageElement.classList.add("text-danger");
-          percentageElement.classList.remove("text-success");
-        }
+        document.getElementById("summary-actual-percent").textContent = `${percentage}%`;
+        document.getElementById("summary-actual-percent").style.color = percentage >= 100 ? "#66bb6a" : "#ef5350";
       }
 
-      // Update progress bar
-      function updateProgressBar() {
-        const months = Object.keys(groupedData);
-        const currentMonth = new Date().getMonth() + 1; // 1-12
-        const progressPercent = (currentMonth / 12) * 100;
-        
-        document.getElementById("yearly-progress-percent").textContent = `${Math.round(progressPercent)}%`;
-        document.getElementById("yearly-progress-bar").style.width = `${progressPercent}%`;
-      }
-
-      // Create performance chart
       function createPerformanceChart() {
         const ctx = document.getElementById('performance-chart').getContext('2d');
-        const months = Object.keys(groupedData).sort();
+        const months = currentMonthFilter ? [currentMonthFilter] : Object.keys(groupedData).sort();
         const monthNames = months.map(monthKey => formatMonth(monthKey));
-        
+
         const targetData = months.map(monthKey => 
           groupedData[monthKey].reduce((sum, row) => sum + (row["SPD TARGET"] || 0), 0)
         );
-        
         const actualData = months.map(monthKey => 
           groupedData[monthKey].filter(row => row.ACTUAL).reduce((sum, row) => sum + (row.ACTUAL || 0), 0)
         );
 
-        if (performanceChart) {
-          performanceChart.destroy();
-        }
+        if (performanceChart) performanceChart.destroy();
 
         performanceChart = new Chart(ctx, {
           type: 'line',
@@ -647,20 +614,24 @@
               {
                 label: 'Target',
                 data: targetData,
-                borderColor: '#3a7bd5',
-                backgroundColor: 'rgba(58, 123, 213, 0.1)',
+                borderColor: '#42a5f5',
+                backgroundColor: 'rgba(66, 165, 245, 0.2)',
                 borderWidth: 2,
-                tension: 0.3,
-                fill: true
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#42a5f5'
               },
               {
                 label: 'Actual',
                 data: actualData,
-                borderColor: '#27ae60',
-                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                borderColor: '#66bb6a',
+                backgroundColor: 'rgba(102, 187, 106, 0.2)',
                 borderWidth: 2,
-                tension: 0.3,
-                fill: false
+                tension: 0.4,
+                fill: false,
+                pointRadius: 5,
+                pointBackgroundColor: '#66bb6a'
               }
             ]
           },
@@ -668,26 +639,12 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: {
-                position: 'top',
-              },
-              tooltip: {
-                mode: 'index',
-                intersect: false,
-              }
+              legend: { position: 'top', labels: { color: 'rgba(255, 255, 255, 0.9)' } },
+              tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(0, 0, 0, 0.8)', titleColor: '#fff', bodyColor: '#fff' }
             },
             scales: {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: 'rgba(0, 0, 0, 0.05)'
-                }
-              },
-              x: {
-                grid: {
-                  display: false
-                }
-              }
+              y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } },
+              x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } }
             }
           }
         });
@@ -697,20 +654,11 @@
         const tableBody = document.getElementById("monthly-data-table-body");
         tableBody.innerHTML = "";
 
-        let totalTarget = 0;
-        let totalActual = 0;
-        let totalStd = 0;
-        let totalGap = 0;
+        let totalTarget = 0, totalActual = 0, totalStd = 0, totalGap = 0;
+        let previousMonthActual = null, previousMonthStd = null;
+        const months = currentMonthFilter ? [currentMonthFilter] : Object.keys(groupedData).sort();
 
-        let previousMonthActual = null;
-        let previousMonthStd = null;
-
-        // Sort months chronologically
-        const sortedMonths = Object.keys(groupedData).sort((a, b) => {
-          return new Date(a) - new Date(b);
-        });
-
-        sortedMonths.forEach((monthKey, index) => {
+        months.forEach((monthKey, index) => {
           const rows = groupedData[monthKey];
           const filteredRows = rows.filter((row) => row.ACTUAL && row.STD);
 
@@ -727,21 +675,19 @@
           const percentage = monthlyTarget > 0 ? ((monthlyActual / monthlyTarget) * 100).toFixed(2) : "-";
 
           const tr = document.createElement("tr");
-          tr.className = "animate-fade-in";
-          tr.style.animationDelay = `${index * 0.05}s`;
 
-          // BULAN
           const monthCell = document.createElement("td");
+          monthCell.setAttribute("data-label", "Month");
           monthCell.textContent = formatMonth(monthKey);
           tr.appendChild(monthCell);
 
-          // SPD TARGET
           const targetCell = document.createElement("td");
+          targetCell.setAttribute("data-label", "Target");
           targetCell.textContent = formatNumber(monthlyTarget);
           tr.appendChild(targetCell);
 
-          // ACTUAL
           const actualCell = document.createElement("td");
+          actualCell.setAttribute("data-label", "Actual");
           const actualMainDiv = document.createElement("div");
           actualMainDiv.textContent = formatNumber(monthlyActual);
 
@@ -768,28 +714,24 @@
           actualCell.appendChild(actualBadgeContainer);
           tr.appendChild(actualCell);
 
-          // %
           const percentageCell = document.createElement("td");
+          percentageCell.setAttribute("data-label", "Achievement");
           percentageCell.textContent = percentage !== "-" ? `${percentage}%` : "-";
           if (percentage !== "-") {
-            percentageCell.style.color = parseFloat(percentage) >= 100 ? "var(--success-dark)" : "var(--danger-dark)";
+            percentageCell.style.color = parseFloat(percentage) >= 100 ? "#66bb6a" : "#ef5350";
             percentageCell.style.fontWeight = "600";
           }
           tr.appendChild(percentageCell);
 
-          // GAP
           const gapCell = document.createElement("td");
+          gapCell.setAttribute("data-label", "Gap");
           gapCell.textContent = formatNumber(monthlyGap);
-          if (monthlyGap > 0) {
-            gapCell.style.color = "var(--success-dark)";
-          } else if (monthlyGap < 0) {
-            gapCell.style.color = "var(--danger-dark)";
-          }
+          gapCell.style.color = monthlyGap > 0 ? "#66bb6a" : monthlyGap < 0 ? "#ef5350" : "var(--text-light)";
           gapCell.style.fontWeight = "600";
           tr.appendChild(gapCell);
 
-          // STD
           const stdCell = document.createElement("td");
+          stdCell.setAttribute("data-label", "STD");
           const stdMainDiv = document.createElement("div");
           stdMainDiv.textContent = formatNumber(monthlyStd);
 
@@ -822,63 +764,38 @@
           previousMonthStd = monthlyStd;
         });
 
-        // Update footer dengan total keseluruhan
         document.getElementById("total-target").textContent = formatNumber(totalTarget);
         document.getElementById("total-actual").textContent = formatNumber(totalActual);
         const totalPercentage = totalTarget > 0 ? ((totalActual / totalTarget) * 100).toFixed(2) : "-";
         const totalPercentageCell = document.getElementById("total-percentage");
         totalPercentageCell.textContent = totalPercentage !== "-" ? `${totalPercentage}%` : "-";
         if (totalPercentage !== "-") {
-          totalPercentageCell.style.color = parseFloat(totalPercentage) >= 100 ? "var(--success-dark)" : "var(--danger-dark)";
+          totalPercentageCell.style.color = parseFloat(totalPercentage) >= 100 ? "#66bb6a" : "#ef5350";
           totalPercentageCell.style.fontWeight = "600";
         }
         document.getElementById("total-gap").textContent = formatNumber(totalGap);
         document.getElementById("total-std").textContent = formatNumber(totalStd);
-
-        // Aktifkan tooltip
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
       }
 
-      // Format number with thousand separators
       function formatNumber(num) {
         if (num === "-" || isNaN(num)) return "-";
         return parseInt(num).toLocaleString("id-ID");
       }
 
-      // Fungsi format khusus untuk badges
       function formatBadgeNumber(num) {
         if (num === "-") return "-";
         num = parseInt(num);
-        if (Math.abs(num) >= 1000000) {
-          return (num / 1000000).toFixed(1) + "Jt";
-        }
-        if (Math.abs(num) >= 1000) {
-          return (num / 1000).toFixed(1) + "K";
-        }
+        if (Math.abs(num) >= 1000000) return (num / 1000000).toFixed(1) + "M";
+        if (Math.abs(num) >= 1000) return (num / 1000).toFixed(1) + "K";
         return num.toString();
       }
 
-      // Fungsi untuk memformat nama bulan dari YYYY-MM
       function formatMonth(monthKey) {
         const [year, month] = monthKey.split("-");
-        const monthNames = [
-          "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-          "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
-        ];
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         return `${monthNames[parseInt(month) - 1]} ${year}`;
       }
 
-      // Export to PDF function
-      function exportToPDF() {
-        // In a real implementation, you would use a library like jsPDF or html2pdf
-        alert("Fitur export PDF akan membuka preview dokumen untuk diunduh");
-        // This is just a placeholder for the actual PDF export functionality
-      }
-
-      // Panggil fungsi fetchData saat halaman dimuat
       document.addEventListener("DOMContentLoaded", fetchData);
     </script>
   </body>
