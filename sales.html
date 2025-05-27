@@ -505,72 +505,64 @@ function drawCharts() {
     const currentDay = currentDate.getDate();
 
     // Process actual sales data
-    const actualData = months.map(month => {
-      try {
-        const items = groupedData[month];
-        if (!Array.isArray(items)) return 0;
+const actualData = months.map(month => {
+  try {
+    const items = groupedData[month];
+    if (!Array.isArray(items)) return 0;
 
-        const validItems = items.filter(item => {
-          return item &&
-            item.ACTUAL !== null &&
-            item.ACTUAL !== undefined &&
-            item.TANGGAL &&
-            isValidDate(item.TANGGAL);
-        });
-
-        const totalActual = validItems.reduce((sum, item) => {
-          const value = Number(item.ACTUAL);
-          return sum + (isNaN(value) ? 0 : value);
-        }, 0);
-
-        if (month === currentYearMonth) {
-          const daysWithData = validItems.length;
-          const daysPassed = Math.min(currentDay, daysWithData);
-          return daysPassed > 0 ? totalActual / daysPassed : 0;
-        } else {
-          const [year, monthNum] = month.split('-');
-          const daysInMonth = getDaysInMonth(parseInt(year), parseInt(monthNum));
-          return daysInMonth > 0 ? totalActual / daysInMonth : 0;
-        }
-      } catch (error) {
-        console.error(`Error processing month ${month}:`, error);
-        return 0;
-      }
+    const validItems = items.filter(item => {
+      return item &&
+        item.ACTUAL !== null &&
+        item.ACTUAL !== undefined &&
+        item.ACTUAL !== 0 &&
+        item.TANGGAL &&
+        isValidDate(item.TANGGAL);
     });
+
+    const totalActual = validItems.reduce((sum, item) => {
+      const value = Number(item.ACTUAL);
+      return sum + (isNaN(value) ? 0 : value);
+    }, 0);
+
+    const validDays = validItems.length;
+    const avg = validDays > 0 ? totalActual / validDays : 0;
+    console.log(`Month: ${month}, Total Actual: ${totalActual}, Valid Days: ${validDays}, Average: ${avg}`);
+    return avg;
+  } catch (error) {
+    console.error(`Error processing month ${month}:`, error);
+    return 0;
+  }
+});
 
     // Process STD data with same logic
-    const stdData = months.map(month => {
-      try {
-        const items = groupedData[month];
-        if (!Array.isArray(items)) return 0;
+const stdData = months.map(month => {
+  try {
+    const items = groupedData[month];
+    if (!Array.isArray(items)) return 0;
 
-        const validItems = items.filter(item => {
-          return item &&
-            item.STD !== null &&
-            item.STD !== undefined &&
-            item.TANGGAL &&
-            isValidDate(item.TANGGAL);
-        });
-
-        const totalStd = validItems.reduce((sum, item) => {
-          const value = Number(item.STD);
-          return sum + (isNaN(value) ? 0 : value);
-        }, 0);
-
-        if (month === currentYearMonth) {
-          const daysWithData = validItems.length;
-          const daysPassed = Math.min(currentDay, daysWithData);
-          return daysPassed > 0 ? totalStd / daysPassed : 0;
-        } else {
-          const [year, monthNum] = month.split('-');
-          const daysInMonth = getDaysInMonth(parseInt(year), parseInt(monthNum));
-          return daysInMonth > 0 ? totalStd / daysInMonth : 0;
-        }
-      } catch (error) {
-        console.error(`Error processing month ${month}:`, error);
-        return 0;
-      }
+    const validItems = items.filter(item => {
+      return item &&
+        item.STD !== null &&
+        item.STD !== undefined &&
+        item.STD !== 0 && // Tambahkan filter untuk mengabaikan STD = 0
+        item.TANGGAL &&
+        isValidDate(item.TANGGAL);
     });
+
+    const totalStd = validItems.reduce((sum, item) => {
+      const value = Number(item.STD);
+      return sum + (isNaN(value) ? 0 : value);
+    }, 0);
+
+    const validDays = validItems.length;
+    const avg = validDays > 0 ? totalStd / validDays : 0;
+    console.log(`Month: ${month}, Total STD: ${totalStd}, Valid STD Days: ${validDays}, Average STD: ${avg}`);
+    return avg;
+  } catch (error) {
+    console.error(`Error processing month ${month}:`, error);
+    return 0;
+  }
+});
 
     // Format month labels for display
     const monthLabels = months.map(month => {
@@ -796,4 +788,4 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 </body>
-</html>y
+</html>
