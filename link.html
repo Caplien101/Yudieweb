@@ -2,174 +2,282 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Link Saya</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Link Yudie</title>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a67d8;
+      --danger: #e53e3e;
+      --success: #48bb78;
+      --gray-light: #f8f9fa;
+      --gray: #e2e8f0;
+      --text: #2d3748;
+      --text-light: #718096;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
       color: #333;
       min-height: 100vh;
-      padding: 20px;
+      padding: 16px;
+      line-height: 1.6;
     }
+
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       background: white;
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       overflow: hidden;
     }
+
     header {
       background: #4a5568;
       color: white;
-      padding: 20px;
+      padding: 24px 20px;
       text-align: center;
     }
+
     header h1 {
       font-weight: 600;
-      font-size: 28px;
+      font-size: clamp(1.5rem, 4vw, 2rem); /* Responsif: 24px → 32px */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
+
     .content {
       padding: 20px;
     }
+
     .password-section {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
+
     .password-section input {
-      padding: 12px;
-      width: 250px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
+      padding: 14px;
+      width: 100%;
+      max-width: 300px;
+      border: 2px solid var(--gray);
+      border-radius: 12px;
       font-size: 16px;
       outline: none;
+      transition: border-color 0.3s;
     }
+
     .password-section input:focus {
-      border-color: #667eea;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
+
     .password-section button {
-      margin-left: 10px;
-      padding: 12px 20px;
-      background: #667eea;
+      margin-top: 12px;
+      padding: 14px 24px;
+      background: var(--primary);
       color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+
+    .password-section button:hover {
+      background: var(--primary-dark);
+    }
+
+    .form-add {
+      display: none;
+      background: var(--gray-light);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      border: 1px solid var(--gray);
+    }
+
+    .form-add h3 {
+      margin-bottom: 16px;
+      color: var(--text);
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-add input {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .form-add button {
+      background: var(--success);
+      color: white;
+      padding: 12px 24px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
+      font-weight: 500;
     }
-    .password-section button:hover {
-      background: #5a67d8;
+
+    .form-add button:hover {
+      opacity: 0.9;
     }
-    .form-add {
-      display: none;
-      background: #f7fafc;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      border: 1px solid #e2e8f0;
-    }
-    .form-add h3 {
-      margin-bottom: 15px;
-      color: #2d3748;
-    }
-    .form-add input {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #cbd5e0;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-    .form-add button {
-      background: #48bb78;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+
     .links-container {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
+
     .link-item {
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      align-items: center;
       padding: 16px;
-      background: #f8f9fa;
-      border-left: 4px solid #667eea;
+      background: var(--gray-light);
+      border-left: 4px solid var(--primary);
       border-radius: 8px;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
+
+    @media (min-width: 600px) {
+      .link-item {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+
     .link-item:hover {
-      transform: translateX(5px);
-      background: #f1f5f9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
+
     .link-item a {
-      font-size: 17px;
+      font-size: 1rem;
       font-weight: 500;
       color: #2b6cb0;
       text-decoration: none;
       display: flex;
       align-items: center;
+      gap: 8px;
+      word-break: break-all;
     }
+
     .link-item a i {
-      margin-right: 8px;
-      color: #667eea;
+      color: var(--primary);
     }
+
     .edit-controls {
       display: none;
+      margin-top: 10px;
     }
+
     .edit-mode .edit-controls {
       display: flex;
-      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 10px;
     }
+
+    @media (min-width: 600px) {
+      .edit-controls {
+        margin-top: 0;
+      }
+    }
+
     .btn-delete {
-      background: #e53e3e;
+      background: var(--danger);
       color: white;
       border: none;
       padding: 8px 12px;
       border-radius: 6px;
       cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
+
     .loader {
       text-align: center;
-      color: #718096;
-      padding: 20px;
+      color: var(--text-light);
+      padding: 24px;
+      font-size: 1rem;
     }
+
     .footer {
       text-align: center;
-      padding: 15px;
-      color: #a0aec0;
-      font-size: 14px;
-      background: #f7fafc;
-      border-top: 1px solid #e2e8f0;
+      padding: 16px;
+      color: var(--text-light);
+      font-size: 0.875rem;
+      background: var(--gray-light);
+      border-top: 1px solid var(--gray);
+    }
+
+    /* Prevent zoom on mobile input focus */
+    input {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+      }
+      .container {
+        border-radius: 12px;
+      }
+      header h1 {
+        font-size: 1.4rem;
+      }
+      .password-section input,
+      .password-section button {
+        font-size: 16px;
+        padding: 12px;
+      }
+      .form-add input {
+        font-size: 15px;
+      }
+      .link-item {
+        padding: 14px;
+      }
+      .link-item a {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1><i class="fas fa-link"></i> Link Saya</h1>
+      <h1><i class="fas fa-link"></i>Kumpulan Link Laporan</h1>
+      <h7>klik untuk menuju link laporan</h7>
     </header>
 
     <div class="content">
       <!-- Password Input -->
       <div class="password-section">
-        <input type="password" id="password" placeholder="Masukkan password" />
-        <button id="btn-toggle-edit"><i class="fas fa-sign-in-alt"></i></button>
+        <input type="password" id="password" placeholder="Login untuk menambahkan link" />
+        <button id="btn-toggle-edit"><i class="fas fa-sign-in-alt"></i> Masuk</button>
       </div>
 
       <!-- Form Tambah Link -->
@@ -187,7 +295,7 @@
     </div>
 
     <div class="footer">
-      Dibuat dengan ❤ oleh Kamu
+      Dibuat dengan ❤ untuk kamu
     </div>
   </div>
 
@@ -196,7 +304,7 @@
     const PASSWORD = "rahasia123"; // Ganti sesuai keinginan
 
     // 🌐 Ganti dengan URL Web App dari Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbyTanogmnJmqsoDVq_IYh2BtnIAGa11-VXRpFFWP_6g_0lK_FsZgxje83GGKUIsM-3eOQ/exec"; // GANTI INI!
+    const API_URL = "https://script.google.com/macros/s/AKfycbyTanogmnJmqsoDVq_IYh2BtnIAGa11-VXRpFFWP_6g_0lK_FsZgxje83GGKUIsM-3eOQ/exec";
 
     // DOM Elements
     const passwordInput = document.getElementById("password");
@@ -214,7 +322,7 @@
         const data = await res.json();
         renderLinks(data.links);
       } catch (err) {
-        linksContainer.innerHTML = `<div class="loader">Gagal memuat data.</div>`;
+        linksContainer.innerHTML = `<div class="loader">Gagal memuat data. Coba lagi nanti.</div>`;
         console.error(err);
       }
     }
@@ -239,8 +347,8 @@
         const controls = document.createElement("div");
         controls.className = "edit-controls";
         controls.innerHTML = `
-          <button class="btn-delete" data-index="${index}" data-url="${link.url}">
-            <i class="fas fa-trash"></i>
+          <button class="btn-delete" data-index="${index}">
+            <i class="fas fa-trash"></i> Hapus
           </button>
         `;
 
@@ -291,18 +399,22 @@
         return alert("Gunakan http:// atau https://");
       }
 
-      await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "add",
-          name,
-          url
-        })
-      });
-
-      linkName.value = "";
-      linkUrl.value = "";
-      loadLinks(); // refresh daftar
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "add",
+            name,
+            url
+          })
+        });
+        linkName.value = "";
+        linkUrl.value = "";
+        loadLinks(); // refresh daftar
+      } catch (err) {
+        alert("Gagal menambahkan link. Cek koneksi atau coba lagi.");
+        console.error(err);
+      }
     });
 
     // Load saat pertama kali
