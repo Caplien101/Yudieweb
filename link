@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Link Saya</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    header {
+      background: #4a5568;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 {
+      font-weight: 600;
+      font-size: 28px;
+    }
+    .content {
+      padding: 20px;
+    }
+    .password-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .password-section input {
+      padding: 12px;
+      width: 250px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+    }
+    .password-section input:focus {
+      border-color: #667eea;
+    }
+    .password-section button {
+      margin-left: 10px;
+      padding: 12px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .password-section button:hover {
+      background: #5a67d8;
+    }
+    .form-add {
+      display: none;
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    .form-add h3 {
+      margin-bottom: 15px;
+      color: #2d3748;
+    }
+    .form-add input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .form-add button {
+      background: #48bb78;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .links-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+    .link-item:hover {
+      transform: translateX(5px);
+      background: #f1f5f9;
+    }
+    .link-item a {
+      font-size: 17px;
+      font-weight: 500;
+      color: #2b6cb0;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    .link-item a i {
+      margin-right: 8px;
+      color: #667eea;
+    }
+    .edit-controls {
+      display: none;
+    }
+    .edit-mode .edit-controls {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-delete {
+      background: #e53e3e;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .loader {
+      text-align: center;
+      color: #718096;
+      padding: 20px;
+    }
+    .footer {
+      text-align: center;
+      padding: 15px;
+      color: #a0aec0;
+      font-size: 14px;
+      background: #f7fafc;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-link"></i> Link Saya</h1>
+    </header>
+
+    <div class="content">
+      <!-- Password Input -->
+      <div class="password-section">
+        <input type="password" id="password" placeholder="Masukkan password" />
+        <button id="btn-toggle-edit"><i class="fas fa-sign-in-alt"></i></button>
+      </div>
+
+      <!-- Form Tambah Link -->
+      <div class="form-add" id="form-add">
+        <h3><i class="fas fa-plus-circle"></i> Tambah Link Baru</h3>
+        <input type="text" id="link-name" placeholder="Nama link, contoh: Google" />
+        <input type="url" id="link-url" placeholder="https://example.com" />
+        <button id="btn-add-link">Tambahkan</button>
+      </div>
+
+      <!-- Daftar Link -->
+      <div id="links-container">
+        <div class="loader">Memuat link...</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Dibuat dengan ❤ oleh Kamu
+    </div>
+  </div>
+
+  <script>
+    // 🔐 Password kamu
+    const PASSWORD = "rahasia123"; // Ganti sesuai keinginan
+
+    // 🌐 Ganti dengan URL Web App dari Google Apps Script
+    const API_URL = "https://script.google.com/macros/s/AKfycbyTanogmnJmqsoDVq_IYh2BtnIAGa11-VXRpFFWP_6g_0lK_FsZgxje83GGKUIsM-3eOQ/exec"; // GANTI INI!
+
+    // DOM Elements
+    const passwordInput = document.getElementById("password");
+    const btnToggleEdit = document.getElementById("btn-toggle-edit");
+    const formAdd = document.getElementById("form-add");
+    const linkName = document.getElementById("link-name");
+    const linkUrl = document.getElementById("link-url");
+    const btnAddLink = document.getElementById("btn-add-link");
+    const linksContainer = document.getElementById("links-container");
+
+    // Ambil data dari Google Sheets
+    async function loadLinks() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        renderLinks(data.links);
+      } catch (err) {
+        linksContainer.innerHTML = `<div class="loader">Gagal memuat data.</div>`;
+        console.error(err);
+      }
+    }
+
+    // Render links
+    function renderLinks(links) {
+      if (links.length === 0) {
+        linksContainer.innerHTML = "<div class='loader'>Belum ada link.</div>";
+        return;
+      }
+
+      linksContainer.innerHTML = "";
+      links.forEach((link, index) => {
+        const div = document.createElement("div");
+        div.className = "link-item";
+
+        const a = document.createElement("a");
+        a.href = link.url;
+        a.target = "_blank";
+        a.innerHTML = `<i class="fas fa-external-link-alt"></i> ${link.name}`;
+
+        const controls = document.createElement("div");
+        controls.className = "edit-controls";
+        controls.innerHTML = `
+          <button class="btn-delete" data-index="${index}" data-url="${link.url}">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+
+        div.appendChild(a);
+        div.appendChild(controls);
+        linksContainer.appendChild(div);
+      });
+
+      // Event delete
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.addEventListener("click", async function () {
+          const index = this.dataset.index;
+          if (confirm("Hapus link ini?")) {
+            await fetch(API_URL, {
+              method: "POST",
+              body: JSON.stringify({
+                action: "delete",
+                index: parseInt(index)
+              })
+            });
+            loadLinks(); // refresh
+          }
+        });
+      });
+    }
+
+    // Toggle edit mode
+    btnToggleEdit.addEventListener("click", () => {
+      if (passwordInput.value === PASSWORD) {
+        formAdd.style.display = "block";
+        document.body.classList.add("edit-mode");
+        passwordInput.disabled = true;
+        passwordInput.value = "";
+        passwordInput.placeholder = "Mode edit aktif";
+        btnToggleEdit.style.display = "none";
+      } else {
+        alert("Password salah!");
+      }
+    });
+
+    // Tambah link
+    btnAddLink.addEventListener("click", async () => {
+      const name = linkName.value.trim();
+      const url = linkUrl.value.trim();
+
+      if (!name || !url) return alert("Isi semua field!");
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        return alert("Gunakan http:// atau https://");
+      }
+
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "add",
+          name,
+          url
+        })
+      });
+
+      linkName.value = "";
+      linkUrl.value = "";
+      loadLinks(); // refresh daftar
+    });
+
+    // Load saat pertama kali
+    loadLinks();
+  </script>
+</body>
+</html>
