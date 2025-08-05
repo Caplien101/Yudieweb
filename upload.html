@@ -48,100 +48,114 @@
     </div>
   </div>
 
-  <script>
-    // ✅ Fix: Hapus spasi di akhir URL
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxzAU4NjOskT1nCjfrfi64sjzkW1HGnbhG1PpH3f4wTtvDC-V-2EpeVMaRa89FdSFvJ/exec';
+ <script>
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyI-1CXhZULKitbn1I7OfS4NkHNGeXGJJhXgtpOZCcuCMQQnx9sx0xFom5tV_WZ3Uht/exec';
 
-    async function loadImages() {
-      try {
-        const res = await fetch('data.json?t=' + Date.now());
-        const images = await res.json();
-        renderImageList(images);
-      } catch (err) {
-        console.error('Gagal muat data.json:', err);
-        document.getElementById('uploadStatus').innerHTML =
-          '<div class="alert alert-warning">Tidak bisa muat data.json. Pastikan file ada dan server jalan.</div>';
+  document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];
+    const category = document.getElementById('category').value;
+    const status = document.getElementById('uploadStatus');
+
+    if (!file) {
+      status.innerHTML = '<div class="alert alert-danger">Pilih file dulu!</div>';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', category);
+
+    const xhr = new XMLHttpRequest();
+
+    // Tampilkan status upload
+    xhr.upload.onprogress = function(e) {
+      if (e.lengthComputable) {
+        const percent = (e.loaded / e.total) * 100;
+        status.innerHTML = `<div class="alert alert-info">Mengunggah: ${Math.round(percent)}%</div>`;
       }
-    }
+    };
 
-    function renderImageList(images) {
-      const list = document.getElementById('imageList');
-      list.innerHTML = '';
-      images.forEach(img => {
-        const li = document.createElement('li');
-        li.className = 'img-item';
-        li.innerHTML = `
-          <div class="d-flex align-items-center">
-            <img src="${img.url}" class="thumb me-3">
-            <div>
-              <div><strong>${img.category}</strong></div>
-              <button class="btn btn-sm btn-danger" onclick="deleteImage('${img.id}')">Hapus</button>
-            </div>
-          </div>`;
-        list.appendChild(li);
-      });
-    }
-
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fileInput = document.getElementById('file');
-      const file = fileInput.files[0];
-      const category = document.getElementById('category').value;
-      const status = document.getElementById('uploadStatus');
-
-      if (!file) return alert('Pilih file dulu!');
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('category', category);
-
-      status.innerHTML = '<div class="alert alert-info">Mengunggah...</div>';
-
-      try {
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: formData
-        });
-
-        const text = await response.text();
-        console.log('Raw response dari GAS:', text); // Cek di console
-
-        let data;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
         try {
-          data = JSON.parse(text);
+          // Coba parse JSON
+          const data = JSON.parse(xhr.responseText);
+          console.log('Respon dari GAS:', data);
+
+          if (data.success) {
+            status.innerHTML = '<div class="alert alert-success">✅ Upload berhasil!</div>';
+            loadImages(); // Refresh daftar gambar
+            fileInput.value = ''; // Reset form
+            document.getElementById('category').value = 'lainnya';
+          } else {
+            status.innerHTML = `<div class="alert alert-danger">❌ Gagal: ${data.error}</div>`;
+          }
         } catch (err) {
-          throw new Error('Invalid JSON: ' + text);
-        }
-
-        if (data.success) {
-          status.innerHTML = '<div class="alert alert-success">✅ Upload berhasil!</div>';
+          // Jika JSON rusak, tapi HTTP 200 → kemungkinan berhasil
+          status.innerHTML = '<div class="alert alert-warning">✅ Upload mungkin berhasil! Cek folder Google Drive.</div>';
           loadImages();
-          fileInput.value = ''; // Reset input file
-          document.getElementById('category').value = 'lainnya';
-        } else {
-          status.innerHTML = `<div class="alert alert-danger">❌ Gagal: ${data.error}</div>`;
         }
-      } catch (err) {
-        console.error('Fetch error:', err);
-        status.innerHTML = `<div class="alert alert-danger">🌐 Error: ${err.message}</div>`;
+      } else {
+        status.innerHTML = `<div class="alert alert-danger">❌ Gagal: HTTP ${xhr.status}</div>`;
       }
-    });
+    };
 
-    async function deleteImage(id) {
-      if (!confirm('Hapus dari daftar? File di Google Drive harus dihapus manual.')) return;
-      try {
-        const res = await fetch('data.json');
-        let images = await res.json();
-        images = images.filter(img => img.id !== id);
-        // Untuk demo: kita tidak bisa simpan otomatis tanpa backend
-        alert('Gambar dihapus dari daftar. Simpan data.json secara manual jika perlu.');
-        loadImages();
-      } catch (err) {
-        alert('Gagal memuat data.json');
-      }
+    xhr.onerror = function() {
+      status.innerHTML = '<div class="alert alert-danger">🌐 Network error. Cek URL atau koneksi.</div>';
+    };
+
+    xhr.open('POST', WEB_APP_URL);
+    xhr.send(formData); // Kirim tanpa mode: no-cors
+  });
+
+  // Fungsi loadImages tetap sama
+  async function loadImages() {
+    try {
+      const res = await fetch('data.json?t=' + Date.now());
+      const images = await res.json();
+      renderImageList(images);
+    } catch (err) {
+      console.error('Gagal muat data.json:', err);
+      document.getElementById('uploadStatus').insertAdjacentHTML('beforeend',
+        '<div class="alert alert-warning">Tidak bisa muat data.json. Pastikan file ada.</div>'
+      );
     }
+  }
 
-    document.addEventListener('DOMContentLoaded', loadImages);
-  </script>
+  function renderImageList(images) {
+    const list = document.getElementById('imageList');
+    list.innerHTML = '';
+    images.forEach(img => {
+      const li = document.createElement('li');
+      li.className = 'img-item';
+      li.innerHTML = `
+        <div class="d-flex align-items-center">
+          <img src="${img.url}" class="thumb me-3">
+          <div>
+            <div><strong>${img.category}</strong></div>
+            <button class="btn btn-sm btn-danger" onclick="deleteImage('${img.id}')">Hapus</button>
+          </div>
+        </div>`;
+      list.appendChild(li);
+    });
+  }
+
+  async function deleteImage(id) {
+    if (!confirm('Hapus dari daftar? File di Drive harus dihapus manual.')) return;
+    try {
+      const res = await fetch('data.json');
+      let images = await res.json();
+      images = images.filter(i => i.id !== id);
+      alert('Gambar dihapus dari daftar. Simpan data.json secara manual jika perlu.');
+      loadImages();
+    } catch (err) {
+      alert('Gagal memuat data.json');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadImages);
+</script>
 </body>
 </html>
