@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Drive Image Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-4 text-center">Google Drive Image Manager</h1>
+
+    <div id="authSection" class="mb-4">
+      <button id="signInButton" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Sign in with
+        Google</button>
+      <button id="signOutButton" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 hidden">Sign
+        Out</button>
+    </div>
+
+    <div id="uploadSection" class="mb-4 hidden">
+      <input type="file" id="imageInput" accept="image/*" class="mb-2 w-full">
+      <button id="uploadButton" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">Upload
+        Image</button>
+    </div>
+
+    <div id="imageList" class="space-y-2"></div>
+  </div>
+
+  <script>
+    const CLIENT_ID = '341017083606-rgq95gf2k0q15vkc0i540jsuutdma0l4.apps.googleusercontent.com '; // Ganti dengan Client ID dari Google Cloud Console
+    const API_KEY = 'AIzaSyA1cA5Us4ECZ31ULZBMGS4CvzkVKmDWj1o'; // Ganti dengan API Key dari Google Cloud Console
+    const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+    const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+    let tokenClient;
+    let accessToken = null;
+
+    function initGapiClient() {
+      gapi.load('client', () => {
+        gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: DISCOVERY_DOCS,
+        }).then(() => {
+          console.log('GAPI client initialized');
+        }).catch(error => {
+          console.error('Error initializing GAPI client:', error);
+        });
+      });
+    }
+
+    function initGoogleSignIn() {
+      if (typeof google !== 'undefined' && google.accounts) {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: (tokenResponse) => {
+            accessToken = tokenResponse.access_token;
+            document.getElementById('signInButton').classList.add('hidden');
+            document.getElementById('signOutButton').classList.remove('hidden');
+            document.getElementById('uploadSection').classList.remove('hidden');
+            listImages();
+          },
+        });
+      } else {
+        console.error('Google Identity Services not loaded. Retrying...');
+        setTimeout(initGoogleSignIn, 1000);
+      }
+    }
+
+    document.getElementById('signInButton').addEventListener('click', () => {
+      if (tokenClient) {
+        tokenClient.requestAccessToken();
+      } else {
+        console.error('Token client not initialized');
+      }
+    });
+
+    document.getElementById('signOutButton').addEventListener('click', () => {
+      if (accessToken) {
+        google.accounts.oauth2.revoke(accessToken);
+        accessToken = null;
+        document.getElementById('signInButton').classList.remove('hidden');
+        document.getElementById('signOutButton').classList.add('hidden');
+        document.getElementById('uploadSection').classList.add('hidden');
+        document.getElementById('imageList').innerHTML = '';
+      }
+    });
+
+    document.getElementById('uploadButton').addEventListener('click', () => {
+      const fileInput = document.getElementById('imageInput');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select an image');
+        return;
+      }
+
+      const metadata = {
+        name: file.name,
+        mimeType: file.type,
+        parents: ['root']
+      };
+
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+        body: form,
+      }).then(response => response.json()).then(data => {
+        alert('Image uploaded successfully');
+        fileInput.value = '';
+        listImages();
+      }).catch(error => {
+        console.error('Error uploading image:', error);
+        alert('Error uploading image');
+      });
+    });
+
+    function listImages() {
+      gapi.client.drive.files.list({
+        q: "mimeType contains 'image/' and trashed=false",
+        fields: 'files(id, name)',
+      }).then(response => {
+        const files = response.result.files;
+        const imageList = document.getElementById('imageList');
+        imageList.innerHTML = '';
+        files.forEach(file => {
+          const div = document.createElement('div');
+          div.className = 'flex justify-between items-center p-2 bg-gray-100 rounded';
+          div.innerHTML = `
+                        <span>${file.name}</span>
+                        <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 delete-btn" data-id="${file.id}">Delete</button>
+                    `;
+          imageList.appendChild(div);
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const fileId = button.getAttribute('data-id');
+            gapi.client.drive.files.delete({
+              fileId: fileId,
+            }).then(() => {
+              alert('Image deleted successfully');
+              listImages();
+            }).catch(error => {
+              console.error('Error deleting image:', error);
+              alert('Error deleting image');
+            });
+          });
+        });
+      }).catch(error => {
+        console.error('Error listing images:', error);
+      });
+    }
+
+    window.onload = () => {
+      initGapiClient();
+      initGoogleSignIn();
+    };
+  </script>
+</body>
+
+</html>
