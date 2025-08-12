@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Selisih</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .card-view {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .center-text {
+            text-align: center;
+        }
+
+        .form-control-editable {
+            background-color: #eef1f5;
+            border: 1px solid #ced4da;
+        }
+
+        .card-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .card-content .col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .card-content p {
+            margin-bottom: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80px;
+        }
+
+        .card-content input {
+            max-width: 80px;
+            font-size: 12px;
+            text-align: center;
+            padding: 4px;
+        }
+
+        /* Tabel responsif */
+        .table-container {
+            display: none;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .table-responsive {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-responsive th, .table-responsive td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .table-responsive th {
+            background-color: #e9ecef;
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 100px;
+        }
+
+        .table-responsive td {
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .table-responsive .description-column {
+            max-width: 150px; /* Batasi lebar kolom Description */
+        }
+
+        /* Header info di atas tabel */
+        .header-info {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .card-content {
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+                gap: 6px;
+            }
+
+            .card-content .col {
+                min-width: 70px;
+            }
+
+            .card-content p {
+                font-size: 10px;
+            }
+
+            .card-content input {
+                max-width: 70px;
+                font-size: 10px;
+                padding: 3px;
+            }
+
+            .card-view {
+                padding: 10px;
+            }
+
+            .table-responsive th, .table-responsive td {
+                font-size: 10px;
+                padding: 6px;
+            }
+
+            .table-responsive .description-column {
+                max-width: 100px;
+            }
+
+            .header-info {
+                font-size: 12px;
+            }
+        }
+
+        .alert-custom {
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn-animate {
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn-animate:hover {
+            transform: scale(1.05);
+            background-color: #218838;
+        }
+
+        .btn-animate:active::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            animation: ripple 0.4s ease-out;
+        }
+
+        @keyframes ripple {
+            from {
+                transform: scale(0);
+                opacity: 1;
+            }
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center">Cetak Selisih</h1>
+
+        <!-- Tanggal, Shift, Penyerah, Penerima -->
+        <div class="row mb-4 g-2" id="headerFields">
+            <div class="col-md-3 col-sm-6">
+                <label for="tanggal" class="form-label">Tanggal:</label>
+                <input type="text" class="form-control" id="tanggal" readonly>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label for="shift" class="form-label">Shift:</label>
+                <input type="text" class="form-control" id="shift" readonly>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label for="penyerah" class="form-label">Penyerah:</label>
+                <input type="text" class="form-control" id="penyerah" readonly>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label for="penerima" class="form-label">Penerima:</label>
+                <input type="text" class="form-control" id="penerima" readonly>
+            </div>
+        </div>
+
+        <!-- Alert untuk pesan respons -->
+        <div id="responseMessage" class="alert-custom"></div>
+
+        <!-- Kontainer untuk kartu -->
+        <div id="cardContainer" class="row row-cols-1 row-cols-md-2 g-3 mt-3">
+            <!-- Data akan dimuat di sini oleh JavaScript -->
+        </div>
+
+        <!-- Kontainer untuk header info dan tabel -->
+        <div id="tableContainer" class="table-container">
+            <div class="header-info" id="headerInfo"></div>
+            <div class="text-center mb-3">
+                <button class="btn btn-success btn-animate" id="exportPdfButton" onclick="exportToPDF()">
+                    <span>Ekspor ke PDF</span>
+                </button>
+                <button class="btn btn-secondary btn-animate ms-2" onclick="window.location.reload()">
+                    <span>Kembali</span>
+                </button>
+            </div>
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>PLU</th>
+                        <th>Description</th>
+                        <th>Qty OH</th>
+                        <th>Display</th>
+                        <th>Gudang</th>
+                        <th>Selisih</th>
+                        <th>Revisi Display</th>
+                        <th>Revisi Gudang</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                    <!-- Data akan dimuat di sini oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Button Simpan Data -->
+        <div class="text-center mb-4 mt-4" id="submitButtonContainer">
+            <button class="btn btn-primary btn-animate" id="submitButton" onclick="sendToGoogleSheet()">
+                <span id="buttonText">Simpan dan Kirim ke Google Sheet</span>
+                <span id="buttonSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        function loadData() {
+            const cardContainer = document.getElementById('cardContainer');
+            const tanggalField = document.getElementById('tanggal');
+            const shiftField = document.getElementById('shift');
+            const penyerahField = document.getElementById('penyerah');
+            const penerimaField = document.getElementById('penerima');
+            cardContainer.innerHTML = ''; // Clear existing content
+
+            const formData = localStorage.getItem('formData');
+            if (formData) {
+                const data = JSON.parse(formData);
+
+                // Display tanggal, shift, penyerah, and penerima from the first item
+                if (data.length > 0) {
+                    tanggalField.value = data[0].TANGGAL || '';
+                    shiftField.value = data[0].SHIFT || '';
+                    penyerahField.value = data[0].PENYERAH || '';
+                    penerimaField.value = data[0].PENERIMA || '';
+                }
+
+                // Filter data where SELISIH is not equal to 0 for card display
+                const filteredData = data.filter(item => item.SELISIH !== 0);
+
+                if (filteredData.length > 0) {
+                    filteredData.forEach((item, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'col';
+
+                        card.innerHTML = `
+                            <div class="card-view">
+                                <h5 class="center-text">${item.PLU}</h5>
+                                <p class="center-text">${item.DESCRIPTION}</p>
+                                <div class="card-content">
+                                    <div class="col">
+                                        <p class="center-text">Qty OH</p>
+                                        <input type="number" class="form-control" value="${item.QTY_OH || 0}" id="qty-oh-${index}" required readonly>
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Display</p>
+                                        <input type="number" class="form-control" value="${item.DISPLAY || 0}" id="display-${index}" required readonly>
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Gudang</p>
+                                        <input type="number" class="form-control" value="${item.GUDANG || 0}" id="gudang-${index}" required readonly>
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Edit Display</p>
+                                        <input type="number" class="form-control form-control-editable" value="${item.REVISI_DISPLAY || ''}" id="revisi-display-${index}" min="0" placeholder="">
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Edit Gudang</p>
+                                        <input type="number" class="form-control form-control-editable" value="${item.REVISI_GUDANG || ''}" id="revisi-gudang-${index}" min="0" placeholder="">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        cardContainer.appendChild(card);
+
+                        // Update SELISIH when Revisi Display or Revisi Gudang changes
+                        document.getElementById(`revisi-display-${index}`).addEventListener('input', function () {
+                            updateSelisih(index, filteredData);
+                        });
+
+                        document.getElementById(`revisi-gudang-${index}`).addEventListener('input', function () {
+                            updateSelisih(index, filteredData);
+                        });
+                    });
+                } else {
+                    const noDataMessage = document.createElement('div');
+                    noDataMessage.className = 'alert alert-info';
+                    noDataMessage.textContent = 'Tidak ada data dengan selisih tidak sama dengan 0';
+                    cardContainer.appendChild(noDataMessage);
+                }
+            } else {
+                const noDataMessage = document.createElement('div');
+                noDataMessage.className = 'alert alert-info';
+                noDataMessage.textContent = 'Tidak ada data tersedia. Silakan lengkapi data di halaman sebelumnya.';
+                cardContainer.appendChild(noDataMessage);
+            }
+        }
+
+        function isValidNumber(value) {
+            return value !== undefined && value !== null && value !== "" && !isNaN(parseFloat(value));
+        }
+
+        function updateSelisih(index, filteredData) {
+            const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
+            const revisiDisplayValue = parseFloat(document.getElementById(`revisi-display-${index}`).value);
+            const revisiGudangValue = parseFloat(document.getElementById(`revisi-gudang-${index}`).value);
+
+            // Gunakan nilai revisi jika diisi, jika tidak gunakan nilai asli untuk perhitungan SELISIH
+            const displayForCalc = isValidNumber(revisiDisplayValue) ? revisiDisplayValue : (parseFloat(document.getElementById(`display-${index}`).value) || 0);
+            const gudangForCalc = isValidNumber(revisiGudangValue) ? revisiGudangValue : (parseFloat(document.getElementById(`gudang-${index}`).value) || 0);
+
+            // Calculate the Selisih based on the updated values
+            const selisih = displayForCalc + gudangForCalc - qtyOhValue;
+
+            // Update hanya SELISIH, REVISI_DISPLAY, dan REVISI_GUDANG di filteredData
+            filteredData[index].SELISIH = selisih;
+            filteredData[index].REVISI_DISPLAY = isValidNumber(revisiDisplayValue) ? revisiDisplayValue : '';
+            filteredData[index].REVISI_GUDANG = isValidNumber(revisiGudangValue) ? revisiGudangValue : '';
+
+            // Update the original data in localStorage
+            const originalData = JSON.parse(localStorage.getItem('formData'));
+            const originalIndex = originalData.findIndex(item => item.PLU === filteredData[index].PLU);
+
+            if (originalIndex > -1) {
+                originalData[originalIndex].SELISIH = selisih;
+                originalData[originalIndex].REVISI_DISPLAY = filteredData[index].REVISI_DISPLAY;
+                originalData[originalIndex].REVISI_GUDANG = filteredData[index].REVISI_GUDANG;
+                localStorage.setItem('formData', JSON.stringify(originalData));
+            }
+        }
+
+        function showTable(data) {
+            const cardContainer = document.getElementById('cardContainer');
+            const headerFields = document.getElementById('headerFields');
+            const submitButtonContainer = document.getElementById('submitButtonContainer');
+            const tableContainer = document.getElementById('tableContainer');
+            const dataTableBody = document.getElementById('dataTableBody');
+            const headerInfo = document.getElementById('headerInfo');
+
+            // Sembunyikan kartu, header fields, dan tombol submit
+            cardContainer.style.display = 'none';
+            headerFields.style.display = 'none';
+            submitButtonContainer.style.display = 'none';
+
+            // Tampilkan tabel
+            tableContainer.style.display = 'block';
+
+            // Tampilkan header info
+            headerInfo.innerHTML = `
+                Tanggal: ${data[0].TANGGAL || ''} | Shift: ${data[0].SHIFT || ''} | 
+                Penyerah: ${data[0].PENYERAH || ''} | Penerima: ${data[0].PENERIMA || ''}
+            `;
+
+            // Isi tabel dengan data
+            dataTableBody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.PLU || ''}</td>
+                    <td class="description-column">${item.DESCRIPTION || ''}</td>
+                    <td>${item.QTY_OH || 0}</td>
+                    <td>${item.DISPLAY || 0}</td>
+                    <td>${item.GUDANG || 0}</td>
+                    <td>${item.SELISIH || 0}</td>
+                    <td>${item.REVISI_DISPLAY || ''}</td>
+                    <td>${item.REVISI_GUDANG || ''}</td>
+                `;
+                dataTableBody.appendChild(row);
+            });
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const tableContainer = document.getElementById('tableContainer');
+            const headerInfo = document.getElementById('headerInfo');
+            const doc = new jsPDF();
+
+            // Tambahkan header PDF
+            doc.setFontSize(16);
+            doc.text('Laporan Selisih Stok', 14, 20);
+            doc.setFontSize(12);
+            doc.text(headerInfo.textContent, 14, 30);
+
+            // Konversi tabel HTML ke PDF
+            html2canvas(tableContainer, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = doc.getImageProperties(imgData);
+                const pdfWidth = doc.internal.pageSize.getWidth() - 28; // Margin 14 di kedua sisi
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                doc.addImage(imgData, 'PNG', 14, 40, pdfWidth, pdfHeight);
+                doc.save(`Laporan_Selisih_${new Date().toISOString().slice(0,10)}.pdf`);
+            });
+        }
+
+        function showAlert(message, type) {
+            const responseMessage = document.getElementById('responseMessage');
+            responseMessage.textContent = message;
+            responseMessage.className = `alert-custom alert-${type}`;
+            responseMessage.style.display = 'block';
+
+            setTimeout(() => {
+                responseMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function sendToGoogleSheet() {
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonSpinner = document.getElementById('buttonSpinner');
+            const formData = localStorage.getItem('formData');
+            const url = "https://script.google.com/macros/s/AKfycbzWh5KzwD2Nieyxc0_jcc6AVeOta_lh8o_UBGXYycxqhGxeQA25uAc6LYBnlUXVCaQO/exec";
+
+            if (formData) {
+                const data = JSON.parse(formData);
+                // Validasi input revisi
+                let valid = true;
+                data.forEach((item, index) => {
+                    const revisiDisplay = document.getElementById(`revisi-display-${index}`)?.value;
+                    const revisiGudang = document.getElementById(`revisi-gudang-${index}`)?.value;
+                    if ((revisiDisplay && (isNaN(revisiDisplay) || parseFloat(revisiDisplay) < 0)) ||
+                        (revisiGudang && (isNaN(revisiGudang) || parseFloat(revisiGudang) < 0))) {
+                        valid = false;
+                    }
+                    if ((revisiDisplay && !revisiGudang) || (!revisiDisplay && revisiGudang)) {
+                        valid = false;
+                    }
+                });
+
+                if (!valid) {
+                    showAlert('Input revisi harus angka non-negatif dan lengkap (kedua kolom diisi atau kosongkan keduanya).', 'error');
+                    return;
+                }
+
+                // Validasi semua data numerik sebelum pengiriman
+                const validatedData = data.map(item => ({
+                    ...item,
+                    QTY_OH: isValidNumber(item.QTY_OH) ? parseFloat(item.QTY_OH) : 0,
+                    DISPLAY: isValidNumber(item.DISPLAY) ? parseFloat(item.DISPLAY) : 0,
+                    GUDANG: isValidNumber(item.GUDANG) ? parseFloat(item.GUDANG) : 0,
+                    SELISIH: isValidNumber(item.SELISIH) ? parseFloat(item.SELISIH) : 0,
+                    REVISI_DISPLAY: isValidNumber(item.REVISI_DISPLAY) ? parseFloat(item.REVISI_DISPLAY) : '',
+                    REVISI_GUDANG: isValidNumber(item.REVISI_GUDANG) ? parseFloat(item.REVISI_GUDANG) : ''
+                }));
+
+                console.log('Data to send:', JSON.stringify(validatedData));
+
+                if (!confirm("Apakah Anda yakin ingin menyimpan dan mengirim data?")) return;
+
+                submitButton.disabled = true;
+                buttonText.textContent = 'Mengirim...';
+                buttonSpinner.classList.remove('d-none');
+
+                fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify(validatedData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        submitButton.disabled = false;
+                        buttonText.textContent = 'Simpan dan Kirim ke Google Sheet';
+                        buttonSpinner.classList.add('d-none');
+
+                        if (data.status === 'success') {
+                            showAlert('Data berhasil dikirim ke Google Sheet!', 'success');
+                            showTable(validatedData); // Tampilkan tabel setelah pengiriman berhasil
+                            localStorage.removeItem('formData'); // Hapus formData
+                        } else {
+                            showAlert('Terjadi kesalahan: ' + (data.message || 'Gagal menyimpan data'), 'error');
+                            console.error('Fetch error:', data.message || 'Unknown error');
+                        }
+                    })
+                    .catch(error => {
+                        submitButton.disabled = false;
+                        buttonText.textContent = 'Simpan dan Kirim ke Google Sheet';
+                        buttonSpinner.classList.add('d-none');
+                        showAlert('Error: ' + error.message, 'error');
+                        console.error('Fetch error:', error.message);
+                    });
+            } else {
+                showAlert('Tidak ada data untuk dikirim. Silakan lengkapi data di halaman sebelumnya.', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
