@@ -1,341 +1,337 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cek On Hand</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f3f4f6;
-    }
-    .card-view {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-      background-color: #ffffff;
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card-view:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-    .card-body-scroll {
-      overflow-y: hidden;
-      max-height: 100px;
-      font-size: 0.875rem;
-      margin-bottom: 8px;
-      background-color: #eef1f5;
-      padding: 5px;
-      border-radius: 5px;
-    }
-    .card-view h5 {
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-    }
-    .btn-spaced {
-      margin: 15px 0;
-      display: block;
-    }
-    .form-inline {
-      display: flex;
-      justify-content: space-between;
-    }
-    .input-group-text, .form-control {
-      font-size: 16px;
-    }
-    .center-text {
-      text-align: center;
-    }
-    #response {
-      display: none;
-    }
-    .alert-custom {
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 5px;
-    }
-    .alert-success {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .alert-error {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    .hidden {
-  display: none;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek On Hand</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+        }
 
+        .card-view {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background-color: #ffffff;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
 
-  </style>
+        .card-view:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-body-scroll {
+            overflow-y: hidden;
+            max-height: 100px;
+            font-size: 0.875rem;
+            margin-bottom: 8px;
+            background-color: #eef1f5;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .card-view h5 {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .btn-spaced {
+            margin: 15px 0;
+            display: block;
+        }
+
+        .form-inline {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .input-group-text,
+        .form-control {
+            font-size: 16px;
+        }
+
+        .center-text {
+            text-align: center;
+        }
+
+        #response {
+            display: none;
+        }
+
+        .alert-custom {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="container mt-5">
-    <h1 class="text-center">Cek On Hand</h1>
-    <!-- Form untuk Tanggal dan Shift -->
-    <div class="form-inline mt-4 mb-4">
-      <div class="form-group me-2">
-        <label for="tanggal" class="form-label">Tanggal:</label>
-        <input type="date" class="form-control" id="tanggal" name="TANGGAL" readonly>
-      </div>
-      <div class="form-group">
-        <label for="shift" class="form-label">Shift:</label>
-        <input type="text" class="form-control" id="shift" name="SHIFT" readonly>
-      </div>
-    </div>
+    <div class="container mt-5">
+        <h1 class="text-center">Cek On Hand</h1>
+        <!-- Form untuk Tanggal dan Shift -->
+        <div class="form-inline mt-4 mb-4">
+            <div class="form-group me-2">
+                <label for="tanggal" class="form-label">Tanggal:</label>
+                <input type="date" class="form-control" id="tanggal" name="TANGGAL" readonly>
+            </div>
+            <div class="form-group">
+                <label for="shift" class="form-label">Shift:</label>
+                <input type="text" class="form-control" id="shift" name="SHIFT" readonly>
+            </div>
+        </div>
 
-    <!-- Group CardView Formulir -->
-    <div id="cardContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-4">
-      <!-- Data akan dimuat di sini oleh JavaScript -->
-    </div>
+        <!-- Group CardView Formulir -->
+        <div id="cardContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-4">
+            <!-- Data akan dimuat di sini oleh JavaScript -->
+        </div>
 
-    <!-- Input fields for Penyerah and Penerima -->
-    <div class="form-inline mt-4 mb-4">
-      <div class="form-group me-2">
-        <label for="penyerah" class="form-label">Penyerah:</label>
-        <input type="text" class="form-control" id="penyerah" name="PENYERAH" required>
-      </div>
-      <div class="form-group">
-        <label for="penerima" class="form-label">Penerima:</label>
-        <input type="text" class="form-control" id="penerima" name="PENERIMA" required>
-      </div>
-    </div>
+        <!-- Input fields for Penyerah and Penerima -->
+        <div class="form-inline mt-4 mb-4">
+            <div class="form-group me-2">
+                <label for="penyerah" class="form-label">Penyerah:</label>
+                <input type="text" class="form-control" id="penyerah" name="PENYERAH" required>
+            </div>
+            <div class="form-group">
+                <label for="penerima" class="form-label">Penerima:</label>
+                <input type="text" class="form-control" id="penerima" name="PENERIMA" required>
+            </div>
+        </div>
         <!-- Response Element -->
         <div id="response" class="alert-custom"></div>
 
-    <!-- Save Button with Loading Animation -->
-    <button class="btn btn-success btn-spaced" id="saveButton">
-      <span id="saveButtonText">Save Data</span>
-      <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-    </button>
+        <!-- Save Button with Loading Animation -->
+        <button class="btn btn-success btn-spaced" id="saveButton">
+            <span id="saveButtonText">Save Data</span>
+            <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status"
+                aria-hidden="true"></span>
+        </button>
 
-    
-  </div>
 
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbz6qUkzN8Tiy1UMfNNxo1jgjMguvIDbByu9Y5Uioi4oZv2MIG0jYIfN-pfRKAQHnYNcHg/exec';
-  
-    function loadData() {
-      const cardContainer = document.getElementById('cardContainer');
-      const tanggalField = document.getElementById('tanggal');
-      const shiftField = document.getElementById('shift');
-      cardContainer.innerHTML = ''; // Clear existing content
-  
-      const formData = localStorage.getItem('formData');
-      if (formData) {
-        const data = JSON.parse(formData);
-  
-        // Display tanggal and shift from the first item
-        if (data.length > 0) {
-          tanggalField.value = data[0].TANGGAL;
-          shiftField.value = data[0].SHIFT;
-        }
-  
-        data.forEach((item, index) => {
-          const card = document.createElement('div');
-          card.className = 'col';
-  
-          // Create the card content including input fields for DISPLAY, GUDANG, TOTAL, and QTY OH
-          card.innerHTML = `
-          <div class="card-view">
-              <h5 class="center-text">${item.PLU}</h5>
-              <div class="card-body-scroll">
-                <p class="center-text">${item.DESCRIPTION}</p>
-              </div>
-        <div class="row text-center">
-          <div class="col hidden"> <!-- Menambahkan class "hidden" untuk menyembunyikan -->
-            <p class="center-text">Display</p>
-            <p class="center-text" id="display-${index}">${item.DISPLAY}</p>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz6qUkzN8Tiy1UMfNNxo1jgjMguvIDbByu9Y5Uioi4oZv2MIG0jYIfN-pfRKAQHnYNcHg/exec';
+
+        function loadData() {
+            const cardContainer = document.getElementById('cardContainer');
+            const tanggalField = document.getElementById('tanggal');
+            const shiftField = document.getElementById('shift');
+            cardContainer.innerHTML = ''; // Clear existing content
+
+            const formData = localStorage.getItem('formData');
+            if (formData) {
+                const data = JSON.parse(formData);
+
+                // Display tanggal and shift from the first item
+                if (data.length > 0) {
+                    tanggalField.value = data[0].TANGGAL;
+                    shiftField.value = data[0].SHIFT;
+                }
+
+                data.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'col';
+
+                    // Create the card content including input fields for DISPLAY, GUDANG, TOTAL, and QTY OH
+                    card.innerHTML = `
+        <div class="card-view">
+          <h5 class="center-text">${item.PLU}</h5>
+          <div class="card-body-scroll">
+            <p class="center-text">${item.DESCRIPTION}</p>
           </div>
-          <div class="col hidden"> <!-- Menyembunyikan kolom Gudang -->
-            <p class="center-text">Gudang</p>
-            <p class="center-text" id="gudang-${index}">${item.GUDANG}</p>
+          <div class="row text-center">
+            <div class="col hidden">
+              <p class="center-text">Display</p>
+              <p class="center-text" id="display-${index}">${item.DISPLAY}</p>
+            </div>
+            <div class="col hidden">
+              <p class="center-text">Gudang</p>
+              <p class="center-text" id="gudang-${index}">${item.GUDANG}</p>
+            </div>
+            <div class="col hidden">
+              <p class="center-text">Total</p>
+              <p class="center-text" id="total-${index}">${item.TOTAL}</p>
+            </div>
+            <div class="col hidden">
+              <p class="center-text">Selisih</p>
+              <p class="center-text" id="selisih-${index}">${item.TOTAL - (item.QTY_OH || 0)}</p>
+            </div>
           </div>
-          <div class="col hidden"> <!-- Menyembunyikan kolom Total -->
-            <p class="center-text">Total</p>
-            <p class="center-text" id="total-${index}">${item.TOTAL}</p>
-          </div>
-          <div class="col hidden"> <!-- Menyembunyikan kolom Selisih -->
-            <p class="center-text">Selisih</p>
-            <p class="center-text" id="selisih-${index}">${item.TOTAL - item.QTY_OH}</p>
+          <div class="input-group mb-2">
+            <span class="input-group-text">QTY OH</span>
+            <input type="number" class="form-control qty-oh-input" value="${item.QTY_OH || 0}" id="qty-oh-${index}" required min="0">
           </div>
         </div>
+      `;
 
-              <div class="input-group mb-2"> 
-                <span class="input-group-text">QTY OH</span> 
-                <input type="number" class="form-control qty-oh-input" value="${item.QTY_OH}" id="qty-oh-${index}" required>
-              </div>
-            </div>
-          `;
-  
-          cardContainer.appendChild(card);
-  
-          // Update 'Selisih' field when QTY OH changes
-          document.getElementById(`qty-oh-${index}`).addEventListener('input', function() {
-            updateSelisih(index, item.TOTAL);
-          });
-        });
-  
-      } else {
-        const noDataMessage = document.createElement('div');
-        noDataMessage.className = 'alert alert-info';
-        noDataMessage.textContent = 'No data available';
-        cardContainer.appendChild(noDataMessage);
-      }
-    }
-  
-    function updateSelisih(index, total) {
-      const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
-      const selisihField = document.getElementById(`selisih-${index}`);
-  
-      // Calculate the Selisih
-      const selisih = total - qtyOhValue;
-      selisihField.textContent = selisih;
-    }
-  
-    function showResponseMessage(message, isSuccess, redirect = false) {
-      const responseElement = document.getElementById('response');
-      responseElement.textContent = message;
-      responseElement.className = `alert-custom ${isSuccess ? 'alert-success' : 'alert-error'}`;
-      responseElement.style.display = 'block';
-  
-      if (redirect) {
-        setTimeout(() => {
-          window.location.href = 'cetakselisih.html'; // Change to the desired page URL
-        }, 4000);
-      } else {
-        setTimeout(() => {
-          responseElement.style.display = 'none';
-        }, 3000);
-      }
-    }
-  
-    function saveData(event) {
-      event.preventDefault(); // Prevent the default form submission
-  
-      const saveButton = document.getElementById('saveButton');
-      const saveButtonText = document.getElementById('saveButtonText');
-      const loadingSpinner = document.getElementById('loadingSpinner');
-      const qtyOhInputs = document.querySelectorAll('.qty-oh-input');
-  
-      // Check if all QTY OH inputs are filled
-      let allFilled = true;
-      qtyOhInputs.forEach(input => {
-        if (!input.value.trim()) {
-          allFilled = false;
-          input.classList.add('border-danger');
-        } else {
-          input.classList.remove('border-danger');
+                    cardContainer.appendChild(card);
+
+                    // Update 'Selisih' field when QTY OH changes
+                    document.getElementById(`qty-oh-${index}`).addEventListener('input', function () {
+                        updateSelisih(index, item.TOTAL);
+                    });
+                });
+            } else {
+                const noDataMessage = document.createElement('div');
+                noDataMessage.className = 'alert alert-info';
+                noDataMessage.textContent = 'Tidak ada data tersedia. Silakan lengkapi data di halaman sebelumnya.';
+                cardContainer.appendChild(noDataMessage);
+            }
         }
-      });
-  
-      if (!allFilled) {
-        showResponseMessage('Semua kolom wajib di isi!!!', false);
-        return;
-      }
-  
-      saveButton.disabled = true;
-      saveButtonText.textContent = 'Saving...';
-      loadingSpinner.classList.remove('d-none');
-  
-      const formData = localStorage.getItem('formData');
-      if (formData) {
-        const data = JSON.parse(formData);
-        const penyerah = document.getElementById('penyerah').value;
-        const penerima = document.getElementById('penerima').value;
-  
-        // Check if penyerah and penerima are provided
-        if (!penyerah.trim() || !penerima.trim()) {
-          showResponseMessage('Penyerah and Penerima wajib di isi.', false);
-          saveButton.disabled = false;
-          saveButtonText.textContent = 'Save Data';
-          loadingSpinner.classList.add('d-none');
-          return;
+
+        function updateSelisih(index, total) {
+            const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
+            const selisihField = document.getElementById(`selisih-${index}`);
+
+            // Calculate the Selisih
+            const selisih = total - qtyOhValue;
+            selisihField.textContent = selisih;
         }
-  
-        // Update QTY OH values from inputs
-        const dataToSubmit = data.map((item, index) => {
-          const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
-          const selisih = item.TOTAL - qtyOhValue;
-          return {
-            ...item,
-            QTY_OH: qtyOhValue,
-            SELISIH: selisih,
-            PENYERAH: penyerah,
-            PENERIMA: penerima
-          };
-        });
+
+        function showResponseMessage(message, isSuccess, redirect = false) {
+            const responseElement = document.getElementById('response');
+            responseElement.textContent = message;
+            responseElement.className = `alert-custom ${isSuccess ? 'alert-success' : 'alert-error'}`;
+            responseElement.style.display = 'block';
+
+            if (redirect) {
+                setTimeout(() => {
+                    window.location.href = 'cetakselisih.html';
+                }, 4000);
+            } else {
+                setTimeout(() => {
+                    responseElement.style.display = 'none';
+                }, 3000);
+            }
+        }
 
         function validateInputs() {
-  const penyerahField = document.getElementById('penyerah');
-  const penerimaField = document.getElementById('penerima');
-  let isValid = true;
+            const penyerahField = document.getElementById('penyerah');
+            const penerimaField = document.getElementById('penerima');
+            const qtyOhInputs = document.querySelectorAll('.qty-oh-input');
+            let isValid = true;
 
-  [penyerahField, penerimaField].forEach(field => {
-    if (!field.value.trim()) {
-      field.classList.add('is-invalid');
-      isValid = false;
-    } else {
-      field.classList.remove('is-invalid');
-      field.classList.add('is-valid');
-    }
-  });
+            // Validasi penyerah dan penerima
+            [penyerahField, penerimaField].forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                }
+            });
 
-  return isValid;
-}
+            // Validasi QTY OH inputs
+            qtyOhInputs.forEach(input => {
+                const value = parseFloat(input.value);
+                if (!input.value.trim() || isNaN(value) || value < 0) {
+                    input.classList.add('border-danger');
+                    isValid = false;
+                } else {
+                    input.classList.remove('border-danger');
+                }
+            });
 
-function saveData(event) {
-  event.preventDefault();
+            return isValid;
+        }
 
-  const isValid = validateInputs();
-  if (!isValid) {
-    showResponseMessage('Semua kolom harus terisi.', false);
-    return;
-  }
+        function saveData(event) {
+            event.preventDefault();
 
-  // Proceed with the rest of the save logic
-}
+            const isValid = validateInputs();
+            if (!isValid) {
+                showResponseMessage('Semua kolom harus diisi dengan angka non-negatif.', false);
+                return;
+            }
 
-  
-        // Save to localStorage before sending
-        localStorage.setItem('formData', JSON.stringify(dataToSubmit));
-  
-        // Fetch request to submit data
-        fetch(scriptURL, {
-          method: 'POST',
-          body: JSON.stringify(dataToSubmit)
-        })
-        .then(response => {
-          if (response.ok) {
-            
-  
-            // Show success message with redirect
-            showResponseMessage('Data berhasil disimpan.Silahkan cek selisih data SO.', true, true);
+            const saveButton = document.getElementById('saveButton');
+            const saveButtonText = document.getElementById('saveButtonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
             saveButton.disabled = true;
-            saveButtonText.textContent = 'Save Data';
-            loadingSpinner.classList.add('d-none');
-          } else {
-            throw new Error('Failed to save data');
-          }
-        })
-        .catch(error => {
-          showResponseMessage(`Error: ${error.message}`, false);
-          saveButton.disabled = false;
-          saveButtonText.textContent = 'Save Data';
-          loadingSpinner.classList.add('d-none');
-        });
-      }
-    }
-  
-    document.addEventListener('DOMContentLoaded', loadData);
-    document.getElementById('saveButton').addEventListener('click', saveData);
-  </script>
-  
+            saveButtonText.textContent = 'Saving...';
+            loadingSpinner.classList.remove('d-none');
+
+            const formData = localStorage.getItem('formData');
+            if (formData) {
+                const data = JSON.parse(formData);
+                const penyerah = document.getElementById('penyerah').value;
+                const penerima = document.getElementById('penerima').value;
+
+                // Update QTY OH values
+                const dataToSubmit = data.map((item, index) => {
+                    const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
+                    const selisih = item.TOTAL - qtyOhValue;
+                    return {
+                        ...item,
+                        QTY_OH: qtyOhValue,
+                        SELISIH: selisih,
+                        PENYERAH: penyerah,
+                        PENERIMA: penerima
+                    };
+                });
+
+                // Save to localStorage before sending
+                localStorage.setItem('formData', JSON.stringify(dataToSubmit));
+
+                // Fetch request to submit data
+                fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(dataToSubmit)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            showResponseMessage('Data berhasil disimpan. Silakan cek selisih data SO.', true, true);
+                            saveButton.disabled = true;
+                            saveButtonText.textContent = 'Save Data';
+                            loadingSpinner.classList.add('d-none');
+                        } else {
+                            throw new Error('Gagal menyimpan data');
+                        }
+                    })
+                    .catch(error => {
+                        showResponseMessage(`Error: ${error.message}`, false);
+                        saveButton.disabled = false;
+                        saveButtonText.textContent = 'Save Data';
+                        loadingSpinner.classList.add('d-none');
+                    });
+            } else {
+                showResponseMessage('Tidak ada data tersedia. Silakan lengkapi data di halaman sebelumnya.', false);
+                saveButton.disabled = false;
+                saveButtonText.textContent = 'Save Data';
+                loadingSpinner.classList.add('d-none');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+        document.getElementById('saveButton').addEventListener('click', saveData);
+    </script>
+
 
 </body>
+
 </html>
