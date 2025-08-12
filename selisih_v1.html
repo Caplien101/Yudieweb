@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -315,6 +315,7 @@
             });
 
             if (filteredData.length > 0) {
+                const fragment = document.createDocumentFragment();
                 filteredData.forEach((item, index) => {
                     const card = document.createElement('div');
                     card.className = 'col';
@@ -348,9 +349,12 @@
                         </div>
                     `;
 
-                    cardContainer.appendChild(card);
+                    fragment.appendChild(card);
+                });
+                cardContainer.appendChild(fragment);
 
-                    // Update SELISIH when Revisi Display or Revisi Gudang changes
+                // Update SELISIH when Revisi Display or Revisi Gudang changes
+                filteredData.forEach((_, index) => {
                     document.getElementById(`revisi-display-${index}`).addEventListener('input', function () {
                         updateSelisih(index, filteredData);
                     });
@@ -442,8 +446,10 @@
             const isAllZero = display === 0 && gudang === 0 && qtyOh === 0;
             // Kondisi 2: SELISIH tidak sama dengan 0
             const isSelisihNotZero = selisih !== 0;
+            // Kondisi 3: REVISI_DISPLAY atau REVISI_GUDANG diisi
+            const hasRevisi = isValidNumber(item.REVISI_DISPLAY) || isValidNumber(item.REVISI_GUDANG);
 
-            return isAllZero || isSelisihNotZero;
+            return isAllZero || isSelisihNotZero || hasRevisi;
         });
 
         // Isi tabel dengan data yang sudah difilter
@@ -591,7 +597,8 @@
                         const filteredTableData = validatedData.filter(item => {
                             const isAllZero = item.DISPLAY === 0 && item.GUDANG === 0 && item.QTY_OH === 0;
                             const isSelisihNotZero = item.SELISIH !== 0;
-                            return isAllZero || isSelisihNotZero;
+                            const hasRevisi = isValidNumber(item.REVISI_DISPLAY) || isValidNumber(item.REVISI_GUDANG);
+                            return isAllZero || isSelisihNotZero || hasRevisi;
                         });
                         showTable(filteredTableData); // Tampilkan tabel dengan data yang difilter
                         localStorage.removeItem('formData'); // Hapus formData
@@ -615,4 +622,4 @@
     document.addEventListener('DOMContentLoaded', loadData);
 </script>
 </body>
-</html>
+</html>                              
