@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -75,9 +75,10 @@
 
         .table-responsive th, .table-responsive td {
             border: 1px solid #dee2e6;
-            padding: 8px;
+            padding: 4px;
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
+            min-width: 50px; /* Pastikan kolom tidak terlalu sempit */
         }
 
         .table-responsive th {
@@ -94,6 +95,10 @@
 
         .table-responsive .description-column {
             max-width: 150px; /* Batasi lebar kolom Description */
+        }
+
+        .table-responsive .revisi-selisih-column {
+            max-width: 100px; /* Batasi lebar kolom Revisi Selisih */
         }
 
         /* Header info di atas tabel */
@@ -129,7 +134,7 @@
 
             .table-responsive th, .table-responsive td {
                 font-size: 10px;
-                padding: 6px;
+                padding: 2px;
             }
 
             .table-responsive .description-column {
@@ -250,14 +255,15 @@
             <table class="table table-responsive">
                 <thead>
                     <tr>
-                        <th>PLU</th>
+                       
                         <th>Description</th>
-                        <th>Qty OH</th>
+                        <th>OH</th>
                         <th>Display</th>
                         <th>Gudang</th>
                         <th>Selisih</th>
-                        <th>Revisi Display</th>
-                        <th>Revisi Gudang</th>
+                        <th>Edit Display</th>
+                        <th>Edit Gudang</th>
+                        <th>Fixed Selisih</th>
                     </tr>
                 </thead>
                 <tbody id="dataTableBody">
@@ -276,350 +282,337 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-    function loadData() {
-        const cardContainer = document.getElementById('cardContainer');
-        const tanggalField = document.getElementById('tanggal');
-        const shiftField = document.getElementById('shift');
-        const penyerahField = document.getElementById('penyerah');
-        const penerimaField = document.getElementById('penerima');
-        cardContainer.innerHTML = ''; // Clear existing content
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        function loadData() {
+            const cardContainer = document.getElementById('cardContainer');
+            const tanggalField = document.getElementById('tanggal');
+            const shiftField = document.getElementById('shift');
+            const penyerahField = document.getElementById('penyerah');
+            const penerimaField = document.getElementById('penerima');
+            cardContainer.innerHTML = '';
 
-        const formData = localStorage.getItem('formData');
-        if (formData) {
-            let data;
-            try {
-                data = JSON.parse(formData);
-            } catch (error) {
-                showAlert('Data di localStorage tidak valid.', 'error');
-                return;
-            }
+            const formData = localStorage.getItem('formData');
+            if (formData) {
+                let data;
+                try {
+                    data = JSON.parse(formData);
+                } catch (error) {
+                    showAlert('Data di localStorage tidak valid.', 'error');
+                    return;
+                }
 
-            // Display tanggal, shift, penyerah, and penerima from the first item
-            if (data.length > 0) {
-                tanggalField.value = data[0].TANGGAL || '';
-                shiftField.value = data[0].SHIFT || '';
-                penyerahField.value = data[0].PENYERAH || '';
-                penerimaField.value = data[0].PENERIMA || '';
-            }
+                if (data.length > 0) {
+                    tanggalField.value = data[0].TANGGAL || '';
+                    shiftField.value = data[0].SHIFT || '';
+                    penyerahField.value = data[0].PENYERAH || '';
+                    penerimaField.value = data[0].PENERIMA || '';
+                }
 
-            // Filter data where SELISIH is not equal to 0 for card display
-            const filteredData = data.filter(item => {
-                const display = parseFloat(item.DISPLAY) || 0;
-                const gudang = parseFloat(item.GUDANG) || 0;
-                const qtyOh = parseFloat(item.QTY_OH) || 0;
-                const selisih = display + gudang - qtyOh;
-                item.SELISIH = selisih; // Pastikan SELISIH diperbarui
-                return selisih !== 0;
-            });
+                const filteredData = data.filter(item => {
+                    const display = parseFloat(item.DISPLAY) || 0;
+                    const gudang = parseFloat(item.GUDANG) || 0;
+                    const qtyOh = parseFloat(item.QTY_OH) || 0;
+                    const selisih = display + gudang - qtyOh;
+                    item.SELISIH = selisih;
+                    return selisih !== 0;
+                });
 
-            if (filteredData.length > 0) {
-                const fragment = document.createDocumentFragment();
-                filteredData.forEach((item, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'col';
+                if (filteredData.length > 0) {
+                    const fragment = document.createDocumentFragment();
+                    filteredData.forEach((item, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'col';
 
-                    card.innerHTML = `
-                        <div class="card-view">
-                            <h5 class="center-text">${item.PLU}</h5>
-                            <p class="center-text">${item.DESCRIPTION}</p>
-                            <div class="card-content">
-                                <div class="col">
-                                    <p class="center-text">Qty OH</p>
-                                    <input type="number" class="form-control" value="${item.QTY_OH || 0}" id="qty-oh-${index}" required readonly>
-                                </div>
-                                <div class="col">
-                                    <p class="center-text">Display</p>
-                                    <input type="number" class="form-control" value="${item.DISPLAY || 0}" id="display-${index}" required readonly>
-                                </div>
-                                <div class="col">
-                                    <p class="center-text">Gudang</p>
-                                    <input type="number" class="form-control" value="${item.GUDANG || 0}" id="gudang-${index}" required readonly>
-                                </div>
-                                <div class="col">
-                                    <p class="center-text">Edit Display</p>
-                                    <input type="number" class="form-control form-control-editable" value="${item.REVISI_DISPLAY || ''}" id="revisi-display-${index}" min="0" placeholder="">
-                                </div>
-                                <div class="col">
-                                    <p class="center-text">Edit Gudang</p>
-                                    <input type="number" class="form-control form-control-editable" value="${item.REVISI_GUDANG || ''}" id="revisi-gudang-${index}" min="0" placeholder="">
+                        card.innerHTML = `
+                            <div class="card-view">
+                                <h5 class="center-text">${item.PLU}</h5>
+                                <p class="center-text">${item.DESCRIPTION}</p>
+                                <div class="card-content">
+                                    <div class="col">
+                                        <p class="center-text">Qty OH</p>
+                                        <input type="number" class="form-control" value="${item.QTY_OH || 0}" id="qty-oh-${index}" required readonly>
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Display</p>
+                                        <input type="number" class="form-control" value="${item.DISPLAY || 0}" id="display-${index}" required readonly>
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Gudang</p>
+                                        <input type="number" class="form-control" value="${item.GUDANG || 0}" id="gudang-${index}" required readonly>
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Edit Display</p>
+                                        <input type="number" class="form-control form-control-editable" value="${item.REVISI_DISPLAY || ''}" id="revisi-display-${index}" min="0" placeholder="">
+                                    </div>
+                                    <div class="col">
+                                        <p class="center-text">Edit Gudang</p>
+                                        <input type="number" class="form-control form-control-editable" value="${item.REVISI_GUDANG || ''}" id="revisi-gudang-${index}" min="0" placeholder="">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-
-                    fragment.appendChild(card);
-                });
-                cardContainer.appendChild(fragment);
-
-                // Update SELISIH when Revisi Display or Revisi Gudang changes
-                filteredData.forEach((_, index) => {
-                    document.getElementById(`revisi-display-${index}`).addEventListener('input', function () {
-                        updateSelisih(index, filteredData);
+                        `;
+                        fragment.appendChild(card);
                     });
+                    cardContainer.appendChild(fragment);
 
-                    document.getElementById(`revisi-gudang-${index}`).addEventListener('input', function () {
-                        updateSelisih(index, filteredData);
+                    filteredData.forEach((_, index) => {
+                        document.getElementById(`revisi-display-${index}`).addEventListener('input', function () {
+                            updateSelisih(index, filteredData);
+                        });
+
+                        document.getElementById(`revisi-gudang-${index}`).addEventListener('input', function () {
+                            updateSelisih(index, filteredData);
+                        });
                     });
-                });
+                } else {
+                    const noDataMessage = document.createElement('div');
+                    noDataMessage.className = 'alert alert-info';
+                    noDataMessage.textContent = 'Tidak ada data dengan selisih tidak sama dengan 0';
+                    cardContainer.appendChild(noDataMessage);
+                }
             } else {
                 const noDataMessage = document.createElement('div');
                 noDataMessage.className = 'alert alert-info';
-                noDataMessage.textContent = 'Tidak ada data dengan selisih tidak sama dengan 0';
+                noDataMessage.textContent = 'Tidak ada data tersedia. Silakan lengkapi data di halaman sebelumnya.';
                 cardContainer.appendChild(noDataMessage);
             }
-        } else {
-            const noDataMessage = document.createElement('div');
-            noDataMessage.className = 'alert alert-info';
-            noDataMessage.textContent = 'Tidak ada data tersedia. Silakan lengkapi data di halaman sebelumnya.';
-            cardContainer.appendChild(noDataMessage);
-        }
-    }
-
-    function isValidNumber(value) {
-        return value !== undefined && value !== null && value !== "" && !isNaN(parseFloat(value));
-    }
-
-    function updateSelisih(index, filteredData) {
-        const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
-        const displayValue = parseFloat(document.getElementById(`display-${index}`).value) || 0; // Gunakan nilai asli
-        const gudangValue = parseFloat(document.getElementById(`gudang-${index}`).value) || 0; // Gunakan nilai asli
-        const revisiDisplayValue = parseFloat(document.getElementById(`revisi-display-${index}`).value);
-        const revisiGudangValue = parseFloat(document.getElementById(`revisi-gudang-${index}`).value);
-
-        // Hitung SELISIH hanya berdasarkan DISPLAY, GUDANG, dan QTY_OH asli
-        const selisih = displayValue + gudangValue - qtyOhValue;
-
-        // Update hanya SELISIH, REVISI_DISPLAY, dan REVISI_GUDANG di filteredData
-        filteredData[index].SELISIH = selisih;
-        filteredData[index].REVISI_DISPLAY = isValidNumber(revisiDisplayValue) ? revisiDisplayValue : '';
-        filteredData[index].REVISI_GUDANG = isValidNumber(revisiGudangValue) ? revisiGudangValue : '';
-
-        // Update data asli di localStorage
-        const originalData = JSON.parse(localStorage.getItem('formData'));
-        const originalIndex = originalData.findIndex(item => item.PLU === filteredData[index].PLU);
-
-        if (originalIndex > -1) {
-            originalData[originalIndex].SELISIH = selisih;
-            originalData[originalIndex].REVISI_DISPLAY = filteredData[index].REVISI_DISPLAY;
-            originalData[originalIndex].REVISI_GUDANG = filteredData[index].REVISI_GUDANG;
-            localStorage.setItem('formData', JSON.stringify(originalData));
-        }
-    }
-
-    function showTable(data) {
-        const cardContainer = document.getElementById('cardContainer');
-        const headerFields = document.getElementById('headerFields');
-        const submitButtonContainer = document.getElementById('submitButtonContainer');
-        const tableContainer = document.getElementById('tableContainer');
-        const dataTableBody = document.getElementById('dataTableBody');
-        const headerInfo = document.getElementById('headerInfo');
-
-        // Sembunyikan kartu, header fields, dan tombol submit
-        cardContainer.style.display = 'none';
-        headerFields.style.display = 'none';
-        submitButtonContainer.style.display = 'none';
-
-        // Tampilkan tabel
-        tableContainer.style.display = 'block';
-
-        // Tampilkan header info
-        if (data.length > 0) {
-            headerInfo.innerHTML = `
-                Tanggal: ${data[0].TANGGAL || ''} | Shift: ${data[0].SHIFT || ''} | 
-                Penyerah: ${data[0].PENYERAH || ''} | Penerima: ${data[0].PENERIMA || ''}
-            `;
-        } else {
-            headerInfo.innerHTML = 'Tidak ada data untuk ditampilkan.';
         }
 
-        // Filter data untuk tabel berdasarkan kondisi
-        const filteredTableData = data.filter(item => {
-            const display = parseFloat(item.DISPLAY) || 0;
-            const gudang = parseFloat(item.GUDANG) || 0;
-            const qtyOh = parseFloat(item.QTY_OH) || 0;
-            const selisih = display + gudang - qtyOh;
-            item.SELISIH = selisih; // Perbarui SELISIH untuk konsistensi
+        function isValidNumber(value) {
+            return value !== undefined && value !== null && value !== "" && !isNaN(parseFloat(value));
+        }
 
-            // Kondisi 1: DISPLAY, GUDANG, dan QTY_OH semuanya 0
-            const isAllZero = display === 0 && gudang === 0 && qtyOh === 0;
-            // Kondisi 2: SELISIH tidak sama dengan 0
-            const isSelisihNotZero = selisih !== 0;
-            // Kondisi 3: REVISI_DISPLAY atau REVISI_GUDANG diisi
-            const hasRevisi = isValidNumber(item.REVISI_DISPLAY) || isValidNumber(item.REVISI_GUDANG);
+        function updateSelisih(index, filteredData) {
+            const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value) || 0;
+            const displayValue = parseFloat(document.getElementById(`display-${index}`).value) || 0;
+            const gudangValue = parseFloat(document.getElementById(`gudang-${index}`).value) || 0;
+            const revisiDisplayValue = parseFloat(document.getElementById(`revisi-display-${index}`).value);
+            const revisiGudangValue = parseFloat(document.getElementById(`revisi-gudang-${index}`).value);
 
-            return isAllZero || isSelisihNotZero || hasRevisi;
-        });
+            const selisih = displayValue + gudangValue - qtyOhValue;
 
-        // Isi tabel dengan data yang sudah difilter
-        dataTableBody.innerHTML = '';
-        if (filteredTableData.length > 0) {
-            const fragment = document.createDocumentFragment();
-            filteredTableData.forEach(item => {
+            filteredData[index].SELISIH = selisih;
+            filteredData[index].REVISI_DISPLAY = isValidNumber(revisiDisplayValue) ? revisiDisplayValue : '';
+            filteredData[index].REVISI_GUDANG = isValidNumber(revisiGudangValue) ? revisiGudangValue : '';
+
+            const originalData = JSON.parse(localStorage.getItem('formData'));
+            const originalIndex = originalData.findIndex(item => item.PLU === filteredData[index].PLU);
+
+            if (originalIndex > -1) {
+                originalData[originalIndex].SELISIH = selisih;
+                originalData[originalIndex].REVISI_DISPLAY = filteredData[index].REVISI_DISPLAY;
+                originalData[originalIndex].REVISI_GUDANG = filteredData[index].REVISI_GUDANG;
+                localStorage.setItem('formData', JSON.stringify(originalData));
+            }
+        }
+
+        function showTable(data) {
+            const cardContainer = document.getElementById('cardContainer');
+            const headerFields = document.getElementById('headerFields');
+            const submitButtonContainer = document.getElementById('submitButtonContainer');
+            const tableContainer = document.getElementById('tableContainer');
+            const dataTableBody = document.getElementById('dataTableBody');
+            const headerInfo = document.getElementById('headerInfo');
+
+            cardContainer.style.display = 'none';
+            headerFields.style.display = 'none';
+            submitButtonContainer.style.display = 'none';
+            tableContainer.style.display = 'block';
+
+            if (data.length > 0) {
+                headerInfo.innerHTML = `
+                    Tanggal: ${data[0].TANGGAL || ''} | Shift: ${data[0].SHIFT || ''} | 
+                    Penyerah: ${data[0].PENYERAH || ''} | Penerima: ${data[0].PENERIMA || ''}
+                `;
+            } else {
+                headerInfo.innerHTML = 'Tidak ada data untuk ditampilkan.';
+            }
+
+            const filteredTableData = data.filter(item => {
                 const display = parseFloat(item.DISPLAY) || 0;
                 const gudang = parseFloat(item.GUDANG) || 0;
                 const qtyOh = parseFloat(item.QTY_OH) || 0;
                 const selisih = display + gudang - qtyOh;
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.PLU || ''}</td>
-                    <td class="description-column">${item.DESCRIPTION || ''}</td>
-                    <td>${item.QTY_OH || 0}</td>
-                    <td>${item.DISPLAY || 0}</td>
-                    <td>${item.GUDANG || 0}</td>
-                    <td>${selisih}</td>
-                    <td>${item.REVISI_DISPLAY || ''}</td>
-                    <td>${item.REVISI_GUDANG || ''}</td>
-                `;
-                fragment.appendChild(row);
-            });
-            dataTableBody.appendChild(fragment);
-        } else {
-            dataTableBody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada data yang memenuhi kriteria.</td></tr>';
-        }
-
-        // Simpan data yang sudah diperbarui ke localStorage
-        localStorage.setItem('formData', JSON.stringify(data));
-    }
-
-    function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const tableContainer = document.getElementById('tableContainer');
-        const headerInfo = document.getElementById('headerInfo');
-        const doc = new jsPDF();
-
-        console.log('Exporting table to PDF...');
-
-        // Tambahkan header PDF
-        doc.setFontSize(16);
-        doc.text('Laporan Selisih Stok', 14, 20);
-        doc.setFontSize(12);
-        doc.text(headerInfo.textContent, 14, 30);
-
-        // Konversi tabel HTML ke PDF
-        html2canvas(tableContainer, { scale: 2 }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const imgProps = doc.getImageProperties(imgData);
-            const pdfWidth = doc.internal.pageSize.getWidth() - 28; // Margin 14 di kedua sisi
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-            doc.addImage(imgData, 'PNG', 14, 40, pdfWidth, pdfHeight);
-            doc.save(`Laporan_Selisih_${new Date().toISOString().slice(0,10)}.pdf`);
-        });
-    }
-
-    function showAlert(message, type) {
-        const responseMessage = document.getElementById('responseMessage');
-        responseMessage.textContent = message;
-        responseMessage.className = `alert-custom alert-${type}`;
-        responseMessage.style.display = 'block';
-
-        setTimeout(() => {
-            responseMessage.style.display = 'none';
-        }, 3000);
-    }
-
-    function sendToGoogleSheet() {
-        const submitButton = document.getElementById('submitButton');
-        const buttonText = document.getElementById('buttonText');
-        const buttonSpinner = document.getElementById('buttonSpinner');
-        const formData = localStorage.getItem('formData');
-        const url = "https://script.google.com/macros/s/AKfycbzWh5KzwD2Nieyxc0_jcc6AVeOta_lh8o_UBGXYycxqhGxeQA25uAc6LYBnlUXVCaQO/exec";
-
-        if (formData) {
-            let data;
-            try {
-                data = JSON.parse(formData);
-            } catch (error) {
-                showAlert('Data di localStorage tidak valid.', 'error');
-                return;
-            }
-
-            // Validasi input revisi
-            let valid = true;
-            data.forEach((item, index) => {
-                const revisiDisplay = document.getElementById(`revisi-display-${index}`)?.value;
-                const revisiGudang = document.getElementById(`revisi-gudang-${index}`)?.value;
-                if ((revisiDisplay && (isNaN(revisiDisplay) || parseFloat(revisiDisplay) < 0)) ||
-                    (revisiGudang && (isNaN(revisiGudang) || parseFloat(revisiGudang) < 0))) {
-                    valid = false;
-                }
-                if ((revisiDisplay && !revisiGudang) || (!revisiDisplay && revisiGudang)) {
-                    valid = false;
-                }
+                item.SELISIH = selisih;
+                const isAllZero = display === 0 && gudang === 0 && qtyOh === 0;
+                const isSelisihNotZero = selisih !== 0;
+                const hasRevisi = isValidNumber(item.REVISI_DISPLAY) || isValidNumber(item.REVISI_GUDANG);
+                return isAllZero || isSelisihNotZero || hasRevisi;
             });
 
-            if (!valid) {
-                showAlert('Input revisi harus angka non-negatif dan lengkap (kedua kolom diisi atau kosongkan keduanya).', 'error');
-                return;
-            }
+            dataTableBody.innerHTML = '';
+            if (filteredTableData.length > 0) {
+                const fragment = document.createDocumentFragment();
+                filteredTableData.forEach(item => {
+                    const display = parseFloat(item.DISPLAY) || 0;
+                    const gudang = parseFloat(item.GUDANG) || 0;
+                    const qtyOh = parseFloat(item.QTY_OH) || 0;
+                    const selisih = display + gudang - qtyOh;
+                    const revisiDisplay = parseFloat(item.REVISI_DISPLAY) || 0;
+                    const revisiGudang = parseFloat(item.REVISI_GUDANG) || 0;
+                    const revisiSelisih = (isValidNumber(item.REVISI_DISPLAY) && isValidNumber(item.REVISI_GUDANG)) 
+                        ? revisiDisplay + revisiGudang - qtyOh 
+                        : '';
 
-            // Siapkan data untuk pengiriman dengan menghitung ulang SELISIH
-            const validatedData = data.map(item => {
-                const display = parseFloat(item.DISPLAY) || 0;
-                const gudang = parseFloat(item.GUDANG) || 0;
-                const qtyOh = parseFloat(item.QTY_OH) || 0;
-                const selisih = display + gudang - qtyOh; // Hitung SELISIH berdasarkan nilai asli
-                return {
-                    ...item,
-                    QTY_OH: qtyOh,
-                    DISPLAY: display,
-                    GUDANG: gudang,
-                    SELISIH: selisih,
-                    REVISI_DISPLAY: isValidNumber(item.REVISI_DISPLAY) ? parseFloat(item.REVISI_DISPLAY) : '',
-                    REVISI_GUDANG: isValidNumber(item.REVISI_GUDANG) ? parseFloat(item.REVISI_GUDANG) : ''
-                };
-            });
-
-            console.log('Data to send:', JSON.stringify(validatedData));
-
-            if (!confirm("Apakah Anda yakin ingin menyimpan dan mengirim data?")) return;
-
-            submitButton.disabled = true;
-            buttonText.textContent = 'Mengirim...';
-            buttonSpinner.classList.remove('d-none');
-
-            fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(validatedData)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    submitButton.disabled = false;
-                    buttonText.textContent = 'Simpan dan Kirim ke Google Sheet';
-                    buttonSpinner.classList.add('d-none');
-
-                    if (data.status === 'success') {
-                        showAlert('Data berhasil dikirim ke Google Sheet!', 'success');
-                        // Filter data untuk ditampilkan di tabel
-                        const filteredTableData = validatedData.filter(item => {
-                            const isAllZero = item.DISPLAY === 0 && item.GUDANG === 0 && item.QTY_OH === 0;
-                            const isSelisihNotZero = item.SELISIH !== 0;
-                            const hasRevisi = isValidNumber(item.REVISI_DISPLAY) || isValidNumber(item.REVISI_GUDANG);
-                            return isAllZero || isSelisihNotZero || hasRevisi;
-                        });
-                        showTable(filteredTableData); // Tampilkan tabel dengan data yang difilter
-                        localStorage.removeItem('formData'); // Hapus formData
-                    } else {
-                        showAlert('Terjadi kesalahan: ' + (data.message || 'Gagal menyimpan data'), 'error');
-                        console.error('Fetch error:', data.message || 'Unknown error');
-                    }
-                })
-                .catch(error => {
-                    submitButton.disabled = false;
-                    buttonText.textContent = 'Simpan dan Kirim ke Google Sheet';
-                    buttonSpinner.classList.add('d-none');
-                    showAlert('Error: ' + error.message, 'error');
-                    console.error('Fetch error:', error.message);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                       
+                        <td class="description-column">${item.DESCRIPTION || ''}</td>
+                        <td>${item.QTY_OH || 0}</td>
+                        <td>${item.DISPLAY || 0}</td>
+                        <td>${item.GUDANG || 0}</td>
+                        <td>${selisih}</td>
+                        <td>${item.REVISI_DISPLAY || ''}</td>
+                        <td>${item.REVISI_GUDANG || ''}</td>
+                        <td class="revisi-selisih-column">${revisiSelisih}</td>
+                    `;
+                    fragment.appendChild(row);
                 });
-        } else {
-            showAlert('Tidak ada data untuk dikirim. Silakan lengkapi data di halaman sebelumnya.', 'error');
-        }
-    }
+                dataTableBody.appendChild(fragment);
+            } else {
+                dataTableBody.innerHTML = '<tr><td colspan="9" class="text-center">Tidak ada data yang memenuhi kriteria.</td></tr>';
+            }
 
-    document.addEventListener('DOMContentLoaded', loadData);
-</script>
+            localStorage.setItem('formData', JSON.stringify(data));
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const tableContainer = document.getElementById('tableContainer');
+            const headerInfo = document.getElementById('headerInfo');
+            const doc = new jsPDF();
+
+            console.log('Exporting table to PDF...');
+
+            doc.setFontSize(16);
+            doc.text('Laporan Selisih Stok', 14, 20);
+            doc.setFontSize(12);
+            doc.text(headerInfo.textContent, 14, 30);
+
+            html2canvas(tableContainer, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = doc.getImageProperties(imgData);
+                const pdfWidth = doc.internal.pageSize.getWidth() - 28;
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                doc.addImage(imgData, 'PNG', 14, 40, pdfWidth, pdfHeight);
+                doc.save(`Laporan_Selisih_${new Date().toISOString().slice(0,10)}.pdf`);
+            });
+        }
+
+        function showAlert(message, type) {
+            const responseMessage = document.getElementById('responseMessage');
+            responseMessage.textContent = message;
+            responseMessage.className = `alert-custom alert-${type}`;
+            responseMessage.style.display = 'block';
+
+            setTimeout(() => {
+                responseMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function sendToGoogleSheet() {
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonSpinner = document.getElementById('buttonSpinner');
+            const formData = localStorage.getItem('formData');
+            const url = "https://script.google.com/macros/s/AKfycbzWh5KzwD2Nieyxc0_jcc6AVeOta_lh8o_UBGXYycxqhGxeQA25uAc6LYBnlUXVCaQO/exec";
+
+            if (formData) {
+                let data;
+                try {
+                    data = JSON.parse(formData);
+                } catch (error) {
+                    showAlert('Data di localStorage tidak valid.', 'error');
+                    return;
+                }
+
+                let valid = true;
+                data.forEach((item, index) => {
+                    const revisiDisplay = document.getElementById(`revisi-display-${index}`)?.value;
+                    const revisiGudang = document.getElementById(`revisi-gudang-${index}`)?.value;
+                    if ((revisiDisplay && (isNaN(revisiDisplay) || parseFloat(revisiDisplay) < 0)) ||
+                        (revisiGudang && (isNaN(revisiGudang) || parseFloat(revisiGudang) < 0))) {
+                        valid = false;
+                    }
+                    if ((revisiDisplay && !revisiGudang) || (!revisiDisplay && revisiGudang)) {
+                        valid = false;
+                    }
+                });
+
+                if (!valid) {
+                    showAlert('Input revisi harus angka non-negatif dan lengkap (kedua kolom diisi atau kosongkan keduanya).', 'error');
+                    return;
+                }
+
+                const validatedData = data.map(item => {
+                    const display = parseFloat(item.DISPLAY) || 0;
+                    const gudang = parseFloat(item.GUDANG) || 0;
+                    const qtyOh = parseFloat(item.QTY_OH) || 0;
+                    const selisih = display + gudang - qtyOh;
+                    return {
+                        TANGGAL: item.TANGGAL,
+                        SHIFT: item.SHIFT,
+                        PENYERAH: item.PENYERAH,
+                        PENERIMA: item.PENERIMA,
+                        PLU: item.PLU,
+                        DESCRIPTION: item.DESCRIPTION,
+                        QTY_OH: qtyOh,
+                        DISPLAY: display,
+                        GUDANG: gudang,
+                        SELISIH: selisih,
+                        REVISI_DISPLAY: isValidNumber(item.REVISI_DISPLAY) ? parseFloat(item.REVISI_DISPLAY) : '',
+                        REVISI_GUDANG: isValidNumber(item.REVISI_GUDANG) ? parseFloat(item.REVISI_GUDANG) : ''
+                    };
+                });
+
+                console.log('Data to send:', JSON.stringify(validatedData));
+
+                if (!confirm("Apakah Anda yakin ingin menyimpan dan mengirim data?")) return;
+
+                submitButton.disabled = true;
+                buttonText.textContent = 'Mengirim...';
+                buttonSpinner.classList.remove('d-none');
+
+                fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify(validatedData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        submitButton.disabled = false;
+                        buttonText.textContent = 'Simpan dan Kirim ke Google Sheet';
+                        buttonSpinner.classList.add('d-none');
+
+                        if (data.status === 'success') {
+                            showAlert('Data berhasil dikirim ke Google Sheet!', 'success');
+                            const filteredTableData = validatedData.filter(item => {
+                                const isAllZero = item.DISPLAY === 0 && item.GUDANG === 0 && item.QTY_OH === 0;
+                                const isSelisihNotZero = item.SELISIH !== 0;
+                                const hasRevisi = isValidNumber(item.REVISI_DISPLAY) || isValidNumber(item.REVISI_GUDANG);
+                                return isAllZero || isSelisihNotZero || hasRevisi;
+                            });
+                            showTable(filteredTableData);
+                            localStorage.removeItem('formData');
+                        } else {
+                            showAlert('Terjadi kesalahan: ' + (data.message || 'Gagal menyimpan data'), 'error');
+                            console.error('Fetch error:', data.message || 'Unknown error');
+                        }
+                    })
+                    .catch(error => {
+                        submitButton.disabled = false;
+                        buttonText.textContent = 'Simpan dan Kirim ke Google Sheet';
+                        buttonSpinner.classList.add('d-none');
+                        showAlert('Error: ' + error.message, 'error');
+                        console.error('Fetch error:', error.message);
+                    });
+            } else {
+                showAlert('Tidak ada data untuk dikirim. Silakan lengkapi data di halaman sebelumnya.', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
 </body>
-</html>                              
+</html>
