@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -28,6 +28,7 @@
     .form-control-editable {
       background-color: #eef1f5;
       border: 1px solid #ced4da;
+      touch-action: manipulation; /* Cegah zoom akibat gestur sentuh */
     }
 
     .card-content {
@@ -56,9 +57,10 @@
 
     .card-content input {
       max-width: 80px;
-      font-size: 12px;
+      font-size: 16px; /* Tingkatkan font-size untuk mencegah zoom di iOS */
       text-align: center;
       padding: 4px;
+      touch-action: manipulation; /* Cegah zoom akibat gestur sentuh */
     }
 
     /* Sembunyikan kolom Display dan Gudang dengan spesifisitas tinggi */
@@ -83,7 +85,7 @@
 
       .card-content input {
         max-width: 70px;
-        font-size: 10px;
+        font-size: 16px; /* Tetap 16px untuk mencegah zoom di iOS */
         padding: 3px;
       }
 
@@ -93,34 +95,34 @@
     }
 
     .alert-custom {
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  text-align: center;
-  font-weight: bold;
-  display: none;
-  position: fixed; /* Menggunakan posisi fixed agar tetap di tempat saat scroll */
-  top: 20px; /* Jarak dari atas layar */
-  left: 50%; /* Posisi tengah secara horizontal */
-  transform: translateX(-50%); /* Geser ke kiri sebesar setengah lebarnya untuk centering */
-  width: 90%; /* Lebar alert, bisa disesuaikan */
-  max-width: 500px; /* Lebar maksimum agar tidak terlalu lebar di layar besar */
-  z-index: 1000; /* Pastikan alert di atas elemen lain */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Tambahkan bayangan untuk efek floating */
-}
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 500px;
+      z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-.alert-success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
 
-.alert-error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
 
     .btn-animate {
       position: relative;
@@ -198,7 +200,7 @@
   <script>
     function loadData() {
       const cardContainer = document.getElementById('cardContainer');
-      cardContainer.innerHTML = ''; // Clear existing content
+      cardContainer.innerHTML = '';
 
       const formData = localStorage.getItem('formData');
       if (formData) {
@@ -225,7 +227,7 @@
                   </div>
                   <div class="col">
                     <p class="center-text">Qty OH</p>
-                    <input type="number" class="form-control form-control-editable" value="${item.QTY_OH || ''}" id="qty-oh-${index}" min="0" placeholder="Masukkan Qty OH">
+                    <input type="number" class="form-control form-control-editable" value="${item.QTY_OH || ''}" id="qty-oh-${index}" min="0" placeholder="">
                   </div>
                 </div>
               </div>
@@ -267,88 +269,85 @@
       const gudangValue = parseFloat(document.getElementById(`gudang-${index}`).value) || 0;
       const qtyOhValue = parseFloat(document.getElementById(`qty-oh-${index}`).value);
 
-      // Calculate SELISIH only if QTY_OH is valid
       const selisih = isValidNumber(qtyOhValue) ? (displayValue + gudangValue - qtyOhValue) : 0;
 
-      // Update data array
       data[index].QTY_OH = isValidNumber(qtyOhValue) ? qtyOhValue : '';
       data[index].SELISIH = selisih;
 
-      // Save updated data to localStorage
       localStorage.setItem('formData', JSON.stringify(data));
     }
 
     function showAlert(message, type) {
-  const responseMessage = document.getElementById('responseMessage');
-  responseMessage.textContent = message;
-  responseMessage.className = `alert-custom alert-${type} show`;
-  responseMessage.style.display = 'block';
+      const responseMessage = document.getElementById('responseMessage');
+      responseMessage.textContent = message;
+      responseMessage.className = `alert-custom alert-${type} show`;
+      responseMessage.style.display = 'block';
 
-  setTimeout(() => {
-    responseMessage.classList.remove('show');
-    setTimeout(() => {
-      responseMessage.style.display = 'none';
-    }, 300);
-  }, 3000);
-}
+      setTimeout(() => {
+        responseMessage.classList.remove('show');
+        setTimeout(() => {
+          responseMessage.style.display = 'none';
+        }, 300);
+      }, 3000);
+    }
 
     function saveData() {
-  try {
-    const submitButton = document.getElementById('submitButton');
-    const buttonText = document.getElementById('buttonText');
-    const buttonSpinner = document.getElementById('buttonSpinner');
-    const penyerah = document.getElementById('penyerah').value.trim();
-    const penerima = document.getElementById('penerima').value.trim();
-    const formData = localStorage.getItem('formData');
+      try {
+        const submitButton = document.getElementById('submitButton');
+        const buttonText = document.getElementById('buttonText');
+        const buttonSpinner = document.getElementById('buttonSpinner');
+        const penyerah = document.getElementById('penyerah').value.trim();
+        const penerima = document.getElementById('penerima').value.trim();
+        const formData = localStorage.getItem('formData');
 
-    if (!formData) {
-      showAlert('Tidak ada data untuk disimpan. Silakan lengkapi data di halaman sebelumnya.', 'error');
-      return;
-    }
+        if (!formData) {
+          showAlert('Tidak ada data untuk disimpan. Silakan lengkapi data di halaman sebelumnya.', 'error');
+          return;
+        }
 
-    const data = JSON.parse(formData);
+        const data = JSON.parse(formData);
 
-    let valid = true;
-    data.forEach((item, index) => {
-      const qtyOh = document.getElementById(`qty-oh-${index}`)?.value;
-      if (!qtyOh || isNaN(qtyOh) || parseFloat(qtyOh) < 0) {
-        valid = false;
+        let valid = true;
+        data.forEach((item, index) => {
+          const qtyOh = document.getElementById(`qty-oh-${index}`)?.value;
+          if (!qtyOh || isNaN(qtyOh) || parseFloat(qtyOh) < 0) {
+            valid = false;
+          }
+        });
+
+        if (!penyerah || !penerima) {
+          showAlert('Penyerah dan Penerima harus diisi.', 'error');
+          return;
+        }
+
+        if (!valid) {
+          showAlert('Qty OH harus diisi dengan angka non-negatif untuk semua item.', 'error');
+          return;
+        }
+
+        data.forEach(item => {
+          item.PENYERAH = penyerah;
+          item.PENERIMA = penerima;
+        });
+
+        localStorage.setItem('formData', JSON.stringify(data));
+
+        submitButton.disabled = true;
+        buttonText.textContent = 'Menyimpan...';
+        buttonSpinner.classList.remove('d-none');
+
+        showAlert('Data berhasil disimpan! Mengalihkan ke Cetak Selisih...', 'success');
+        setTimeout(() => {
+          console.log('Redirecting to selisih_v1.html');
+          window.location.href = 'selisih_v1.html';
+        }, 2000);
+      } catch (error) {
+        console.error('Error in saveData:', error);
+        showAlert('Terjadi kesalahan saat menyimpan data.', 'error');
       }
-    });
-
-    if (!penyerah || !penerima) {
-      showAlert('Penyerah dan Penerima harus diisi.', 'error');
-      return;
     }
-
-    if (!valid) {
-      showAlert('Qty OH harus diisi dengan angka non-negatif untuk semua item.', 'error');
-      return;
-    }
-
-    data.forEach(item => {
-      item.PENYERAH = penyerah;
-      item.PENERIMA = penerima;
-    });
-
-    localStorage.setItem('formData', JSON.stringify(data));
-
-    submitButton.disabled = true;
-    buttonText.textContent = 'Menyimpan...';
-    buttonSpinner.classList.remove('d-none');
-
-    showAlert('Data berhasil disimpan! Mengalihkan ke Cetak Selisih...', 'success');
-    setTimeout(() => {
-      console.log('Redirecting to selisih_v1.html');
-      window.location.href = 'selisih_v1.html';
-    }, 2000);
-  } catch (error) {
-    console.error('Error in saveData:', error);
-    showAlert('Terjadi kesalahan saat menyimpan data.', 'error');
-  }
-}
 
     document.addEventListener('DOMContentLoaded', loadData);
   </script>
 </body>
-</html>
+</html> 
