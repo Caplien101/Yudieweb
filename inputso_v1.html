@@ -4,21 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
-
-    <title>SO SERAH TRIMA SHIFT</title>
+    <title>SO SERAH TERIMA SHIFT</title>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f3f4f6;
-            /* Warna background lembut */
         }
-
         .card-view {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -31,49 +24,60 @@
             justify-content: space-between;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .card-view:hover {
             transform: translateY(-5px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
-
         .card-body-scroll {
             overflow-y: hidden;
-            /* Menghilangkan scrollbar */
             max-height: 100px;
             font-size: 0.875rem;
             margin-bottom: 8px;
             background-color: #eef1f5;
-            /* Background modern */
             padding: 5px;
             border-radius: 5px;
         }
-
         .card-view h5 {
             font-size: 0.9rem;
             margin-bottom: 4px;
         }
-
         .input-group {
             margin-top: 5px;
         }
-
         .input-group-text,
         .form-control {
             font-size: 16px;
-            /* Minimal 16px untuk mencegah zoom otomatis di perangkat seluler */
         }
-
         .btn-spaced {
             margin: 15px 0;
             margin-left: auto;
             margin-right: auto;
             display: block;
         }
-
+        #searchInput {
+            border-radius: 8px 0 0 8px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.2s;
+        }
+        #searchInput:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
         .alert-custom {
-            display: none;
-            margin-top: 20px;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .alert-custom.show {
+            display: block;
+            opacity: 1;
         }
     </style>
 </head>
@@ -81,14 +85,11 @@
 <body>
     <div id="content" class="container mt-5">
         <h2>SO SERAH TERIMA SHIFT</h2>
-
-        <!-- Form Input -->
         <form id="pluForm" class="mt-4">
             <div class="mb-3">
                 <label for="tanggal" class="form-label">Tanggal:</label>
                 <input type="date" class="form-control" id="tanggal" name="TANGGAL" required>
             </div>
-
             <div class="mb-3">
                 <label for="shift" class="form-label">Shift:</label>
                 <select id="shift" class="form-select" name="SHIFT" required>
@@ -98,38 +99,30 @@
                     <option value="Shift 3">Shift 3</option>
                 </select>
             </div>
-
-            <!-- Tombol Ambil Data -->
             <button type="button" class="btn btn-primary mt-2" id="fetchDataBtn" onclick="fetchData()" disabled>
                 <span class="spinner-border spinner-border-sm d-none" id="fetchButtonSpinner" aria-hidden="true"></span>
                 <span role="status" id="fetchButtonText">Ambil Data</span>
             </button>
         </form>
-
-        <!-- Group CardView Formulir -->
-        <div id="cardContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-4">
-            <!-- Data akan dimuat di sini oleh JavaScript -->
+        <div class="mb-3 input-group">
+            <input type="text" class="form-control" id="searchInput" placeholder="Cari PLU atau Deskripsi..." aria-label="Cari PLU atau Deskripsi">
+            <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('searchInput').value = ''; searchCards();">Reset</button>
         </div>
-
-        <!-- Alert untuk notifikasi keberhasilan -->
-        <div id="response" class="alert alert-success alert-custom" role="alert">
-            Data berhasil dikirim!
-        </div>
-
-        <!-- Tombol Simpan Data -->
-        <button type="button" class="btn btn-success mt-2 btn-spaced" id="submitBtn" onclick="submitForm(event)"
-            disabled>
+        <div id="cardContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-4"></div>
+        <div id="response" class="alert alert-success alert-custom" role="alert"></div>
+        <button type="button" class="btn btn-success mt-2 btn-spaced" id="submitBtn" onclick="submitForm(event)" disabled>
             <span class="spinner-border spinner-border-sm d-none" id="buttonSpinner" aria-hidden="true"></span>
             <span role="status" id="buttonText">Simpan Data</span>
         </button>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwelfEQUFSYBTyQL9auKNT2ygx-0pVBhp_m9TdD-H-2wrgSRtYv-vVNnmmpNn_FkOHlIA/exec';
+        let allData = []; // Simpan semua data untuk pencarian
 
-        // Muat data dari localStorage saat halaman dimuat
         window.onload = function () {
             loadFromLocalStorage();
-            checkFormValidity(); // Validasi form saat halaman dimuat
+            checkFormValidity();
         };
 
         function fetchData() {
@@ -144,65 +137,77 @@
             fetch(scriptURL)
                 .then(response => response.json())
                 .then(data => {
-                    const cardContainer = document.getElementById('cardContainer');
-                    cardContainer.innerHTML = '';
-
-                    data.forEach((row, index) => {
-                        const card = document.createElement('div');
-                        card.className = 'col';
-                        card.innerHTML = ` 
-          <div class="card-view"> 
-            <h5>${row[0]}</h5> 
-            <div class="card-body-scroll"> 
-              <p>${row[1]}</p> 
-            </div> 
-            <div class="input-group mb-2"> 
-              <span class="input-group-text">DISPLAY</span> 
-              <input type="number" class="form-control qty-input" value="${row[2]}" name="DISPLAY" required id="display-${index}">
-            </div> 
-            <div class="input-group mb-2"> 
-              <span class="input-group-text">GUDANG</span> 
-              <input type="number" class="form-control qty-input" value="${row[3]}" name="GUDANG" required id="gudang-${index}">
-            </div> 
-            <div class="input-group"> 
-              <span class="input-group-text">TOTAL</span> 
-              <input type="number" class="form-control qty-input" value="${row[4]}" name="TOTAL" required id="total-${index}" readonly> 
-            </div> 
-          </div>`;
-
-                        cardContainer.appendChild(card);
-
-                        // Add event listeners to update the total and save to localStorage
-                        const displayInput = document.getElementById(`display-${index}`);
-                        const gudangInput = document.getElementById(`gudang-${index}`);
-                        displayInput.addEventListener('input', () => { updateTotal(index); saveToLocalStorage(); });
-                        gudangInput.addEventListener('input', () => { updateTotal(index); saveToLocalStorage(); });
-                    });
-
-                    // Simpan data yang diambil (dengan values awal) ke localStorage
+                    allData = data.map(row => ({
+                        PLU: String(row[0] || ''), // Konversi PLU ke string
+                        DESCRIPTION: String(row[1] || ''), // Konversi DESCRIPTION ke string
+                        DISPLAY: parseFloat(row[2]) || 0,
+                        GUDANG: parseFloat(row[3]) || 0,
+                        TOTAL: parseFloat(row[4]) || 0
+                    }));
+                    renderCards(allData);
                     saveToLocalStorage();
-
                     fetchDataBtn.disabled = false;
                     fetchButtonSpinner.classList.add('d-none');
                     fetchButtonText.textContent = 'Ambil Data';
-
-                    checkFormValidity(); // Validasi form setelah data diambil
+                    checkFormValidity();
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
+                    showAlert('Terjadi kesalahan saat mengambil data. Silakan coba lagi.', 'danger');
                     fetchDataBtn.disabled = false;
                     fetchButtonSpinner.classList.add('d-none');
                     fetchButtonText.textContent = 'Ambil Data';
-
-                    alert('Terjadi kesalahan saat mengambil data. Silakan coba lagi.');
                 });
+        }
+
+        function renderCards(data) {
+            const cardContainer = document.getElementById('cardContainer');
+            cardContainer.innerHTML = '';
+            if (data.length === 0) {
+                cardContainer.innerHTML = '<div class="alert alert-info">Tidak ada data yang sesuai dengan pencarian.</div>';
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'col';
+                card.innerHTML = `
+                    <div class="card-view">
+                        <h5>${item.PLU}</h5>
+                        <div class="card-body-scroll">
+                            <p>${item.DESCRIPTION}</p>
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">DISPLAY</span>
+                            <input type="number" class="form-control qty-input" value="${item.DISPLAY}" name="DISPLAY" required id="display-${index}">
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">GUDANG</span>
+                            <input type="number" class="form-control qty-input" value="${item.GUDANG}" name="GUDANG" required id="gudang-${index}">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text">TOTAL</span>
+                            <input type="number" class="form-control qty-input" value="${item.TOTAL}" name="TOTAL" required id="total-${index}" readonly>
+                        </div>
+                    </div>`;
+                fragment.appendChild(card);
+            });
+
+            cardContainer.appendChild(fragment);
+
+            data.forEach((_, index) => {
+                const displayInput = document.getElementById(`display-${index}`);
+                const gudangInput = document.getElementById(`gudang-${index}`);
+                displayInput.addEventListener('input', () => { updateTotal(index); saveToLocalStorage(); });
+                gudangInput.addEventListener('input', () => { updateTotal(index); saveToLocalStorage(); });
+            });
         }
 
         function updateTotal(index) {
             const displayValue = parseFloat(document.getElementById(`display-${index}`).value) || 0;
             const gudangValue = parseFloat(document.getElementById(`gudang-${index}`).value) || 0;
             const totalField = document.getElementById(`total-${index}`);
-
             totalField.value = displayValue + gudangValue;
         }
 
@@ -221,115 +226,98 @@
                     SHIFT: shift,
                     PLU: card.getElementsByTagName('h5')[0].textContent,
                     DESCRIPTION: card.getElementsByTagName('p')[0].textContent,
-                    DISPLAY: inputs[0].value,
-                    GUDANG: inputs[1].value,
-                    TOTAL: inputs[2].value
-                };
-            });
-
-            // Simpan data yang akan dikirim ke localStorage (seperti sebelumnya)
-            localStorage.setItem('formData', JSON.stringify(dataToSubmit));
-
-            const submitBtn = document.getElementById('submitBtn');
-            const buttonSpinner = document.getElementById('buttonSpinner');
-            const buttonText = document.getElementById('buttonText');
-            const responseElement = document.getElementById('response');
-
-            submitBtn.disabled = true;
-            buttonSpinner.classList.remove('d-none');
-            buttonText.textContent = 'Loading...';
-
-            // Simulasi pengiriman data berhasil
-            setTimeout(() => {
-                submitBtn.disabled = true;
-                buttonSpinner.classList.add('d-none');
-                buttonText.textContent = 'Simpan Data';
-                responseElement.textContent = 'Data berhasil disimpan!, lanjutkan untuk cek on hand';
-                responseElement.style.display = 'block';
-
-                setTimeout(() => {
-                    responseElement.style.display = 'none';
-                    window.location.href = 'onhand_v1.html'; // Redirect setelah alert menghilang
-                }, 3000);
-
-                // Disable editing of DISPLAY and GUDANG fields after successful submission
-                document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"], #cardContainer .card-view input[name="GUDANG"]').forEach(input => {
-                    input.setAttribute('readonly', true);
-                });
-            }, 1000); // Simulasi waktu tunggu 1 detik
-        }
-
-        // Fungsi untuk menyimpan seluruh data ke localStorage (real-time, menggunakan formData untuk kompatibilitas)
-        function saveToLocalStorage() {
-            const tanggal = document.getElementById('tanggal').value;
-            const shift = document.getElementById('shift').value;
-            const cardContainer = document.getElementById('cardContainer');
-            const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
-
-            if (cards.length === 0) return; // Jangan simpan jika belum ada data
-
-            const formData = cards.map(card => {
-                const inputs = card.getElementsByTagName('input');
-                return {
-                    TANGGAL: tanggal,
-                    SHIFT: shift,
-                    PLU: card.getElementsByTagName('h5')[0].textContent,
-                    DESCRIPTION: card.getElementsByTagName('p')[0].textContent,
                     DISPLAY: inputs[0].value || 0,
                     GUDANG: inputs[1].value || 0,
                     TOTAL: inputs[2].value || 0
                 };
             });
 
-            localStorage.setItem('formData', JSON.stringify(formData));
+            localStorage.setItem('formData', JSON.stringify(allData)); // Simpan semua data, bukan hanya yang ditampilkan
+
+            const submitBtn = document.getElementById('submitBtn');
+            const buttonSpinner = document.getElementById('buttonSpinner');
+            const buttonText = document.getElementById('buttonText');
+
+            submitBtn.disabled = true;
+            buttonSpinner.classList.remove('d-none');
+            buttonText.textContent = 'Loading...';
+
+            setTimeout(() => {
+                submitBtn.disabled = true;
+                buttonSpinner.classList.add('d-none');
+                buttonText.textContent = 'Simpan Data';
+                showAlert('Data berhasil disimpan! Lanjutkan untuk cek on hand.', 'success');
+
+                document.querySelectorAll('#cardContainer .card-view input[name="DISPLAY"], #cardContainer .card-view input[name="GUDANG"]').forEach(input => {
+                    input.setAttribute('readonly', true);
+                });
+
+                setTimeout(() => {
+                    window.location.href = 'onhand_v1.html';
+                }, 3000);
+            }, 1000);
         }
 
-        // Fungsi untuk memuat data dari localStorage
+        function saveToLocalStorage() {
+            const tanggal = document.getElementById('tanggal').value;
+            const shift = document.getElementById('shift').value;
+            const cardContainer = document.getElementById('cardContainer');
+            const cards = Array.from(cardContainer.getElementsByClassName('card-view'));
+
+            if (cards.length === 0) return;
+
+            const formData = cards.map(card => {
+                const inputs = card.getElementsByTagName('input');
+                const plu = card.getElementsByTagName('h5')[0].textContent;
+                const description = card.getElementsByTagName('p')[0].textContent;
+                const existingData = allData.find(item => item.PLU === plu) || {};
+                return {
+                    TANGGAL: tanggal,
+                    SHIFT: shift,
+                    PLU: plu,
+                    DESCRIPTION: description,
+                    DISPLAY: parseFloat(inputs[0].value) || existingData.DISPLAY || 0,
+                    GUDANG: parseFloat(inputs[1].value) || existingData.GUDANG || 0,
+                    TOTAL: parseFloat(inputs[2].value) || existingData.TOTAL || 0
+                };
+            });
+
+            // Perbarui allData dengan data dari kartu yang ditampilkan
+            formData.forEach(newItem => {
+                const index = allData.findIndex(item => item.PLU === newItem.PLU);
+                if (index !== -1) {
+                    allData[index] = newItem;
+                } else {
+                    allData.push(newItem);
+                }
+            });
+
+            localStorage.setItem('formData', JSON.stringify(allData));
+        }
+
         function loadFromLocalStorage() {
             const savedData = localStorage.getItem('formData');
             if (!savedData) return;
 
-            const formData = JSON.parse(savedData);
-            const cardContainer = document.getElementById('cardContainer');
-            cardContainer.innerHTML = '';
-
-            // Set tanggal dan shift jika ada
-            document.getElementById('tanggal').value = formData[0]?.TANGGAL || '';
-            document.getElementById('shift').value = formData[0]?.SHIFT || '';
-
-            formData.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'col';
-                card.innerHTML = ` 
-      <div class="card-view"> 
-        <h5>${item.PLU}</h5> 
-        <div class="card-body-scroll"> 
-          <p>${item.DESCRIPTION}</p> 
-        </div> 
-        <div class="input-group mb-2"> 
-          <span class="input-group-text">DISPLAY</span> 
-          <input type="number" class="form-control qty-input" value="${item.DISPLAY}" name="DISPLAY" required id="display-${index}">
-        </div> 
-        <div class="input-group mb-2"> 
-          <span class="input-group-text">GUDANG</span> 
-          <input type="number" class="form-control qty-input" value="${item.GUDANG}" name="GUDANG" required id="gudang-${index}">
-        </div> 
-        <div class="input-group"> 
-          <span class="input-group-text">TOTAL</span> 
-          <input type="number" class="form-control qty-input" value="${item.TOTAL}" name="TOTAL" required id="total-${index}" readonly> 
-        </div> 
-      </div>`;
-
-                cardContainer.appendChild(card);
-
-                // Add event listeners to update the total and save to localStorage
-                const displayInput = document.getElementById(`display-${index}`);
-                const gudangInput = document.getElementById(`gudang-${index}`);
-                displayInput.addEventListener('input', () => { updateTotal(index); saveToLocalStorage(); });
-                gudangInput.addEventListener('input', () => { updateTotal(index); saveToLocalStorage(); });
-            });
-
-            checkFormValidity(); // Revalidasi setelah muat data
+            try {
+                const formData = JSON.parse(savedData);
+                allData = formData.map(item => ({
+                    PLU: String(item.PLU || ''),
+                    DESCRIPTION: String(item.DESCRIPTION || ''),
+                    DISPLAY: parseFloat(item.DISPLAY) || 0,
+                    GUDANG: parseFloat(item.GUDANG) || 0,
+                    TOTAL: parseFloat(item.TOTAL) || 0,
+                    TANGGAL: item.TANGGAL || '',
+                    SHIFT: item.SHIFT || ''
+                }));
+                document.getElementById('tanggal').value = formData[0]?.TANGGAL || '';
+                document.getElementById('shift').value = formData[0]?.SHIFT || '';
+                renderCards(allData);
+                checkFormValidity();
+            } catch (error) {
+                console.error('Error parsing localStorage data:', error);
+                showAlert('Data di localStorage tidak valid.', 'danger');
+            }
         }
 
         function checkFormValidity() {
@@ -347,13 +335,36 @@
             submitBtn.disabled = !(tanggal && shift && allInputsFilled);
         }
 
+        function searchCards() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = allData.filter(item => {
+                const plu = String(item.PLU || '').toLowerCase();
+                const description = String(item.DESCRIPTION || '').toLowerCase();
+                return plu.includes(searchInput) || description.includes(searchInput);
+            });
+            renderCards(filteredData);
+            checkFormValidity();
+        }
+
+        function showAlert(message, type) {
+            const responseElement = document.getElementById('response');
+            responseElement.textContent = message;
+            responseElement.className = `alert alert-${type} alert-custom show`;
+            responseElement.style.display = 'block';
+
+            setTimeout(() => {
+                responseElement.classList.remove('show');
+                setTimeout(() => {
+                    responseElement.style.display = 'none';
+                }, 300);
+            }, 3000);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', searchCards);
         document.getElementById('tanggal').addEventListener('input', () => { checkFormValidity(); saveToLocalStorage(); });
         document.getElementById('shift').addEventListener('change', () => { checkFormValidity(); saveToLocalStorage(); });
         document.getElementById('cardContainer').addEventListener('input', checkFormValidity);
     </script>
-
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
