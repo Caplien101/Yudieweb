@@ -28,6 +28,7 @@
         .form-control-editable {
             background-color: #eef1f5;
             border: 1px solid #ced4da;
+            touch-action: manipulation;
         }
 
         .card-content {
@@ -55,13 +56,13 @@
         }
 
         .card-content input {
-            max-width: 80px;
-            font-size: 12px;
+            max-width: 90px;
+            font-size: 16px;
             text-align: center;
             padding: 4px;
+            touch-action: manipulation;
         }
 
-        /* Tabel responsif */
         .table-container {
             display: none;
             margin-top: 20px;
@@ -78,7 +79,7 @@
             padding: 4px;
             text-align: center;
             font-size: 11px;
-            min-width: 50px; /* Pastikan kolom tidak terlalu sempit */
+            min-width: 50px;
         }
 
         .table-responsive th {
@@ -94,14 +95,22 @@
         }
 
         .table-responsive .description-column {
-            max-width: 150px; /* Batasi lebar kolom Description */
+            max-width: 150px;
         }
 
         .table-responsive .revisi-selisih-column {
-            max-width: 100px; /* Batasi lebar kolom Revisi Selisih */
+            max-width: 100px;
         }
 
-        /* Header info di atas tabel */
+        /* Warna untuk Selisih dan Fixed Selisih */
+        .negative {
+            color: #dc3545; /* Merah untuk nilai negatif */
+        }
+
+        .positive {
+            color: #007bff; /* Biru untuk nilai positif */
+        }
+
         .header-info {
             margin-bottom: 15px;
             font-size: 14px;
@@ -123,8 +132,8 @@
             }
 
             .card-content input {
-                max-width: 70px;
-                font-size: 10px;
+                max-width: 80px;
+                font-size: 16px;
                 padding: 3px;
             }
 
@@ -255,7 +264,6 @@
             <table class="table table-responsive">
                 <thead>
                     <tr>
-                       
                         <th>Description</th>
                         <th>OH</th>
                         <th>Display</th>
@@ -455,23 +463,27 @@
                         ? revisiDisplay + revisiGudang - qtyOh 
                         : '';
 
+                    // Tentukan kelas warna untuk Selisih
+                    const selisihClass = selisih < 0 ? 'negative' : selisih > 0 ? 'positive' : '';
+                    // Tentukan kelas warna untuk Fixed Selisih
+                    const revisiSelisihClass = revisiSelisih !== '' ? (revisiSelisih < 0 ? 'negative' : revisiSelisih > 0 ? 'positive' : '') : '';
+
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                       
                         <td class="description-column">${item.DESCRIPTION || ''}</td>
                         <td>${item.QTY_OH || 0}</td>
                         <td>${item.DISPLAY || 0}</td>
                         <td>${item.GUDANG || 0}</td>
-                        <td>${selisih}</td>
+                        <td class="${selisihClass}">${selisih}</td>
                         <td>${item.REVISI_DISPLAY || ''}</td>
                         <td>${item.REVISI_GUDANG || ''}</td>
-                        <td class="revisi-selisih-column">${revisiSelisih}</td>
+                        <td class="revisi-selisih-column ${revisiSelisihClass}">${revisiSelisih}</td>
                     `;
                     fragment.appendChild(row);
                 });
                 dataTableBody.appendChild(fragment);
             } else {
-                dataTableBody.innerHTML = '<tr><td colspan="9" class="text-center">Tidak ada data yang memenuhi kriteria.</td></tr>';
+                dataTableBody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada data yang memenuhi kriteria.</td></tr>';
             }
 
             localStorage.setItem('formData', JSON.stringify(data));
