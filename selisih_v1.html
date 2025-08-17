@@ -102,13 +102,12 @@
             max-width: 100px;
         }
 
-        /* Warna untuk Selisih dan Fixed Selisih */
         .negative {
-            color: #dc3545; /* Merah untuk nilai negatif */
+            color: #dc3545;
         }
 
         .positive {
-            color: #007bff; /* Biru untuk nilai positif */
+            color: #007bff;
         }
 
         .header-info {
@@ -222,7 +221,6 @@
     <div class="container mt-4">
         <h1 class="text-center">Cetak Selisih</h1>
 
-        <!-- Tanggal, Shift, Penyerah, Penerima -->
         <div class="row mb-4 g-2" id="headerFields">
             <div class="col-md-3 col-sm-6">
                 <label for="tanggal" class="form-label">Tanggal:</label>
@@ -242,15 +240,10 @@
             </div>
         </div>
 
-        <!-- Alert untuk pesan respons -->
         <div id="responseMessage" class="alert-custom"></div>
 
-        <!-- Kontainer untuk kartu -->
-        <div id="cardContainer" class="row row-cols-1 row-cols-md-2 g-3 mt-3">
-            <!-- Data akan dimuat di sini oleh JavaScript -->
-        </div>
+        <div id="cardContainer" class="row row-cols-1 row-cols-md-2 g-3 mt-3"></div>
 
-        <!-- Kontainer untuk header info dan tabel -->
         <div id="tableContainer" class="table-container">
             <div class="header-info" id="headerInfo"></div>
             <div class="text-center mb-3">
@@ -274,13 +267,10 @@
                         <th>Fixed Selisih</th>
                     </tr>
                 </thead>
-                <tbody id="dataTableBody">
-                    <!-- Data akan dimuat di sini oleh JavaScript -->
-                </tbody>
+                <tbody id="dataTableBody"></tbody>
             </table>
         </div>
 
-        <!-- Button Simpan Data -->
         <div class="text-center mb-4 mt-4" id="submitButtonContainer">
             <button class="btn btn-primary btn-animate" id="submitButton" onclick="sendToGoogleSheet()">
                 <span id="buttonText">Simpan dan Kirim ke Google Sheet</span>
@@ -457,16 +447,13 @@
                     const gudang = parseFloat(item.GUDANG) || 0;
                     const qtyOh = parseFloat(item.QTY_OH) || 0;
                     const selisih = display + gudang - qtyOh;
-                    const revisiDisplay = parseFloat(item.REVISI_DISPLAY) || 0;
-                    const revisiGudang = parseFloat(item.REVISI_GUDANG) || 0;
-                    const revisiSelisih = (isValidNumber(item.REVISI_DISPLAY) && isValidNumber(item.REVISI_GUDANG)) 
-                        ? revisiDisplay + revisiGudang - qtyOh 
-                        : '';
 
-                    // Tentukan kelas warna untuk Selisih
+                    const revisiDisplay = isValidNumber(item.REVISI_DISPLAY) ? parseFloat(item.REVISI_DISPLAY) : display;
+                    const revisiGudang = isValidNumber(item.REVISI_GUDANG) ? parseFloat(item.REVISI_GUDANG) : gudang;
+                    const revisiSelisih = revisiDisplay + revisiGudang - qtyOh;
+
                     const selisihClass = selisih < 0 ? 'negative' : selisih > 0 ? 'positive' : '';
-                    // Tentukan kelas warna untuk Fixed Selisih
-                    const revisiSelisihClass = revisiSelisih !== '' ? (revisiSelisih < 0 ? 'negative' : revisiSelisih > 0 ? 'positive' : '') : '';
+                    const revisiSelisihClass = revisiSelisih < 0 ? 'negative' : revisiSelisih > 0 ? 'positive' : '';
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -548,15 +535,23 @@
                         (revisiGudang && (isNaN(revisiGudang) || parseFloat(revisiGudang) < 0))) {
                         valid = false;
                     }
-                    if ((revisiDisplay && !revisiGudang) || (!revisiDisplay && revisiGudang)) {
-                        valid = false;
+                    // Jika salah satu field revisi diisi, isi field lain dengan nilai original
+                    if (revisiDisplay && !revisiGudang) {
+                        item.REVISI_GUDANG = item.GUDANG || 0;
+                        document.getElementById(`revisi-gudang-${index}`).value = item.REVISI_GUDANG;
+                    } else if (!revisiDisplay && revisiGudang) {
+                        item.REVISI_DISPLAY = item.DISPLAY || 0;
+                        document.getElementById(`revisi-display-${index}`).value = item.REVISI_DISPLAY;
                     }
                 });
 
                 if (!valid) {
-                    showAlert('Input revisi harus angka non-negatif dan lengkap (kedua kolom diisi atau kosongkan keduanya).', 'error');
+                    showAlert('Input revisi harus angka non-negatif.', 'error');
                     return;
                 }
+
+                // Perbarui localStorage dengan data yang sudah diisi otomatis
+                localStorage.setItem('formData', JSON.stringify(data));
 
                 const validatedData = data.map(item => {
                     const display = parseFloat(item.DISPLAY) || 0;
@@ -581,7 +576,7 @@
 
                 console.log('Data to send:', JSON.stringify(validatedData));
 
-                if (!confirm("Apakah Anda yakin ingin menyimpan dan mengirim data?")) return;
+                if (!confirm("Apakah Anda yakin ingin menyimpan dan mengirim data? (Field revisi kosong telah diisi dengan nilai asli.)")) return;
 
                 submitButton.disabled = true;
                 buttonText.textContent = 'Mengirim...';
