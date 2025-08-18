@@ -1,553 +1,659 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Halaman Entry Data</title>
-        <script src="https://unpkg.com/html5-qrcode"></script>
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        />
-        <style>
-            :root {
-                --primary-color: #2563eb;
-                --hover-color: #1d4ed8;
-            }
-            body {
-                background-color: #f8f9fa;
-                padding: 16px;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Halaman Entry Data</title>
+    <script defer src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --hover-color: #1d4ed8;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --info-color: #17a2b8;
+            --border-radius: 6px;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', system-ui, sans-serif;
+            padding: 12px;
+            line-height: 1.4;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 8px;
+        }
+
+        /* Toast Styling */
+        .toast-container {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+        }
+
+        .toast {
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-success { background-color: var(--success-color); color: white; }
+        .toast-error { background-color: var(--error-color); color: white; }
+        .toast-info { background-color: var(--info-color); color: white; }
+
+        /* Scanner Overlay */
+        .scanner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            z-index: 1500;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 320px;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            background: white;
+        }
+
+        .scanner-container .btn-close {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+
+        /* Floating Action Button */
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .floating-btn:hover {
+            background: var(--hover-color);
+            transform: scale(1.1);
+        }
+
+        .floating-btn:focus {
+            outline: 2px solid var(--hover-color);
+            outline-offset: 2px;
+        }
+
+        /* Form and Inputs */
+        .form-control {
+            font-size: 1rem; /* Prevent iOS zoom */
+            touch-action: manipulation;
+            min-height: 44px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        .input-group .btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 1rem;
+        }
+
+        /* Card Container */
+        .card-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            border: 1px solid #dee2e6;
+            border-radius: var(--border-radius);
+            padding: 8px;
+            background: white;
+        }
+
+        .product-card {
+            display: grid;
+            grid-template-columns: 80px 1fr 50px;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+            border: 1px solid #dee2e6;
+            border-radius: var(--border-radius);
+            background: white;
+            padding: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            min-height: 44px;
+        }
+
+        .product-card:hover {
+            background-color: #f1f5f9;
+        }
+
+        .product-card:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: -2px;
+        }
+
+        .product-card .plu {
+            font-size: 0.8rem;
+            color: #000;
+        }
+
+        .product-card .description {
+            font-size: 0.8rem;
+            color: #000;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-card .qty {
+            font-size: 0.8rem;
+            color: #000;
+            text-align: right;
+        }
+
+        .product-card p {
+            margin: 0;
+            font-size: 0.7rem;
+            color: #6c757d;
+        }
+
+        /* Search Input */
+        #tableSearch {
+            max-width: 300px;
+            font-size: 1rem; /* Prevent iOS zoom */
+            touch-action: manipulation;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: var(--border-radius);
+        }
+
+        .modal-header {
+            border-bottom: none;
+            padding: 8px 12px;
+        }
+
+        .modal-body {
+            padding: 8px 12px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        .modal-body .form-label {
+            font-size: 0.7rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 576px) {
             .container {
-                max-width: 1000px;
-                margin: 0 auto;
-                padding: 0 12px;
+                padding: 0 6px;
             }
-            /* Styling untuk toast */
-            .toast-container {
-                position: fixed;
-                top: 20px; /* Letakkan di bagian atas */
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 1000;
-            }
-            .toast {
-                background-color: rgba(255, 59, 48, 0.9); /* Merah iOS */
-                color: white;
-                padding: 12px 20px;
-                border-radius: 20px;
-                font-size: 14px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                opacity: 0;
-                transform: translateY(-20px);
-                transition:
-                    opacity 0.3s ease,
-                    transform 0.3s ease;
-            }
-            .toast.show {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            /* Styling untuk scanner overlay */
-            .scanner-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.9);
-                display: none;
-                z-index: 1000;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-            }
-            #reader {
-                width: 100%;
-                max-width: 400px;
-                margin: 20px auto;
-            }
+
             .floating-btn {
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                width: 56px;
-                height: 56px;
-                background: var(--primary-color);
-                border: none;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                transition: all 0.2s ease;
-                z-index: 100;
+                bottom: 12px;
+                right: 12px;
+                width: 40px;
+                height: 40px;
             }
-            .floating-btn:hover {
-                background: var(--hover-color);
-                transform: scale(1.1);
+
+            .floating-btn .bi {
+                font-size: 1.1rem;
             }
-            .scanner-icon {
-                width: 24px;
-                height: 24px;
-                filter: invert(1);
+
+            .form-control, .btn {
+                font-size: 1rem; /* Prevent iOS zoom */
             }
-            @media (max-width: 768px) {
-                .form-row > .col {
-                    margin-bottom: 12px;
-                }
-                .table-responsive {
-                    overflow-x: auto;
-                }
-                .data-card .btn {
-                    width: 100%;
-                    margin-top: 8px;
-                }
+
+            .scanner-container {
+                padding: 6px;
             }
-            @media (max-width: 767px) {
-                .scan-results .row .col-12 {
-                    width: 100%;
-                }
-                /* Barcode & PLU dibuat bertumpuk */
-                .scan-results .col-12.col-md-6 {
-                    flex: 0 0 100%;
-                    max-width: 100%;
-                }
-                /* Qty dan Tombol Simpan menjadi full width */
-                .scan-results .col-12.col-md-4 {
-                    flex: 0 0 100%;
-                    max-width: 100%;
-                }
-                /* Memberi sedikit margin bawah pada input agar lebih rapi */
-                .scan-results .form-control {
-                    margin-bottom: 10px;
-                }
+
+            #reader {
+                max-width: 100%;
             }
-            .table-container {
-                max-height: 75vh; /* Maksimum tinggi tabel 3/4 layar */
-                overflow-y: auto; /* Aktifkan scroll vertikal */
-                border: 1px solid #dee2e6; /* Tambahkan border untuk estetika */
-                border-radius: 8px;
+
+            #tableSearch {
+                max-width: 100%;
             }
-        </style>
-    </head>
-    <body>
-        <!-- Container untuk toast -->
-        <div class="toast-container">
-            <div id="toast" class="toast text-center">Pesan notifikasi</div>
+
+            .product-card {
+                grid-template-columns: 60px 1fr 40px;
+                gap: 6px;
+                padding: 3px;
+                margin-bottom: 4px;
+            }
+
+            .product-card p {
+                font-size: 0.65rem;
+            }
+
+            .product-card .plu,
+            .product-card .description,
+            .product-card .qty {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <h2 class="text-start mb-2 fw-bold text-primary" style="font-size: 1.25rem;">Entry Data</h2>
+
+        <!-- Input Rak and Button -->
+        <div class="row mb-2 align-items-center">
+            <div class="col-12 col-md-6">
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="rakFilter"
+                        class="form-control form-control-sm"
+                        placeholder="Masukkan Rak (contoh: AT1)"
+                        aria-label="Rak Filter"
+                        required
+                    />
+                    <button id="btnGetData" class="btn btn-primary btn-sm" type="button">
+                        Get Data
+                        <span id="loadingSpinner" class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true" style="display: none"></span>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="container">
-            <!-- Header -->
-            <h3 class="text-center mb-4 fw-bold text-primary">Entry Data</h3>
-            <!-- Input rak + Button dalam satu baris -->
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <!-- Input untuk filter rak -->
-                        <input
-                            type="text"
-                            id="rakFilter"
-                            class="form-control"
-                            placeholder="Masukkan Rak (contoh: AT1)"
-                            aria-label="Rak Filter"
-                        />
-                        <!-- Tombol dengan spinner -->
-                        <button
-                            id="btnGetData"
-                            class="btn btn-primary"
-                            type="button"
-                        >
-                            Get Data
-                            <span
-                                id="loadingSpinner"
-                                class="spinner-border spinner-border-sm ms-2"
-                                role="status"
-                                aria-hidden="true"
-                                style="display: none"
-                            ></span>
-                        </button>
+        <!-- Scanner Overlay -->
+        <div class="scanner-container" role="dialog" aria-label="QR Code Scanner">
+            <div id="reader" role="region" aria-label="QR Code Scanner Window"></div>
+            <button class="btn btn-close mt-2" onclick="stopScanner()" aria-label="Tutup Scanner"></button>
+        </div>
+
+        <!-- Scan Results Modal -->
+        <div class="modal fade" id="scanResultsModal" tabindex="-1" aria-labelledby="scanResultsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="scanResultsModalLabel" style="font-size: 1rem;">Data Produk</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                </div>
-            </div>
-            <!-- Scanner Overlay -->
-            <div class="scanner-container">
-                <div id="reader"></div>
-                <button class="btn btn-light mt-3" onclick="stopScanner()">
-                    Tutup Scanner
-                </button>
-            </div>
-            <!-- Hasil Scan -->
-            <div class="scan-results" id="scanResults" style="display: none">
-                <h5 class="mb-3 fw-semibold">Data Produk</h5>
-                <div
-                    class="data-card p-3 border rounded shadow-sm"
-                    id="dataCard"
-                >
-                    <div class="row g-3">
-                        <!-- Barcode & PLU -->
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">Barcode</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="barcodeInput"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">PLU</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="pluInput"
-                                readonly
-                            />
-                        </div>
-                        <!-- Deskripsi -->
-                        <div class="col-12">
-                            <label class="form-label">Deskripsi</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="descInput"
-                                readonly
-                            />
-                        </div>
-                        <!-- Qty -->
-                        <div class="col-12 col-md-4">
-                            <label class="form-label">Qty</label>
-                            <input
-                                type="number"
-                                class="form-control"
-                                id="qtyInput"
-                                value="1"
-                                min="1"
-                            />
-                        </div>
-                        <!-- Tombol Simpan Data -->
-                        <div class="col-12 col-md-4 d-flex align-items-end">
-                            <button
-                                class="btn btn-primary w-100"
-                                onclick="saveData()"
-                            >
-                                Simpan Data
-                            </button>
+                    <div class="modal-body">
+                        <div class="row g-2">
+                            <div class="col-12 col-md-6">
+                                <label for="barcodeInput" class="form-label" style="font-size: 0.7rem;">Barcode</label>
+                                <input type="text" class="form-control form-control-sm" id="barcodeInput" readonly aria-readonly="true" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="pluInput" class="form-label" style="font-size: 0.7rem;">PLU</label>
+                                <input type="text" class="form-control form-control-sm" id="pluInput" readonly aria-readonly="true" />
+                            </div>
+                            <div class="col-12">
+                                <label for="descInput" class="form-label" style="font-size: 0.7rem;">Deskripsi</label>
+                                <input type="text" class="form-control form-control-sm" id="descInput" readonly aria-readonly="true" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="qtyInput" class="form-label" style="font-size: 0.7rem;">Qty</label>
+                                <input type="number" class="form-control form-control-sm" id="qtyInput" value="1" min="1" aria-describedby="qtyHelp" />
+                                <small id="qtyHelp" class="form-text text-muted" style="font-size: 0.7rem;">Masukkan jumlah produk</small>
+                            </div>
+                            <div class="col-12 col-md-6 d-flex align-items-end">
+                                <button class="btn btn-primary btn-sm w-100" onclick="saveData()" aria-label="Simpan Data">Simpan Data</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Tabel Data -->
-            <div class="mt-4">
-                <div class="table-container">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>PLU</th>
-                                <th>Deskripsi</th>
-                                <th>Qty</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dataTable"></tbody>
-                    </table>
                 </div>
             </div>
         </div>
+
+        <!-- Data Card Section -->
+        <div class="mt-2">
+            <!-- Search Input -->
+            <div class="mb-2">
+                <input
+                    type="text"
+                    id="tableSearch"
+                    class="form-control form-control-sm"
+                    placeholder="Cari PLU/Deskripsi..."
+                    aria-label="Pencarian Produk"
+                />
+            </div>
+            <div class="card-container" id="dataCards"></div>
+        </div>
+
         <!-- Next Button -->
-        <div class="mt-4 text-center">
-            <button id="nextPageBtn" class="btn btn-success">Next Page</button>
+        <div class="mt-2 text-center">
+            <button id="nextPageBtn" class="btn btn-success btn-sm px-3 py-1" aria-label="Lanjut ke Halaman Berikutnya">Next Page</button>
         </div>
-        <!-- Floating Button -->
-        <button id="startScanner" class="floating-btn">
-            <img
-                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgN2g0YTEgMSAwIDAgMSAxIDF2NG0tNiAwSDhhMSAxIDAgMCAxLTEtMVY4bTAgOWg0YTEgMSAwIDAgMSAxIDF2NG0tNiAwSDhhMSAxIDAgMCAxLTEtMXYtNCIvPjwvc3ZnPg=="
-                class="scanner-icon"
-            />
-        </button>
-        <script>
-            // Fungsi untuk menampilkan toast
-            function showToast(message) {
-                const toast = document.getElementById("toast");
-                toast.textContent = message;
-                toast.classList.add("show");
+    </div>
 
-                setTimeout(() => {
-                    toast.classList.remove("show");
-                }, 3000);
+    <!-- Floating Action Button -->
+    <button id="startScanner" class="floating-btn" aria-label="Buka Scanner QR Code" title="Buka Scanner">
+        <i class="bi bi-qr-code-scan scanner-icon fs-5 text-white"></i>
+    </button>
+
+    <script>
+        // Toast Notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show toast-${type}`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // Override alert with toast
+        window.alert = function (message, type = 'info') {
+            showToast(message, type);
+        };
+
+        const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ14bYNZ3F2E36Rd5kuE9T0-pIhwr-ZwUwre3FYlbmAGsnTTvwCcQz6pI56mIiEvakAzsNuv1WGCM6B/pub?gid=0&single=true&output=csv";
+        let filteredProductDatabase = [];
+        let isLoading = false;
+        const scanResultsModal = new bootstrap.Modal(document.getElementById('scanResultsModal'));
+
+        async function loadProductData(selectedRak) {
+            if (!selectedRak) {
+                showToast("Rak kosong, silakan masukkan kode rak.", 'error');
+                return;
             }
-
-            // Ganti alert() dengan toast
-            window.alert = function (message) {
-                showToast(message);
-            };
-
-            // Implementasi lainnya tetap sama, hanya ganti alert() dengan showToast()
-            const GOOGLE_SHEET_URL =
-                "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ14bYNZ3F2E36Rd5kuE9T0-pIhwr-ZwUwre3FYlbmAGsnTTvwCcQz6pI56mIiEvakAzsNuv1WGCM6B/pub?gid=0&single=true&output=csv";
-            let filteredProductDatabase = [];
-            let isLoading = false;
-
-            async function loadProductData(selectedRak) {
-                if (!selectedRak) {
-                    showToast("Rak kosong, tidak ada data yang dimuat.");
-                    return;
-                }
-                try {
-                    const response = await fetch(GOOGLE_SHEET_URL);
-                    const csvData = await response.text();
-                    const rows = csvData
-                        .split("\n")
-                        .filter(row => row.trim() !== "");
-                    const headers = rows[0]
-                        .split(",")
-                        .map(h => h.trim().toLowerCase());
-                    const productDatabase = rows.slice(1).map(row => {
-                        const cells = row.split(",").map(c => c.trim());
-                        return {
-                            rak: cells[0] || "",
-                            plu: cells[1] || "",
-                            barcode: cells[2] || "",
-                            description: cells[3] || ""
-                        };
-                    });
-                    filteredProductDatabase = productDatabase.filter(
-                        item =>
-                            item.rak.toLowerCase() === selectedRak.toLowerCase()
-                    );
-                    const dataTable = document.getElementById("dataTable");
-                    while (dataTable.rows.length > 1) {
-                        dataTable.deleteRow(1);
-                    }
-                    filteredProductDatabase.forEach(item => {
-                        const row = dataTable.insertRow();
-                        row.innerHTML = `
-                        <td>${item.plu}</td>
-                        <td>${item.description}</td>
-                        <td>0</td>
-                    `;
-                    });
-                    localStorage.setItem(
-                        "filteredProductData",
-                        JSON.stringify(filteredProductDatabase)
-                    );
-                } catch (error) {
-                    console.error("Gagal memuat data:", error);
-                    showToast("Error: Gagal memuat data dari Google Sheet!");
-                }
-            }
-
-            document
-                .getElementById("btnGetData")
-                .addEventListener("click", function () {
-                    const button = document.getElementById("btnGetData");
-                    const spinner = document.getElementById("loadingSpinner");
-                    let selectedRak = document
-                        .getElementById("rakFilter")
-                        .value.trim();
-                    if (!selectedRak) {
-                        showToast(
-                            "Textbox kosong, tidak ada data yang dimuat."
-                        );
-                        return;
-                    }
-                    if (isLoading) {
-                        showToast("Proses sedang berjalan, harap tunggu...");
-                        return;
-                    }
-                    isLoading = true;
-                    button.disabled = true;
-                    spinner.style.display = "inline-block";
-                    loadProductData(selectedRak).finally(() => {
-                        isLoading = false;
-                        button.disabled = false;
-                        spinner.style.display = "none";
-                    });
+            try {
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) throw new Error('Gagal mengambil data dari server.');
+                const csvData = await response.text();
+                const rows = csvData.split('\n').filter(row => row.trim() !== '');
+                const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+                const productDatabase = rows.slice(1).map(row => {
+                    const cells = row.split(',').map(c => c.trim());
+                    return {
+                        rak: cells[0] || '',
+                        plu: cells[1] || '',
+                        barcode: cells[2] || '',
+                        description: cells[3] || ''
+                    };
                 });
-
-            const dataTable = document.getElementById("dataTable");
-            dataTable.addEventListener("click", function (event) {
-                const row = event.target.closest("tr");
-                if (!row) return;
-                const plu = row.cells[0].textContent;
-                const product = filteredProductDatabase.find(
-                    item => item.plu === plu
+                filteredProductDatabase = productDatabase.filter(
+                    item => item.rak.toLowerCase() === selectedRak.toLowerCase()
                 );
+                const cardContainer = document.getElementById('dataCards');
+                cardContainer.innerHTML = ''; // Clear cards
+                filteredProductDatabase.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.tabIndex = 0;
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('aria-label', `Pilih Produk ${item.plu}`);
+                    card.innerHTML = `
+                        <p><strong></strong> <span class="plu">${item.plu}</span></p>
+                        <p><strong></strong> <span class="description">${item.description}</span></p>
+                        <p><strong></strong> <span class="qty">0</span></p>
+                    `;
+                    cardContainer.appendChild(card);
+                });
+                try {
+                    localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
+                } catch (e) {
+                    showToast('Gagal menyimpan data ke localStorage.', 'error');
+                }
+            } catch (error) {
+                console.error('Gagal memuat data:', error);
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('btnGetData').addEventListener('click', function () {
+            const button = this;
+            const spinner = document.getElementById('loadingSpinner');
+            const selectedRak = document.getElementById('rakFilter').value.trim();
+            if (!selectedRak) {
+                showToast('Masukkan kode rak terlebih dahulu.', 'error');
+                return;
+            }
+            if (isLoading) {
+                showToast('Proses sedang berjalan, harap tunggu...', 'info');
+                return;
+            }
+            isLoading = true;
+            button.disabled = true;
+            spinner.style.display = 'inline-block';
+            loadProductData(selectedRak).finally(() => {
+                isLoading = false;
+                button.disabled = false;
+                spinner.style.display = 'none';
+            });
+        });
+
+        // Event delegation for card selection
+        document.getElementById('dataCards').addEventListener('click', function (event) {
+            const card = event.target.closest('.product-card');
+            if (!card) return;
+            const plu = card.querySelector('.plu').textContent;
+            const product = filteredProductDatabase.find(item => item.plu === plu);
+            if (product) {
+                document.getElementById('barcodeInput').value = product.barcode || '-';
+                document.getElementById('pluInput').value = product.plu || '-';
+                document.getElementById('descInput').value = product.description || '-';
+                scanResultsModal.show();
+                document.getElementById('qtyInput').focus();
+            } else {
+                showToast('Produk tidak ditemukan di database.', 'error');
+            }
+        });
+
+        // Keyboard navigation for cards
+        document.getElementById('dataCards').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                const card = event.target.closest('.product-card');
+                if (!card) return;
+                const plu = card.querySelector('.plu').textContent;
+                const product = filteredProductDatabase.find(item => item.plu === plu);
                 if (product) {
-                    document.getElementById("barcodeInput").value =
-                        product.barcode || "-";
-                    document.getElementById("pluInput").value =
-                        product.plu || "-";
-                    document.getElementById("descInput").value =
-                        product.description || "-";
-                    document.getElementById("scanResults").style.display =
-                        "block";
+                    document.getElementById('barcodeInput').value = product.barcode || '-';
+                    document.getElementById('pluInput').value = product.plu || '-';
+                    document.getElementById('descInput').value = product.description || '-';
+                    scanResultsModal.show();
+                    document.getElementById('qtyInput').focus();
                 } else {
-                    showToast("Produk tidak ditemukan!");
+                    showToast('Produk tidak ditemukan di database.', 'error');
+                }
+            }
+        });
+
+        let scanner;
+        const scannerContainer = document.querySelector('.scanner-container');
+
+        async function startScanner() {
+            try {
+                scannerContainer.style.display = 'flex';
+                showToast('Memulai scanner...', 'info');
+                if (!scanner) {
+                    scanner = new Html5Qrcode('reader');
+                }
+                const cameras = await Html5Qrcode.getCameras();
+                if (cameras.length === 0) {
+                    throw new Error('Tidak ditemukan kamera pada perangkat.');
+                }
+                await scanner.start(
+                    { facingMode: 'environment' },
+                    {
+                        fps: 10,
+                        qrbox: { width: 180, height: 180 },
+                        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                    },
+                    decodedText => {
+                        processBarcode(decodedText);
+                        stopScanner();
+                    },
+                    errorMessage => {
+                        console.warn(`Scan Error: ${errorMessage}`);
+                    }
+                );
+            } catch (err) {
+                console.error(err);
+                stopScanner();
+                showToast(`Gagal memulai scanner: ${err.message}`, 'error');
+            }
+        }
+
+        function stopScanner() {
+            scannerContainer.style.display = 'none';
+            if (scanner) {
+                scanner.stop().then(() => {
+                    scanner = null;
+                }).catch(err => console.error(err));
+            }
+        }
+
+        function processBarcode(barcode) {
+            const trimmedBarcode = barcode.slice(0, -1);
+            const product = filteredProductDatabase.find(item => item.barcode === trimmedBarcode);
+            const barcodeInput = document.getElementById('barcodeInput');
+            const pluInput = document.getElementById('pluInput');
+            const descInput = document.getElementById('descInput');
+            barcodeInput.value = '';
+            pluInput.value = '';
+            descInput.value = '';
+            if (product) {
+                barcodeInput.value = product.barcode;
+                pluInput.value = product.plu;
+                descInput.value = product.description;
+                scanResultsModal.show();
+                document.getElementById('qtyInput').focus();
+                showToast('Barcode berhasil dipindai!', 'success');
+            } else {
+                showToast('Produk tidak ditemukan di database.', 'error');
+            }
+        }
+
+        document.getElementById('startScanner').addEventListener('click', startScanner);
+
+        function saveData() {
+            const barcodeInput = document.getElementById('barcodeInput');
+            const pluInput = document.getElementById('pluInput');
+            const descInput = document.getElementById('descInput');
+            const qtyInput = document.getElementById('qtyInput');
+            const plu = pluInput.value;
+            const description = descInput.value;
+            const barcode = barcodeInput.value;
+            const qty = parseInt(qtyInput.value);
+            if (!plu || !description || !qty || qty < 1) {
+                showToast('Harap isi semua field dengan data yang valid.', 'error');
+                return;
+            }
+            const card = Array.from(document.querySelectorAll('.product-card')).find(
+                card => card.querySelector('.plu').textContent === plu
+            );
+            if (!card) {
+                showToast('Produk tidak ditemukan di database.', 'error');
+                return;
+            }
+            const qtyElement = card.querySelector('.qty');
+            const currentQty = parseInt(qtyElement.textContent);
+            qtyElement.textContent = currentQty + qty;
+            const product = filteredProductDatabase.find(item => item.plu === plu);
+            const rak = product ? product.rak : '-';
+            scanResultsModal.hide();
+            barcodeInput.value = '';
+            pluInput.value = '';
+            descInput.value = '';
+            qtyInput.value = 1;
+            updateLocalStorage(rak, plu, barcode, description, currentQty + qty);
+            showToast('Data berhasil disimpan!', 'success');
+        }
+
+        function updateLocalStorage(rak, plu, barcode, description, qty) {
+            let products = JSON.parse(localStorage.getItem('filteredProductData')) || [];
+            const productIndex = products.findIndex(item => item.plu === plu);
+            if (productIndex !== -1) {
+                products[productIndex].qty = qty;
+            } else {
+                products.push({ rak, plu, barcode, description, qty });
+            }
+            try {
+                localStorage.setItem('filteredProductData', JSON.stringify(products));
+            } catch (e) {
+                showToast('Gagal menyimpan data ke localStorage.', 'error');
+            }
+        }
+
+        document.getElementById('nextPageBtn').addEventListener('click', function () {
+            const filteredProductData = localStorage.getItem('filteredProductData');
+            if (!filteredProductData) {
+                showToast('Tidak ada data untuk dilanjutkan.', 'error');
+                return;
+            }
+            try {
+                sessionStorage.setItem('filteredProductData', filteredProductData);
+                window.location.href = 'next-page.html';
+            } catch (e) {
+                showToast('Gagal menyimpan data ke sessionStorage.', 'error');
+            }
+        });
+
+        // Card Search Functionality
+        document.getElementById('tableSearch').addEventListener('input', function () {
+            const searchValue = this.value.trim().toLowerCase();
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                const plu = card.querySelector('.plu').textContent.toLowerCase();
+                const description = card.querySelector('.description').textContent.toLowerCase();
+                if (searchValue === '') {
+                    card.style.display = '';
+                } else if (!isNaN(searchValue) && plu.includes(searchValue)) {
+                    card.style.display = '';
+                } else if (description.includes(searchValue)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
                 }
             });
-
-            let scanner;
-            const startScannerBtn = document.getElementById("startScanner");
-            const scannerContainer =
-                document.querySelector(".scanner-container");
-
-            async function startScanner() {
-                try {
-                    scannerContainer.style.display = "flex";
-                    if (!scanner) {
-                        scanner = new Html5Qrcode("reader");
-                    }
-                    const cameras = await Html5Qrcode.getCameras();
-                    if (cameras.length === 0) {
-                        throw new Error("Tidak ditemukan kamera");
-                    }
-                    await scanner.start(
-                        { facingMode: "environment" },
-                        {
-                            fps: 10,
-                            qrbox: { width: 250, height: 250 },
-                            experimentalFeatures: {
-                                useBarCodeDetectorIfSupported: true
-                            }
-                        },
-                        decodedText => {
-                            processBarcode(decodedText);
-                            stopScanner();
-                        },
-                        errorMessage => {
-                            console.warn(`Scan Error: ${errorMessage}`);
-                        }
-                    );
-                } catch (err) {
-                    console.error(err);
-                    stopScanner();
-                    showToast(`Gagal memulai scanner: ${err.message}`);
-                }
-            }
-
-            function stopScanner() {
-                scannerContainer.style.display = "none";
-                if (scanner) {
-                    scanner
-                        .stop()
-                        .then(() => {
-                            scanner = null;
-                        })
-                        .catch(err => console.error(err));
-                }
-            }
-
-            function processBarcode(barcode) {
-                const trimmedBarcode = barcode.slice(0, -1);
-                const product = filteredProductDatabase.find(
-                    item => item.barcode === trimmedBarcode
-                );
-                const barcodeInput = document.getElementById("barcodeInput");
-                const pluInput = document.getElementById("pluInput");
-                const descInput = document.getElementById("descInput");
-                const scanResults = document.getElementById("scanResults");
-                barcodeInput.value = "";
-                pluInput.value = "";
-                descInput.value = "";
-                scanResults.style.display = "none";
-                if (product) {
-                    barcodeInput.value = product.barcode;
-                    pluInput.value = product.plu;
-                    descInput.value = product.description;
-                    scanResults.style.display = "block";
-                } else {
-                    showToast("Produk tidak ditemukan!");
-                }
-            }
-
-            startScannerBtn.addEventListener("click", startScanner);
-
-            function saveData() {
-                const barcodeInput = document.getElementById("barcodeInput");
-                const pluInput = document.getElementById("pluInput");
-                const descInput = document.getElementById("descInput");
-                const qtyInput = document.getElementById("qtyInput");
-                const scanResults = document.getElementById("scanResults");
-                const dataTable = document.getElementById("dataTable");
-                const plu = pluInput.value;
-                const description = descInput.value;
-                const barcode = barcodeInput.value;
-                const qty = parseInt(qtyInput.value);
-                if (!plu || !description || !qty) {
-                    showToast("Harap isi semua field!");
-                    return;
-                }
-                const existingRow = Array.from(dataTable.rows).find(
-                    row => row.cells[0].textContent === plu
-                );
-                if (!existingRow) {
-                    showToast(
-                        "Produk tidak ditemukan di database. Penambahan produk baru ditolak."
-                    );
-                    return;
-                }
-                const currentQty = parseInt(existingRow.cells[2].textContent);
-                existingRow.cells[2].textContent = currentQty + qty;
-                const product = filteredProductDatabase.find(
-                    item => item.plu === plu
-                );
-                const rak = product ? product.rak : "-";
-                scanResults.style.display = "none";
-                barcodeInput.value = "";
-                pluInput.value = "";
-                descInput.value = "";
-                qtyInput.value = 1;
-                updateLocalStorage(
-                    rak,
-                    plu,
-                    barcode,
-                    description,
-                    currentQty + qty
-                );
-            }
-
-            function updateLocalStorage(rak, plu, barcode, description, qty) {
-                let products =
-                    JSON.parse(localStorage.getItem("filteredProductData")) ||
-                    [];
-                const productIndex = products.findIndex(
-                    item => item.plu === plu
-                );
-                if (productIndex !== -1) {
-                    products[productIndex].qty = qty;
-                } else {
-                    products.push({
-                        rak: rak,
-                        plu: plu,
-                        barcode: barcode,
-                        description: description,
-                        qty: qty
-                    });
-                }
-                localStorage.setItem(
-                    "filteredProductData",
-                    JSON.stringify(products)
-                );
-            }
-
-            document
-                .getElementById("nextPageBtn")
-                .addEventListener("click", function () {
-                    const filteredProductData = localStorage.getItem(
-                        "filteredProductData"
-                    );
-                    if (!filteredProductData) {
-                        showToast(
-                            "Tidak ada data yang dapat dibawa ke halaman berikutnya!"
-                        );
-                        return;
-                    }
-                    sessionStorage.setItem(
-                        "filteredProductData",
-                        filteredProductData
-                    );
-                    window.location.href = "next-page.html";
-                });
-        </script>
-    </body>
+        });
+    </script>
+</body>
 </html>
