@@ -276,6 +276,11 @@
             .product-card .qty {
                 font-size: 0.75rem;
             }
+
+            .modal-body .btn {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
+            }
         }
     </style>
 </head>
@@ -338,12 +343,16 @@
                                 <input type="text" class="form-control form-control-sm" id="descInput" readonly aria-readonly="true" />
                             </div>
                             <div class="col-12 col-md-6">
-                                <label for="qtyInput" class="form-label" style="font-size: 0.7rem;">Qty</label>
+                                <label for="qtyInput" class="form-label" style="font-size: 0.7rem;"></label>
+                                <small id="savedQty" class="form-text text-info" style="font-size: 0.7rem;">Qty Sebelumnya: 0</small>
                                 <input type="number" class="form-control form-control-sm" id="qtyInput" value="1" min="1" aria-describedby="qtyHelp" />
-                                <small id="qtyHelp" class="form-text text-muted" style="font-size: 0.7rem;">Masukkan jumlah produk</small>
+                                <small id="qtyHelp" class="form-text text-muted" style="font-size: 0.7rem;"></small>
+                                
                             </div>
-                            <div class="col-12 col-md-6 d-flex align-items-end">
-                                <button class="btn btn-primary btn-sm w-100" onclick="saveData()" aria-label="Simpan Data">Simpan Data</button>
+                            <div class="col-12 col-md-6 d-flex align-items-end gap-2">
+                                
+                                <button class="btn btn-warning btn-sm w-50" onclick="resetQty()" aria-label="Reset Qty">Reset Qty</button>
+                                <button class="btn btn-primary btn-sm w-50" onclick="saveData()" aria-label="Simpan Data">Simpan Data</button>
                             </div>
                         </div>
                     </div>
@@ -398,29 +407,58 @@
         let isLoading = false;
         const scanResultsModal = new bootstrap.Modal(document.getElementById('scanResultsModal'));
 
-        async function loadProductData(selectedRak) {
+        async function loadProductData(selectedRak, restore = false) {
             if (!selectedRak) {
                 showToast("Rak kosong, silakan masukkan kode rak.", 'error');
                 return;
             }
             try {
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) throw new Error('Gagal mengambil data dari server.');
-                const csvData = await response.text();
-                const rows = csvData.split('\n').filter(row => row.trim() !== '');
-                const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-                const productDatabase = rows.slice(1).map(row => {
-                    const cells = row.split(',').map(c => c.trim());
-                    return {
-                        rak: cells[0] || '',
-                        plu: cells[1] || '',
-                        barcode: cells[2] || '',
-                        description: cells[3] || ''
-                    };
-                });
-                filteredProductDatabase = productDatabase.filter(
-                    item => item.rak.toLowerCase() === selectedRak.toLowerCase()
-                );
+                // Load saved data from localStorage
+                let savedProducts = JSON.parse(localStorage.getItem('filteredProductData')) || [];
+                const savedRak = localStorage.getItem('selectedRak') || '';
+
+                // Only fetch from Google Sheet if not restoring or rak has changed
+                if (!restore || savedRak.toLowerCase() !== selectedRak.toLowerCase()) {
+                    const response = await fetch(GOOGLE_SHEET_URL);
+                    if (!response.ok) throw new Error('Gagal mengambil data dari server.');
+                    const csvData = await response.text();
+                    const rows = csvData.split('\n').filter(row => row.trim() !== '');
+                    if (rows.length < 1) throw new Error('Data CSV kosong.');
+                    const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+                    const productDatabase = rows.slice(1).map(row => {
+                        const cells = row.split(',').map(c => c.trim());
+                        return {
+                            rak: cells[0] || '',
+                            plu: cells[1] || '',
+                            barcode: cells[2] || '',
+                            description: cells[3] || '',
+                            qty: 0 // Default qty
+                        };
+                    });
+                    filteredProductDatabase = productDatabase.filter(
+                        item => item.rak.toLowerCase() === selectedRak.toLowerCase()
+                    );
+
+                    // Merge with saved quantities
+                    filteredProductDatabase = filteredProductDatabase.map(item => {
+                        const savedItem = savedProducts.find(saved => saved.plu === item.plu && saved.rak.toLowerCase() === selectedRak.toLowerCase());
+                        return savedItem ? { ...item, qty: savedItem.qty || 0 } : item;
+                    });
+                } else {
+                    // Use saved data if restoring and rak matches
+                    filteredProductDatabase = savedProducts.filter(
+                        item => item.rak.toLowerCase() === selectedRak.toLowerCase()
+                    );
+                }
+
+                // Save rak to localStorage
+                try {
+                    localStorage.setItem('selectedRak', selectedRak);
+                } catch (e) {
+                    showToast('Gagal menyimpan kode rak ke localStorage.', 'error');
+                }
+
+                // Render cards
                 const cardContainer = document.getElementById('dataCards');
                 cardContainer.innerHTML = ''; // Clear cards
                 filteredProductDatabase.forEach(item => {
@@ -432,10 +470,12 @@
                     card.innerHTML = `
                         <p><strong></strong> <span class="plu">${item.plu}</span></p>
                         <p><strong></strong> <span class="description">${item.description}</span></p>
-                        <p><strong></strong> <span class="qty">0</span></p>
+                        <p><strong></strong> <span class="qty">${item.qty || 0}</span></p>
                     `;
                     cardContainer.appendChild(card);
                 });
+
+                // Save to localStorage
                 try {
                     localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
                 } catch (e) {
@@ -444,6 +484,14 @@
             } catch (error) {
                 console.error('Gagal memuat data:', error);
                 showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function restoreState() {
+            const savedRak = localStorage.getItem('selectedRak');
+            if (savedRak) {
+                document.getElementById('rakFilter').value = savedRak;
+                loadProductData(savedRak, true);
             }
         }
 
@@ -479,6 +527,7 @@
                 document.getElementById('barcodeInput').value = product.barcode || '-';
                 document.getElementById('pluInput').value = product.plu || '-';
                 document.getElementById('descInput').value = product.description || '-';
+                document.getElementById('savedQty').textContent = `Qty Sebelumnya: ${product.qty || 0}`;
                 scanResultsModal.show();
                 document.getElementById('qtyInput').focus();
             } else {
@@ -497,6 +546,7 @@
                     document.getElementById('barcodeInput').value = product.barcode || '-';
                     document.getElementById('pluInput').value = product.plu || '-';
                     document.getElementById('descInput').value = product.description || '-';
+                    document.getElementById('savedQty').textContent = `Qty Sebelumnya: ${product.qty || 0}`;
                     scanResultsModal.show();
                     document.getElementById('qtyInput').focus();
                 } else {
@@ -563,6 +613,7 @@
                 barcodeInput.value = product.barcode;
                 pluInput.value = product.plu;
                 descInput.value = product.description;
+                document.getElementById('savedQty').textContent = `Qty Sebelumnya: ${product.qty || 0}`;
                 scanResultsModal.show();
                 document.getElementById('qtyInput').focus();
                 showToast('Barcode berhasil dipindai!', 'success');
@@ -594,29 +645,62 @@
                 return;
             }
             const qtyElement = card.querySelector('.qty');
-            const currentQty = parseInt(qtyElement.textContent);
-            qtyElement.textContent = currentQty + qty;
-            const product = filteredProductDatabase.find(item => item.plu === plu);
-            const rak = product ? product.rak : '-';
+            const currentQty = parseInt(qtyElement.textContent) || 0;
+            const newQty = currentQty + qty;
+            qtyElement.textContent = newQty;
+
+            // Update filteredProductDatabase
+            const productIndex = filteredProductDatabase.findIndex(item => item.plu === plu);
+            if (productIndex !== -1) {
+                filteredProductDatabase[productIndex].qty = newQty;
+            }
+
             scanResultsModal.hide();
             barcodeInput.value = '';
             pluInput.value = '';
             descInput.value = '';
             qtyInput.value = 1;
-            updateLocalStorage(rak, plu, barcode, description, currentQty + qty);
-            showToast('Data berhasil disimpan!', 'success');
+            document.getElementById('savedQty').textContent = 'Qty Sebelumnya: 0';
+
+            // Update localStorage
+            try {
+                localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
+                showToast('Data berhasil disimpan!', 'success');
+            } catch (e) {
+                showToast('Gagal menyimpan data ke localStorage.', 'error');
+            }
         }
 
-        function updateLocalStorage(rak, plu, barcode, description, qty) {
-            let products = JSON.parse(localStorage.getItem('filteredProductData')) || [];
-            const productIndex = products.findIndex(item => item.plu === plu);
-            if (productIndex !== -1) {
-                products[productIndex].qty = qty;
-            } else {
-                products.push({ rak, plu, barcode, description, qty });
+        function resetQty() {
+            const pluInput = document.getElementById('pluInput');
+            const plu = pluInput.value;
+            if (!plu) {
+                showToast('Tidak ada produk yang dipilih untuk direset.', 'error');
+                return;
             }
+            const card = Array.from(document.querySelectorAll('.product-card')).find(
+                card => card.querySelector('.plu').textContent === plu
+            );
+            if (!card) {
+                showToast('Produk tidak ditemukan di database.', 'error');
+                return;
+            }
+            const qtyElement = card.querySelector('.qty');
+            qtyElement.textContent = 0;
+
+            // Update filteredProductDatabase
+            const productIndex = filteredProductDatabase.findIndex(item => item.plu === plu);
+            if (productIndex !== -1) {
+                filteredProductDatabase[productIndex].qty = 0;
+            }
+
+            // Update savedQty display
+            document.getElementById('savedQty').textContent = 'Qty Sebelumnya: 0';
+
+            // Update localStorage
             try {
-                localStorage.setItem('filteredProductData', JSON.stringify(products));
+                localStorage.setItem('filteredProductData', JSON.stringify(filteredProductDatabase));
+                showToast('Qty berhasil direset!', 'success');
             } catch (e) {
                 showToast('Gagal menyimpan data ke localStorage.', 'error');
             }
@@ -630,6 +714,9 @@
             }
             try {
                 sessionStorage.setItem('filteredProductData', filteredProductData);
+                // Clear localStorage on navigation to next page (optional)
+                // localStorage.removeItem('filteredProductData');
+                // localStorage.removeItem('selectedRak');
                 window.location.href = 'next-page.html';
             } catch (e) {
                 showToast('Gagal menyimpan data ke sessionStorage.', 'error');
@@ -653,6 +740,11 @@
                     card.style.display = 'none';
                 }
             });
+        });
+
+        // Restore state on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            restoreState();
         });
     </script>
 </body>
