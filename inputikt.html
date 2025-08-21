@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Laporan Harian</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        #submittedDataCard {
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        #submittedDataCard.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #submittedDataCard .card-header {
+            background: linear-gradient(90deg, #28a745 0%, #34c759 100%);
+            color: white;
+            font-weight: 500;
+            padding: 1rem;
+            border-bottom: none;
+            font-size: 1.1rem;
+        }
+        #submittedDataCard .card-body {
+            padding: 1rem;
+        }
+        .form-container .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container .btn-primary {
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+        .form-container .btn-primary:disabled {
+            background: #6c757d;
+            opacity: 0.7;
+        }
+        .custom-alert {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1050;
+            min-width: 250px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .custom-alert.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .custom-alert.alert-success {
+            background: linear-gradient(90deg, #28a745 0%, #34c759 100%);
+            color: white;
+        }
+        .custom-alert.alert-danger {
+            background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+        .custom-alert.alert-warning {
+            background: linear-gradient(90deg, #ffc107 0%, #ffca2c 100%);
+            color: #333;
+        }
+        .custom-alert .btn-close {
+            filter: invert(1);
+        }
+        .parameter-card {
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .parameter-card .card-body {
+            padding: 0.5rem;
+        }
+        .parameter-card .card-title {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        .value-box {
+            flex: 1;
+            font-weight: 500;
+            text-align: right;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            padding: 0.3rem 0.5rem;
+        }
+        .target-box {
+            color: #007bff;
+        }
+        .actual-box {
+            color: #6c757d;
+        }
+        .achievement-box {
+            color: #28a745;
+        }
+        .gap-box {
+            color: #dc3545;
+        }
+        .best-estimate-box {
+            color: #ff851b; /* Orange untuk Best Estimate */
+        }
+        .value-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: space-between;
+            white-space: nowrap;
+            width: 100%;
+        }
+        @media (max-width: 576px) {
+            .value-box {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.3rem;
+            }
+            .value-row {
+                gap: 0.2rem;
+            }
+            .parameter-card .card-title {
+                font-size: 0.8rem;
+            }
+            .parameter-card .card-body {
+                padding: 0.4rem;
+            }
+            .col-md-6 {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-3 form-container">
+        <h2 class="text-center mb-3" style="font-size: 1.5rem;">Form Laporan Harian</h2>
+        <div class="card shadow mb-3">
+            <div class="card-body p-3">
+                <form id="dailyReportForm">
+                    <div class="mb-3">
+                        <label for="reportDate" class="form-label fw-bold" style="font-size: 0.9rem;">Tanggal Laporan</label>
+                        <input type="date" class="form-control form-control-sm" id="reportDate" name="reportDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reportType" class="form-label fw-bold" style="font-size: 0.9rem;">Jenis Laporan</label>
+                        <select class="form-select form-control-sm" id="reportType" name="reportType" required disabled>
+                            <option value="" disabled selected>Pilih Jenis Laporan</option>
+                            <option value="sales">Laporan Sales</option>
+                            <option value="ikt">Laporan IKT</option>
+                        </select>
+                    </div>
+                    <div id="salesForm" class="report-form d-none">
+                        <h4 class="mb-2" style="font-size: 1rem;">Laporan Sales</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label for="spd" class="form-label" style="font-size: 0.8rem;">SPD</label>
+                                <input type="number" class="form-control form-control-sm" id="spd" name="spd" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="std" class="form-label" style="font-size: 0.8rem;">STD</label>
+                                <input type="number" class="form-control form-control-sm" id="std" name="std" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="apc" class="form-label" style="font-size: 0.8rem;">APC</label>
+                                <input type="number" class="form-control form-control-sm" id="apc" name="apc" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="gm" class="form-label" style="font-size: 0.8rem;">GM</label>
+                                <input type="text" class="form-control form-control-sm" id="gm" name="gm" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="oos" class="form-label" style="font-size: 0.8rem;">OOS</label>
+                                <input type="text" class="form-control form-control-sm" id="oos" name="oos" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="nsb" class="form-label" style="font-size: 0.8rem;">NSB</label>
+                                <input type="number" class="form-control form-control-sm" id="nsb" name="nsb" placeholder="" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="iktForm" class="report-form d-none">
+                        <h4 class="mb-2" style="font-size: 1rem;">Laporan IKT</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label for="salesRetail" class="form-label" style="font-size: 0.8rem;">Sales Retail</label>
+                                <input type="number" class="form-control form-control-sm" id="salesRetail" name="salesRetail" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="eVoucher" class="form-label" style="font-size: 0.8rem;">E-Voucher</label>
+                                <input type="number" class="form-control form-control-sm" id="eVoucher" name="eVoucher" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="gm_ikt" class="form-label" style="font-size: 0.8rem;">GM</label>
+                                <input type="text" class="form-control form-control-sm" id="gm_ikt" name="gm" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="pwp" class="form-label" style="font-size: 0.8rem;">PWP</label>
+                                <input type="number" class="form-control form-control-sm" id="pwp" name="pwp" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="psm" class="form-label" style="font-size: 0.8rem;">PSM</label>
+                                <input type="number" class="form-control form-control-sm" id="psm" name="psm" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="sertis" class="form-label" style="font-size: 0.8rem;">SERTIS</label>
+                                <input type="number" class="form-control form-control-sm" id="sertis" name="sertis" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="conStrukMember" class="form-label" style="font-size: 0.8rem;">Con Struk Member</label>
+                                <input type="number" class="form-control form-control-sm" id="conStrukMember" name="conStrukMember" placeholder="" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="returBadStock" class="form-label" style="font-size: 0.8rem;">Retur Bad Stock</label>
+                                <input type="number" class="form-control form-control-sm" id="returBadStock" name="returBadStock" placeholder="" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-sm" id="submitButton" disabled>
+                            <span id="buttonText">Submit Laporan</span>
+                            <span id="buttonSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="submittedDataCard" class="card shadow d-none">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-check-circle-fill"></i> Data Laporan Terkirim</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <p style="font-size: 0.8rem;"><strong>Tanggal:</strong> <span id="submittedDate"></span></p>
+                    </div>
+                    <div class="col-6">
+                        <p style="font-size: 0.8rem;"><strong>Jenis Laporan:</strong> <span id="submittedType"></span></p>
+                    </div>
+                </div>
+                <div class="row g-2" id="parameterCards"></div>
+            </div>
+        </div>
+    </div>
+    <div id="customAlert" class="custom-alert alert alert-success alert-dismissible fade d-none" role="alert">
+        <div id="alertMessage" style="font-size: 0.8rem;"></div>
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   
+
+<script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwIH8ZQNARH5BdxG3vpY_9TDJC4FaquaZwZlGgr7DYriZ8e0eJcRV9xm5PBc6baCgf_/exec';
+    const submitButton = document.getElementById('submitButton');
+    const buttonText = document.getElementById('buttonText');
+    const buttonSpinner = document.getElementById('buttonSpinner');
+    let targetData = { sales: [], ikt: [] };
+
+    // Format number with commas (for integers)
+    function formatNumber(num) {
+        if (isNaN(num)) return '0';
+        return Number(num).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    // Format decimal number (preserves up to 2 decimal places)
+    function formatDecimal(num) {
+        if (isNaN(num)) return '0';
+        // Convert to number and use toFixed(2) to ensure 2 decimal places, trim trailing zeros
+        return Number(num).toFixed(2).replace(/\.0+$/, '').replace(/(\.\d)0$/, '$1');
+    }
+
+    // Fungsi untuk menghitung sisa hari kerja berdasarkan kategori dan tanggal
+    function calculateRemainingWorkdays(reportDate, category) {
+        const date = new Date(reportDate);
+        const day = date.getDate();
+        const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+        let remainingDays = 0;
+        const fullMonthCategories = ['salesRetail', 'eVoucher', 'gm', 'conStrukMember', 'returBadStock'];
+        if (fullMonthCategories.includes(category)) {
+            remainingDays = lastDayOfMonth - day + 1;
+        } else if (category === 'pwp' || category === 'sertis') {
+            if (day <= 15) {
+                remainingDays = 15 - day + 1;
+            } else {
+                remainingDays = lastDayOfMonth - day + 1;
+            }
+        } else if (category === 'psm') {
+            if (day <= 7) {
+                remainingDays = 7 - day + 1;
+            } else if (day <= 15) {
+                remainingDays = 15 - day + 1;
+            } else if (day <= 23) {
+                remainingDays = 23 - day + 1;
+            } else {
+                remainingDays = lastDayOfMonth - day + 1;
+            }
+        }
+        return remainingDays > 0 ? remainingDays : 0;
+    }
+
+    // Fungsi untuk menghitung Best Estimate
+    function calculateBestEstimate(actual, target, remainingWorkdays) {
+        const gap = actual - target;
+        if (remainingWorkdays === 0) {
+            return gap;
+        }
+        return gap / remainingWorkdays;
+    }
+
+    function showCustomAlert(message, type = 'success') {
+        const alert = document.getElementById('customAlert');
+        const alertMessage = document.getElementById('alertMessage');
+        alert.classList.remove('alert-success', 'alert-danger', 'alert-warning');
+        alert.classList.add(`alert-${type}`);
+        alertMessage.textContent = message;
+        alert.classList.remove('d-none');
+        alert.classList.add('show');
+        setTimeout(() => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.classList.add('d-none'), 300);
+        }, 3000);
+    }
+
+    // Decimal validation function
+    function validateDecimalInputs(inputs) {
+        let isValid = true;
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input && input.value) {
+                let value = input.value.replace(',', '.').trim();
+                if (!/^-?\d+(\.\d{0,2})?$/.test(value)) {
+                    input.classList.add('is-invalid');
+                    showCustomAlert(
+                        `Field ${input.name.toUpperCase()} harus berupa angka bulat atau desimal (maks. 2 digit desimal, gunakan titik sebagai pemisah). Contoh: 123, 123.4, 123.45, -123.45`,
+                        'danger'
+                    );
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                    input.value = value;
+                }
+            }
+        });
+        return isValid;
+    }
+
+    // Fetch target data
+    fetch(WEB_APP_URL, {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success !== false) {
+            targetData = data;
+            console.log('Target data:', targetData);
+        } else {
+            showCustomAlert('Gagal mengambil data target: ' + (data.message || 'Unknown error'), 'danger');
+            console.error('Fetch target error:', data.message || 'Unknown error');
+        }
+    })
+    .catch(error => {
+        showCustomAlert('Error mengambil data target: ' + error.message, 'danger');
+        console.error('Fetch target error:', error.message);
+    });
+
+    document.getElementById('reportDate').addEventListener('change', function() {
+        document.getElementById('reportType').disabled = !this.value;
+        checkFormValidity();
+    });
+
+    document.getElementById('reportType').addEventListener('change', function() {
+        const salesForm = document.getElementById('salesForm');
+        const iktForm = document.getElementById('iktForm');
+        const salesInputs = ['spd', 'std', 'apc', 'gm', 'oos', 'nsb'];
+        const iktInputs = ['salesRetail', 'eVoucher', 'gm_ikt', 'pwp', 'psm', 'sertis', 'conStrukMember', 'returBadStock'];
+        salesForm.classList.add('d-none');
+        iktForm.classList.add('d-none');
+        salesInputs.concat(iktInputs).forEach(id => {
+            document.getElementById(id).removeAttribute('required');
+            document.getElementById(id).classList.remove('is-invalid');
+        });
+        if (this.value === 'sales') {
+            salesForm.classList.remove('d-none');
+            salesInputs.forEach(id => {
+                document.getElementById(id).setAttribute('required', '');
+            });
+        } else if (this.value === 'ikt') {
+            iktForm.classList.remove('d-none');
+            iktInputs.forEach(id => {
+                document.getElementById(id).setAttribute('required', '');
+            });
+        }
+        checkFormValidity();
+    });
+
+    function checkFormValidity() {
+        const form = document.getElementById('dailyReportForm');
+        const reportType = document.getElementById('reportType').value;
+        const reportDate = document.getElementById('reportDate').value;
+        let isValid = reportDate && reportType;
+        if (reportType === 'sales') {
+            const salesInputs = ['spd', 'std', 'apc', 'gm', 'oos', 'nsb'];
+            isValid = isValid && salesInputs.every(id => {
+                const input = document.getElementById(id);
+                return input.value !== '';
+            });
+        } else if (reportType === 'ikt') {
+            const iktInputs = ['salesRetail', 'eVoucher', 'gm_ikt', 'pwp', 'psm', 'sertis', 'conStrukMember', 'returBadStock'];
+            isValid = isValid && iktInputs.every(id => {
+                const input = document.getElementById(id);
+                return input.value !== '';
+            });
+        }
+        submitButton.disabled = !isValid;
+    }
+
+    document.querySelectorAll('#dailyReportForm input, #dailyReportForm select').forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+    });
+
+    document.getElementById('dailyReportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validate decimal inputs for both Sales and IKT
+        const decimalInputs = ['oos', 'gm', 'gm_ikt'];
+        if (!validateDecimalInputs(decimalInputs)) {
+            return;
+        }
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+
+        submitButton.disabled = true;
+        buttonText.textContent = 'Mengirim...';
+        buttonSpinner.classList.remove('d-none');
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            submitButton.disabled = false;
+            buttonText.textContent = 'Submit Laporan';
+            buttonSpinner.classList.add('d-none');
+
+            if (result.success) {
+                const reportType = data.reportType;
+                const reportDate = data.reportDate;
+                let target = { 
+                    spd: 0, std: 0, apc: 0, gm: 0, oos: 0, nsb: 0, 
+                    salesRetail: 0, eVoucher: 0, pwp: 0, psm: 0, sertis: 0, 
+                    conStrukMember: 0, returBadStock: 0 
+                };
+                
+                if (reportType === 'sales') {
+                    const targetRow = targetData.sales.find(row => row.date === reportDate) || target;
+                    if (!targetRow.date) {
+                        showCustomAlert('Data target untuk tanggal ' + reportDate + ' tidak ditemukan, menggunakan target 0.', 'warning');
+                    }
+                    target = targetRow;
+                } else if (reportType === 'ikt') {
+                    const targetRow = targetData.ikt.find(row => row.date === reportDate) || target;
+                    if (!targetRow.date) {
+                        showCustomAlert('Data target untuk tanggal ' + reportDate + ' tidak ditemukan, menggunakan target 0.', 'warning');
+                    }
+                    target = targetRow;
+                }
+
+                const parameterCards = document.getElementById('parameterCards');
+                parameterCards.innerHTML = '';
+                let fields = [];
+                const decimalFields = ['oos', 'gm', 'gm_ikt']; // Fields that should display decimals
+
+                if (reportType === 'sales') {
+                    fields = [
+                        { label: 'SPD', key: 'spd', actual: parseFloat(data.spd) || 0, target: parseFloat(target.spd) || 0 },
+                        { label: 'STD', key: 'std', actual: parseFloat(data.std) || 0, target: parseFloat(target.std) || 0 },
+                        { label: 'APC', key: 'apc', actual: parseFloat(data.apc) || 0, target: parseFloat(target.apc) || 0 },
+                        { label: 'GM', key: 'gm', actual: parseFloat(data.gm) || 0, target: parseFloat(target.gm) || 0 },
+                        { label: 'OOS', key: 'oos', actual: parseFloat(data.oos) || 0, target: parseFloat(target.oos) || 0 },
+                        { label: 'NSB', key: 'nsb', actual: parseFloat(data.nsb) || 0, target: parseFloat(target.nsb) || 0 }
+                    ];
+                } else if (reportType === 'ikt') {
+                    fields = [
+                        { label: 'Sales Retail', key: 'salesRetail', actual: parseFloat(data.salesRetail) || 0, target: parseFloat(target.salesRetail) || 0 },
+                        { label: 'E-Voucher', key: 'eVoucher', actual: parseFloat(data.eVoucher) || 0, target: parseFloat(target.eVoucher) || 0 },
+                        { label: 'GM', key: 'gm', actual: parseFloat(data.gm) || 0, target: parseFloat(target.gm) || 0 },
+                        { label: 'PWP', key: 'pwp', actual: parseFloat(data.pwp) || 0, target: parseFloat(target.pwp) || 0 },
+                        { label: 'PSM', key: 'psm', actual: parseFloat(data.psm) || 0, target: parseFloat(target.psm) || 0 },
+                        { label: 'SERTIS', key: 'sertis', actual: parseFloat(data.sertis) || 0, target: parseFloat(target.sertis) || 0 },
+                        { label: 'Con Struk Member', key: 'conStrukMember', actual: parseFloat(data.conStrukMember) || 0, target: parseFloat(target.conStrukMember) || 0 },
+                        { label: 'Retur Bad Stock', key: 'returBadStock', actual: parseFloat(data.returBadStock) || 0, target: parseFloat(target.returBadStock) || 0 }
+                    ];
+                }
+
+                fields.forEach(field => {
+                    // Use formatDecimal for decimal fields, formatNumber for others
+                    const targetValue = decimalFields.includes(field.key) ? formatDecimal(target[field.key]) : formatNumber(target[field.key]);
+                    const actualValue = decimalFields.includes(field.key) ? formatDecimal(field.actual) : formatNumber(field.actual);
+                    const achievement = field.target && !isNaN(field.target) && field.target !== 0 ? 
+                        ((field.actual / field.target) * 100).toFixed(0) + '%' : '0%';
+                    const gap = isNaN(field.actual) || isNaN(field.target) ? 
+                        '0' : decimalFields.includes(field.key) ? formatDecimal(field.actual - field.target) : formatNumber(field.actual - field.target);
+                    
+                    let bestEstimate = 'N/A';
+                    if (reportType === 'ikt') {
+                        const remainingWorkdays = calculateRemainingWorkdays(data.reportDate, field.key);
+                        const bestEstimateValue = calculateBestEstimate(field.actual, field.target, remainingWorkdays);
+                        bestEstimate = decimalFields.includes(field.key) ? formatDecimal(bestEstimateValue) : formatNumber(bestEstimateValue.toFixed(0));
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'col-md-6 col-lg-3';
+                    card.innerHTML = `
+                        <div class="card parameter-card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">${field.label}</h5>
+                                <div class="value-row">
+                                    <div class="value-box target-box">${targetValue}</div>
+                                    <div class="value-box actual-box">${actualValue}</div>
+                                    <div class="value-box achievement-box">${achievement}</div>
+                                    <div class="value-box gap-box">${gap}</div>
+                                    ${reportType === 'ikt' ? `<div class="value-box best-estimate-box">${bestEstimate}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    parameterCards.appendChild(card);
+                });
+
+                document.getElementById('submittedDate').textContent = data.reportDate;
+                document.getElementById('submittedType').textContent = reportType === 'sales' ? 'Laporan Sales' : 'Laporan IKT';
+                const card = document.getElementById('submittedDataCard');
+                card.classList.remove('d-none');
+                setTimeout(() => card.classList.add('show'), 10);
+                this.reset();
+                document.getElementById('reportType').disabled = true;
+                document.getElementById('salesForm').classList.add('d-none');
+                document.getElementById('iktForm').classList.add('d-none');
+                submitButton.disabled = true;
+                showCustomAlert(result.message, 'success');
+            } else {
+                showCustomAlert('Terjadi kesalahan: ' + (result.message || 'Gagal menyimpan data'), 'danger');
+                console.error('Fetch error:', result.message || 'Unknown error');
+            }
+        })
+        .catch(error => {
+            submitButton.disabled = false;
+            buttonText.textContent = 'Submit Laporan';
+            buttonSpinner.classList.add('d-none');
+            showCustomAlert('Error: ' + error.message, 'danger');
+            console.error('Fetch error:', error.message);
+        });
+    });
+</script>
+</body>
+</html>
