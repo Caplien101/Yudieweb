@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Izin Karyawan</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            border: none;
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .card-body {
+            padding: 30px;
+        }
+        .required-field::after {
+            content: "*";
+            color: red;
+            margin-left: 4px;
+        }
+        .conditional-field {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #0d6efd;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border: none;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+        }
+        .btn-secondary {
+            padding: 12px 25px;
+            font-weight: 600;
+        }
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .company-logo {
+            width: 70px;
+            height: 70px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0d6efd;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-right: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        .company-name {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .info-icon {
+            font-size: 1.2rem;
+            color: #0d6efd;
+            margin-right: 8px;
+        }
+        .spinner-border {
+    margin-right: 8px;
+}
+       
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="logo-container">
+                           
+                            <div>
+                                <h1 class="form-title">Form Izin Karyawan</h1>
+                                <p class="company-name">SAT PRAMUKA Bekasi</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="izinForm">
+                            <!-- NIK dan Nama -->
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label for="nik" class="form-label required-field">NIK</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                        <input type="text" class="form-control" id="nik" required placeholder="Masukkan NIK Anda">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="nama" class="form-label required-field">Nama Lengkap</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                                        <input type="text" class="form-control" id="nama" required placeholder="Masukkan nama lengkap">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tanggal -->
+                            <div class="mb-4">
+                                <label for="tanggal" class="form-label required-field">Tanggal Izin</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="date" class="form-control" id="tanggal" required>
+                                </div>
+                            </div>
+
+                            <!-- Kategori -->
+                            <div class="mb-4">
+                                <label for="kategori" class="form-label required-field">Kategori Izin</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-list-ul"></i></span>
+                                    <select class="form-select" id="kategori" required>
+                                        <option value="" selected disabled>Pilih Kategori Izin</option>
+                                        <option value="terlambat">Terlambat</option>
+                                        <option value="sakit">Sakit</option>
+                                        <option value="mangkir">Mangkir</option>
+                                        <option value="ijin">Ijin</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Field untuk Terlambat -->
+                            <div id="terlambatField" class="conditional-field">
+                                <h5><i class="bi bi-clock"></i> Informasi Keterlambatan</h5>
+                                <div class="mb-3">
+                                    <label for="jamTerlambat" class="form-label required-field">Jam Terlambat</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                                        <input type="time" class="form-control" id="jamTerlambat">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Field untuk Sakit -->
+                            <div id="sakitField" class="conditional-field">
+                                <h5><i class="bi bi-heart-pulse"></i> Informasi Sakit</h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="jumlahHariSakit" class="form-label required-field">Jumlah Hari Sakit</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-calendar-week"></i></span>
+                                            <input type="number" class="form-control" id="jumlahHariSakit" min="" value="">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label required-field">Apakah tersedia surat dokter?</label>
+                                        <div class="d-flex gap-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="suratDokter" id="suratDokterYa" value="ya">
+                                                <label class="form-check-label" for="suratDokterYa">Ya</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="suratDokter" id="suratDokterTidak" value="tidak" checked>
+                                                <label class="form-check-label" for="suratDokterTidak">Tidak</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Alasan -->
+                            <div class="mb-4">
+                                <label for="alasan" class="form-label required-field">Alasan Izin</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+                                    <textarea class="form-control" id="alasan" rows="3" required placeholder="Jelaskan alasan izin secara detail"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Keterangan -->
+                            <div class="mb-4">
+                                <label class="form-label"><i class="bi bi-info-circle"></i> Keterangan Tambahan</label>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="dekatanGajian">
+                                    <label class="form-check-label" for="dekatanGajian">
+                                        <i class="bi bi-currency-dollar info-icon"></i>Apakah berdekatan dengan tanggal gajian?
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="dekatanLibur">
+                                    <label class="form-check-label" for="dekatanLibur">
+                                        <i class="bi bi-sun info-icon"></i>Berdekatan hari libur?
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="weekend">
+                                    <label class="form-check-label" for="weekend">
+                                        <i class="bi bi-calendar-weekend info-icon"></i>Apakah hari Week End?
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Tombol Submit -->
+<div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+    <button type="reset" class="btn btn-secondary me-md-3 px-4"><i class="bi bi-arrow-repeat"></i> Reset Form</button>
+    <button type="submit" class="btn btn-primary px-4" id="submitButton">
+        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="spinner"></span>
+        <span id="buttonText"><i class="bi bi-send-check"></i> Kirim Permohonan</span>
+    </button>
+</div>
+                
+                <!-- Footer -->
+                <div class="footer">
+                    <p>© 2025 Yudie Apps - Sistem Manajemen Izin Karyawan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    const kategoriSelect = document.getElementById('kategori');
+    const terlambatField = document.getElementById('terlambatField');
+    const sakitField = document.getElementById('sakitField');
+    const submitButton = document.getElementById('submitButton');
+    const spinner = document.getElementById('spinner');
+    const buttonText = document.getElementById('buttonText');
+
+    // Fungsi untuk menangani perubahan kategori
+    kategoriSelect.addEventListener('change', function() {
+        terlambatField.style.display = 'none';
+        sakitField.style.display = 'none';
+        
+        if (this.value === 'terlambat') {
+            terlambatField.style.display = 'block';
+        } else if (this.value === 'sakit') {
+            sakitField.style.display = 'block';
+        }
+    });
+
+    // Validasi dan kirim form ke Google Sheets
+    document.getElementById('izinForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validasi sederhana
+        let isValid = true;
+        const requiredFields = this.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        const kategori = kategoriSelect.value;
+        if (kategori === 'terlambat' && !document.getElementById('jamTerlambat').value) {
+            isValid = false;
+            document.getElementById('jamTerlambat').classList.add('is-invalid');
+        }
+        
+        if (kategori === 'sakit' && !document.getElementById('jumlahHariSakit').value) {
+            isValid = false;
+            document.getElementById('jumlahHariSakit').classList.add('is-invalid');
+        }
+
+        if (isValid) {
+            // Tampilkan spinner dan nonaktifkan tombol
+            spinner.classList.remove('d-none');
+            buttonText.innerHTML = 'Mengirim...';
+            submitButton.disabled = true;
+
+            // Ambil data dari form
+            const formData = {
+                nik: document.getElementById('nik').value,
+                nama: document.getElementById('nama').value,
+                tanggal: document.getElementById('tanggal').value,
+                kategori: kategoriSelect.value,
+                jamTerlambat: document.getElementById('jamTerlambat').value,
+                jumlahHariSakit: document.getElementById('jumlahHariSakit').value,
+                suratDokter: document.querySelector('input[name="suratDokter"]:checked').value,
+                alasan: document.getElementById('alasan').value,
+                dekatanGajian: document.getElementById('dekatanGajian').checked,
+                dekatanLibur: document.getElementById('dekatanLibur').checked,
+                weekend: document.getElementById('weekend').checked
+            };
+
+            // Kirim data ke Google Apps Script
+            fetch('https://script.google.com/macros/s/AKfycbwcxnhByycR4vhdTdGx0u5dQazZTzW-muk9VeWdH1faF7ymB9j-wZezvgOgVo0yNbnqyA/exec', { // Ganti dengan URL Web App dari Apps Script
+                method: 'POST',
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Sembunyikan spinner dan aktifkan kembali tombol
+                spinner.classList.add('d-none');
+                buttonText.innerHTML = '<i class="bi bi-send-check"></i> Kirim Permohonan';
+                submitButton.disabled = false;
+
+                if (data.result === 'success') {
+                    alert('Form berhasil disubmit! Data izin karyawan telah tersimpan di Google Sheets.');
+                    document.getElementById('izinForm').reset();
+                    terlambatField.style.display = 'none';
+                    sakitField.style.display = 'none';
+                } else {
+                    alert('Terjadi kesalahan: ' + data.message);
+                }
+            })
+            .catch(error => {
+                // Sembunyikan spinner dan aktifkan kembali tombol
+                spinner.classList.add('d-none');
+                buttonText.innerHTML = '<i class="bi bi-send-check"></i> Kirim Permohonan';
+                submitButton.disabled = false;
+                alert('Terjadi kesalahan saat mengirim data: ' + error);
+            });
+        } else {
+            alert('Harap isi semua field yang wajib diisi.');
+        }
+    });
+});
+    </script>
+</body>
+</html>
