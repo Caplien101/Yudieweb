@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Laporan Setoran Tunai</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding-top: 20px;
+            padding-bottom: 60px;
+            font-size: calc(15px + 0.1vw);
+        }
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            font-weight: 600;
+        }
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+        }
+        /* Mencegah zoom pada input di Safari iOS */
+        @media screen and (max-width: 767px) {
+            input[type="date"],
+            input[type="text"],
+            input[type="number"] {
+                font-size: 16px !important;
+            }
+        }
+        .btn {
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table th {
+            background-color: #f1f8ff;
+        }
+        .positive {
+            color: #198754;
+            font-weight: 600;
+        }
+        .negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-top: 30px;
+            border-top: 1px solid #dee2e6;
+        }
+        .table-total {
+            font-weight: 700;
+            background-color: #e9ecef;
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            .card {
+                margin-bottom: 15px;
+            }
+            .mobile-table-row {
+                border-bottom: 2px solid #dee2e6;
+                padding: 12px 0;
+            }
+            .mobile-table-label {
+                font-weight: 600;
+                color: #6c757d;
+            }
+        }
+        
+        /* Loader */
+        .loader {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #0d6efd;
+            width: 30px;
+            height: 30px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Summary Card Styles */
+        .summary-card {
+            transition: transform 0.3s;
+        }
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+        .summary-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        /* Spinner Button */
+        .btn-spinner {
+            position: relative;
+        }
+
+        .btn-spinner .spinner-border {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -12px;
+            margin-left: -12px;
+            display: none;
+        }
+
+        .btn-spinner.loading .spinner-border {
+            display: inline-block;
+        }
+
+        .btn-spinner.loading .btn-text {
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="h3 mb-0 text-primary"><i class="bi bi-cash-coin me-2"></i>Laporan Setoran Tunai</h1>
+                    <a href="index.html" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i>Kembali
+                    </a>
+                </div>
+                <p class="text-muted">Form input laporan setoran tunai harian</p>
+            </div>
+        </div>
+
+        <!-- Form Input -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-pencil-square me-2"></i>Input Data Setoran
+                    </div>
+                    <div class="card-body">
+                        <form id="setoranForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="tanggal" class="form-label">Tanggal Sales<span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="tanggal" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="penyetor" class="form-label">Nama Penyetor <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="penyetor" placeholder="Nama lengkap penyetor" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="penjualan" class="form-label">Report Penjualan (Rp) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="penjualan" placeholder="0" min="0" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="setor" class="form-label">Nominal Setor (Rp) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" id="setor" placeholder="0" min="0" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success w-100 btn-spinner" id="submitBtn">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <span class="btn-text">
+                                            <i class="bi bi-floppy me-2"></i>Simpan Laporan
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-info-circle me-2"></i>Informasi
+                    </div>
+                    <div class="card-body">
+                        <h6>Petunjuk Pengisian:</h6>
+                        <ul class="ps-3">
+                            <li>Isi semua field yang bertanda bintang (*)</li>
+                            <li>Tanggal diisi dengan tanggal sales bukan tanggal setor</li>
+                            <li>Nama penyetor diisi ( Yudi , Arif , Iqbal )</li>
+                            <li>Nominal input tanpa titik atau koma</li>
+                        </ul>
+                        
+                        <h6 class="mt-4">Keterangan Selisih:</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success rounded-circle me-2" style="width: 15px; height: 15px;"></div>
+                            <span>Selisih positif: Setoran lebih dari penjualan</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-danger rounded-circle me-2" style="width: 15px; height: 15px;"></div>
+                            <span>Selisih negatif: Setoran kurang dari penjualan</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card Summary -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up me-2"></i>Summary Report
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="filterBulan" class="form-label">Filter Bulan</label>
+                                <select class="form-select" id="filterBulan">
+                                    <option value="all">Semua Bulan</option>
+                                    <option value="01">Januari</option>
+                                    <option value="02">Februari</option>
+                                    <option value="03">Maret</option>
+                                    <option value="04">April</option>
+                                    <option value="05">Mei</option>
+                                    <option value="06">Juni</option>
+                                    <option value="07">Juli</option>
+                                    <option value="08">Agustus</option>
+                                    <option value="09">September</option>
+                                    <option value="10">Oktober</option>
+                                    <option value="11">November</option>
+                                    <option value="12">Desember</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row" id="summaryCards">
+                            <!-- Summary cards will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Daftar Laporan -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-list-check me-2"></i>Daftar Laporan Setoran
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary me-2" id="totalLaporan">0 laporan</span>
+                            <button class="btn btn-sm btn-outline-secondary" id="refreshBtn">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tabel untuk desktop -->
+                        <div class="d-none d-md-block">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabelSetoran">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>Penyetor</th>
+                                            <th class="text-end">Penjualan (Rp)</th>
+                                            <th class="text-end">Setoran (Rp)</th>
+                                            <th class="text-end">Selisih (Rp)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data akan diisi oleh JavaScript -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-total">
+                                            <td colspan="2" class="text-end">TOTAL:</td>
+                                            <td class="text-end" id="totalPenjualan">Rp 0</td>
+                                            <td class="text-end" id="totalSetor">Rp 0</td>
+                                            <td class="text-end" id="totalSelisih">Rp 0</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Tampilan mobile -->
+                        <div class="d-md-none" id="mobileView">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </div>
+                        
+                        <!-- Loader -->
+                        <div class="loader mt-3" id="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer text-center">
+            <p class="text-muted mb-0">© 2025 Yudie Apps-Laporan Setoran Tunai - Hak Cipta Dilindungi</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom Script -->
+    <script>
+        // Konfigurasi Google Sheets
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzO2CW1pa3ie29y_FkfffnDu3hhXXgNem49qQgQl4wRdJMUi7HYFMBsVfFKd2kMcLknZA/exec'; // Ganti dengan URL Web App Anda
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            let dataSetoran = [];
+            
+            // Format angka ke format Rupiah
+            function formatRupiah(angka) {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(angka);
+            }
+            
+            // Hitung selisih
+            function hitungSelisih(penjualan, setor) {
+                return setor - penjualan;
+            }
+            
+            // Format tanggal dari YYYY-MM-DD ke DD/MM/YYYY
+            function formatTanggal(tanggal) {
+                const [tahun, bulan, hari] = tanggal.split('-');
+                return `${hari}/${bulan}/${tahun}`;
+            }
+            
+            // Dapatkan nama bulan dari angka bulan
+            function getNamaBulan(bulanAngka) {
+                const bulan = [
+                    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                ];
+                return bulan[parseInt(bulanAngka) - 1] || "Tidak Valid";
+            }
+            
+            // Fungsi untuk menampilkan/menyembunyikan spinner
+            function toggleSpinner(show) {
+                const submitBtn = document.getElementById('submitBtn');
+                if (show) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                } else {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            // Ambil data dari Google Sheets
+            async function ambilData() {
+                document.getElementById('loader').style.display = 'block';
+                
+                try {
+                    const response = await fetch(scriptURL + '?action=read');
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        dataSetoran = data.data;
+                        renderTabel();
+                        renderSummaryCards();
+                    } else {
+                        throw new Error('Gagal mengambil data');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Gagal mengambil data dari server. Data contoh akan ditampilkan.');
+                    // Gunakan data contoh jika gagal mengambil dari server
+                    dataSetoran = [
+                        { id: 1, tanggal: '2023-04-15', penyetor: 'Budi Santoso', penjualan: 1250000, setor: 1250000 },
+                        { id: 2, tanggal: '2023-04-14', penyetor: 'Siti Rahayu', penjualan: 2175000, setor: 2200000 },
+                        { id: 3, tanggal: '2023-04-13', penyetor: 'Agus Wijaya', penjualan: 3500000, setor: 3450000 },
+                        { id: 4, tanggal: '2023-04-12', penyetor: 'Dewi Kusuma', penjualan: 1800000, setor: 1800000 },
+                        { id: 5, tanggal: '2023-04-11', penyetor: 'Rudi Hermawan', penjualan: 2650000, setor: 2700000 },
+                        { id: 6, tanggal: '2023-03-10', penyetor: 'Budi Santoso', penjualan: 1500000, setor: 1550000 },
+                        { id: 7, tanggal: '2023-03-09', penyetor: 'Siti Rahayu', penjualan: 2300000, setor: 2250000 }
+                    ];
+                    renderTabel();
+                    renderSummaryCards();
+                } finally {
+                    document.getElementById('loader').style.display = 'none';
+                }
+            }
+            
+            // Simpan data ke Google Sheets
+            async function simpanData(data) {
+                try {
+                    const response = await fetch(scriptURL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'create',
+                            data: data
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        // Refresh data setelah berhasil menyimpan
+                        await ambilData();
+                        return true;
+                    } else {
+                        throw new Error('Gagal menyimpan data');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Gagal menyimpan data ke server.');
+                    return false;
+                }
+            }
+            
+            // Render data ke tabel
+            function renderTabel() {
+                const tabelBody = document.querySelector('#tabelSetoran tbody');
+                const mobileView = document.getElementById('mobileView');
+                
+                tabelBody.innerHTML = '';
+                mobileView.innerHTML = '';
+                
+                let totalPenjualan = 0;
+                let totalSetor = 0;
+                let totalSelisih = 0;
+                
+                // Filter data berdasarkan bulan yang dipilih
+                const selectedMonth = document.getElementById('filterBulan').value;
+                let filteredData = dataSetoran;
+                
+                if (selectedMonth !== 'all') {
+                    filteredData = dataSetoran.filter(item => {
+                        const itemMonth = item.tanggal.split('-')[1];
+                        return itemMonth === selectedMonth;
+                    });
+                }
+                
+                filteredData.forEach(item => {
+                    const selisih = hitungSelisih(item.penjualan, item.setor);
+                    totalPenjualan += item.penjualan;
+                    totalSetor += item.setor;
+                    totalSelisih += selisih;
+                    
+                    // Untuk tampilan desktop
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formatTanggal(item.tanggal)}</td>
+                        <td>${item.penyetor}</td>
+                        <td class="text-end">${formatRupiah(item.penjualan)}</td>
+                        <td class="text-end">${formatRupiah(item.setor)}</td>
+                        <td class="text-end ${selisih >= 0 ? 'positive' : 'negative'}">${formatRupiah(selisih)}</td>
+                    `;
+                    tabelBody.appendChild(row);
+                    
+                    // Untuk tampilan mobile
+                    const mobileCard = document.createElement('div');
+                    mobileCard.className = 'card mb-3';
+                    mobileCard.innerHTML = `
+                        <div class="card-body">
+                            <div class="row mobile-table-row">
+                                <div class="col-6 mobile-table-label">Tanggal</div>
+                                <div class="col-6">${formatTanggal(item.tanggal)}</div>
+                            </div>
+                            <div class="row mobile-table-row">
+                                <div class="col-6 mobile-table-label">Penyetor</div>
+                                <div class="col-6">${item.penyetor}</div>
+                            </div>
+                            <div class="row mobile-table-row">
+                                <div class="col-6 mobile-table-label">Penjualan</div>
+                                <div class="col-6 text-end">${formatRupiah(item.penjualan)}</div>
+                            </div>
+                            <div class="row mobile-table-row">
+                                <div class="col-6 mobile-table-label">Setoran</div>
+                                <div class="col-6 text-end">${formatRupiah(item.setor)}</div>
+                            </div>
+                            <div class="row mobile-table-row">
+                                <div class="col-6 mobile-table-label">Selisih</div>
+                                <div class="col-6 text-end ${selisih >= 0 ? 'positive' : 'negative'}">${formatRupiah(selisih)}</div>
+                            </div>
+                        </div>
+                    `;
+                    mobileView.appendChild(mobileCard);
+                });
+                
+                // Update total
+                document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
+                document.getElementById('totalSetor').textContent = formatRupiah(totalSetor);
+                document.getElementById('totalSelisih').textContent = formatRupiah(totalSelisih);
+                document.getElementById('totalSelisih').className = `text-end ${totalSelisih >= 0 ? 'positive' : 'negative'}`;
+                
+                // Update jumlah laporan
+                document.getElementById('totalLaporan').textContent = `${filteredData.length} laporan`;
+            }
+            
+            // Render summary cards
+            function renderSummaryCards() {
+                const summaryContainer = document.getElementById('summaryCards');
+                summaryContainer.innerHTML = '';
+                
+                // Filter data berdasarkan bulan yang dipilih
+                const selectedMonth = document.getElementById('filterBulan').value;
+                let filteredData = dataSetoran;
+                
+                if (selectedMonth !== 'all') {
+                    filteredData = dataSetoran.filter(item => {
+                        const itemMonth = item.tanggal.split('-')[1];
+                        return itemMonth === selectedMonth;
+                    });
+                }
+                
+                // Kelompokkan data berdasarkan penyetor
+                const groupedByPenyetor = {};
+                
+                filteredData.forEach(item => {
+                    if (!groupedByPenyetor[item.penyetor]) {
+                        groupedByPenyetor[item.penyetor] = {
+                            penjualan: 0,
+                            setor: 0,
+                            selisih: 0
+                        };
+                    }
+                    
+                    groupedByPenyetor[item.penyetor].penjualan += item.penjualan;
+                    groupedByPenyetor[item.penyetor].setor += item.setor;
+                    groupedByPenyetor[item.penyetor].selisih += hitungSelisih(item.penjualan, item.setor);
+                });
+                
+                // Buat card untuk setiap penyetor
+                Object.keys(groupedByPenyetor).forEach(penyetor => {
+                    const data = groupedByPenyetor[penyetor];
+                    
+                    const cardCol = document.createElement('div');
+                    cardCol.className = 'col-md-4 mb-3';
+                    cardCol.innerHTML = `
+                        <div class="card summary-card h-100">
+                            <div class="card-body text-center">
+                                <div class="summary-icon text-primary">
+                                    <i class="bi bi-person-circle"></i>
+                                </div>
+                                <h5 class="card-title">${penyetor}</h5>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Penjualan:</span>
+                                    <strong>${formatRupiah(data.penjualan)}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Setoran:</span>
+                                    <strong>${formatRupiah(data.setor)}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Selisih:</span>
+                                    <strong class="${data.selisih >= 0 ? 'positive' : 'negative'}">${formatRupiah(data.selisih)}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    summaryContainer.appendChild(cardCol);
+                });
+                
+                // Jika tidak ada data
+                if (Object.keys(groupedByPenyetor).length === 0) {
+                    summaryContainer.innerHTML = `
+                        <div class="col-12 text-center py-4">
+                            <i class="bi bi-inbox display-4 text-muted"></i>
+                            <p class="text-muted mt-2">Tidak ada data untuk bulan yang dipilih</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Handle form submission
+            document.getElementById('setoranForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Tampilkan spinner
+                toggleSpinner(true);
+                
+                const tanggal = document.getElementById('tanggal').value;
+                const penyetor = document.getElementById('penyetor').value;
+                const penjualan = parseInt(document.getElementById('penjualan').value) || 0;
+                const setor = parseInt(document.getElementById('setor').value) || 0;
+                
+                if (!tanggal || !penyetor || penjualan <= 0 || setor <= 0) {
+                    alert('Harap isi semua field dengan benar!');
+                    toggleSpinner(false); // Sembunyikan spinner
+                    return;
+                }
+                
+                const selisih = hitungSelisih(penjualan, setor);
+                
+                // Tampilkan alert berdasarkan selisih
+                let userConfirmed = false;
+                
+                if (selisih > 0) {
+                    userConfirmed = confirm(`Setoran LEBIH sebesar ${formatRupiah(selisih)}. Apakah Anda yakin ingin menyimpan data?`);
+                } else if (selisih < 0) {
+                    userConfirmed = confirm(`Setoran KURANG sebesar ${formatRupiah(Math.abs(selisih))}. Apakah Anda yakin ingin menyimpan data?`);
+                } else {
+                    userConfirmed = confirm('Setoran sesuai dengan laporan penjualan. Apakah Anda yakin ingin menyimpan data?');
+                }
+                
+                if (!userConfirmed) {
+                    toggleSpinner(false); // Sembunyikan spinner
+                    return;
+                }
+                
+                // Simpan data
+                const newData = {
+                    tanggal,
+                    penyetor,
+                    penjualan,
+                    setor
+                };
+                
+                const berhasil = await simpanData(newData);
+                
+                if (berhasil) {
+                    // Reset form
+                    document.getElementById('setoranForm').reset();
+                    document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+                    
+                    alert('Laporan setoran tunai berhasil disimpan!');
+                }
+                
+                // Sembunyikan spinner
+                toggleSpinner(false);
+            });
+            
+            // Refresh data
+            document.getElementById('refreshBtn').addEventListener('click', ambilData);
+            
+            // Filter bulan change event
+            document.getElementById('filterBulan').addEventListener('change', function() {
+                renderTabel();
+                renderSummaryCards();
+            });
+            
+            // Set tanggal hari ini sebagai default
+            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+            
+            // Set filter bulan ke bulan saat ini
+            const currentMonth = new Date().toISOString().split('-')[1];
+            document.getElementById('filterBulan').value = currentMonth;
+            
+            // Ambil data pertama kali
+            ambilData();
+        });
+    </script>
+</body>
+</html>
