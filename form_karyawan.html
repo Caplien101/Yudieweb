@@ -16,7 +16,7 @@
             min-height: 100vh;
         }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
         }
         .card {
             border-radius: 15px;
@@ -67,6 +67,18 @@
             padding: 12px 25px;
             font-weight: 600;
         }
+        .btn-info {
+            background: linear-gradient(135deg, #0dcaf0 0%, #31d2f2 100%);
+            border: none;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #31d2f2 0%, #0dcaf0 100%);
+        }
         .form-check-input:checked {
             background-color: #0d6efd;
             border-color: #0d6efd;
@@ -113,9 +125,93 @@
             margin-right: 8px;
         }
         .spinner-border {
-    margin-right: 8px;
-}
-       
+            margin-right: 8px;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .table thead th {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            border: none;
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        #dataTable {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            margin-bottom: 20px;
+        }
+        .table th, .table td {
+            max-width: 200px;
+            padding: 8px;
+            font-size: 0.85rem;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        @media (max-width: 576px) {
+            .table-responsive {
+                display: block;
+                overflow-x: hidden;
+            }
+            .table {
+                display: block;
+                width: 100%;
+            }
+            .table thead {
+                display: none;
+            }
+            .table tbody {
+                display: block;
+            }
+            .table tr {
+                display: block;
+                margin-bottom: 20px;
+                padding: 10px;
+                background-color: #fff;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+            .table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 10px;
+                border: none;
+                font-size: 0.9rem;
+                text-align: right;
+                white-space: normal;
+                max-width: none;
+                word-wrap: break-word;
+            }
+            .table td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                width: 40%;
+                text-align: left;
+                color: #333;
+            }
+            .table td[data-label="NIK"],
+            .table td[data-label="Alasan"] {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -125,143 +221,190 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="logo-container">
-                           
                             <div>
                                 <h1 class="form-title">Form Izin Karyawan</h1>
-                                <p class="company-name">SAT PRAMUKA Bekasi</p>
+                                <p class="company-name">SAT Pramuka Bekasi</p>
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
-                        <form id="izinForm">
-                            <!-- NIK dan Nama -->
-                            <div class="row mb-4">
-                                <div class="col-md-6 mb-3 mb-md-0">
-                                    <label for="nik" class="form-label required-field">NIK</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                        <input type="text" class="form-control" id="nik" required placeholder="Masukkan NIK Anda">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="nama" class="form-label required-field">Nama Lengkap</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
-                                        <input type="text" class="form-control" id="nama" required placeholder="Masukkan nama lengkap">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tanggal -->
-                            <div class="mb-4">
-                                <label for="tanggal" class="form-label required-field">Tanggal Izin</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-                                    <input type="date" class="form-control" id="tanggal" required>
-                                </div>
-                            </div>
-
-                            <!-- Kategori -->
-                            <div class="mb-4">
-                                <label for="kategori" class="form-label required-field">Kategori Izin</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-list-ul"></i></span>
-                                    <select class="form-select" id="kategori" required>
-                                        <option value="" selected disabled>Pilih Kategori Izin</option>
-                                        <option value="terlambat">Terlambat</option>
-                                        <option value="sakit">Sakit</option>
-                                        <option value="mangkir">Mangkir</option>
-                                        <option value="ijin">Ijin</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Field untuk Terlambat -->
-                            <div id="terlambatField" class="conditional-field">
-                                <h5><i class="bi bi-clock"></i> Informasi Keterlambatan</h5>
-                                <div class="mb-3">
-                                    <label for="jamTerlambat" class="form-label required-field">Jam Terlambat</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
-                                        <input type="time" class="form-control" id="jamTerlambat">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Field untuk Sakit -->
-                            <div id="sakitField" class="conditional-field">
-                                <h5><i class="bi bi-heart-pulse"></i> Informasi Sakit</h5>
-                                <div class="row mb-3">
+                        <div id="formSection">
+                            <form id="izinForm">
+                                <!-- NIK dan Nama -->
+                                <div class="row mb-4">
                                     <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="jumlahHariSakit" class="form-label required-field">Jumlah Hari Sakit</label>
+                                        <label for="nik" class="form-label required-field">NIK</label>
                                         <div class="input-group">
-                                            <span class="input-group-text"><i class="bi bi-calendar-week"></i></span>
-                                            <input type="number" class="form-control" id="jumlahHariSakit" min="" value="">
+                                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                            <input type="text" class="form-control" id="nik" required placeholder="Masukkan NIK Anda">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label required-field">Apakah tersedia surat dokter?</label>
-                                        <div class="d-flex gap-4">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="suratDokter" id="suratDokterYa" value="ya">
-                                                <label class="form-check-label" for="suratDokterYa">Ya</label>
+                                        <label for="nama" class="form-label required-field">Nama Lengkap</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                                            <input type="text" class="form-control" id="nama" required placeholder="Masukkan nama lengkap">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tanggal -->
+                                <div class="mb-4">
+                                    <label for="tanggal" class="form-label required-field">Tanggal Izin</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                        <input type="date" class="form-control" id="tanggal" required>
+                                    </div>
+                                </div>
+
+                                <!-- Kategori -->
+                                <div class="mb-4">
+                                    <label for="kategori" class="form-label required-field">Kategori Izin</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-list-ul"></i></span>
+                                        <select class="form-select" id="kategori" required>
+                                            <option value="" selected disabled>Pilih Kategori Izin</option>
+                                            <option value="terlambat">Terlambat</option>
+                                            <option value="sakit">Sakit</option>
+                                            <option value="mangkir">Mangkir</option>
+                                            <option value="ijin">Ijin</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Field untuk Terlambat -->
+                                <div id="terlambatField" class="conditional-field">
+                                    <h5><i class="bi bi-clock"></i> Informasi Keterlambatan</h5>
+                                    <div class="mb-3">
+                                        <label for="jamTerlambat" class="form-label required-field">Jam Terlambat</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                                            <input type="time" class="form-control" id="jamTerlambat">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Field untuk Sakit -->
+                                <div id="sakitField" class="conditional-field">
+                                    <h5><i class="bi bi-heart-pulse"></i> Informasi Sakit</h5>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            <label for="jumlahHariSakit" class="form-label required-field">Jumlah Hari Sakit</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-calendar-week"></i></span>
+                                                <input type="number" class="form-control" id="jumlahHariSakit" min="1" value="">
                                             </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="suratDokter" id="suratDokterTidak" value="tidak" checked>
-                                                <label class="form-check-label" for="suratDokterTidak">Tidak</label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label required-field">Apakah tersedia surat dokter?</label>
+                                            <div class="d-flex gap-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="suratDokter" id="suratDokterYa" value="ya">
+                                                    <label class="form-check-label" for="suratDokterYa">Ya</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="suratDokter" id="suratDokterTidak" value="tidak" checked>
+                                                    <label class="form-check-label" for="suratDokterTidak">Tidak</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Alasan -->
-                            <div class="mb-4">
-                                <label for="alasan" class="form-label required-field">Alasan Izin</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
-                                    <textarea class="form-control" id="alasan" rows="3" required placeholder="Jelaskan alasan izin secara detail"></textarea>
+                                <!-- Alasan -->
+                                <div class="mb-4">
+                                    <label for="alasan" class="form-label required-field">Alasan Izin</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+                                        <textarea class="form-control" id="alasan" rows="3" required placeholder="Jelaskan alasan izin secara detail"></textarea>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Keterangan -->
-                            <div class="mb-4">
-                                <label class="form-label"><i class="bi bi-info-circle"></i> Keterangan Tambahan</label>
-                                
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="dekatanGajian">
-                                    <label class="form-check-label" for="dekatanGajian">
-                                        <i class="bi bi-currency-dollar info-icon"></i>Apakah berdekatan dengan tanggal gajian?
-                                    </label>
+                                <!-- Keterangan -->
+                                <div class="mb-4">
+                                    <label class="form-label"><i class="bi bi-info-circle"></i> Keterangan Tambahan</label>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="dekatanGajian">
+                                        <label class="form-check-label" for="dekatanGajian">
+                                            <i class="bi bi-currency-dollar info-icon"></i>Apakah berdekatan dengan tanggal gajian?
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="dekatanLibur">
+                                        <label class="form-check-label" for="dekatanLibur">
+                                            <i class="bi bi-sun info-icon"></i>Berdekatan hari libur?
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="weekend">
+                                        <label class="form-check-label" for="weekend">
+                                            <i class="bi bi-calendar-weekend info-icon"></i>Apakah hari Week End?
+                                        </label>
+                                    </div>
                                 </div>
-                                
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="dekatanLibur">
-                                    <label class="form-check-label" for="dekatanLibur">
-                                        <i class="bi bi-sun info-icon"></i>Berdekatan hari libur?
-                                    </label>
-                                </div>
-                                
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="weekend">
-                                    <label class="form-check-label" for="weekend">
-                                        <i class="bi bi-calendar-weekend info-icon"></i>Apakah hari Week End?
-                                    </label>
-                                </div>
-                            </div>
 
-                            <!-- Tombol Submit -->
-<div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
-    <button type="reset" class="btn btn-secondary me-md-3 px-4"><i class="bi bi-arrow-repeat"></i> Reset Form</button>
-    <button type="submit" class="btn btn-primary px-4" id="submitButton">
-        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="spinner"></span>
-        <span id="buttonText"><i class="bi bi-send-check"></i> Kirim Permohonan</span>
-    </button>
-</div>
-                
-                <!-- Footer -->
-                <div class="footer">
-                    <p>© 2025 Yudie Apps - Sistem Manajemen Izin Karyawan</p>
+                                <!-- Tombol Submit -->
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+                                    <button type="button" class="btn btn-info me-auto" id="btnGetData">
+                                        <i class="bi bi-table"></i> Lihat Data Izin
+                                    </button>
+                                    <button type="reset" class="btn btn-secondary me-md-3 px-4"><i class="bi bi-arrow-repeat"></i> Reset Form</button>
+                                    <button type="submit" class="btn btn-primary px-4" id="submitButton">
+                                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="spinner"></span>
+                                        <span id="buttonText"><i class="bi bi-send-check"></i> Kirim Permohonan</span>
+                                    </button>
+                                </div>
+                            </form>
+                            <!-- Footer -->
+                            <div class="footer">
+                                <p>© 2025 Yudie Apps - Sistem Manajemen Izin Karyawan</p>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Data -->
+                        <div id="dataTable">
+                            <div class="back-button">
+                                <button class="btn btn-secondary" id="btnBackToForm">
+                                    <i class="bi bi-arrow-left"></i> Kembali ke Form
+                                </button>
+                            </div>
+                            <div class="data-header">
+                                <h3><i class="bi bi-table"></i> Data Izin Karyawan</h3>
+                                <button class="btn btn-primary" id="btnRefreshData">
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                                </button>
+                            </div>
+                            <div class="alert alert-info d-none" id="dataAlert">
+                                <i class="bi bi-info-circle"></i> <span id="alertMessage"></span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>NIK</th>
+                                            <th>Nama</th>
+                                            <th>Tanggal</th>
+                                            <th>Kategori</th>
+                                            <th>Alasan</th>
+                                            <th>Keterangan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tableBody">
+                                        <!-- Data akan diisi oleh JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="text-muted" id="dataInfo">Menampilkan 0 data</div>
+                                <nav>
+                                    <ul class="pagination justify-content-end" id="pagination">
+                                        <!-- Pagination akan diisi oleh JavaScript -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -272,107 +415,259 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-    const kategoriSelect = document.getElementById('kategori');
-    const terlambatField = document.getElementById('terlambatField');
-    const sakitField = document.getElementById('sakitField');
-    const submitButton = document.getElementById('submitButton');
-    const spinner = document.getElementById('spinner');
-    const buttonText = document.getElementById('buttonText');
+            const kategoriSelect = document.getElementById('kategori');
+            const terlambatField = document.getElementById('terlambatField');
+            const sakitField = document.getElementById('sakitField');
+            const submitButton = document.getElementById('submitButton');
+            const spinner = document.getElementById('spinner');
+            const buttonText = document.getElementById('buttonText');
+            const formSection = document.getElementById('formSection');
+            const dataTable = document.getElementById('dataTable');
+            const btnGetData = document.getElementById('btnGetData');
+            const btnBackToForm = document.getElementById('btnBackToForm');
+            const btnRefreshData = document.getElementById('btnRefreshData');
+            const tableBody = document.getElementById('tableBody');
+            const dataInfo = document.getElementById('dataInfo');
+            const pagination = document.getElementById('pagination');
+            const dataAlert = document.getElementById('dataAlert');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            // Variabel untuk pagination
+            let currentPage = 1;
+            const itemsPerPage = 5;
+            let allData = [];
 
-    // Fungsi untuk menangani perubahan kategori
-    kategoriSelect.addEventListener('change', function() {
-        terlambatField.style.display = 'none';
-        sakitField.style.display = 'none';
-        
-        if (this.value === 'terlambat') {
-            terlambatField.style.display = 'block';
-        } else if (this.value === 'sakit') {
-            sakitField.style.display = 'block';
-        }
-    });
-
-    // Validasi dan kirim form ke Google Sheets
-    document.getElementById('izinForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Validasi sederhana
-        let isValid = true;
-        const requiredFields = this.querySelectorAll('[required]');
-        
-        requiredFields.forEach(field => {
-            if (!field.value) {
-                isValid = false;
-                field.classList.add('is-invalid');
-            } else {
-                field.classList.remove('is-invalid');
-            }
-        });
-
-        const kategori = kategoriSelect.value;
-        if (kategori === 'terlambat' && !document.getElementById('jamTerlambat').value) {
-            isValid = false;
-            document.getElementById('jamTerlambat').classList.add('is-invalid');
-        }
-        
-        if (kategori === 'sakit' && !document.getElementById('jumlahHariSakit').value) {
-            isValid = false;
-            document.getElementById('jumlahHariSakit').classList.add('is-invalid');
-        }
-
-        if (isValid) {
-            // Tampilkan spinner dan nonaktifkan tombol
-            spinner.classList.remove('d-none');
-            buttonText.innerHTML = 'Mengirim...';
-            submitButton.disabled = true;
-
-            // Ambil data dari form
-            const formData = {
-                nik: document.getElementById('nik').value,
-                nama: document.getElementById('nama').value,
-                tanggal: document.getElementById('tanggal').value,
-                kategori: kategoriSelect.value,
-                jamTerlambat: document.getElementById('jamTerlambat').value,
-                jumlahHariSakit: document.getElementById('jumlahHariSakit').value,
-                suratDokter: document.querySelector('input[name="suratDokter"]:checked').value,
-                alasan: document.getElementById('alasan').value,
-                dekatanGajian: document.getElementById('dekatanGajian').checked,
-                dekatanLibur: document.getElementById('dekatanLibur').checked,
-                weekend: document.getElementById('weekend').checked
-            };
-
-            // Kirim data ke Google Apps Script
-            fetch('https://script.google.com/macros/s/AKfycbwcxnhByycR4vhdTdGx0u5dQazZTzW-muk9VeWdH1faF7ymB9j-wZezvgOgVo0yNbnqyA/exec', { // Ganti dengan URL Web App dari Apps Script
-                method: 'POST',
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Sembunyikan spinner dan aktifkan kembali tombol
-                spinner.classList.add('d-none');
-                buttonText.innerHTML = '<i class="bi bi-send-check"></i> Kirim Permohonan';
-                submitButton.disabled = false;
-
-                if (data.result === 'success') {
-                    alert('Form berhasil disubmit! Data izin karyawan telah tersimpan di Google Sheets.');
-                    document.getElementById('izinForm').reset();
-                    terlambatField.style.display = 'none';
-                    sakitField.style.display = 'none';
-                } else {
-                    alert('Terjadi kesalahan: ' + data.message);
+            // Fungsi untuk menangani perubahan kategori
+            kategoriSelect.addEventListener('change', function() {
+                terlambatField.style.display = 'none';
+                sakitField.style.display = 'none';
+                
+                if (this.value === 'terlambat') {
+                    terlambatField.style.display = 'block';
+                } else if (this.value === 'sakit') {
+                    sakitField.style.display = 'block';
                 }
-            })
-            .catch(error => {
-                // Sembunyikan spinner dan aktifkan kembali tombol
-                spinner.classList.add('d-none');
-                buttonText.innerHTML = '<i class="bi bi-send-check"></i> Kirim Permohonan';
-                submitButton.disabled = false;
-                alert('Terjadi kesalahan saat mengirim data: ' + error);
             });
-        } else {
-            alert('Harap isi semua field yang wajib diisi.');
-        }
-    });
-});
+
+            // Fungsi untuk toggle antara form dan data
+            btnGetData.addEventListener('click', function() {
+                formSection.style.display = 'none';
+                dataTable.style.display = 'block';
+                loadData();
+            });
+
+            btnBackToForm.addEventListener('click', function() {
+                dataTable.style.display = 'none';
+                formSection.style.display = 'block';
+            });
+
+            btnRefreshData.addEventListener('click', function() {
+                loadData();
+            });
+
+            // Fungsi untuk memuat data dari Google Sheets
+            function loadData() {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"></div> Memuat data...</td></tr>';
+                dataAlert.classList.add('d-none');
+                
+                const scriptUrl = 'https://script.google.com/macros/s/AKfycbwSKGEFzG43cA1npwNi07meuefkfW7CwiMlMgsfa0G1wmYrwiQj4R0qwbvDh4zEWkmT5g/exec';
+                
+                fetch(scriptUrl + '?action=getData')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok: ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Data received:", data);
+                        
+                        if (data && data.length > 0) {
+                            allData = data;
+                            currentPage = 1;
+                            renderTable();
+                        } else {
+                            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data izin</td></tr>';
+                            dataInfo.textContent = 'Menampilkan 0 data';
+                            pagination.innerHTML = '';
+                            
+                            alertMessage.textContent = 'Tidak ada data yang ditemukan. Pastikan data sudah dikirim melalui form.';
+                            dataAlert.classList.remove('d-none');
+                            dataAlert.classList.remove('alert-danger');
+                            dataAlert.classList.add('alert-info');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                        tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Gagal memuat data: ' + error.message + '</td></tr>';
+                        
+                        alertMessage.textContent = 'Error: ' + error.message + '. Pastikan URL Apps Script benar dan sudah di-deploy.';
+                        dataAlert.classList.remove('d-none');
+                        dataAlert.classList.remove('alert-info');
+                        dataAlert.classList.add('alert-danger');
+                    });
+            }
+
+            // Fungsi untuk merender tabel dengan data
+            function renderTable() {
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const pageData = allData.slice(startIndex, endIndex);
+                
+                tableBody.innerHTML = '';
+                
+                if (pageData.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data izin</td></tr>';
+                } else {
+                    pageData.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        const globalIndex = startIndex + index + 1;
+                        
+                        // Format tanggal tanpa jam
+                        let tanggalFormatted = item['Tanggal Izin'] || item.tanggal || '-';
+                        if (tanggalFormatted.includes(' ')) {
+                            tanggalFormatted = tanggalFormatted.split(' ')[0]; // Ambil bagian sebelum spasi
+                        }
+
+                        // Buat keterangan dari data
+                        let keterangan = [];
+                        if (item['Dekat Tanggal Gajian'] === 'Ya') keterangan.push('Dekat gajian');
+                        if (item['Dekat Hari Libur'] === 'Ya') keterangan.push('Dekat libur');
+                        if (item['Hari Weekend'] === 'Ya') keterangan.push('Hari weekend');
+                        const keteranganText = keterangan.length > 0 ? keterangan.join(', ') : '-';
+
+                        row.innerHTML = `
+                            <td data-label="No">${globalIndex}</td>
+                            <td data-label="NIK">${item.NIK || item.nik || '-'}</td>
+                            <td data-label="Nama">${item.Nama || item.nama || '-'}</td>
+                            <td data-label="Tanggal">${tanggalFormatted}</td>
+                            <td data-label="Kategori">${item['Kategori Izin'] || '-'}</td>
+                            <td data-label="Alasan" title="${item.Alasan || item.alasan || '-'}">${item.Alasan || item.alasan ? (item.Alasan || item.alasan).substring(0, 30) + ((item.Alasan || item.alasan).length > 30 ? '...' : '') : '-'}</td>
+                            <td data-label="Keterangan">${keteranganText}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                }
+                
+                dataInfo.textContent = `Menampilkan ${startIndex + 1} sampai ${Math.min(endIndex, allData.length)} dari ${allData.length} data`;
+                
+                renderPagination();
+            }
+
+            // Fungsi untuk merender pagination
+            function renderPagination() {
+                const totalPages = Math.ceil(allData.length / itemsPerPage);
+                
+                pagination.innerHTML = '';
+                
+                if (totalPages <= 1) return;
+                
+                const prevLi = document.createElement('li');
+                prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                prevLi.innerHTML = `<a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>`;
+                pagination.appendChild(prevLi);
+                
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageLi = document.createElement('li');
+                    pageLi.className = `page-item ${currentPage === i ? 'active' : ''}`;
+                    pageLi.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+                    pagination.appendChild(pageLi);
+                }
+                
+                const nextLi = document.createElement('li');
+                nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                nextLi.innerHTML = `<a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>`;
+                pagination.appendChild(nextLi);
+                
+                pagination.querySelectorAll('.page-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const page = parseInt(this.getAttribute('data-page'));
+                        if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                            currentPage = page;
+                            renderTable();
+                        }
+                    });
+                });
+            }
+
+            // Validasi dan kirim form ke Google Sheets
+            document.getElementById('izinForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                let isValid = true;
+                const requiredFields = this.querySelectorAll('[required]');
+                
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+
+                const kategori = kategoriSelect.value;
+                if (kategori === 'terlambat' && !document.getElementById('jamTerlambat').value) {
+                    isValid = false;
+                    document.getElementById('jamTerlambat').classList.add('is-invalid');
+                }
+                
+                if (kategori === 'sakit' && !document.getElementById('jumlahHariSakit').value) {
+                    isValid = false;
+                    document.getElementById('jumlahHariSakit').classList.add('is-invalid');
+                }
+
+                if (isValid) {
+                    spinner.classList.remove('d-none');
+                    buttonText.innerHTML = 'Mengirim...';
+                    submitButton.disabled = true;
+
+                    const formData = {
+                        nik: document.getElementById('nik').value,
+                        nama: document.getElementById('nama').value,
+                        tanggal: document.getElementById('tanggal').value,
+                        kategori: kategoriSelect.value,
+                        jamTerlambat: document.getElementById('jamTerlambat').value,
+                        jumlahHariSakit: document.getElementById('jumlahHariSakit').value,
+                        suratDokter: document.querySelector('input[name="suratDokter"]:checked').value,
+                        alasan: document.getElementById('alasan').value,
+                        'Dekat Tanggal Gajian': document.getElementById('dekatanGajian').checked ? 'Ya' : 'Tidak',
+                        'Dekat Hari Libur': document.getElementById('dekatanLibur').checked ? 'Ya' : 'Tidak',
+                        'Hari Weekend': document.getElementById('weekend').checked ? 'Ya' : 'Tidak'
+                    };
+                    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwSKGEFzG43cA1npwNi07meuefkfW7CwiMlMgsfa0G1wmYrwiQj4R0qwbvDh4zEWkmT5g/exec';
+                    
+                    fetch(scriptUrl, {
+                        method: 'POST',
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        spinner.classList.add('d-none');
+                        buttonText.innerHTML = '<i class="bi bi-send-check"></i> Kirim Permohonan';
+                        submitButton.disabled = false;
+
+                        if (data.result === 'success') {
+                            alert('Form berhasil disubmit! Data izin karyawan telah tersimpan di Google Sheets.');
+                            document.getElementById('izinForm').reset();
+                            terlambatField.style.display = 'none';
+                            sakitField.style.display = 'none';
+                        } else {
+                            alert('Terjadi kesalahan: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        spinner.classList.add('d-none');
+                        buttonText.innerHTML = '<i class="bi bi-send-check"></i> Kirim Permohonan';
+                        submitButton.disabled = false;
+                        alert('Terjadi kesalahan saat mengirim data: ' + error);
+                    });
+                } else {
+                    alert('Harap isi semua field yang wajib diisi.');
+                }
+            });
+        });
     </script>
 </body>
 </html>
