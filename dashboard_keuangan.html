@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Keuangan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .card {
+      background-color: #ffffff;
+      transition: transform 0.2s;
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+      min-height: 160px;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .transaction-card {
+      background-color: #ffffff;
+      transition: transform 0.2s;
+      width: 100%;
+      max-width: 100%;
+      min-height: auto;
+    }
+    .transaction-card:hover {
+      transform: translateY(-5px);
+    }
+    .btn-primary {
+      transition: background-color 0.3s;
+    }
+    .btn-primary:hover {
+      background-color: #005f73;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #0a9396;
+      box-shadow: 0 0 0 0.2rem rgba(10, 147, 150, 0.25);
+    }
+    .alert {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .alert-success {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+    .alert-danger {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+    #budgetForm {
+      display: none;
+    }
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1rem;
+      height: 100%;
+    }
+    .card-text {
+      margin-bottom: 0;
+    }
+    .budget-status {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    .section-form, .section-dashboard, .section-transactions {
+      margin-bottom: 2rem;
+    }
+    .spinner-border {
+      width: 1rem;
+      height: 1rem;
+      vertical-align: middle;
+      margin-left: 0.5rem;
+    }
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+    /* Loading overlay styles */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .loading-overlay .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: #ffffff;
+    }
+    @media (min-width: 992px) {
+      .card {
+        min-height: 180px;
+      }
+      .card-body {
+        padding: 1.5rem;
+      }
+      .transaction-card {
+        min-height: 400px;
+      }
+      .alert {
+        margin-top: 1rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+      }
+    }
+    @media (max-width: 576px) {
+      .card {
+        max-width: 100%;
+        min-height: 140px;
+      }
+      .card-body {
+        padding: 0.75rem;
+      }
+      .form-label {
+        font-size: 0.85rem;
+      }
+      .form-control, .form-select {
+        font-size: 0.85rem;
+      }
+      .btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.75rem;
+      }
+      .section-form, .section-dashboard, .section-transactions {
+        margin-bottom: 1.5rem;
+      }
+      .spinner-border {
+        width: 0.8rem;
+        height: 0.8rem;
+      }
+      .loading-overlay .spinner-border {
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div class="container py-3 py-md-4">
+    <h1 class="mb-3 mb-md-4 text-center text-primary">Dashboard Keuangan</h1>
+
+    <!-- Section 1: Form Input dan Set Budget -->
+    <section class="section-form">
+      <div class="row g-3 justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title mb-2"><i class="bi bi-plus-circle me-2"></i>Tambah Transaksi</h5>
+              <div class="mb-2">
+                <label for="transactionDescription" class="form-label">Deskripsi</label>
+                <input type="text" class="form-control" id="transactionDescription" placeholder="Masukkan deskripsi" data-bs-toggle="tooltip" title="Masukkan deskripsi transaksi">
+              </div>
+              <div class="mb-2">
+                <label for="transactionAmount" class="form-label">Jumlah (Rp)</label>
+                <input type="number" class="form-control" id="transactionAmount" placeholder="Masukkan jumlah" data-bs-toggle="tooltip" title="Masukkan jumlah dalam Rupiah">
+              </div>
+              <div class="mb-2">
+                <label for="transactionType" class="form-label">Jenis</label>
+                <select class="form-select" id="transactionType" data-bs-toggle="tooltip" title="Pilih jenis transaksi">
+                  <option value="income">Pendapatan</option>
+                  <option value="expense">Pengeluaran</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label for="transactionDate" class="form-label">Tanggal</label>
+                <input type="date" class="form-control" id="transactionDate" data-bs-toggle="tooltip" title="Pilih tanggal transaksi">
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary" id="addTransactionBtn" onclick="addTransaction()">
+                  Tambah
+                  <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+                <button class="btn btn-outline-secondary" onclick="resetTransactionForm()">Reset</button>
+              </div>
+              <div id="transactionAlert" class="alert" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title mb-2"><i class="bi bi-wallet2 me-2"></i>Budget Bulanan</h5>
+              <p class="mb-2">Budget Saat Ini: <span id="currentBudget" class="fw-bold text-primary">Rp 0</span> untuk <span id="currentBudgetMonth">Bulan Ini</span></p>
+              <button class="btn btn-primary" onclick="toggleBudgetForm()">Atur Budget</button>
+              <div id="budgetForm" class="mt-2">
+                <div class="mb-2">
+                  <label for="budgetMonth" class="form-label">Bulan</label>
+                  <input type="month" class="form-control" id="budgetMonth" data-bs-toggle="tooltip" title="Pilih bulan untuk budget">
+                </div>
+                <div class="mb-2">
+                  <label for="monthlyBudget" class="form-label">Budget Bulanan (Rp)</label>
+                  <input type="number" class="form-control" id="monthlyBudget" placeholder="Masukkan budget bulanan" data-bs-toggle="tooltip" title="Masukkan budget bulanan dalam Rupiah">
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-primary" id="saveBudgetBtn" onclick="setBudget()">
+                    Simpan
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  </button>
+                  <button class="btn btn-outline-secondary" onclick="toggleBudgetForm()">Batal</button>
+                </div>
+              </div>
+              <div id="budgetAlert" class="alert" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Dashboard -->
+    <section class="section-dashboard">
+      <div class="row g-3 justify-content-center">
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title text-muted"><i class="bi bi-arrow-up-circle me-2"></i>Total Pendapatan</h5>
+              <h3 class="card-text text-success" id="totalIncome">Rp 0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title text-muted"><i class="bi bi-arrow-down-circle me-2"></i>Total Pengeluaran</h5>
+              <h3 class="card-text text-danger" id="totalExpense">Rp 0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title text-muted"><i class="bi bi-bank me-2"></i>Saldo</h5>
+              <h3 class="card-text text-primary" id="balance">Rp 0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title text-muted"><i class="bi bi-pie-chart me-2"></i>Pengeluaran vs Budget</h5>
+              <h3 class="card-text" id="budgetComparison">0% dari Budget</h3>
+              <p class="budget-status" id="budgetStatus"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Daftar Transaksi -->
+    <section class="section-transactions">
+      <div class="card shadow-sm border-0 transaction-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="card-title mb-0"><i class="bi bi-list-ul me-2"></i>Daftar Transaksi</h2>
+            <div class="w-50 w-md-25 w-lg-15">
+              <select class="form-select" id="transactionFilter" onchange="filterTransactions()" data-bs-toggle="tooltip" title="Filter transaksi berdasarkan jenis">
+                <option value="all">Semua</option>
+                <option value="income">Pendapatan</option>
+                <option value="expense">Pengeluaran</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-striped" id="transactionTable">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Deskripsi</th>
+                  <th>Jenis</th>
+                  <th>Jumlah</th>
+                </tr>
+              </thead>
+              <tbody id="transactionBody">
+                <!-- Transaksi akan ditambahkan secara dinamis -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let transactions = [];
+    let monthlyBudget = 0;
+    let budgetMonth = '';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbziq-FkHW2CRtKH-f2vvny4xzUZgIRA0QZCAGh6532HsVOZyKiABSA87W42l6SiA4DH/exec'; // Ganti dengan URL Web App dari Apps Script
+
+    // Inisialisasi tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+    // Set tanggal default ke hari ini
+    document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+
+    // Fungsi untuk menampilkan/sembunyikan loading overlay
+    function toggleLoading(show) {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.style.display = show ? 'flex' : 'none';
+    }
+
+    // Memuat data saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', async () => {
+      toggleLoading(true); // Tampilkan loading overlay
+      try {
+        // Memuat transaksi
+        const transactionResponse = await fetch(`${WEB_APP_URL}?action=getTransactions`);
+        const transactionData = await transactionResponse.json();
+        transactions = transactionData;
+        updateSummary();
+        filterTransactions();
+
+        // Memuat budget
+        const budgetResponse = await fetch(`${WEB_APP_URL}?action=getBudget`);
+        const budgetData = await budgetResponse.json();
+        if (budgetData.month) {
+          budgetMonth = budgetData.month;
+          monthlyBudget = budgetData.amount;
+          document.getElementById('currentBudget').textContent = `Rp ${monthlyBudget.toLocaleString('id-ID')}`;
+          document.getElementById('currentBudgetMonth').textContent = new Date(budgetMonth).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+          updateSummary();
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        showAlert('transactionAlert', 'Gagal memuat data dari Google Sheets', 'danger');
+      } finally {
+        toggleLoading(false); // Sembunyikan loading overlay
+      }
+    });
+
+    function toggleBudgetForm() {
+      const form = document.getElementById('budgetForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function updateSummary() {
+      const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+      const totalExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+      const balance = totalIncome - totalExpense;
+
+      document.getElementById('totalIncome').textContent = `Rp ${totalIncome.toLocaleString('id-ID')}`;
+      document.getElementById('totalExpense').textContent = `Rp ${totalExpense.toLocaleString('id-ID')}`;
+      document.getElementById('balance').textContent = `Rp ${balance.toLocaleString('id-ID')}`;
+
+      const budgetComparison = monthlyBudget > 0 ? (totalExpense / monthlyBudget * 100).toFixed(2) : 0;
+      document.getElementById('budgetComparison').textContent = `${budgetComparison}% dari Budget`;
+      const budgetStatus = document.getElementById('budgetStatus');
+      if (monthlyBudget === 0) {
+        budgetStatus.textContent = 'Belum ada budget yang diatur';
+        budgetStatus.className = 'budget-status text-muted';
+      } else if (totalExpense > monthlyBudget) {
+        budgetStatus.textContent = 'Pengeluaran melebihi budget!';
+        budgetStatus.className = 'budget-status text-danger';
+      } else {
+        budgetStatus.textContent = 'Pengeluaran dalam batas budget';
+        budgetStatus.className = 'budget-status text-success';
+      }
+    }
+
+    async function setBudget() {
+      const budgetInput = document.getElementById('monthlyBudget').value;
+      const monthInput = document.getElementById('budgetMonth').value;
+      const budgetAlert = document.getElementById('budgetAlert');
+      const saveBtn = document.getElementById('saveBudgetBtn');
+      const spinner = saveBtn.querySelector('.spinner-border');
+
+      if (budgetInput && !isNaN(budgetInput) && budgetInput > 0 && monthInput) {
+        const budget = {
+          month: monthInput,
+          amount: parseInt(budgetInput)
+        };
+        saveBtn.disabled = true;
+        spinner.classList.remove('d-none');
+        try {
+          const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            
+            body: JSON.stringify({ action: 'setBudget', budget })
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            monthlyBudget = budget.amount;
+            budgetMonth = budget.month;
+            document.getElementById('currentBudget').textContent = `Rp ${monthlyBudget.toLocaleString('id-ID')}`;
+            document.getElementById('currentBudgetMonth').textContent = new Date(budgetMonth).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+            document.getElementById('monthlyBudget').value = '';
+            document.getElementById('budgetMonth').value = '';
+            toggleBudgetForm();
+            showAlert('budgetAlert', result.message, 'success');
+            updateSummary();
+          } else {
+            showAlert('budgetAlert', result.message, 'danger');
+          }
+        } catch (error) {
+          console.error('Error saving budget:', error);
+          showAlert('budgetAlert', 'Gagal menyimpan budget ke Google Sheets', 'danger');
+        } finally {
+          saveBtn.disabled = false;
+          spinner.classList.add('d-none');
+        }
+      } else {
+        showAlert('budgetAlert', 'Masukkan bulan dan jumlah budget yang valid!', 'danger');
+      }
+    }
+
+    async function addTransaction() {
+      const description = document.getElementById('transactionDescription').value;
+      const amount = parseInt(document.getElementById('transactionAmount').value);
+      const type = document.getElementById('transactionType').value;
+      const date = document.getElementById('transactionDate').value;
+      const transactionAlert = document.getElementById('transactionAlert');
+      const addBtn = document.getElementById('addTransactionBtn');
+      const spinner = addBtn.querySelector('.spinner-border');
+
+      if (!description || isNaN(amount) || amount <= 0 || !date) {
+        showAlert('transactionAlert', 'Harap isi semua field dengan data yang valid!', 'danger');
+        return;
+      }
+
+      const transaction = { description, amount, type, date };
+
+      addBtn.disabled = true;
+      spinner.classList.remove('d-none');
+      toggleLoading(true); // Tampilkan loading overlay
+      try {
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          
+          body: JSON.stringify({ action: 'addTransaction', transaction })
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+          transactions.push({ id: `T${transactions.length + 1}`, ...transaction });
+          showAlert('transactionAlert', result.message, 'success');
+          resetTransactionForm();
+          filterTransactions();
+          updateSummary();
+        } else {
+          showAlert('transactionAlert', result.message, 'danger');
+        }
+      } catch (error) {
+        console.error('Error saving transaction:', error);
+        showAlert('transactionAlert', 'Gagal menyimpan transaksi ke Google Sheets', 'danger');
+      } finally {
+        addBtn.disabled = false;
+        spinner.classList.add('d-none');
+        toggleLoading(false); // Sembunyikan loading overlay
+      }
+    }
+
+    function resetTransactionForm() {
+      document.getElementById('transactionDescription').value = '';
+      document.getElementById('transactionAmount').value = '';
+      document.getElementById('transactionType').value = 'income';
+      document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+    }
+
+    function filterTransactions() {
+      const filter = document.getElementById('transactionFilter').value;
+      const tableBody = document.getElementById('transactionBody');
+      tableBody.innerHTML = '';
+
+      const filteredTransactions = filter === 'all' 
+        ? transactions 
+        : transactions.filter(t => t.type === filter);
+
+      filteredTransactions.forEach(transaction => {
+        // Format tanggal ke DD/MM/YYYY
+        const dateParts = transaction.date.split('-'); // Misalnya, "2025-08-29"
+        const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // Menjadi "29/08/2025"
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${formattedDate}</td>
+          <td>${transaction.description}</td>
+          <td class="${transaction.type === 'income' ? 'text-success' : 'text-danger'}">
+            ${transaction.type === 'income' ? 'Pendapatan' : 'Pengeluaran'}
+          </td>
+          <td>Rp ${transaction.amount.toLocaleString('id-ID')}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function showAlert(elementId, message, type) {
+      const alertElement = document.getElementById(elementId);
+      alertElement.textContent = message;
+      alertElement.className = `alert alert-${type}`;
+      alertElement.style.display = 'block';
+      setTimeout(() => {
+        alertElement.style.opacity = 0;
+        setTimeout(() => {
+          alertElement.style.display = 'none';
+          alertElement.style.opacity = 1;
+        }, 300);
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
