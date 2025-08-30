@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Laporan Sales Harian</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .form-container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #343a40;
+        }
+        .btn-submit {
+            background-color: #0d6efd;
+            border: none;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        .btn-submit:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+        }
+        .btn-reset {
+            background-color: #6c757d;
+            border: none;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        .btn-reset:hover {
+            background-color: #5c636a;
+            transform: translateY(-2px);
+        }
+        .alert-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-in-out;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .summary-card {
+            margin-top: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .card-header {
+            border-top-left-radius: 10px !important;
+            border-top-right-radius: 10px !important;
+            font-weight: 600;
+        }
+        .table-responsive {
+            margin-top: 1rem;
+        }
+        .table-footer {
+            font-weight: bold;
+            background-color: #e9ecef;
+        }
+        .number-input {
+            position: relative;
+        }
+        .number-input input {
+            padding-right: 15px;
+        }
+        h2 {
+            color: #0d6efd;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 25px;
+        }
+        .table th {
+            background-color: #f1f4f7;
+            color: #495057;
+            font-weight: 600;
+        }
+        .highlight-number {
+            font-weight: 600;
+            color: #0d6efd;
+        }
+        .input-hint {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .btn-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            vertical-align: -0.125em;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Memuat data dari Google Sheets...</p>
+        </div>
+    </div>
+
+    <div class="container mt-5 mb-5">
+        <!-- Form Input -->
+        <div class="form-container">
+            <h2 class="text-center mb-4"><i class="fas fa-chart-line me-2"></i>Form Input Laporan Sales Harian</h2>
+            <form id="salesForm" method="POST">
+                <div class="row g-3">
+                    <!-- Tanggal -->
+                    <div class="col-md-6">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                    </div>
+
+                    <!-- SPD -->
+                    <div class="col-md-6">
+                        <label for="spd" class="form-label">SPD</label>
+                        <input type="text" class="form-control number-input" id="spd" name="spd" required>
+                        <div class="input-hint">Masukkan angka tanpa titik atau koma</div>
+                    </div>
+
+                    <!-- STD -->
+                    <div class="col-md-6">
+                        <label for="std" class="form-label">STD</label>
+                        <input type="text" class="form-control number-input" id="std" name="std" required>
+                        <div class="input-hint">Masukkan angka tanpa titik atau koma</div>
+                    </div>
+
+                    <!-- APC -->
+                    <div class="col-md-6">
+                        <label for="apc" class="form-label">APC</label>
+                        <input type="text" class="form-control number-input" id="apc" name="apc" required>
+                        <div class="input-hint">Masukkan angka tanpa titik atau koma</div>
+                    </div>
+
+                    <!-- GM -->
+                    <div class="col-md-6">
+                        <label for="gm" class="form-label">GM (Desimal)</label>
+                        <input type="number" step="0.01" class="form-control" id="gm" name="gm" required>
+                        <div class="input-hint">Contoh: 12.5 untuk 12,5%</div>
+                    </div>
+
+                    <!-- OOS -->
+                    <div class="col-md-6">
+                        <label for="oos" class="form-label">OOS (Desimal)</label>
+                        <input type="number" step="0.01" class="form-control" id="oos" name="oos" required>
+                        <div class="input-hint">Contoh: 5.2 untuk 5,2%</div>
+                    </div>
+
+                    <!-- NSB -->
+                    <div class="col-md-6">
+                        <label for="nsb" class="form-label">NSB (Positif/Negatif)</label>
+                        <input type="text" class="form-control number-input" id="nsb" name="nsb" required>
+                        <div class="input-hint">Gunakan tanda minus (-) untuk nilai negatif</div>
+                    </div>
+                </div>
+
+                <!-- Tombol Submit dan Reset -->
+                <div class="mt-4 text-center">
+                    <button type="submit" class="btn btn-primary btn-submit me-2" id="submitBtn">
+                        <span id="submitSpinner" class="btn-spinner" style="display: none;"></span>
+                        <i class="fas fa-paper-plane me-2"></i>Submit
+                    </button>
+                    <button type="reset" class="btn btn-secondary btn-reset"><i class="fas fa-undo me-2"></i>Reset</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Alert Notifikasi -->
+        <div id="alertContainer" style="display: none;" class="alert alert-success alert-custom alert-dismissible fade show" role="alert">
+            <strong><i class="fas fa-check-circle me-2"></i>Sukses!</strong> Data laporan berhasil disimpan.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Alert Error -->
+        <div id="errorContainer" style="display: none;" class="alert alert-danger alert-custom alert-dismissible fade show" role="alert">
+            <strong><i class="fas fa-exclamation-circle me-2"></i>Error!</strong> <span id="errorMessage"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Card untuk Ringkasan Data -->
+        <div class="card summary-card" id="summaryCard">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Ringkasan Laporan Sales Harian</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>SPD</th>
+                                <th>STD</th>
+                                <th>APC</th>
+                                <th>GM</th>
+                                <th>OOS</th>
+                                <th>NSB</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                        <tfoot id="summaryTableFooter" class="table-footer">
+                            <tr>
+                                <td>Total</td>
+                                <td id="totalSpd">0</td>
+                                <td id="totalStd">0</td>
+                                <td id="totalApc">0</td>
+                                <td id="totalGm">0.00</td>
+                                <td id="totalOos">0.00</td>
+                                <td id="totalNsb">0</td>
+                            </tr>
+                            <tr>
+                                <td>AVG</td>
+                                <td id="avgSpd">-</td>
+                                <td id="avgStd">-</td>
+                                <td id="avgApc">-</td> 
+                                <td id="avgGm">-</td>
+                                <td id="avgOos">-</td>
+                                <td id="avgNsb">-</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // URL Google Apps Script Web App (ganti dengan URL Anda)
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxNt-uEOmbqZiaLdDaHSBfOc8v7WIyBJ45S2gjDwtQ-ziXTvD5xpGLDAYtVANhqQLDpXQ/exec';
+        
+        // Array untuk menyimpan data
+        let salesData = [];
+
+        // Fungsi untuk memformat angka dengan pemisah ribuan
+        function formatNumber(num) {
+            if (num === '-' || num === '' || num === null || num === undefined) return num;
+            // Handle negative numbers
+            const isNegative = num.toString().startsWith('-');
+            const absoluteNum = isNegative ? num.toString().substring(1) : num.toString();
+            
+            // Remove any existing formatting
+            const numberValue = absoluteNum.replace(/\./g, '');
+            
+            // Format the number with thousand separators
+            return (isNegative ? '-' : '') + new Intl.NumberFormat('id-ID').format(numberValue);
+        }
+
+        // Fungsi untuk menghapus pemisah ribuan dan mengembalikan angka
+        function parseFormattedNumber(formattedNum) {
+            if (!formattedNum) return 0;
+            return parseInt(formattedNum.replace(/\./g, ''), 10);
+        }
+
+        // Fungsi untuk menghitung total
+        function calculateTotal(field) {
+            const sum = salesData.reduce((acc, curr) => {
+                if (field === 'gm' || field === 'oos') {
+                    return acc + parseFloat(curr[field] || 0);
+                } else {
+                    return acc + parseFormattedNumber(curr[field] || 0);
+                }
+            }, 0);
+            
+            if (field === 'gm' || field === 'oos') {
+                return sum.toFixed(2);
+            } else {
+                return formatNumber(sum);
+            }
+        }
+
+        // Fungsi untuk menghitung rata-rata
+        function calculateAverage(field) {
+            if (salesData.length === 0) return '-';
+            
+            const sum = salesData.reduce((acc, curr) => {
+                if (field === 'gm' || field === 'oos') {
+                    return acc + parseFloat(curr[field] || 0);
+                } else {
+                    return acc + parseFormattedNumber(curr[field] || 0);
+                }
+            }, 0);
+            
+            if (field === 'gm' || field === 'oos') {
+                return (sum / salesData.length).toFixed(2);
+            } else {
+                return formatNumber(Math.round(sum / salesData.length));
+            }
+        }
+
+        // Fungsi untuk memperbarui footer tabel dengan pengecekan null
+        function updateTableFooter() {
+            // Fungsi helper untuk mengatur text content dengan pengecekan null
+            function setTextContent(elementId, value) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+            
+            setTextContent('totalSpd', calculateTotal('spd'));
+            setTextContent('totalStd', calculateTotal('std'));
+            setTextContent('totalApc', calculateTotal('apc'));
+            setTextContent('totalGm', calculateTotal('gm'));
+            setTextContent('totalOos', calculateTotal('oos'));
+            setTextContent('totalNsb', calculateTotal('nsb'));
+
+            setTextContent('avgSpd', calculateAverage('spd'));
+            setTextContent('avgStd', calculateAverage('std'));
+            setTextContent('avgApc', calculateAverage('apc'));
+            setTextContent('avgGm', calculateAverage('gm'));
+            setTextContent('avgOos', calculateAverage('oos'));
+            setTextContent('avgNsb', calculateAverage('nsb'));
+        }
+
+        // Fungsi untuk menambahkan data ke tabel
+        function addDataToTable(data) {
+            const tableBody = document.getElementById('summaryTableBody');
+            
+            // Kosongkan tabel terlebih dahulu
+            if (tableBody) {
+                tableBody.innerHTML = '';
+                
+                // Tambahkan data ke tabel
+                data.forEach(item => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${item.tanggal}</td>
+                        <td class="highlight-number">${formatNumber(item.spd)}</td>
+                        <td class="highlight-number">${formatNumber(item.std)}</td>
+                        <td class="highlight-number">${formatNumber(item.apc)}</td>
+                        <td>${item.gm}%</td>
+                        <td>${item.oos}%</td>
+                        <td class="highlight-number">${formatNumber(item.nsb)}</td>
+                    `;
+                    tableBody.appendChild(newRow);
+                });
+                
+                // Perbarui footer tabel
+                updateTableFooter();
+            }
+        }
+
+        // Event listener untuk input dengan pemisah ribuan
+        function addNumberInputListeners() {
+            const spdInput = document.getElementById('spd');
+            const stdInput = document.getElementById('std');
+            const apcInput = document.getElementById('apc');
+            const nsbInput = document.getElementById('nsb');
+            
+            if (spdInput) {
+                spdInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\./g, '');
+                    if (!isNaN(value)) {
+                        e.target.value = formatNumber(value);
+                    }
+                });
+            }
+            
+            if (stdInput) {
+                stdInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\./g, '');
+                    if (!isNaN(value)) {
+                        e.target.value = formatNumber(value);
+                    }
+                });
+            }
+            
+            if (apcInput) {
+                apcInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\./g, '');
+                    if (!isNaN(value)) {
+                        e.target.value = formatNumber(value);
+                    }
+                });
+            }
+            
+            if (nsbInput) {
+                nsbInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\./g, '');
+                    // Handle negative values for NSB
+                    if (value.startsWith('-')) {
+                        const numValue = value.substring(1);
+                        if (!isNaN(numValue) && numValue !== '') {
+                            e.target.value = '-' + formatNumber(numValue);
+                        }
+                    } else if (!isNaN(value)) {
+                        e.target.value = formatNumber(value);
+                    }
+                });
+            }
+        }
+
+        // Fungsi untuk mengambil data dari Google Sheets
+        async function loadDataFromSheets() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(scriptURL + '?action=getData');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    salesData = data.data;
+                    addDataToTable(salesData);
+                } else {
+                    showError('Gagal memuat data dari Google Sheets: ' + data.message);
+                }
+            } catch (error) {
+                showError('Terjadi kesalahan saat memuat data: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Fungsi untuk mengirim data ke Google Sheets
+        async function submitDataToSheets(formData) {
+            showSubmitSpinner(true);
+            
+            try {
+                // Konversi FormData ke objek JavaScript
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                // Kirim data sebagai JSON
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Tambahkan data baru ke array
+                    salesData.push({
+                        tanggal: data.tanggal,
+                        spd: data.spd,
+                        std: data.std,
+                        apc: data.apc,
+                        gm: data.gm,
+                        oos: data.oos,
+                        nsb: data.nsb
+                    });
+                    
+                    // Perbarui tabel
+                    addDataToTable(salesData);
+                    
+                    // Tampilkan alert sukses
+                    showAlert('Data berhasil disimpan ke Google Sheets');
+                    
+                    // Reset form
+                    document.getElementById('salesForm').reset();
+                    
+                    // Set tanggal default ke hari ini
+                    const today = new Date().toISOString().substr(0, 10);
+                    document.getElementById('tanggal').value = today;
+                } else {
+                    showError('Gagal menyimpan data: ' + result.message);
+                }
+            } catch (error) {
+                showError('Terjadi kesalahan saat mengirim data: ' + error.message);
+            } finally {
+                showSubmitSpinner(false);
+            }
+        }
+
+        // Fungsi untuk menampilkan/menyembunyikan loading overlay
+        function showLoading(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = show ? 'flex' : 'none';
+            }
+        }
+
+        // Fungsi untuk menampilkan/menyembunyikan spinner pada tombol submit
+        function showSubmitSpinner(show) {
+            const submitSpinner = document.getElementById('submitSpinner');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (submitSpinner) {
+                submitSpinner.style.display = show ? 'inline-block' : 'none';
+            }
+            
+            if (submitBtn) {
+                submitBtn.disabled = show;
+            }
+        }
+
+        // Fungsi untuk menampilkan alert sukses
+        function showAlert(message) {
+            const alertContainer = document.getElementById('alertContainer');
+            if (alertContainer) {
+                if (message) {
+                    const strongElement = alertContainer.querySelector('strong');
+                    const spanElement = alertContainer.querySelector('span');
+                    
+                    if (strongElement) {
+                        strongElement.innerHTML = '<i class="fas fa-check-circle me-2"></i>Sukses!';
+                    }
+                    
+                    if (spanElement) {
+                        spanElement.textContent = message;
+                    }
+                }
+                alertContainer.style.display = 'block';
+                
+                setTimeout(() => {
+                    alertContainer.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Fungsi untuk menampilkan error
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            if (errorContainer) {
+                const errorMessageElement = document.getElementById('errorMessage');
+                if (errorMessageElement) {
+                    errorMessageElement.textContent = message;
+                }
+                errorContainer.style.display = 'block';
+                
+                setTimeout(() => {
+                    errorContainer.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // JavaScript untuk menangani submit form
+        function setupFormSubmit() {
+            const salesForm = document.getElementById('salesForm');
+            if (salesForm) {
+                salesForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    // Ambil data dari form
+                    const tanggal = document.getElementById('tanggal')?.value;
+                    const spd = document.getElementById('spd')?.value;
+                    const std = document.getElementById('std')?.value;
+                    const apc = document.getElementById('apc')?.value;
+                    const gm = document.getElementById('gm')?.value;
+                    const oos = document.getElementById('oos')?.value;
+                    const nsb = document.getElementById('nsb')?.value;
+
+                    // Validasi input
+                    if (!tanggal || !spd || !std || !apc || !gm || !oos || !nsb) {
+                        showError('Harap isi semua field dengan data yang valid!');
+                        return;
+                    }
+
+                    // Buat FormData object
+                    const formData = new FormData();
+                    formData.append('tanggal', tanggal);
+                    formData.append('spd', spd.replace(/\./g, ''));
+                    formData.append('std', std.replace(/\./g, ''));
+                    formData.append('apc', apc.replace(/\./g, ''));
+                    formData.append('gm', gm);
+                    formData.append('oos', oos);
+                    formData.append('nsb', nsb.replace(/\./g, ''));
+
+                    // Kirim data ke Google Sheets
+                    submitDataToSheets(formData);
+                });
+            }
+        }
+
+        // Muat data dari Google Sheets saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set tanggal default ke hari ini
+            const today = new Date().toISOString().substr(0, 10);
+            const tanggalInput = document.getElementById('tanggal');
+            if (tanggalInput) {
+                tanggalInput.value = today;
+            }
+            
+            // Setup event listeners
+            addNumberInputListeners();
+            setupFormSubmit();
+            
+            // Load data dari Google Sheets
+            loadDataFromSheets();
+        });
+    </script>
+</body>
+</html>
