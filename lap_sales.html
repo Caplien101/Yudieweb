@@ -9,6 +9,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS styles tetap sama seperti sebelumnya */
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -69,6 +70,10 @@
             border-top-left-radius: 10px !important;
             border-top-right-radius: 10px !important;
             font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .table-responsive {
             margin-top: 1rem;
@@ -134,10 +139,64 @@
         @keyframes spinner-border {
             to { transform: rotate(360deg); }
         }
+        .progress {
+            height: 10px;
+            margin-bottom: 5px;
+        }
+        .progress-bar {
+            font-size: 10px;
+            line-height: 10px;
+        }
+        .achievement-positive {
+            color: #198754;
+            font-weight: bold;
+        }
+        .achievement-negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .target-table th, .target-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .gap-positive {
+            color: #198754;
+            font-weight: bold;
+        }
+        .gap-negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .kpi-badge {
+            font-size: 0.75rem;
+            padding: 0.3em 0.6em;
+            border-radius: 0.25rem;
+        }
+        .mobile-table {
+            display: none;
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        .collapsed .toggle-icon {
+            transform: rotate(0deg);
+        }
+        .not-collapsed .toggle-icon {
+            transform: rotate(45deg);
+        }
+        @media (max-width: 768px) {
+            .desktop-table {
+                display: none;
+            }
+            .mobile-table {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
+    <!-- HTML structure tetap sama seperti sebelumnya -->
+     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay" style="display: none;">
         <div class="text-center">
             <div class="spinner-border text-primary" role="status">
@@ -227,419 +286,994 @@
 
         <!-- Card untuk Ringkasan Data -->
         <div class="card summary-card" id="summaryCard">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-primary text-white" id="summaryHeader" data-bs-toggle="collapse" data-bs-target="#summaryContent">
                 <h5 class="mb-0"><i class="fas fa-table me-2"></i>Ringkasan Laporan Sales Harian</h5>
+                <span class="toggle-icon not-collapsed"><i class="fas fa-plus"></i></span>
+            </div>
+            <div id="summaryContent" class="collapse show">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>SPD</th>
+                                    <th>STD</th>
+                                    <th>APC</th>
+                                    <th>GM</th>
+                                    <th>OOS</th>
+                                    <th>NSB</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody">
+                                <!-- Data akan diisi oleh JavaScript -->
+                            </tbody>
+                            <tfoot id="summaryTableFooter" class="table-footer">
+    <tr>
+        <td>Total</td>
+        <td id="totalSpd">0</td>
+        <td id="totalStd">0</td>
+        <td id="avgApc">0</td>
+        <td id="avgGm">0.00</td>
+        <td id="avgOos">0.00</td>
+        <td id="totalNsb">0</td>
+    </tr>
+    <tr>
+        <td>Target</td>
+        <td id="targetSpd">0</td>
+        <td id="targetStd">0</td>
+        <td id="targetApc">0</td>
+        <td id="targetGm">0.00</td>
+        <td id="targetOos">0.00</td>
+        <td id="targetNsb">0</td>
+    </tr>
+    <tr>
+        <td>Acv %</td>
+        <td id="achieveSpd">-</td>
+        <td id="achieveStd">-</td>
+        <td id="achieveApc">-</td>
+        <td id="achieveGm">-</td>
+        <td id="achieveOos">-</td>
+        <td id="achieveNsb">-</td>
+    </tr>
+    <tr>
+        <td>Gap</td>
+        <td id="gapSpd">-</td>
+        <td id="gapStd">-</td>
+        <td id="gapApc">-</td>
+        <td id="gapGm">-</td>
+        <td id="gapOos">-</td>
+        <td id="gapNsb">-</td>
+    </tr>
+</tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Pencapaian Actual vs Target (Desktop) -->
+        <div class="card summary-card mt-4 desktop-table">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-target me-2"></i>Pencapaian Actual vs Target</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered">
-                        <thead>
+                    <table class="table table-bordered target-table">
+                        <thead class="table-light">
                             <tr>
-                                <th>Tanggal</th>
-                                <th>SPD</th>
-                                <th>STD</th>
-                                <th>APC</th>
-                                <th>GM</th>
-                                <th>OOS</th>
-                                <th>NSB</th>
+                                <th rowspan="2">KPI</th>
+                                <th colspan="4">Hari Ini</th>
+                                <th colspan="4">Bulan Ini</th>
+                            </tr>
+                            <tr>
+                                <th>Target</th>
+                                <th>Actual</th>
+                                <th>%</th>
+                                <th>Gap</th>
+                                <th>Target</th>
+                                <th>Actual</th>
+                                <th>%</th>
+                                <th>Gap</th>
                             </tr>
                         </thead>
-                        <tbody id="summaryTableBody">
+                        <tbody id="targetTableBody">
                             <!-- Data akan diisi oleh JavaScript -->
                         </tbody>
-                        <tfoot id="summaryTableFooter" class="table-footer">
-                            <tr>
-                                <td>Total</td>
-                                <td id="totalSpd">0</td>
-                                <td id="totalStd">0</td>
-                                <td id="totalApc">0</td>
-                                <td id="totalGm">0.00</td>
-                                <td id="totalOos">0.00</td>
-                                <td id="totalNsb">0</td>
-                            </tr>
-                            <tr>
-                                <td>AVG</td>
-                                <td id="avgSpd">-</td>
-                                <td id="avgStd">-</td>
-                                <td id="avgApc">-</td> 
-                                <td id="avgGm">-</td>
-                                <td id="avgOos">-</td>
-                                <td id="avgNsb">-</td>
-                            </tr>
-                        </tfoot>
                     </table>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Target harian diambil berdasarkan tanggal yang dipilih. 
+                        Target bulanan: SPD dan NSB menggunakan total target, STD sampai OOS menggunakan rata-rata target.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Pencapaian Hari Ini (Mobile) -->
+        <div class="card summary-card mt-4 mobile-table">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Pencapaian Hari Ini</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered target-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>KPI</th>
+                                <th>Target</th>
+                                <th>Actual</th>
+                                <th>%</th>
+                                <th>Gap</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mobileTodayTableBody">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Pencapaian Bulan Ini (Mobile) -->
+        <div class="card summary-card mt-4 mobile-table">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Pencapaian Bulan Ini</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered target-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>KPI</th>
+                                <th>Target</th>
+                                <th>Actual</th>
+                                <th>%</th>
+                                <th>Gap</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mobileMonthlyTableBody">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Target bulanan: SPD dan NSB menggunakan total target, STD sampai OOS menggunakan rata-rata target.
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 
+
     <!-- Bootstrap 5 JS and Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // URL Google Apps Script Web App (ganti dengan URL Anda)
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxNt-uEOmbqZiaLdDaHSBfOc8v7WIyBJ45S2gjDwtQ-ziXTvD5xpGLDAYtVANhqQLDpXQ/exec';
+     // URL Google Apps Script Web App
+const scriptURL = 'https://script.google.com/macros/s/AKfycbzYDyo9_qfw_H7HLzRV1Z8YA4VLchTYg8jCGjMNFHv0k5iXcLWKCn59dMQNEAqnurA6uw/exec';
+
+// Array untuk menyimpan data
+let salesData = [];
+let targetData = {};
+
+// Fungsi untuk mendapatkan target berdasarkan tanggal
+function getDailyTarget(date) {
+    // Jika ada data target untuk tanggal tertentu, gunakan data tersebut
+    if (targetData[date]) {
+        return targetData[date];
+    }
+    // Kembalikan nilai default jika tidak ada data
+    return {
+        spd: 0,
+        std: 0,
+        apc: 0,
+        gm: 0,
+        oos: 0,
+        nsb: 0
+    };
+}
+
+// Fungsi untuk mendapatkan data actual berdasarkan tanggal
+function getDailyActual(date) {
+    // Cari data actual berdasarkan tanggal
+    const actualData = salesData.find(item => item.tanggal === date);
+    
+    if (actualData) {
+        return {
+            spd: parseFormattedNumber(actualData.spd) || 0,
+            std: parseFormattedNumber(actualData.std) || 0,
+            apc: parseFormattedNumber(actualData.apc) || 0,
+            gm: parseFloat(actualData.gm) || 0,
+            oos: parseFloat(actualData.oos) || 0,
+            nsb: parseFormattedNumber(actualData.nsb) || 0
+        };
+    }
+    
+    // Jika tidak ada data, kembalikan objek kosong
+    return {
+        spd: 0,
+        std: 0,
+        apc: 0,
+        gm: 0,
+        oos: 0,
+        nsb: 0
+    };
+}
+
+// Fungsi untuk memuat data target dari Google Sheets
+async function loadTargetData() {
+    showLoading(true);
+    
+    try {
+        const response = await fetch(scriptURL + '?action=getTargets');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
         
-        // Array untuk menyimpan data
-        let salesData = [];
-
-        // Fungsi untuk memformat angka dengan pemisah ribuan
-        function formatNumber(num) {
-            if (num === '-' || num === '' || num === null || num === undefined) return num;
-            // Handle negative numbers
-            const isNegative = num.toString().startsWith('-');
-            const absoluteNum = isNegative ? num.toString().substring(1) : num.toString();
-            
-            // Remove any existing formatting
-            const numberValue = absoluteNum.replace(/\./g, '');
-            
-            // Format the number with thousand separators
-            return (isNegative ? '-' : '') + new Intl.NumberFormat('id-ID').format(numberValue);
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            throw new Error('Invalid JSON response');
         }
-
-        // Fungsi untuk menghapus pemisah ribuan dan mengembalikan angka
-        function parseFormattedNumber(formattedNum) {
-            if (!formattedNum) return 0;
-            return parseInt(formattedNum.replace(/\./g, ''), 10);
+        
+        if (data.status === 'success') {
+            targetData = data.data || {};
+            console.log('Data target loaded:', targetData);
+        } else {
+            console.error('Gagal memuat data target:', data.message);
         }
+    } catch (error) {
+        console.error('Terjadi kesalahan saat memuat data target:', error.message);
+    } finally {
+        showLoading(false);
+    }
+}
 
-        // Fungsi untuk menghitung total
-        function calculateTotal(field) {
-            const sum = salesData.reduce((acc, curr) => {
-                if (field === 'gm' || field === 'oos') {
-                    return acc + parseFloat(curr[field] || 0);
-                } else {
-                    return acc + parseFormattedNumber(curr[field] || 0);
-                }
-            }, 0);
-            
-            if (field === 'gm' || field === 'oos') {
-                return sum.toFixed(2);
+// Fungsi untuk menghitung target bulanan sesuai kriteria baru
+function calculateMonthlyTargets(selectedDate) {
+    const date = new Date(selectedDate);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    
+    // Hitung jumlah hari dalam bulan
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Inisialisasi objek target bulanan
+    const monthlyTargets = {
+        spd: 0,        // Rata-rata SPD
+        std: 0,        // Rata-rata STD
+        apc: 0,        // Rata-rata APC
+        gm: 0,         // Rata-rata GM
+        oos: 0,        // Rata-rata OOS
+        nsb: 0         // Total NSB
+    };
+    
+    // Jumlahkan target harian untuk seluruh bulan
+    let dayCount = 0;
+    for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(year, month, day);
+        const dateString = formatDateToYYYYMMDD(currentDate);
+        const dailyTarget = getDailyTarget(dateString);
+        
+        monthlyTargets.spd += dailyTarget.spd || 0;
+        monthlyTargets.std += dailyTarget.std || 0;
+        monthlyTargets.apc += dailyTarget.apc || 0;
+        monthlyTargets.gm += dailyTarget.gm || 0;
+        monthlyTargets.oos += dailyTarget.oos || 0;
+        monthlyTargets.nsb += dailyTarget.nsb || 0;
+        
+        dayCount++;
+    }
+    
+    // Hitung rata-rata untuk SPD, STD, APC, GM, dan OOS; total untuk NSB
+    if (dayCount > 0) {
+        monthlyTargets.spd = monthlyTargets.spd / dayCount;
+        monthlyTargets.std = monthlyTargets.std / dayCount;
+        monthlyTargets.apc = monthlyTargets.apc / dayCount;
+        monthlyTargets.gm = monthlyTargets.gm / dayCount;
+        monthlyTargets.oos = monthlyTargets.oos / dayCount;
+        // NSB tetap total
+    }
+    
+    return monthlyTargets;
+}
+
+// Fungsi untuk memformat tanggal ke YYYY-MM-DD
+function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Fungsi untuk memformat angka dengan pemisah ribuan
+function formatNumber(num) {
+    if (num === '-' || num === '' || num === null || num === undefined) return num;
+    // Handle negative numbers
+    const isNegative = num.toString().startsWith('-');
+    const absoluteNum = isNegative ? num.toString().substring(1) : num.toString();
+    
+    // Remove any existing formatting
+    const numberValue = absoluteNum.replace(/\./g, '');
+    
+    // Format the number with thousand separators
+    return (isNegative ? '-' : '') + new Intl.NumberFormat('id-ID').format(numberValue);
+}
+
+// Fungsi untuk menghapus pemisah ribuan dan mengembalikan angka
+function parseFormattedNumber(formattedNum) {
+    if (!formattedNum) return 0;
+    return parseInt(formattedNum.replace(/\./g, ''), 10);
+}
+
+// Fungsi untuk memformat angka desimal (khusus GM dan OOS)
+function formatDecimal(num, decimalPlaces = 2) {
+    if (num === '-' || num === '' || num === null || num === undefined) return num;
+    return parseFloat(num).toFixed(decimalPlaces);
+}
+
+// Fungsi untuk menghitung nilai numerik total (tanpa format)
+function calculateNumericTotal(field) {
+    const sum = salesData.reduce((acc, curr) => {
+        if (field === 'gm' || field === 'oos') {
+            return acc + parseFloat(curr[field] || 0);
+        } else {
+            return acc + parseFormattedNumber(curr[field] || 0);
+        }
+    }, 0);
+    
+    return sum;
+}
+
+// Fungsi untuk menghitung rata-rata
+function calculateAverage(field) {
+    if (salesData.length === 0) return 0;
+    
+    const sum = salesData.reduce((acc, curr) => {
+        if (field === 'gm' || field === 'oos') {
+            return acc + parseFloat(curr[field] || 0);
+        } else {
+            return acc + parseFormattedNumber(curr[field] || 0);
+        }
+    }, 0);
+    
+    return sum / salesData.length;
+}
+
+// Fungsi untuk menghitung actual bulanan untuk setiap KPI
+function calculateMonthlyActual() {
+    return {
+        spd: calculateAverage('spd'),          // Rata-rata SPD
+        std: calculateAverage('std'),          // Rata-rata STD
+        apc: calculateAverage('apc'),          // Rata-rata APC
+        gm: calculateAverage('gm'),            // Rata-rata GM
+        oos: calculateAverage('oos'),          // Rata-rata OOS
+        nsb: calculateNumericTotal('nsb')      // Total NSB
+    };
+}
+
+// Fungsi untuk memperbarui footer tabel dengan pengecekan null
+function updateTableFooter() {
+    // Fungsi helper untuk mengatur text content dengan pengecekan null
+    function setTextContent(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+    
+    // 1. Baris Total: Total SPD, STD, NSB; Rata-rata APC, GM, OOS
+    const totalSpd = calculateNumericTotal('spd');
+    const totalStd = calculateNumericTotal('std');
+    const avgApc = calculateAverage('apc');
+    const avgGm = calculateAverage('gm');
+    const avgOos = calculateAverage('oos');
+    const totalNsb = calculateNumericTotal('nsb');
+    
+    setTextContent('totalSpd', formatNumber(totalSpd));
+    setTextContent('totalStd', formatNumber(totalStd));
+    setTextContent('avgApc', Math.round(avgApc));
+    setTextContent('avgGm', avgGm.toFixed(2));
+    setTextContent('avgOos', avgOos.toFixed(2));
+    setTextContent('totalNsb', formatNumber(totalNsb));
+    
+    // 2. Baris Target 1 Bulan: Total SPD, STD, NSB; Rata-rata APC, GM, OOS
+    const selectedDate = document.getElementById('tanggal').value || new Date().toISOString().substr(0, 10);
+    const date = new Date(selectedDate);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Hitung total target untuk SPD, STD, NSB
+    let targetSpd = 0, targetStd = 0, targetApc = 0, targetGm = 0, targetOos = 0, targetNsb = 0;
+    let dayCount = 0;
+    for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(year, month, day);
+        const dateString = formatDateToYYYYMMDD(currentDate);
+        const dailyTarget = getDailyTarget(dateString);
+        
+        targetSpd += dailyTarget.spd || 0;
+        targetStd += dailyTarget.std || 0;
+        targetApc += dailyTarget.apc || 0;
+        targetGm += dailyTarget.gm || 0;
+        targetOos += dailyTarget.oos || 0;
+        targetNsb += dailyTarget.nsb || 0;
+        
+        dayCount++;
+    }
+    
+    // Hitung rata-rata untuk APC, GM, OOS
+    if (dayCount > 0) {
+        targetApc = targetApc / dayCount;
+        targetGm = targetGm / dayCount;
+        targetOos = targetOos / dayCount;
+    }
+    
+    setTextContent('targetSpd', formatNumber(targetSpd));
+    setTextContent('targetStd', formatNumber(targetStd));
+    setTextContent('targetApc', Math.round(targetApc));
+    setTextContent('targetGm', targetGm.toFixed(2));
+    setTextContent('targetOos', targetOos.toFixed(2));
+    setTextContent('targetNsb', formatNumber(targetNsb));
+    
+    // 3. Baris Pencapaian: Total / Target (%)
+    const achieveSpd = targetSpd ? ((totalSpd / targetSpd) * 100).toFixed(2) + '%' : '-';
+    const achieveStd = targetStd ? ((totalStd / targetStd) * 100).toFixed(2) + '%' : '-';
+    const achieveApc = targetApc ? ((avgApc / targetApc) * 100).toFixed(2) + '%' : '-';
+    const achieveGm = targetGm ? ((avgGm / targetGm) * 100).toFixed(2) + '%' : '-';
+    const achieveOos = targetOos ? ((avgOos / targetOos) * 100).toFixed(2) + '%' : '-';
+    const achieveNsb = targetNsb ? ((totalNsb / targetNsb) * 100).toFixed(2) + '%' : '-';
+    
+    setTextContent('achieveSpd', achieveSpd);
+    setTextContent('achieveStd', achieveStd);
+    setTextContent('achieveApc', achieveApc);
+    setTextContent('achieveGm', achieveGm);
+    setTextContent('achieveOos', achieveOos);
+    setTextContent('achieveNsb', achieveNsb);
+    
+    // 4. Baris Gap: Total - Target
+    const gapSpd = totalSpd - targetSpd;
+    const gapStd = totalStd - targetStd;
+    const gapApc = avgApc - targetApc;
+    const gapGm = avgGm - targetGm;
+    const gapOos = avgOos - targetOos;
+    const gapNsb = totalNsb - targetNsb;
+    
+    setTextContent('gapSpd', formatNumber(gapSpd));
+    setTextContent('gapStd', formatNumber(gapStd));
+    setTextContent('gapApc', Math.round(gapApc));
+    setTextContent('gapGm', gapGm.toFixed(2));
+    setTextContent('gapOos', gapOos.toFixed(2));
+    setTextContent('gapNsb', formatNumber(gapNsb));
+    
+    // Tambahkan kelas untuk styling gap
+    document.getElementById('gapSpd').className = gapSpd >= 0 ? 'gap-positive' : 'gap-negative';
+    document.getElementById('gapStd').className = gapStd >= 0 ? 'gap-positive' : 'gap-negative';
+    document.getElementById('gapApc').className = gapApc >= 0 ? 'gap-positive' : 'gap-negative';
+    document.getElementById('gapGm').className = gapGm >= 0 ? 'gap-positive' : 'gap-negative';
+    document.getElementById('gapOos').className = gapOos >= 0 ? 'gap-positive' : 'gap-negative';
+    document.getElementById('gapNsb').className = gapNsb >= 0 ? 'gap-positive' : 'gap-negative';
+}
+
+// Fungsi untuk menambahkan data ke tabel
+function addDataToTable(data, appendOnly = false) {
+    const tableBody = document.getElementById('summaryTableBody');
+    
+    if (tableBody) {
+        if (!appendOnly) {
+            // Kosongkan tabel terlebih dahulu jika bukan append only
+            tableBody.innerHTML = '';
+        }
+        
+        // Tambahkan data ke tabel
+        data.forEach(item => {
+            // Cek apakah baris untuk tanggal ini sudah ada
+            const existingRow = tableBody.querySelector(`tr td:first-child[data-tanggal="${item.tanggal}"]`);
+            if (existingRow) {
+                // Update baris yang ada
+                const row = existingRow.parentElement;
+                row.innerHTML = `
+                    <td data-tanggal="${item.tanggal}">${item.tanggal}</td>
+                    <td class="highlight-number">${formatNumber(item.spd)}</td>
+                    <td class="highlight-number">${formatNumber(item.std)}</td>
+                    <td class="highlight-number">${formatNumber(item.apc)}</td>
+                    <td>${formatDecimal(item.gm)}%</td>
+                    <td>${formatDecimal(item.oos)}%</td>
+                    <td class="highlight-number">${formatNumber(item.nsb)}</td>
+                `;
             } else {
-                return formatNumber(sum);
+                // Tambahkan baris baru
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td data-tanggal="${item.tanggal}">${item.tanggal}</td>
+                    <td class="highlight-number">${formatNumber(item.spd)}</td>
+                    <td class="highlight-number">${formatNumber(item.std)}</td>
+                    <td class="highlight-number">${formatNumber(item.apc)}</td>
+                    <td>${formatDecimal(item.gm)}%</td>
+                    <td>${formatDecimal(item.oos)}%</td>
+                    <td class="highlight-number">${formatNumber(item.nsb)}</td>
+                `;
+                tableBody.appendChild(newRow);
             }
-        }
+        });
+        
+        // Perbarui footer tabel
+        updateTableFooter();
+        
+        // Perbarui tabel target
+        updateTargetTable();
+    }
+}
 
-        // Fungsi untuk menghitung rata-rata
-        function calculateAverage(field) {
-            if (salesData.length === 0) return '-';
-            
-            const sum = salesData.reduce((acc, curr) => {
-                if (field === 'gm' || field === 'oos') {
-                    return acc + parseFloat(curr[field] || 0);
-                } else {
-                    return acc + parseFormattedNumber(curr[field] || 0);
-                }
-            }, 0);
-            
-            if (field === 'gm' || field === 'oos') {
-                return (sum / salesData.length).toFixed(2);
+// Fungsi untuk menghitung persentase pencapaian
+function calculateAchievementPercentage(actual, target) {
+    if (target === 0) return 0;
+    return (actual / target) * 100;
+}
+
+// Fungsi untuk menghitung gap
+function calculateGap(actual, target) {
+    return actual - target;
+}
+
+// Fungsi untuk memperbarui tabel target vs actual
+function updateTargetTable() {
+    const targetTableBody = document.getElementById('targetTableBody');
+    const mobileTodayTableBody = document.getElementById('mobileTodayTableBody');
+    const mobileMonthlyTableBody = document.getElementById('mobileMonthlyTableBody');
+    
+    if (!targetTableBody || !mobileTodayTableBody || !mobileMonthlyTableBody) return;
+    
+    // Dapatkan tanggal yang dipilih
+    let selectedDate = document.getElementById('tanggal').value;
+    if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+        console.warn('Tanggal tidak valid, menggunakan default hari ini');
+        selectedDate = new Date().toISOString().substr(0, 10);
+    }
+    
+    // Dapatkan target harian berdasarkan tanggal
+    const dailyTarget = getDailyTarget(selectedDate);
+    
+    // Dapatkan actual harian berdasarkan tanggal
+    const dailyActual = getDailyActual(selectedDate);
+    
+    // Hitung target bulanan (SPD, STD, APC, GM, OOS: rata-rata; NSB: total)
+    const monthlyTargets = calculateMonthlyTargets(selectedDate);
+    
+    // Hitung actual bulanan (SPD, STD, APC, GM, OOS: rata-rata; NSB: total)
+    const monthlyActual = calculateMonthlyActual();
+    
+    // Debug: Tampilkan nilai-nilai penting di console
+    console.log('Selected date:', selectedDate);
+    console.log('Daily target:', dailyTarget);
+    console.log('Daily actual:', dailyActual);
+    console.log('Monthly targets:', monthlyTargets);
+    console.log('Monthly actual:', monthlyActual);
+    
+    // Kosongkan tabel
+    targetTableBody.innerHTML = '';
+    mobileTodayTableBody.innerHTML = '';
+    mobileMonthlyTableBody.innerHTML = '';
+    
+    // Array KPI untuk iterasi
+    const kpis = ['spd', 'std', 'apc', 'gm', 'oos', 'nsb'];
+    const kpiLabels = {
+        spd: 'SPD', 
+        std: 'STD', 
+        apc: 'APC', 
+        gm: 'GM (%)', 
+        oos: 'OOS (%)', 
+        nsb: 'NSB'
+    };
+    
+    // Format nilai berdasarkan tipe KPI
+    const formatValue = (value, kpi) => {
+        if (value === null || value === undefined) return '-';
+        
+        if (kpi === 'gm' || kpi === 'oos') {
+            return value.toFixed(2) + '%';
+        } else if (kpi === 'spd' || kpi === 'std' || kpi === 'apc') {
+            return formatNumber(Math.round(value));
+        } else {
+            return formatNumber(value);
+        }
+    };
+    
+    // Format nilai gap berdasarkan tipe KPI
+    const formatGapValue = (value, kpi) => {
+        if (value === null || value === undefined) return '-';
+        
+        if (kpi === 'gm' || kpi === 'oos') {
+            return value.toFixed(2) + '%';
+        } else if (kpi === 'spd' || kpi === 'std' || kpi === 'apc') {
+            return formatNumber(Math.round(value));
+        } else {
+            return formatNumber(value);
+        }
+    };
+    
+    // Tambahkan baris untuk setiap KPI
+    kpis.forEach(kpi => {
+        // Hitung nilai untuk hari ini
+        const todayActual = dailyActual[kpi];
+        const todayTarget = dailyTarget[kpi];
+        const todayPercentage = calculateAchievementPercentage(todayActual, todayTarget);
+        const todayGap = calculateGap(todayActual, todayTarget);
+        
+        // Hitung nilai untuk bulan ini
+        const monthlyTarget = monthlyTargets[kpi];
+        const monthlyActualValue = monthlyActual[kpi];
+        const monthlyPercentage = calculateAchievementPercentage(monthlyActualValue, monthlyTarget);
+        const monthlyGap = calculateGap(monthlyActualValue, monthlyTarget);
+        
+        // Tentukan kelas untuk gap
+        const todayGapClass = todayGap >= 0 ? 'gap-positive' : 'gap-negative';
+        const monthlyGapClass = monthlyGap >= 0 ? 'gap-positive' : 'gap-negative';
+        
+        // Baris untuk desktop
+        const desktopRow = document.createElement('tr');
+        desktopRow.innerHTML = `
+            <td>${kpiLabels[kpi]}</td>
+            <td>${formatValue(todayTarget, kpi)}</td>
+            <td>${formatValue(todayActual, kpi)}</td>
+            <td>${todayPercentage.toFixed(2)}%</td>
+            <td class="${todayGapClass}">${formatGapValue(todayGap, kpi)}</td>
+            <td>${formatValue(monthlyTarget, kpi)}</td>
+            <td>${formatValue(monthlyActualValue, kpi)}</td>
+            <td>${monthlyPercentage.toFixed(2)}%</td>
+            <td class="${monthlyGapClass}">${formatGapValue(monthlyGap, kpi)}</td>
+        `;
+        targetTableBody.appendChild(desktopRow);
+        
+        // Baris untuk mobile (hari ini)
+        const mobileTodayRow = document.createElement('tr');
+        mobileTodayRow.innerHTML = `
+            <td>${kpiLabels[kpi]}</td>
+            <td>${formatValue(todayTarget, kpi)}</td>
+            <td>${formatValue(todayActual, kpi)}</td>
+            <td>${todayPercentage.toFixed(2)}%</td>
+            <td class="${todayGapClass}">${formatGapValue(todayGap, kpi)}</td>
+        `;
+        mobileTodayTableBody.appendChild(mobileTodayRow);
+        
+        // Baris untuk mobile (bulan ini)
+        const mobileMonthlyRow = document.createElement('tr');
+        mobileMonthlyRow.innerHTML = `
+            <td>${kpiLabels[kpi]}</td>
+            <td>${formatValue(monthlyTarget, kpi)}</td>
+            <td>${formatValue(monthlyActualValue, kpi)}</td>
+            <td>${monthlyPercentage.toFixed(2)}%</td>
+            <td class="${monthlyGapClass}">${formatGapValue(monthlyGap, kpi)}</td>
+        `;
+        mobileMonthlyTableBody.appendChild(mobileMonthlyRow);
+    });
+}
+
+// Event listener untuk input dengan pemisah ribuan
+function addNumberInputListeners() {
+    const spdInput = document.getElementById('spd');
+    const stdInput = document.getElementById('std');
+    const apcInput = document.getElementById('apc');
+    const nsbInput = document.getElementById('nsb');
+    
+    if (spdInput) {
+        spdInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\./g, '');
+            if (/^\d*$/.test(value)) {  // Hanya angka positif
+                e.target.value = value ? formatNumber(value) : value;
             } else {
-                return formatNumber(Math.round(sum / salesData.length));
+                e.target.value = '';
             }
-        }
-
-        // Fungsi untuk memperbarui footer tabel dengan pengecekan null
-        function updateTableFooter() {
-            // Fungsi helper untuk mengatur text content dengan pengecekan null
-            function setTextContent(elementId, value) {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.textContent = value;
-                }
+        });
+    }
+    
+    if (stdInput) {
+        stdInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\./g, '');
+            if (/^\d*$/.test(value)) {  // Hanya angka positif
+                e.target.value = value ? formatNumber(value) : value;
+            } else {
+                e.target.value = '';
             }
-            
-            setTextContent('totalSpd', calculateTotal('spd'));
-            setTextContent('totalStd', calculateTotal('std'));
-            setTextContent('totalApc', calculateTotal('apc'));
-            setTextContent('totalGm', calculateTotal('gm'));
-            setTextContent('totalOos', calculateTotal('oos'));
-            setTextContent('totalNsb', calculateTotal('nsb'));
-
-            setTextContent('avgSpd', calculateAverage('spd'));
-            setTextContent('avgStd', calculateAverage('std'));
-            setTextContent('avgApc', calculateAverage('apc'));
-            setTextContent('avgGm', calculateAverage('gm'));
-            setTextContent('avgOos', calculateAverage('oos'));
-            setTextContent('avgNsb', calculateAverage('nsb'));
-        }
-
-        // Fungsi untuk menambahkan data ke tabel
-        function addDataToTable(data) {
-            const tableBody = document.getElementById('summaryTableBody');
-            
-            // Kosongkan tabel terlebih dahulu
-            if (tableBody) {
-                tableBody.innerHTML = '';
-                
-                // Tambahkan data ke tabel
-                data.forEach(item => {
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td>${item.tanggal}</td>
-                        <td class="highlight-number">${formatNumber(item.spd)}</td>
-                        <td class="highlight-number">${formatNumber(item.std)}</td>
-                        <td class="highlight-number">${formatNumber(item.apc)}</td>
-                        <td>${item.gm}%</td>
-                        <td>${item.oos}%</td>
-                        <td class="highlight-number">${formatNumber(item.nsb)}</td>
-                    `;
-                    tableBody.appendChild(newRow);
-                });
-                
-                // Perbarui footer tabel
-                updateTableFooter();
+        });
+    }
+    
+    if (apcInput) {
+        apcInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\./g, '');
+            if (/^\d*$/.test(value)) {  // Hanya angka positif
+                e.target.value = value ? formatNumber(value) : value;
+            } else {
+                e.target.value = '';
             }
-        }
-
-        // Event listener untuk input dengan pemisah ribuan
-        function addNumberInputListeners() {
-            const spdInput = document.getElementById('spd');
-            const stdInput = document.getElementById('std');
-            const apcInput = document.getElementById('apc');
-            const nsbInput = document.getElementById('nsb');
-            
-            if (spdInput) {
-                spdInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\./g, '');
-                    if (!isNaN(value)) {
-                        e.target.value = formatNumber(value);
-                    }
-                });
-            }
-            
-            if (stdInput) {
-                stdInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\./g, '');
-                    if (!isNaN(value)) {
-                        e.target.value = formatNumber(value);
-                    }
-                });
-            }
-            
-            if (apcInput) {
-                apcInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\./g, '');
-                    if (!isNaN(value)) {
-                        e.target.value = formatNumber(value);
-                    }
-                });
-            }
-            
-            if (nsbInput) {
-                nsbInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\./g, '');
-                    // Handle negative values for NSB
-                    if (value.startsWith('-')) {
-                        const numValue = value.substring(1);
-                        if (!isNaN(numValue) && numValue !== '') {
-                            e.target.value = '-' + formatNumber(numValue);
-                        }
-                    } else if (!isNaN(value)) {
-                        e.target.value = formatNumber(value);
-                    }
-                });
-            }
-        }
-
-        // Fungsi untuk mengambil data dari Google Sheets
-        async function loadDataFromSheets() {
-            showLoading(true);
-            
-            try {
-                const response = await fetch(scriptURL + '?action=getData');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    salesData = data.data;
-                    addDataToTable(salesData);
+        });
+    }
+    
+    if (nsbInput) {
+        nsbInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\./g, '');
+            // Hanya izinkan angka dengan tanda minus opsional di awal
+            if (/^-?\d*$/.test(value)) {
+                if (value.startsWith('-')) {
+                    const numValue = value.substring(1);
+                    e.target.value = numValue ? '-' + formatNumber(numValue) : value;
                 } else {
-                    showError('Gagal memuat data dari Google Sheets: ' + data.message);
+                    e.target.value = value ? formatNumber(value) : value;
                 }
-            } catch (error) {
-                showError('Terjadi kesalahan saat memuat data: ' + error.message);
-            } finally {
-                showLoading(false);
+            } else {
+                e.target.value = ''; // Kosongkan input jika tidak valid
             }
+        });
+    }
+}
+
+// Fungsi untuk mengambil data dari Google Sheets
+async function loadDataFromSheets() {
+    showLoading(true);
+    
+    try {
+        const response = await fetch(scriptURL + '?action=getData');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-
-        // Fungsi untuk mengirim data ke Google Sheets
-        async function submitDataToSheets(formData) {
-            showSubmitSpinner(true);
-            
-            try {
-                // Konversi FormData ke objek JavaScript
-                const data = {};
-                for (let [key, value] of formData.entries()) {
-                    data[key] = value;
-                }
-                
-                // Kirim data sebagai JSON
-                const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    // Tambahkan data baru ke array
-                    salesData.push({
-                        tanggal: data.tanggal,
-                        spd: data.spd,
-                        std: data.std,
-                        apc: data.apc,
-                        gm: data.gm,
-                        oos: data.oos,
-                        nsb: data.nsb
-                    });
-                    
-                    // Perbarui tabel
-                    addDataToTable(salesData);
-                    
-                    // Tampilkan alert sukses
-                    showAlert('Data berhasil disimpan ke Google Sheets');
-                    
-                    // Reset form
-                    document.getElementById('salesForm').reset();
-                    
-                    // Set tanggal default ke hari ini
-                    const today = new Date().toISOString().substr(0, 10);
-                    document.getElementById('tanggal').value = today;
-                } else {
-                    showError('Gagal menyimpan data: ' + result.message);
-                }
-            } catch (error) {
-                showError('Terjadi kesalahan saat mengirim data: ' + error.message);
-            } finally {
-                showSubmitSpinner(false);
-            }
+        
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            throw new Error('Invalid JSON response');
         }
-
-        // Fungsi untuk menampilkan/menyembunyikan loading overlay
-        function showLoading(show) {
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            if (loadingOverlay) {
-                loadingOverlay.style.display = show ? 'flex' : 'none';
-            }
+        
+        if (data.status === 'success') {
+            salesData = data.data || [];
+            console.log('Data sales loaded:', salesData);
+            addDataToTable(salesData);
+        } else {
+            showError('Gagal memuat data dari Google Sheets: ' + data.message);
         }
+    } catch (error) {
+        showError('Terjadi kesalahan saat memuat data: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
 
-        // Fungsi untuk menampilkan/menyembunyikan spinner pada tombol submit
-        function showSubmitSpinner(show) {
-            const submitSpinner = document.getElementById('submitSpinner');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            if (submitSpinner) {
-                submitSpinner.style.display = show ? 'inline-block' : 'none';
-            }
-            
-            if (submitBtn) {
-                submitBtn.disabled = show;
-            }
+// Fungsi untuk mengirim data ke Google Sheets
+async function submitDataToSheets(formData) {
+    showSubmitSpinner(true);
+    
+    try {
+        // Konversi FormData ke objek JavaScript
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
         }
-
-        // Fungsi untuk menampilkan alert sukses
-        function showAlert(message) {
-            const alertContainer = document.getElementById('alertContainer');
-            if (alertContainer) {
-                if (message) {
-                    const strongElement = alertContainer.querySelector('strong');
-                    const spanElement = alertContainer.querySelector('span');
-                    
-                    if (strongElement) {
-                        strongElement.innerHTML = '<i class="fas fa-check-circle me-2"></i>Sukses!';
-                    }
-                    
-                    if (spanElement) {
-                        spanElement.textContent = message;
-                    }
-                }
-                alertContainer.style.display = 'block';
-                
-                setTimeout(() => {
-                    alertContainer.style.display = 'none';
-                }, 3000);
-            }
+        
+        // Kirim data sebagai JSON
+        const response = await fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-
-        // Fungsi untuk menampilkan error
-        function showError(message) {
-            const errorContainer = document.getElementById('errorContainer');
-            if (errorContainer) {
-                const errorMessageElement = document.getElementById('errorMessage');
-                if (errorMessageElement) {
-                    errorMessageElement.textContent = message;
-                }
-                errorContainer.style.display = 'block';
-                
-                setTimeout(() => {
-                    errorContainer.style.display = 'none';
-                }, 5000);
-            }
+        
+        let result;
+        try {
+            result = await response.json();
+        } catch (e) {
+            throw new Error('Invalid JSON response');
         }
-
-        // JavaScript untuk menangani submit form
-        function setupFormSubmit() {
-            const salesForm = document.getElementById('salesForm');
-            if (salesForm) {
-                salesForm.addEventListener('submit', function(event) {
-                    event.preventDefault();
-
-                    // Ambil data dari form
-                    const tanggal = document.getElementById('tanggal')?.value;
-                    const spd = document.getElementById('spd')?.value;
-                    const std = document.getElementById('std')?.value;
-                    const apc = document.getElementById('apc')?.value;
-                    const gm = document.getElementById('gm')?.value;
-                    const oos = document.getElementById('oos')?.value;
-                    const nsb = document.getElementById('nsb')?.value;
-
-                    // Validasi input
-                    if (!tanggal || !spd || !std || !apc || !gm || !oos || !nsb) {
-                        showError('Harap isi semua field dengan data yang valid!');
-                        return;
-                    }
-
-                    // Buat FormData object
-                    const formData = new FormData();
-                    formData.append('tanggal', tanggal);
-                    formData.append('spd', spd.replace(/\./g, ''));
-                    formData.append('std', std.replace(/\./g, ''));
-                    formData.append('apc', apc.replace(/\./g, ''));
-                    formData.append('gm', gm);
-                    formData.append('oos', oos);
-                    formData.append('nsb', nsb.replace(/\./g, ''));
-
-                    // Kirim data ke Google Sheets
-                    submitDataToSheets(formData);
+        
+        if (result.status === 'success') {
+            // Cek apakah data untuk tanggal ini sudah ada
+            const existingIndex = salesData.findIndex(item => item.tanggal === data.tanggal);
+            if (existingIndex !== -1) {
+                // Update data jika sudah ada
+                salesData[existingIndex] = {
+                    tanggal: data.tanggal,
+                    spd: data.spd,
+                    std: data.std,
+                    apc: data.apc,
+                    gm: data.gm,
+                    oos: data.oos,
+                    nsb: data.nsb
+                };
+            } else {
+                // Tambahkan data baru jika belum ada
+                salesData.push({
+                    tanggal: data.tanggal,
+                    spd: data.spd,
+                    std: data.std,
+                    apc: data.apc,
+                    gm: data.gm,
+                    oos: data.oos,
+                    nsb: data.nsb
                 });
             }
-        }
-
-        // Muat data dari Google Sheets saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Perbarui tabel dengan append only untuk efisiensi
+            addDataToTable([{
+                tanggal: data.tanggal,
+                spd: data.spd,
+                std: data.std,
+                apc: data.apc,
+                gm: data.gm,
+                oos: data.oos,
+                nsb: data.nsb
+            }], true);
+            
+            // Tampilkan alert sukses
+            showAlert('Data laporan berhasil disimpan.');
+            
+            // Reset form
+            document.getElementById('salesForm').reset();
+            
             // Set tanggal default ke hari ini
             const today = new Date().toISOString().substr(0, 10);
-            const tanggalInput = document.getElementById('tanggal');
-            if (tanggalInput) {
-                tanggalInput.value = today;
+            document.getElementById('tanggal').value = today;
+        } else {
+            showError('Gagal menyimpan data: ' + result.message);
+        }
+    } catch (error) {
+        showError('Terjadi kesalahan saat mengirim data: ' + error.message);
+    } finally {
+        showSubmitSpinner(false);
+    }
+}
+
+// Fungsi untuk menampilkan/menyembunyikan loading overlay
+function showLoading(show) {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// Fungsi untuk menampilkan/menyembunyikan spinner pada tombol submit
+function showSubmitSpinner(show) {
+    const submitSpinner = document.getElementById('submitSpinner');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (submitSpinner) {
+        submitSpinner.style.display = show ? 'inline-block' : 'none';
+    }
+    
+    if (submitBtn) {
+        submitBtn.disabled = show;
+    }
+}
+
+// Fungsi untuk menampilkan alert sukses
+function showAlert(message) {
+    const alertContainer = document.getElementById('alertContainer');
+    if (alertContainer) {
+        alertContainer.innerHTML = `
+            <strong><i class="fas fa-check-circle me-2"></i>Sukses!</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        alertContainer.style.display = 'block';
+        
+        setTimeout(() => {
+            alertContainer.style.display = 'none';
+        }, 3000);
+    }
+}
+
+// Fungsi untuk menampilkan error
+function showError(message) {
+    const errorContainer = document.getElementById('errorContainer');
+    if (errorContainer) {
+        const errorMessageElement = document.getElementById('errorMessage');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = message;
+        }
+        errorContainer.style.display = 'block';
+        
+        setTimeout(() => {
+            errorContainer.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// JavaScript untuk menangani submit form
+function setupFormSubmit() {
+    const salesForm = document.getElementById('salesForm');
+    if (salesForm) {
+        salesForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Ambil data dari form
+            const tanggal = document.getElementById('tanggal')?.value;
+            let spd = document.getElementById('spd')?.value.replace(/\./g, '');
+            let std = document.getElementById('std')?.value.replace(/\./g, '');
+            let apc = document.getElementById('apc')?.value.replace(/\./g, '');
+            const gm = document.getElementById('gm')?.value;
+            const oos = document.getElementById('oos')?.value;
+            let nsb = document.getElementById('nsb')?.value.replace(/\./g, '');
+
+            // Validasi input
+            if (!tanggal || !/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) {
+                showError('Tanggal tidak valid!');
+                return;
             }
-            
-            // Setup event listeners
-            addNumberInputListeners();
-            setupFormSubmit();
-            
-            // Load data dari Google Sheets
-            loadDataFromSheets();
+            if (!/^\d+$/.test(spd) || !/^\d+$/.test(std) || !/^\d+$/.test(apc) || !/^-?\d+$/.test(nsb)) {
+                showError('Field SPD, STD, APC, dan NSB harus berupa angka!');
+                return;
+            }
+            if (isNaN(gm) || isNaN(oos)) {
+                showError('Field GM dan OOS harus berupa angka desimal!');
+                return;
+            }
+
+            // Buat FormData object
+            const formData = new FormData();
+            formData.append('tanggal', tanggal);
+            formData.append('spd', spd);
+            formData.append('std', std);
+            formData.append('apc', apc);
+            formData.append('gm', gm);
+            formData.append('oos', oos);
+            formData.append('nsb', nsb);
+
+            // Kirim data ke Google Sheets
+            submitDataToSheets(formData);
         });
+    }
+}
+
+// Fungsi untuk mengubah ikon toggle
+function setupToggleIcon() {
+    const summaryHeader = document.getElementById('summaryHeader');
+    const summaryContent = document.getElementById('summaryContent');
+    
+    if (summaryHeader && summaryContent) {
+        summaryHeader.addEventListener('click', function() {
+            // Tunggu sampai transisi collapse selesai
+            setTimeout(function() {
+                if (summaryContent.classList.contains('show')) {
+                    summaryHeader.classList.remove('collapsed');
+                    summaryHeader.classList.add('not-collapsed');
+                } else {
+                    summaryHeader.classList.remove('not-collapsed');
+                    summaryHeader.classList.add('collapsed');
+                }
+            }, 10);
+        });
+    }
+}
+
+// Muat data dari Google Sheets saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    // Set tanggal default ke hari ini
+    const today = new Date().toISOString().substr(0, 10);
+    const tanggalInput = document.getElementById('tanggal');
+    if (tanggalInput) {
+        tanggalInput.value = today;
+    }
+    
+    // Setup event listeners
+    addNumberInputListeners();
+    setupFormSubmit();
+    setupToggleIcon();
+    
+    // Event listener untuk perubahan tanggal
+    if (tanggalInput) {
+        tanggalInput.addEventListener('change', function() {
+            updateTargetTable();
+        });
+    }
+    
+    // Load data dari Google Sheets
+    loadDataFromSheets();
+    loadTargetData();
+});
     </script>
 </body>
 </html>
