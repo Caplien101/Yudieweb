@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Data Indikator Pramuka</title>
+    <style>
+        :root {
+            --primary-color: #1E3A8A;
+            --secondary-color: #F3F4F6;
+            --text-color: #111827;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --error-color: #D32F2F;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        #title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            position: relative;
+            margin-bottom: 1.5rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Indikator visual untuk scroll horizontal */
+        .table-container::after {
+            content: '↔';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 12px;
+            color: var(--primary-color);
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #E5E7EB;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: var(--white);
+            font-weight: 600;
+            position: relative;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background-color: #2D4BA9;
+        }
+
+        th.indicator-header::after {
+            content: "⬍";
+            position: absolute;
+            right: 10px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        td {
+            background-color: var(--white);
+            word-break: break-word;
+        }
+
+        /* Header judul */
+        .header-row {
+            background-color: #E5E7EB;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Sub-item indented */
+        .sub-item td:first-child {
+            padding-left: 1.5rem;
+        }
+
+        /* Sub-sub-item (Week) indented lebih dalam */
+        .sub-sub-item td:first-child {
+            padding-left: 2.5rem;
+        }
+
+        /* Sub-sub-sub-item (Detail seperti Aqua) indented lagi */
+        .sub-sub-sub-item td:first-child {
+            padding-left: 3.5rem;
+        }
+
+        /* Nilai kosong */
+        .empty {
+            color: #6B7280;
+            text-align: center;
+        }
+
+        /* Sembunyikan sub-item PSM dan detail Week secara default */
+        .psm-sub-item,
+        .week-detail {
+            display: none;
+        }
+
+        /* Tampilkan saat header expanded */
+        .psm-sub-item.show,
+        .week-detail.show {
+            display: table-row;
+        }
+
+        /* Baris yang bisa disembunyikan */
+        .spd-row, .std-row, .apc-row {
+            transition: all 0.3s ease;
+        }
+
+        .hidden-row {
+            display: none;
+        }
+
+        /* Style untuk kolom pencapaian */
+        .achievement {
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .achievement.high {
+            color: var(--success-color);
+        }
+
+        .achievement.medium {
+            color: var(--warning-color);
+        }
+
+        .achievement.low {
+            color: var(--error-color);
+        }
+
+        /* Style untuk kolom gap */
+        .gap {
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .gap.positive {
+            color: var(--success-color);
+        }
+
+        .gap.negative {
+            color: var(--error-color);
+        }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            border: 4px solid #E5E7EB;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-text {
+            font-size: 0.875rem;
+            color: var(--error-color);
+            margin-top: 0.25rem;
+            text-align: center;
+            display: none;
+        }
+
+        .error-text.active {
+            display: block;
+        }
+
+        #retry-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #retry-btn:hover {
+            background-color: #1E40AF;
+        }
+
+        /* Responsive design untuk perangkat sangat kecil */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                padding: 0.75rem;
+                border-radius: 6px;
+            }
+
+            #title {
+                font-size: 1.25rem;
+                margin-bottom: 0.75rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            .sub-item td:first-child {
+                padding-left: 1rem;
+            }
+
+            .sub-sub-item td:first-child {
+                padding-left: 1.5rem;
+            }
+
+            .sub-sub-sub-item td:first-child {
+                padding-left: 2rem;
+            }
+
+            .table-container::after {
+                font-size: 10px;
+                top: 3px;
+                right: 3px;
+            }
+        }
+
+        /* Responsive design untuk tablet */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .container {
+                padding: 1.25rem;
+            }
+
+            #title {
+                font-size: 1.4rem;
+            }
+
+            th, td {
+                padding: 0.6rem;
+            }
+        }
+
+        /* Untuk perangkat dengan layar lebar */
+        @media (min-width: 769px) {
+            body {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 2rem;
+            }
+
+            #title {
+                font-size: 1.75rem;
+            }
+
+            th, td {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">REKAP LAPORAN PERSHIFT</h1>
+        <div class="loading-overlay" id="loading-overlay" aria-live="polite" aria-busy="true">
+            <div class="loading-spinner"></div>
+            <span>Memuat data...</span>
+        </div>
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th id="indicator-header" class="indicator-header">Indikator</th>
+                        <th>Target</th>
+                        <th>Actual</th>
+                        <th>Acv %</th>
+                        <th>Gap</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+        <div id="error" class="error-text">
+            <button id="retry-btn" style="display: none;">Coba Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxzm7f-xTHbRHkXwLlS6gn7XJV8IZYG4Ll9JJtzmL-txvY56HwKed-Xy_LwdHOB4yKTXg/exec?sheet=Web';
+
+        // Daftar indikator yang dianggap sebagai header
+        const headers = [
+            'FOCUS MARKETING',
+            'REKAP LAPORAN MTD',
+            'PWP',
+            'SERTIS',
+            'MURAH SEJAGAT',
+            'SUEGER',
+            'PSM'
+        ];
+
+        // Variabel untuk status baris SPD, STD, APC
+        let isSPDVisible = true;
+        let isSTDVisible = true;
+        let isAPCVisible = true;
+        let isPULSAVisible = true;
+
+        // Fungsi untuk memformat angka dengan pemisah ribuan dan bilangan bulat
+        const formatNumber = (num) => {
+            if (num === "" || num === null || isNaN(num)) return "-";
+            return Math.floor(Number(num)).toLocaleString('id-ID');
+        };
+
+        // Fungsi untuk menghitung pencapaian
+        const calculateAchievement = (actual, target) => {
+            if (target === 0 || target === "" || actual === "" || isNaN(actual) || isNaN(target)) return "-";
+            const achievement = (actual / target) * 100;
+            return Math.round(achievement * 100) / 100; // Pembulatan 2 angka di belakang koma
+        };
+
+        // Fungsi untuk menghitung gap
+        const calculateGap = (actual, target) => {
+            if (actual === "" || target === "" || isNaN(actual) || isNaN(target)) return "-";
+            return Math.round((actual - target) * 100) / 100; // Pembulatan 2 angka di belakang koma
+        };
+
+        // Fungsi untuk mendapatkan kelas CSS berdasarkan nilai pencapaian
+        const getAchievementClass = (achievement) => {
+            if (achievement === "-") return "";
+            if (achievement >= 100) return "high";
+            if (achievement >= 80) return "medium";
+            return "low";
+        };
+
+        // Fungsi untuk mendapatkan kelas CSS berdasarkan nilai gap
+        const getGapClass = (gap) => {
+            if (gap === "-") return "";
+            if (gap >= 0) return "positive";
+            return "negative";
+        };
+
+        // Fungsi untuk toggle baris SPD, STD, APC
+        const toggleSPDSTDAPC = () => {
+            const spdRows = document.querySelectorAll('.spd-row');
+            const stdRows = document.querySelectorAll('.std-row');
+            const apcRows = document.querySelectorAll('.apc-row');
+            const pulsaRows = document.querySelectorAll('.pulsa-row');
+            
+            // Toggle status
+            isSPDVisible = !isSPDVisible;
+            isSTDVisible = !isSTDVisible;
+            isAPCVisible = !isAPCVisible;
+            isPULSAVisible = !isPULSAVisible;
+            
+            // Terapkan status ke baris
+            spdRows.forEach(row => {
+                if (isSPDVisible) {
+                    row.classList.remove('hidden-row');
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
+            
+            stdRows.forEach(row => {
+                if (isSTDVisible) {
+                    row.classList.remove('hidden-row');
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
+            
+            apcRows.forEach(row => {
+                if (isAPCVisible) {
+                    row.classList.remove('hidden-row');
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
+            
+            pulsaRows.forEach(row => {
+                if (isPULSAVisible) {
+                    row.classList.remove('hidden-row');
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
+            
+            // Update teks header
+            const indicatorHeader = document.getElementById('indicator-header');
+            if (isSPDVisible && isSTDVisible && isAPCVisible) {
+                indicatorHeader.innerHTML = 'Indikator <span style="font-size:12px;opacity:0.7"></span>';
+            } else {
+                indicatorHeader.innerHTML = 'Indikator <span style="font-size:12px;opacity:0.7"></span>';
+            }
+        };
+
+        const loadWebData = async () => {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const error = document.getElementById('error');
+            const retryBtn = document.getElementById('retry-btn');
+            const tableBody = document.getElementById('table-body');
+            loadingOverlay.classList.add('active');
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const response = await fetch(GAS_URL, {
+                    method: 'GET',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+                }
+                const result = await response.json();
+                console.log('Respons dari GAS:', result);
+                if (result.status === 'error') {
+                    throw new Error(result.message);
+                }
+                tableBody.innerHTML = '';
+                let isSubItem = false;
+                let isPsmSubItem = false;
+                let currentWeek = null;
+
+                result.data.forEach(item => {
+                    const row = document.createElement('tr');
+                    const isHeader = headers.includes(item.indikator.toUpperCase());
+                    
+                    // Tambahkan kelas khusus untuk baris SPD, STD, APC
+                    if (item.indikator.toUpperCase().includes('SPD')) {
+                        row.classList.add('spd-row');
+                    } else if (item.indikator.toUpperCase().includes('STD')) {
+                        row.classList.add('std-row');
+                    } else if (item.indikator.toUpperCase().includes('APC')) {
+                        row.classList.add('apc-row');
+                    }
+                    else if (item.indikator.toUpperCase().includes('PULSA')) {
+                        row.classList.add('pulsa-row');
+                    }
+                    
+                    // Hitung pencapaian dan gap
+                    const actualNum = item.actual !== "" ? Number(item.actual) : "";
+                    const targetNum = item.target !== "" ? Number(item.target) : "";
+                    const achievement = calculateAchievement(actualNum, targetNum);
+                    const gap = calculateGap(actualNum, targetNum);
+                    
+                    const achievementClass = getAchievementClass(achievement);
+                    const gapClass = getGapClass(gap);
+                    
+                    // Format nilai untuk ditampilkan
+                    const achievementDisplay = achievement !== "-" ? `${achievement}%` : "-";
+                    const gapDisplay = gap !== "-" ? formatNumber(gap) : "-";
+
+                    if (isHeader) {
+                        row.classList.add('header-row');
+                        if (item.indikator.toUpperCase() === 'PSM') {
+                            row.classList.add('psm-header');
+                            row.dataset.expanded = 'false';
+                        }
+                        row.innerHTML = `
+                            <td colspan="5">
+                                <span class="toggle-icon"></span>
+                                ${item.indikator}
+                            </td>
+                        `;
+                        isSubItem = true;
+                        isPsmSubItem = item.indikator.toUpperCase() === 'PSM';
+                        currentWeek = null;
+                    } else if (isPsmSubItem && item.indikator.toLowerCase().startsWith('week')) {
+                        row.classList.add('sub-sub-item', 'week-header');
+                        row.dataset.expanded = 'false';
+                        row.dataset.week = item.indikator;
+                        const targetClass = item.target === "" ? 'empty' : '';
+                        const actualClass = item.actual === "" ? 'empty' : '';
+                        row.innerHTML = `
+                            <td>
+                                <span class="toggle-icon"></span>
+                                ${item.indikator}
+                            </td>
+                            <td class="${targetClass}">${formatNumber(item.target)}</td>
+                            <td class="${actualClass}">${formatNumber(item.actual)}</td>
+                            <td class="achievement ${achievementClass}">${achievementDisplay}</td>
+                            <td class="gap ${gapClass}">${gapDisplay}</td>
+                        `;
+                        currentWeek = item.indikator;
+                    } else if (isPsmSubItem && currentWeek && item.target !== "" && item.actual !== "") {
+                        row.classList.add('sub-sub-sub-item', 'week-detail');
+                        row.dataset.week = currentWeek;
+                        const targetClass = item.target === "" ? 'empty' : '';
+                        const actualClass = item.actual === "" ? 'empty' : '';
+                        row.innerHTML = `
+                            <td>${item.indikator}</td>
+                            <td class="${targetClass}">${formatNumber(item.target)}</td>
+                            <td class="${actualClass}">${formatNumber(item.actual)}</td>
+                            <td class="achievement ${achievementClass}">${achievementDisplay}</td>
+                            <td class="gap ${gapClass}">${gapDisplay}</td>
+                        `;
+                    } else {
+                        const targetClass = item.target === "" ? 'empty' : '';
+                        const actualClass = item.actual === "" ? 'empty' : '';
+                        row.innerHTML = `
+                            <td>${item.indikator}</td>
+                            <td class="${targetClass}">${formatNumber(item.target)}</td>
+                            <td class="${actualClass}">${formatNumber(item.actual)}</td>
+                            <td class="achievement ${achievementClass}">${achievementDisplay}</td>
+                            <td class="gap ${gapClass}">${gapDisplay}</td>
+                        `;
+                        if (isPsmSubItem) row.classList.add('sub-item', 'psm-sub-item');
+                        else if (isSubItem) row.classList.add('sub-item');
+                    }
+                    tableBody.appendChild(row);
+                });
+
+                // Tambahkan event listener untuk header Indikator
+                document.getElementById('indicator-header').addEventListener('click', toggleSPDSTDAPC);
+                
+                // Set teks header awal
+                document.getElementById('indicator-header').innerHTML = 'Indikator <span style="font-size:12px;opacity:0.7"></span>';
+
+                // Tambahkan toggle icon untuk PSM header
+                const psmHeaders = tableBody.querySelectorAll('.psm-header');
+                psmHeaders.forEach(header => {
+                    const toggleIcon = header.querySelector('.toggle-icon');
+                    header.addEventListener('click', () => {
+                        const isExpanded = header.dataset.expanded === 'true';
+                        header.dataset.expanded = !isExpanded;
+                        toggleIcon.classList.toggle('expanded', !isExpanded);
+                        
+                        // Tampilkan/sembunyikan semua sub-item PSM
+                        const psmSubItems = tableBody.querySelectorAll('.psm-sub-item');
+                        psmSubItems.forEach(item => {
+                            item.classList.toggle('show', !isExpanded);
+                        });
+                        
+                        // Sembunyikan juga week details jika PSM ditutup
+                        if (isExpanded) {
+                            const weekDetails = tableBody.querySelectorAll('.week-detail');
+                            weekDetails.forEach(item => {
+                                item.classList.remove('show');
+                            });
+                            
+                            // Reset status week headers
+                            const weekHeaders = tableBody.querySelectorAll('.week-header');
+                            weekHeaders.forEach(weekHeader => {
+                                weekHeader.dataset.expanded = 'false';
+                                const weekToggleIcon = weekHeader.querySelector('.toggle-icon');
+                                if (weekToggleIcon) {
+                                    weekToggleIcon.classList.remove('expanded');
+                                }
+                            });
+                        }
+                    });
+                });
+
+                // Tambahkan toggle icon untuk Week header
+                const weekHeaders = tableBody.querySelectorAll('.week-header');
+                weekHeaders.forEach(header => {
+                    const toggleIcon = header.querySelector('.toggle-icon');
+                    header.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Mencegah event bubbling ke parent PSM
+                        const isExpanded = header.dataset.expanded === 'true';
+                        header.dataset.expanded = !isExpanded;
+                        toggleIcon.classList.toggle('expanded', !isExpanded);
+                        const week = header.dataset.week;
+                        const details = tableBody.querySelectorAll(`.week-detail[data-week="${week}"]`);
+                        details.forEach(item => {
+                            item.classList.toggle('show', !isExpanded);
+                        });
+                    });
+                });
+
+                error.classList.remove('active');
+                retryBtn.style.display = 'none';
+            } catch (error) {
+                console.error('Gagal memuat data:', error);
+                error.textContent = 'Gagal memuat data: ' + error.message;
+                error.classList.add('active');
+                retryBtn.style.display = 'block';
+            } finally {
+                loadingOverlay.classList.remove('active');
+            }
+        };
+
+        document.getElementById('retry-btn').addEventListener('click', loadWebData);
+        window.onload = loadWebData;
+    </script>
+</body>
+</html>
