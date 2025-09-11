@@ -2,578 +2,1025 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Rokok Gudang</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Inventory Barang</title>
+
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.4/css/all.min.css">
+
     <style>
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
         }
-        .card {
-            background: linear-gradient(45deg, #ffffff, #e0eafc);
-            border: none;
-            border-radius: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
+        .status-connected {
+            background-color: #28a745; /* hijau */
+            box-shadow: 0 0 6px #28a745;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        .status-disconnected {
+            background-color: #dc3545; /* merah */
         }
-        .card-title {
-            font-size: 0.8rem;
-            color: #2c3e50;
+        .status-syncing {
+            background-color: #ffc107; /* kuning */
+            animation: blink 1.5s infinite;
         }
-        .card-text {
-            color: #34495e;
-            font-size: 0.8rem;
+        @keyframes blink {
+            50% { opacity: 0.5; }
         }
-        .edit-icon {
-            font-size: 1.2rem;
-            color: #1890ff;
-            transition: color 0.3s;
+
+        .highlight {
+            animation: highlight-animation 2s;
+            background-color: #d4edda !important;
         }
-        .edit-icon:hover {
-            color: #40a9ff;
+        @keyframes highlight-animation {
+            0% { background-color: #d4edda; }
+            100% { background-color: transparent; }
         }
-        .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
         }
-        .modal-header {
-            background: #1890ff;
-            color: white;
-            border-radius: 15px 15px 0 0;
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-top: -8px;
+            margin-left: -8px;
+            border: 2px solid #fff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        .btn-primary {
-            background: #1890ff;
-            border: none;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .btn-primary:hover {
-            background: #40a9ff;
+
+        .pulse {
+            animation: pulse-animation 1.5s infinite;
         }
-        .info-row {
-            font-size: 0.9rem;
-            color: #6c757d;
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
         }
-        .data-row {
-            font-size: 1rem;
-            font-weight: 500;
+
+        .badge-filter {
+            cursor: pointer;
+            transition: all 0.2s;
         }
-      /* CSS tambahan untuk modal konfirmasi */
-        .modal-confirm .modal-header {
-            background: #ffc107;
-            color: white;
+        .badge-filter.active {
+            transform: scale(1.1);
+            font-weight: bold;
         }
-        .modal-confirm .btn-danger {
-            background: #dc3545;
-            border: none;
-        }
-        .modal-confirm .btn-danger:hover {
-            background: #bd2130;
-        }
-        
+
         .toast-container {
-    z-index: 1060; /* Pastikan muncul di atas modal */
-}
+            z-index: 9999;
+        }
 
-    /* Tambahkan di bagian style */
-    #tableContainer {
-    min-height: 80vh; /* 3/4 tinggi layar */
-    overflow-y: auto; /* Tambahkan scroll jika konten melebihi       tinggi */
-    margin-bottom: 20px; /* Optional: jarak bawah */
-}
+        #searchBox {
+            transition: all 0.3s;
+        }
+        #searchBox:focus {
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        }
 
-/* Perbaiki padding untuk card agar lebih rapi */
-.card-body {
-    padding: 1.25rem;
-}
-
-#uploadSpinnerContainer {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    z-index: 1050;
-}
-
-#loadingSpinner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    z-index: 1050;
-}
-/* Gaya untuk baris tabel yang dapat diklik */
-.table tbody tr:hover {
-    background-color: #e9f7ef; /* Warna latar belakang saat hover */
-    cursor: pointer; /* Ubah kursor menjadi pointer */
-}
-
-/* Efek highlight saat baris diklik */
-.table tbody tr:focus {
-    outline: none;
-    background-color: #d4edda; /* Warna latar belakang saat diklik */
-}
-
-
-/* Gaya untuk freeze header tabel */
-#tableContainer {
-    max-height: 75vh; /* Sesuaikan tinggi maksimal tabel */
-    overflow-y: auto; /* Aktifkan scroll vertikal */
-}
-
-.table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Opsi: tambahkan bayangan untuk pemisah */
-}
+        .table-danger {
+            background-color: #f8d7da !important;
+        }
         
+      /* === Filter Badges Styling === */
+.badge-filter {
+    background-color: #e9ecef;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    min-width: 80px; /* Lebar minimum agar tidak terlalu sempit */
+    flex: 1 1 calc(33.333% - 10px); /* Default: 3 kolom */
+    text-align: center;
+}
+
+.badge-filter:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+}
+
+.badge-filter.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+    transform: scale(1.03);
+    box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+}
+
+/* Mobile: 3 kolom badge */
+@media (max-width: 768px) {
+    #filterBadgesContainer {
+        gap: 0.5rem;
+    }
+
+    .badge-filter {
+        flex: 1 1 calc(33.333% - 0.5rem); /* 3 kolom, account for gap */
+        min-width: auto;
+    }
+}
+
+/* Extra small: tetap 3 kolom sampai sangat kecil */
+@media (max-width: 480px) {
+    .badge-filter {
+        flex: 1 1 calc(33.333% - 0.5rem);
+        font-size: 0.85rem;
+        padding: 0.5rem 0.25rem;
+    }
+}
     </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h3 class="text-center text-primary mb-4">Data Rokok</h3>
-        
-        <!-- Search Section -->
-<div class="row mb-4">
-    <div class="col-md-6 offset-md-3">
-        <div class="input-group">
-            <input type="text" id="searchInput" class="form-control" 
-                   placeholder="Cari berdasarkan deskripsi,plu..">
-            <button class="btn btn-primary" type="button" onclick="performSearch()">
-                <i class="fas fa-search"></i> Cari
+<body class="bg-light">
+
+    <div class="container py-4">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-box-seam me-2"></i>Inventory Barang</h2>
+            <div class="connection-status d-flex align-items-center">
+                <div id="connectionStatus" class="status-indicator status-syncing"></div>
+                <span id="connectionMessage" class="ms-2 small">Menyiapkan koneksi...</span>
+            </div>
+        </div>
+
+       <!-- Filter & Search -->
+<div class="row mb-3 g-3">
+
+   
+
+    <!-- Filter Badges -->
+    <div class="col-12">
+    <div class="d-flex flex-wrap gap-2 justify-content-center" id="filterBadgesContainer">
+        <span class="badge-filter text-center py-2 rounded fw-medium" data-filter="all">Semua</span>
+        <span class="badge-filter text-center py-2 rounded fw-medium" data-filter="inStock">Tersedia</span>
+        <span class="badge-filter text-center py-2 rounded fw-medium" data-filter="outOfStock">Habis</span>
+    </div>
+</div>
+
+    <!-- Action Buttons -->
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-end" id="actionButtonsContainer">
+            <button id="syncBtn" class="btn btn-outline-warning flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center px-3">
+                <i class="fas fa-sync-alt me-1"></i> Sync
+                <span id="unsyncedBadge" class="badge bg-danger ms-2 d-none">0</span>
+            </button>
+            <button id="addNewItemBtn" class="btn btn-primary flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center px-3">
+                <i class="fas fa-plus me-1"></i> Tambah Barang
             </button>
         </div>
     </div>
-</div>
-        
-        <!-- Pindahkan uploadSpinner ke luar dari loadingSpinner -->
-<div class="text-center mb-4" id="loadingSpinner">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-    <div class="mt-2">Mengambil data Google Sheets...</div>
+
 </div>
 
-<!-- Tambahkan uploadSpinner di luar container loading awal -->
-<div id="uploadSpinnerContainer" class="text-center mt-4" style="display: none;">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Mengunggah...</span>
-    </div>
-    <div class="mt-2">Mengirim data ke Google Sheets...</div>
-</div>
-        
-        
-       
-        <!-- Di bagian tombol Update -->
-<div class="text-center mt-4">
-    <button class="btn btn-success btn-md me-2" data-bs-toggle="modal" data-bs-target="#addModal">
-        <i class="fas fa-plus me-2"></i> Add Data
-    </button>
-    <button class="btn btn-primary btn-md" onclick="updateGoogleSheet()">
-        <i class="fas fa-cloud-upload-alt me-2"></i> Update
-    </button>  
-</div>
- <br>
-        
-        <div id="tableContainer" class="mt-4">
-    <table class="table table-bordered table-hover">
-        <thead class="table-secondary">
-            <tr>
-                <th>PLU</th>
-                <th>Description</th>
-                <th>Qty</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- Data rows -->
-        </tbody>
-    </table>
-</div>
-
-        <!-- Add Data Modal -->
-<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addModalLabel">Tambah Data Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="addSearch" class="form-label">Cari Produk</label>
-                        <input type="text" class="form-control" id="addSearch" placeholder="Cari berdasarkan deskripsi...">
-                        <div id="searchSuggestions" class="list-group mt-2" style="display: none;"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addRak" class="form-label">Rak</label>
-                        <input type="text" class="form-control" id="addRak" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addPlu" class="form-label">PLU</label>
-                        <input type="text" class="form-control" id="addPlu" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addBarcode" class="form-label">Barcode</label>
-                        <input type="text" class="form-control" id="addBarcode" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addDesc" class="form-label">Description</label>
-                        <input type="text" class="form-control" id="addDesc" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addQty" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="addQty" value="0">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="saveNewData()">Simpan</button>
-            </div>
+ <!-- Search Box -->
+    <div class="col-12 mb-2">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" id="searchBox" class="form-control" placeholder="Cari PLU atau Deskripsi...">
         </div>
     </div>
-</div>
 
-        <!-- Edit Modal -->
-        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel">Edit Data</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+        <!-- Empty State -->
+        <div id="emptyState" class="alert alert-info text-center d-none">
+            <i class="bi bi-inbox me-2"></i>
+            Tidak ada data barang. Silakan tambahkan barang pertama Anda!
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th data-sort="plu">PLU <i class="fas fa-sort"></i></th>
+                        <th data-sort="description">Deskripsi <i class="fas fa-sort"></i></th>
+                        <th data-sort="qty">Qty <i class="fas fa-sort"></i></th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data akan diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Modal: Tambah/Edit Barang -->
+    <div class="modal fade" id="itemModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Input Data Barang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="itemForm">
                     <div class="modal-body">
-                        <form>
-                            <div class="mb-3">
-                                <label for="editDesc" class="form-label">Description</label>
-                                <input type="text" class="form-control" id="editDesc" placeholder="Masukkan deskripsi">
+                        <div class="mb-3">
+                            <label class="form-label">PLU <small class="text-muted"></small></label>
+                            <input type="number" id="plu" class="form-control" required min="0">
+                            <div id="pluError" class="text-danger small mt-1 d-none">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                <span>PLU harus berupa angka positif.</span>
                             </div>
-                            <div class="mb-3">
-                                <label for="editQty" class="form-label">Quantity</label>
-                                <input type="number" class="form-control" id="editQty" placeholder="Masukkan jumlah baru">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deskripsi</label>
+                            <input type="text" id="description" class="form-control" required>
+                            <div id="descriptionError" class="text-danger small mt-1 d-none">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                <span>Deskripsi hanya boleh berisi huruf, angka, dan spasi.</span>
                             </div>
-                        </form>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kuantitas</label>
+                            <input type="number" id="qty" class="form-control" required min="0" value="0">
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-primary" onclick="saveEdit()">Simpan</button>
-                    </div>                    
+                        <button type="submit" id="submitButton" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Tambah Barang
+                        </button>
+                        <button type="button" id="deleteFromModalBtn" class="btn btn-danger d-none">
+                            <i class="fas fa-trash me-2"></i>Hapus
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Konfirmasi Hapus -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Anda yakin ingin menghapus barang:</p>
+                    <h5><span id="itemToDelete">-</span></h5>
+                    <p class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Aksi ini tidak dapat dibatalkan kecuali dengan tombol Undo setelah hapus.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Hapus
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    
-  
-    
-    <!-- Toast Notification -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <!-- Toast untuk penyimpanan lokal -->
-    <div id="successToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
-        <div class="toast-body">
-            <i class="fas fa-check-circle me-2"></i>Data berhasil disimpan!
-        </div>
-    </div>
 
-    <!-- Toast untuk Google Sheets -->
-    <div id="googleSheetToast" class="toast bg-success text-white text-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
-        <div class="toast-body">
-            <i class="fas fa-cloud-upload-alt me-2"></i>Data berhasil diunggah ke Google Sheets!
-        </div>
-    </div>
-</div>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- JavaScript Utama -->
     <script>
-        let tempNewData = {}; // Untuk menyimpan data sementara
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSHm4hTsSoDmwByuUCOLt2iitKhfzVDpvi1myu9IL8u1Ts_COKx6_zoiVsbp1djUQnwAsSUKxNwOy-Z/pub?gid=0&single=true&output=csv";
-        let currentIndex = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            // ✅ Ambil semua elemen penting
+            const requiredElements = {
+                itemModal: document.getElementById('itemModal'),
+                deleteConfirmModal: document.getElementById('deleteConfirmModal'),
+                form: document.getElementById('itemForm'),
+                pluInput: document.getElementById('plu'),
+                descriptionInput: document.getElementById('description'),
+                qtyInput: document.getElementById('qty'),
+                submitButton: document.getElementById('submitButton'),
+                deleteFromModalBtn: document.getElementById('deleteFromModalBtn'),
+                confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
+                modalLabel: document.getElementById('itemModalLabel'),
+                searchBox: document.getElementById('searchBox'),
+                tableBody: document.getElementById('tableBody'),
+                emptyState: document.getElementById('emptyState'),
+                syncBtn: document.getElementById('syncBtn'),
+                unsyncedBadge: document.getElementById('unsyncedBadge'),
+                pluError: document.getElementById('pluError'),
+                descriptionError: document.getElementById('descriptionError'),
+                toastContainer: document.querySelector('.toast-container'),
+                connectionStatus: document.getElementById('connectionStatus'),
+                connectionMessage: document.getElementById('connectionMessage'),
+                itemToDelete: document.getElementById('itemToDelete')
+            };
 
-        function fetchData() {
-            fetch(sheetUrl)
-                .then(response => response.text())
-                .then(data => {
-                    const parsedData = csvToJson(data);
-                    localStorage.setItem("inventoryData", JSON.stringify(parsedData));
-                    displayData();
-                    document.getElementById("loadingSpinner").style.display = "none";
-                })
-                .catch(error => console.error("Error fetching data:", error));
-        }
+            // ✅ Validasi Bootstrap tersedia
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap JS belum dimuat');
+                alert('Bootstrap JS belum dimuat. Pastikan Anda sudah include bootstrap.bundle.min.js');
+                return;
+            }
 
-        function csvToJson(csv) {
-            const rows = csv.split("\n")
-                .map(row => row.trim())
-                .filter(row => row);
-            const headers = rows.shift().split(",");
-            return rows.map(row => {
-                const values = row.split(",");
-                return {
-                    rak: values[0],
-                    plu: values[1],
-                    barcode: values[2],
-                    description: values[3],
-                    qty: values[4],
-                    timestamp: values[5] || new Date().toLocaleString()
-                };
+            // ✅ Validasi semua elemen penting
+            for (const [name, element] of Object.entries(requiredElements)) {
+                if (!element) {
+                    console.error(`❌ Elemen '${name}' tidak ditemukan di DOM!`);
+                    alert(`Kesalahan inisialisasi: Elemen '${name}' tidak ditemukan. Periksa HTML Anda.`);
+                    return;
+                }
+            }
+
+            // Buat instance modal setelah validasi
+            const itemModal = new bootstrap.Modal(requiredElements.itemModal, { keyboard: true });
+            const deleteConfirmModal = new bootstrap.Modal(requiredElements.deleteConfirmModal);
+
+            // Konfigurasi Google Sheets - GANTI DENGAN URL ANDA
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzjD43Gr6GijGBYJ2HBMMdhQcqLGcfZ1hgXht6aByQjJvsVjvQaVRVcCKpQ2ql5K_Vm/exec';
+            let dataList = [];
+            let itemIndex = -1;
+            let currentFilter = 'all';
+            let sortField = 'plu';
+            let sortDirection = 'asc';
+            const LOCAL_STORAGE_KEY = 'unsynced_items';
+            const DELETED_ITEMS_KEY = 'deleted_items';
+
+            let retryBtn = null;
+            let deletedItemBackup = null;
+
+            // Format PLU to have leading zeros (e.g., 123 -> 00123)
+            function formatPLU(plu) {
+                return String(plu).padStart(5, '');
+            }
+
+            // Capitalize each word in description
+            function formatDescription(description) {
+                return description
+                    .trim()
+                    .toLowerCase()
+                    .replace(/\b\w/g, char => char.toUpperCase());
+            }
+
+            // Check for duplicate PLU or description
+            function checkDuplicate(plu, description, excludeIndex = -1) {
+                return dataList.findIndex((item, index) => {
+                    return index !== excludeIndex && item && (item.plu === plu || item.description.toLowerCase() === description.toLowerCase());
+                });
+            }
+
+            // Validate dataList integrity
+            function validateDataList(data) {
+                return data.every(item => 
+                    item && 
+                    typeof item.plu === 'number' && 
+                    typeof item.description === 'string' && 
+                    typeof item.qty === 'number' && 
+                    typeof item.isSynced === 'boolean'
+                );
+            }
+
+            // Update connection status UI
+            function updateConnectionStatus(status, message) {
+                if (!requiredElements.connectionStatus || !requiredElements.connectionMessage) {
+                    console.error('Elemen connectionStatus atau connectionMessage tidak ditemukan');
+                    return;
+                }
+                requiredElements.connectionStatus.className = 'status-indicator';
+                requiredElements.connectionStatus.classList.remove('status-connected', 'status-disconnected', 'status-syncing');
+                if (status === 'connected') {
+                    requiredElements.connectionStatus.classList.add('status-connected');
+                } else if (status === 'disconnected') {
+                    requiredElements.connectionStatus.classList.add('status-disconnected');
+                } else if (status === 'syncing') {
+                    requiredElements.connectionStatus.classList.add('status-syncing');
+                }
+                requiredElements.connectionMessage.textContent = message;
+            }
+
+            // Show toast notification
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast align-items-center text-white bg-${type} border-0 mb-2`;
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'assertive');
+                toast.setAttribute('aria-atomic', 'true');
+                
+                toast.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+                
+                requiredElements.toastContainer.appendChild(toast);
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+                
+                toast.addEventListener('hidden.bs.toast', () => {
+                    toast.remove();
+                });
+
+                // Handle undo button if exists
+                if (message.includes('Undo')) {
+                    const undoBtn = toast.querySelector('.btn-undo');
+                    if (undoBtn) {
+                        undoBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            undoDelete();
+                        });
+                    }
+                }
+            }
+
+            // Cek koneksi internet
+            function checkOnline() {
+                if (!navigator.onLine) {
+                    showToast('Tidak ada koneksi internet. Gunakan mode offline.', 'warning');
+                    return false;
+                }
+                return true;
+            }
+
+            // Fungsi undo delete
+            function undoDelete() {
+                if (deletedItemBackup) {
+                    dataList.push(deletedItemBackup);
+                    deletedItemBackup = null;
+                    renderTable(requiredElements.searchBox.value);
+                    saveToLocalStorage();
+                    showToast('Penghapusan dibatalkan', 'success');
+                }
+            }
+
+            // Load data from Google Sheets
+            async function loadDataFromSheets() {
+                if (!checkOnline()) {
+                    updateConnectionStatus('disconnected', 'Tidak ada koneksi. Menggunakan data lokal.');
+                    loadFromLocalStorage();
+                    renderTable();
+                    updateUnsyncedBadge();
+                    return;
+                }
+                updateConnectionStatus('syncing', 'Mengambil data dari Google Sheets...');
+                
+                try {
+                    const response = await fetch(scriptURL + '?action=get');
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch (error) {
+                        throw new Error('Gagal memproses JSON dari server: ' + error.message);
+                    }
+
+                    console.log('📡 Respons dari server:', result);
+
+                    if (result && result.status === 'success' && Array.isArray(result.data)) {
+                        console.log('✅ Data dari server diterima:', result.data.length, 'item');
+
+                        dataList = result.data.map(item => ({
+                            ...item,
+                            plu: parseInt(item.plu),
+                            qty: parseInt(item.qty),
+                            isSynced: true,
+                            hasBeenRendered: false
+                        })).filter(item => !isNaN(item.plu) && !isNaN(item.qty));
+
+                        loadFromLocalStorage();
+                        renderTable();
+                        updateUnsyncedBadge();
+                        updateConnectionStatus('connected', 'Terhubung ke Google Sheets');
+                        showToast(`Data berhasil dimuat (${dataList.length} item)`, 'success');
+                    } else if (result && result.status === 'success' && result.data === null) {
+                        console.log('✅ Server: data null — dianggap sebagai data kosong.');
+                        dataList = [];
+                        loadFromLocalStorage();
+                        renderTable();
+                        updateUnsyncedBadge();
+                        updateConnectionStatus('connected', 'Terhubung (data kosong)');
+                        showToast('Tidak ada data di server — menggunakan data lokal.', 'info');
+                    } else {
+                        console.error('❌ Format respons tidak valid:', result);
+                        throw new Error('Format data tidak dikenali dari server');
+                    }
+                } catch (error) {
+                    console.error('⛔ Error saat load data dari Google Sheets:', error);
+                    updateConnectionStatus('disconnected', 'Gagal memuat dari Google Sheets');
+                    
+                    if (error.message.includes('HTTP') || error.message.includes('JSON')) {
+                        showToast('Gagal memuat data: ' + error.message, 'danger');
+                    }
+
+                    loadFromLocalStorage();
+                    renderTable();
+                    updateUnsyncedBadge();
+                }
+            }
+
+            // Sync data to Google Sheets
+            async function syncDataToSheets() {
+                const unsyncedItems = dataList.filter(item => !item.isSynced);
+                const deletedItems = getDeletedItemsFromLocalStorage();
+                
+                if (unsyncedItems.length === 0 && deletedItems.length === 0) {
+                    showToast('Tidak ada data baru yang perlu disinkronkan', 'info');
+                    return;
+                }
+
+                if (!checkOnline()) return;
+
+                updateConnectionStatus('syncing', 'Menyinkronkan data ke Google Sheets...');
+                requiredElements.syncBtn.classList.add('btn-loading');
+                requiredElements.syncBtn.disabled = true;
+
+                try {
+                    const response = await fetch(scriptURL, {
+                        method: 'POST',
+                        
+                        body: JSON.stringify({
+                            action: 'sync',
+                             unsyncedItems,
+                            deletedItems: deletedItems
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Gagal menyinkronkan data ke server: ${response.status}`);
+                    }
+
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch (error) {
+                        throw new Error('Gagal memproses respons server: Format JSON tidak valid');
+                    }
+
+                    if (result && result.status === 'success') {
+                        dataList.forEach(item => item.isSynced = true);
+                        localStorage.removeItem(LOCAL_STORAGE_KEY);
+                        localStorage.removeItem(DELETED_ITEMS_KEY);
+                        updateUnsyncedBadge();
+                        updateConnectionStatus('connected', 'Data tersinkronisasi dengan Google Sheets');
+                        showToast(`${unsyncedItems.length + deletedItems.length} item berhasil disinkronkan`, 'success');
+                    } else {
+                        throw new Error(result.message || 'Gagal menyinkronkan data');
+                    }
+                } catch (error) {
+                    console.error('Error syncing data to Google Sheets:', error);
+                    updateConnectionStatus('disconnected', 'Gagal menyinkronkan data');
+                    showToast('Gagal menyinkronkan  ' + error.message, 'danger');
+                    if (!retryBtn || !document.body.contains(retryBtn)) {
+                        retryBtn = document.createElement('button');
+                        retryBtn.className = 'btn btn-retry btn-sm ms-2';
+                        retryBtn.textContent = 'Retry Sync';
+                        retryBtn.onclick = syncDataToSheets;
+                        requiredElements.syncBtn.parentNode.appendChild(retryBtn);
+                    }
+                } finally {
+                    requiredElements.syncBtn.classList.remove('btn-loading');
+                    requiredElements.syncBtn.disabled = false;
+                }
+            }
+
+            // Delete item from Google Sheets
+            async function deleteItemFromSheets(item) {
+                if (!checkOnline()) {
+                    saveDeletedItemToLocalStorage(item);
+                    return false;
+                }
+                updateConnectionStatus('syncing', 'Menghapus data dari Google Sheets...');
+                
+                try {
+                    const response = await fetch(scriptURL, {
+                        method: 'POST',
+                        
+                        body: JSON.stringify({
+                            action: 'delete',
+                            plu: item.plu,
+                            description: item.description
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Gagal menghapus data dari server: ${response.status}`);
+                    }
+
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch (error) {
+                        throw new Error('Gagal memproses respons server: Format JSON tidak valid');
+                    }
+
+                    if (result && result.status === 'success') {
+                        updateConnectionStatus('connected', 'Data terhapus dari Google Sheets');
+                        return true;
+                    } else {
+                        throw new Error(result.message || 'Gagal menghapus data');
+                    }
+                } catch (error) {
+                    console.error('Error deleting item from Google Sheets:', error);
+                    updateConnectionStatus('disconnected', 'Gagal menghapus data. Menyimpan di lokal.');
+                    saveDeletedItemToLocalStorage(item);
+                    return false;
+                }
+            }
+
+            function loadFromLocalStorage() {
+                try {
+                    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                    if (storedData) {
+                        const unsyncedItems = JSON.parse(storedData);
+                        if (!Array.isArray(unsyncedItems)) {
+                            throw new Error('Data lokal tidak valid');
+                        }
+                        unsyncedItems.forEach(unsyncedItem => {
+                            if (!unsyncedItem.plu || !unsyncedItem.description || isNaN(unsyncedItem.qty)) {
+                                return;
+                            }
+                            const existingIndex = dataList.findIndex(item => 
+                                item.plu === unsyncedItem.plu && 
+                                item.description === unsyncedItem.description
+                            );
+                            if (existingIndex > -1) {
+                                dataList[existingIndex].qty = unsyncedItem.qty;
+                                dataList[existingIndex].isSynced = false;
+                            } else {
+                                dataList.push({...unsyncedItem, isSynced: false});
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error("Gagal memuat dari Local Storage:", error);
+                    showToast('Gagal memuat data dari penyimpanan lokal', 'danger');
+                }
+            }
+
+            function saveToLocalStorage() {
+                try {
+                    const unsyncedItems = dataList.filter(item => !item.isSynced);
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(unsyncedItems));
+                    updateUnsyncedBadge();
+                } catch (error) {
+                    console.error("Gagal menyimpan ke Local Storage:", error);
+                    showToast('Gagal menyimpan data ke penyimpanan lokal', 'danger');
+                }
+            }
+
+            function saveDeletedItemToLocalStorage(item) {
+                try {
+                    const deletedItems = getDeletedItemsFromLocalStorage();
+                    deletedItems.push(item);
+                    localStorage.setItem(DELETED_ITEMS_KEY, JSON.stringify(deletedItems));
+                } catch (error) {
+                    console.error("Gagal menyimpan item terhapus ke Local Storage:", error);
+                }
+            }
+
+            function getDeletedItemsFromLocalStorage() {
+                try {
+                    const storedData = localStorage.getItem(DELETED_ITEMS_KEY);
+                    return storedData ? JSON.parse(storedData) : [];
+                } catch (error) {
+                    console.error("Gagal memuat item terhapus dari Local Storage:", error);
+                    return [];
+                }
+            }
+
+            function updateUnsyncedBadge() {
+                const unsyncedCount = dataList.filter(item => !item.isSynced).length;
+                const deletedCount = getDeletedItemsFromLocalStorage().length;
+                const totalUnsynced = unsyncedCount + deletedCount;
+                
+                requiredElements.unsyncedBadge.textContent = totalUnsynced;
+                requiredElements.unsyncedBadge.classList.toggle('d-none', totalUnsynced === 0);
+                
+                if (totalUnsynced > 0) {
+                    requiredElements.syncBtn.classList.add('pulse');
+                } else {
+                    requiredElements.syncBtn.classList.remove('pulse');
+                }
+            }
+
+            // Sort data
+            function sortData(data) {
+                return data.sort((a, b) => {
+                    let valueA, valueB;
+                    
+                    switch(sortField) {
+                        case 'plu':
+                            valueA = a.plu;
+                            valueB = b.plu;
+                            break;
+                        case 'description':
+                            valueA = a.description.toLowerCase();
+                            valueB = b.description.toLowerCase();
+                            break;
+                        case 'qty':
+                            valueA = a.qty;
+                            valueB = b.qty;
+                            break;
+                        default:
+                            valueA = a.plu;
+                            valueB = b.plu;
+                    }
+                    
+                    if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+                    if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            // Filter data
+            function filterData(data) {
+                switch(currentFilter) {
+                    case 'inStock':
+                        return data.filter(item => item.qty > 0);
+                    case 'outOfStock':
+                        return data.filter(item => item.qty === 0);
+                    default:
+                        return data;
+                }
+            }
+
+            function renderTable(filterText = '') {
+                requiredElements.tableBody.innerHTML = '';
+                
+                let filteredList = dataList.filter(item => {
+                    return item && (
+                        formatPLU(item.plu).includes(filterText.toLowerCase()) ||
+                        item.description.toLowerCase().includes(filterText.toLowerCase())
+                    );
+                });
+                
+                filteredList = filterData(filteredList);
+                filteredList = sortData(filteredList);
+
+                if (filteredList.length > 100) {
+                    filteredList = filteredList.slice(0, 100);
+                    showToast('Gunakan filter untuk melihat lebih banyak.', 'info');
+                }
+
+                if (filteredList.length === 0) {
+                    requiredElements.emptyState.classList.remove('d-none');
+                    return;
+                }
+                
+                requiredElements.emptyState.classList.add('d-none');
+
+                filteredList.forEach((item, index) => {
+                    const originalIndex = dataList.findIndex(d => d.plu === item.plu && d.description === item.description && d.qty === item.qty);
+                    const row = document.createElement('tr');
+                    
+                    if (!item.hasBeenRendered) {
+                        row.classList.add('highlight');
+                        item.hasBeenRendered = true;
+                    }
+                    
+                    if (item.qty === 0) {
+                        row.classList.add('table-danger');
+                    }
+                    
+                    row.innerHTML = `
+                        <td class="align-middle">${index + 1}</td>
+                        <td class="align-middle">${formatPLU(item.plu)}</td>
+                        <td class="align-middle">${item.description}</td>
+                        <td class="align-middle">${item.qty}</td>
+                        <td class="align-middle text-center">
+                            <button class="btn btn-sm btn-info text-white" onclick="editItem(${originalIndex})" title="Edit Barang">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </td>
+                    `;
+                    requiredElements.tableBody.appendChild(row);
+                });
+                
+                document.querySelectorAll('th[data-sort]').forEach(th => {
+                    const icon = th.querySelector('i');
+                    if (th.dataset.sort === sortField) {
+                        icon.className = sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+                    } else {
+                        icon.className = 'fas fa-sort';
+                    }
+                });
+                
+                document.querySelectorAll('.badge-filter').forEach(badge => {
+                    if (badge.dataset.filter === currentFilter) {
+                        badge.classList.add('active');
+                    } else {
+                        badge.classList.remove('active');
+                    }
+                });
+                
+                saveToLocalStorage();
+            }
+
+            // Sorting
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const field = th.dataset.sort;
+                    
+                    if (sortField === field) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortField = field;
+                        sortDirection = 'asc';
+                    }
+                    
+                    renderTable(requiredElements.searchBox.value);
+                });
             });
-        }
 
-        function displayData(searchTerm = '') {
-    const storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
-    let filteredData = storedData
-        .map((item, originalIndex) => ({ ...item, originalIndex })) // Simpan indeks asli
-        .filter(item => parseInt(item.qty) > 0);
+            // Filter
+            document.querySelectorAll('.badge-filter').forEach(badge => {
+                badge.addEventListener('click', () => {
+                    currentFilter = badge.dataset.filter;
+                    renderTable(requiredElements.searchBox.value);
+                });
+            });
 
-    // Filter berdasarkan pencarian
-    if (searchTerm) {
-        searchTerm = searchTerm.toLowerCase();
-        filteredData = filteredData.filter(item =>
-            item.description.toLowerCase().includes(searchTerm) ||
-            item.plu.toLowerCase().includes(searchTerm)
-        );
-    }
+            // Form submit
+            requiredElements.form.addEventListener('submit', function(event) {
+                event.preventDefault();
 
-    const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
+                const pluValue = requiredElements.pluInput.value.trim();
+                const descriptionValue = requiredElements.descriptionInput.value.trim();
+                const qtyValue = requiredElements.qtyInput.value.trim();
+                const plu = pluValue ? parseInt(pluValue) : NaN;
+                const description = formatDescription(descriptionValue);
+                const qty = qtyValue ? parseInt(qtyValue) : NaN;
 
-    filteredData.forEach((item) => {
-        const row = `
-            <tr data-original-index="${item.originalIndex}" 
-                style="cursor: pointer;"
-                onclick="showEditModal(${item.originalIndex})">
-                <td>${item.plu}</td>
-                <td>${item.description}</td>
-                <td>${item.qty}</td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
-    });
-}
-    
-    function handleRowClick(event) {
-    const rowIndex = event.currentTarget.getAttribute("data-index");
-    showEditModal(rowIndex);
-}
-        
-        
-        function performSearch() {
-    const searchTerm = document.getElementById('searchInput').value;
-    displayData(searchTerm);
-}
+                requiredElements.pluError.classList.add('d-none');
+                requiredElements.descriptionError.classList.add('d-none');
 
-// Pencarian otomatis saat mengetik
-document.getElementById('searchInput').addEventListener('input', performSearch);
+                if (isNaN(plu) || plu < 0) {
+                    requiredElements.pluError.querySelector('span').textContent = 'PLU harus berupa angka positif.';
+                    requiredElements.pluError.classList.remove('d-none');
+                    requiredElements.pluInput.focus();
+                    return;
+                }
 
-        function showEditModal(originalIndex) {
-    currentIndex = originalIndex; // Simpan indeks asli
-    const storedData = JSON.parse(localStorage.getItem("inventoryData"));
-    
-    // Ambil data langsung dari storedData menggunakan indeks asli
-    document.getElementById('editDesc').value = storedData[currentIndex].description;
-    document.getElementById('editQty').value = storedData[currentIndex].qty;
-    
-    const modal = new bootstrap.Modal(document.getElementById('editModal'));
-    modal.show();
-}
+                if (!description || !/[A-Za-z0-9\s]+/.test(description)) {
+                    requiredElements.descriptionError.querySelector('span').textContent = 'Deskripsi hanya boleh berisi huruf, angka, dan spasi.';
+                    requiredElements.descriptionError.classList.remove('d-none');
+                    requiredElements.descriptionInput.focus();
+                    return;
+                }
+
+                if (isNaN(qty) || qty < 0) {
+                    showToast('Kuantitas harus berupa angka positif', 'warning');
+                    requiredElements.qtyInput.focus();
+                    return;
+                }
+
+                if (itemIndex > -1) {
+                    if (!dataList[itemIndex]) {
+                        showToast('Data tidak valid, silakan coba lagi', 'danger');
+                        itemModal.hide();
+                        return;
+                    }
+                    dataList[itemIndex].qty = qty;
+                    dataList[itemIndex].isSynced = false;
+                    itemModal.hide();
+                    requiredElements.form.reset();
+                    renderTable(requiredElements.searchBox.value);
+                    saveToLocalStorage();
+                    showToast('Barang berhasil diperbarui', 'success');
+                } else {
+                    const duplicateIndex = checkDuplicate(plu, description);
+                    if (duplicateIndex > -1 && dataList[duplicateIndex]) {
+                        requiredElements.pluError.querySelector('span').textContent = `PLU atau Deskripsi sudah ada. Silakan edit item dengan PLU ${formatPLU(dataList[duplicateIndex].plu)}.`;
+                        requiredElements.pluError.classList.remove('d-none');
+                        setTimeout(() => {
+                            editItem(duplicateIndex);
+                        }, 1000);
+                        return;
+                    }
+
+                    dataList.push({ plu, description, qty, isSynced: false, hasBeenRendered: false });
+                    itemModal.hide();
+                    requiredElements.form.reset();
+                    renderTable(requiredElements.searchBox.value);
+                    saveToLocalStorage();
+                    showToast('Barang berhasil ditambahkan', 'success');
+                }
+            });
+
+            // Add new item
+            document.getElementById('addNewItemBtn').addEventListener('click', function() {
+                requiredElements.form.reset();
+                itemIndex = -1;
+                requiredElements.submitButton.innerHTML = '<i class="fas fa-plus me-2"></i>Tambah Barang';
+                requiredElements.modalLabel.textContent = 'Input Data Barang';
+                requiredElements.deleteFromModalBtn.classList.add('d-none');
+                requiredElements.pluInput.removeAttribute('readonly');
+                requiredElements.descriptionInput.removeAttribute('readonly');
+                requiredElements.pluError.classList.add('d-none');
+                requiredElements.descriptionError.classList.add('d-none');
+                requiredElements.pluInput.focus();
+                itemModal.show();
+            });
+
+            // Edit item
+            window.editItem = function(index) {
+                if (!dataList[index]) {
+                    showToast('Item tidak ditemukan', 'danger');
+                    return;
+                }
+                const itemToEdit = dataList[index];
+                requiredElements.pluInput.value = itemToEdit.plu;
+                requiredElements.descriptionInput.value = itemToEdit.description;
+                requiredElements.qtyInput.value = itemToEdit.qty;
+                itemIndex = index;
+                requiredElements.submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Simpan Perubahan';
+                requiredElements.modalLabel.textContent = 'Edit Data Barang';
+                requiredElements.deleteFromModalBtn.classList.remove('d-none');
+
+                requiredElements.deleteFromModalBtn.onclick = function() {
+                    itemModal.hide();
+                    requiredElements.itemToDelete.textContent = `${formatPLU(itemToEdit.plu)} - ${itemToEdit.description}`;
+                    deleteConfirmModal.show();
+
+                    requiredElements.confirmDeleteBtn.onclick = async function() {
+                        deleteConfirmModal.hide();
+                        deletedItemBackup = { ...dataList[index] };
+                        await removeItem(index);
+                        showToast('Barang dihapus. <button class="btn btn-sm btn-light btn-undo">Undo</button>', 'info');
+                    };
+                };
+
+                requiredElements.pluInput.setAttribute('readonly', 'readonly');
+                requiredElements.descriptionInput.setAttribute('readonly', 'readonly');
+                requiredElements.pluError.classList.add('d-none');
+                requiredElements.descriptionError.classList.add('d-none');
+                requiredElements.qtyInput.focus();
+                itemModal.show();
+            };
+
+            // Remove item
+            window.removeItem = async function(index) {
+                if (index >= 0 && index < dataList.length) {
+                    const removedItem = dataList[index];
+                    const success = await deleteItemFromSheets(removedItem);
+                    dataList.splice(index, 1);
+                    if (success) {
+                        showToast(`Barang "${removedItem.description}" telah dihapus dari Google Sheets`, 'success');
+                    } else {
+                        saveDeletedItemToLocalStorage(removedItem);
+                        showToast(`Barang "${removedItem.description}" telah dihapus (akan disinkron nanti)`, 'info');
+                    }
+                    itemModal.hide();
+                    renderTable(requiredElements.searchBox.value);
+                    saveToLocalStorage();
+                }
+            };
+
+            // Search debounce
+            let searchTimeout;
+            requiredElements.searchBox.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    renderTable(requiredElements.searchBox.value);
+                }, 300);
+            });
+
+            // Sync button
+            requiredElements.syncBtn.addEventListener('click', function() {
+                if (!validateDataList(dataList)) {
+                    showToast('Data lokal tidak valid, memuat ulang...', 'warning');
+                    dataList = [];
+                    loadDataFromSheets();
+                    return;
+                }
+                syncDataToSheets();
+            });
+
+            // Initialize
+            updateConnectionStatus('syncing', 'Menyiapkan aplikasi...');
+            loadDataFromSheets();
             
-          // Fungsi untuk menangani pencarian produk
-document.getElementById('addSearch').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
-    const suggestions = storedData.filter(item => 
-        item.description.toLowerCase().includes(searchTerm)
-    );
-    
-    const suggestionsDiv = document.getElementById('searchSuggestions');
-    suggestionsDiv.innerHTML = '';
-    
-    if(searchTerm && suggestions.length > 0) {
-        suggestionsDiv.style.display = 'block';
-        suggestions.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'list-group-item list-group-item-action';
-            div.textContent = item.description;
-            div.onclick = () => selectSuggestion(item);
-            suggestionsDiv.appendChild(div);
-        });
-    } else {
-        suggestionsDiv.style.display = 'none';
-    }
-});
+            setTimeout(() => {
+                if (dataList.length === 0) {
+                    showToast('Selamat datang! Silakan tambahkan barang pertama Anda', 'info');
+                }
+            }, 1500);
 
-// Saat memilih suggestion, tampilkan qty dari data yang ada
-function selectSuggestion(item) {
-    document.getElementById('addRak').value = item.rak;
-    document.getElementById('addPlu').value = item.plu;
-    document.getElementById('addBarcode').value = item.barcode;
-    document.getElementById('addDesc').value = item.description;
-    document.getElementById('addQty').value = item.qty; // Tampilkan qty dari local storage
-    document.getElementById('searchSuggestions').style.display = 'none';
-    document.getElementById('addSearch').value = item.description;
-}
-
-// Fungsi simpan data yang memprioritaskan update jika data sudah ada
-function saveNewData() {
-    const rak = document.getElementById('addRak').value || '-';
-    const plu = document.getElementById('addPlu').value || '-';
-    const barcode = document.getElementById('addBarcode').value || '-';
-    const desc = document.getElementById('addDesc').value;
-    const qty = document.getElementById('addQty').value || 0;
-    
-    if(!desc) {
-        alert("Deskripsi harus diisi!");
-        return;
-    }
-    
-    let storedData = JSON.parse(localStorage.getItem("inventoryData")) || [];
-    
-    // Cek apakah data sudah ada
-    const existingIndex = storedData.findIndex(item => 
-        item.rak === rak &&
-        item.plu === plu &&
-        item.barcode === barcode &&
-        item.description === desc
-    );
-    
-    if(existingIndex !== -1) {
-        // Lakukan update jika data sudah ada
-        storedData[existingIndex].qty = qty.toString();
-        storedData[existingIndex].timestamp = new Date().toLocaleString();
-    } else {
-        // Tambah data baru jika belum ada
-        const newItem = {
-            rak: rak,
-            plu: plu,
-            barcode: barcode,
-            description: desc,
-            qty: qty.toString(),
-            timestamp: new Date().toLocaleString()
-        };
-        storedData.push(newItem);
-    }
-    
-    localStorage.setItem("inventoryData", JSON.stringify(storedData));
-    
-    // Perbarui tampilan
-    const searchTerm = document.getElementById('searchInput').value;
-    displayData(searchTerm);
-    
-    // Tutup modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
-    modal.hide();
-    
-    // Tampilkan toast
-    const toast = new bootstrap.Toast(document.getElementById('successToast'));
-    toast.show();
-}
-
-// Reset form saat modal ditampilkan
-document.getElementById('addModal').addEventListener('shown.bs.modal', function () {
-    document.getElementById('addSearch').value = '';
-    document.getElementById('addRak').value = '';
-    document.getElementById('addPlu').value = '';
-    document.getElementById('addBarcode').value = '';
-    document.getElementById('addDesc').value = '';
-    document.getElementById('addQty').value = 0;
-    document.getElementById('searchSuggestions').style.display = 'none';
-});
-
-        function saveEdit() {
-    const newDesc = document.getElementById('editDesc').value;
-    const newQty = document.getElementById('editQty').value;
-    const timestamp = new Date().toLocaleString();
-    
-    // Ambil data dari local storage
-    let storedData = JSON.parse(localStorage.getItem("inventoryData"));
-    
-    // Perbarui data menggunakan indeks asli
-    storedData[currentIndex].description = newDesc;
-    storedData[currentIndex].qty = newQty;
-    storedData[currentIndex].timestamp = timestamp;
-    
-    // Simpan kembali ke local storage
-    localStorage.setItem("inventoryData", JSON.stringify(storedData));
-    
-    // Perbarui tampilan dengan mempertahankan filter pencarian
-    const searchTerm = document.getElementById('searchInput').value;
-    displayData(searchTerm);
-    
-    // Tutup modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-    modal.hide();
-    
-    // Tampilkan toast
-    const toast = new bootstrap.Toast(document.getElementById('successToast'));
-    toast.show();
-}
-
-function showEditModal(index) {
-    currentIndex = index; // Simpan indeks data yang akan diedit
-    const storedData = JSON.parse(localStorage.getItem("inventoryData"));
-    document.getElementById('editDesc').value = storedData[currentIndex].description;
-    document.getElementById('editQty').value = storedData[currentIndex].qty;
-    const modal = new bootstrap.Modal(document.getElementById('editModal'));
-    modal.show();
-}
-
-        async function updateGoogleSheet() {
-    const storedData = JSON.parse(localStorage.getItem("inventoryData"));
-    if (!storedData || storedData.length === 0) {
-        alert("Tidak ada data untuk dikirim!");
-        return;
-    }
-    
-    // Tampilkan spinner upload
-    document.getElementById('uploadSpinnerContainer').style.display = 'block';
-    
-    try {
-        // Konversi ke CSV
-        const headers = ["rak", "plu", "barcode", "description", "qty", "timestamp"];
-        const csvRows = storedData.map(item => 
-            `${item.rak},${item.plu},${item.barcode},${item.description},${item.qty},${item.timestamp}`
-        );
-        const csvContent = `${headers.join(",")}\n${csvRows.join("\n")}`;
-
-        const response = await fetch('https://script.google.com/macros/s/AKfycbwQcWuwFzu76BeDUgNk1ySHYSMBWZvTeac7FfWYQGPpYV8QB8sJq7vWMkwzaoZEGxYU/exec', {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: csvContent
-        });
-
-        if (response.ok) {
-            const toast = new bootstrap.Toast(document.getElementById('googleSheetToast'));
-            toast.show();
-        } else {
-            alert(`Gagal: ${response.statusText}`);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Terjadi kesalahan jaringan");
-    } finally {
-        // Sembunyikan spinner upload
-        document.getElementById('uploadSpinnerContainer').style.display = 'none';
-    }
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-            localStorage.removeItem("inventoryData");
-            fetchData();
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
