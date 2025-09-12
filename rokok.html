@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aplikasi Inventory Barang</title>
 
     <!-- Bootstrap 5 CSS -->
@@ -20,14 +20,14 @@
             display: inline-block;
         }
         .status-connected {
-            background-color: #28a745; /* hijau */
+            background-color: #28a745;
             box-shadow: 0 0 6px #28a745;
         }
         .status-disconnected {
-            background-color: #dc3545; /* merah */
+            background-color: #dc3545;
         }
         .status-syncing {
-            background-color: #ffc107; /* kuning */
+            background-color: #ffc107;
             animation: blink 1.5s infinite;
         }
         @keyframes blink {
@@ -44,51 +44,138 @@
         }
 
         .btn-loading {
-            position: relative;
-            pointer-events: none;
-        }
-        .btn-loading::after {
-            content: "";
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-top: -8px;
-            margin-left: -8px;
-            border: 2px solid #fff;
-            border-top: 2px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    position: relative;
+    pointer-events: none;
+    color: transparent !important; /* Sembunyikan teks tombol saat loading */
+}
 
-        .pulse {
-            animation: pulse-animation 1.5s infinite;
-        }
-        @keyframes pulse-animation {
-            0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 20px; /* Ukuran spinner lebih besar */
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-top: -10px;
+    margin-left: -10px;
+    border: 3px solid #fff; /* Warna border lebih tebal */
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite; /* Animasi lebih cepat */
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Pastikan spinner terlihat jelas di perangkat mobile */
+@media (max-width: 576px) {
+    .btn-loading::after {
+        width: 18px;
+        height: 18px;
+        margin-top: -9px;
+        margin-left: -9px;
+        border-width: 2px; /* Sedikit lebih tipis di mobile */
+    }
+}
+
+        /* Filter Badges Styling: 3 kolom sejajar di semua ukuran layar */
+        #filterBadgesContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: space-between;
         }
 
         .badge-filter {
+            background-color: #e9ecef;
+            color: #495057;
+            border: 1px solid #dee2e6;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-        .badge-filter.active {
-            transform: scale(1.1);
-            font-weight: bold;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            flex: 1 1 calc(33.333% - 0.34rem); /* 3 kolom dengan jarak antar badge */
+            text-align: center;
+            padding: 0.5rem;
+            min-width: 80px; /* Lebar minimum untuk keterbacaan */
         }
 
+        .badge-filter:hover {
+            background-color: #dee2e6;
+            transform: translateY(-1px);
+        }
+
+        .badge-filter.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+            transform: scale(1.03);
+            box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+        }
+
+        /* Tombol Aksi: 2 kolom sejajar di semua ukuran layar */
+        #actionButtonsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: space-between;
+        }
+
+        #actionButtonsContainer .btn {
+            flex: 1 1 calc(50% - 0.25rem); /* 2 kolom dengan jarak antar tombol */
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            min-width: 120px; /* Lebar minimum untuk keterbacaan */
+        }
+
+        /* Pastikan ukuran font untuk input minimal 16px untuk mencegah zoom di Safari */
+        .form-control {
+            font-size: 16px !important;
+        }
+
+        input[type="text"], input[type="number"] {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%; /* Mencegah penyesuaian ukuran teks oleh Safari */
+        }
+
+        /* Modal responsif */
+        .modal-content {
+            min-width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 576px) {
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            .modal-content {
+                font-size: 16px;
+            }
+            .modal-body input {
+                padding: 0.5rem;
+                height: 40px; /* Tinggi input lebih besar untuk sentuhan */
+            }
+        }
+
+        /* Pastikan tabel responsif */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table th, .table td {
+            font-size: 0.9rem;
+            white-space: nowrap; /* Mencegah teks membungkus */
+        }
+
+        /* Toast container */
         .toast-container {
             z-index: 9999;
         }
 
         #searchBox {
             transition: all 0.3s;
+            font-size: 16px;
         }
         #searchBox:focus {
             box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
@@ -97,53 +184,6 @@
         .table-danger {
             background-color: #f8d7da !important;
         }
-        
-      /* === Filter Badges Styling === */
-.badge-filter {
-    background-color: #e9ecef;
-    color: #495057;
-    border: 1px solid #dee2e6;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.9rem;
-    min-width: 80px; /* Lebar minimum agar tidak terlalu sempit */
-    flex: 1 1 calc(33.333% - 10px); /* Default: 3 kolom */
-    text-align: center;
-}
-
-.badge-filter:hover {
-    background-color: #dee2e6;
-    transform: translateY(-1px);
-}
-
-.badge-filter.active {
-    background-color: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-    transform: scale(1.03);
-    box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
-}
-
-/* Mobile: 3 kolom badge */
-@media (max-width: 768px) {
-    #filterBadgesContainer {
-        gap: 0.5rem;
-    }
-
-    .badge-filter {
-        flex: 1 1 calc(33.333% - 0.5rem); /* 3 kolom, account for gap */
-        min-width: auto;
-    }
-}
-
-/* Extra small: tetap 3 kolom sampai sangat kecil */
-@media (max-width: 480px) {
-    .badge-filter {
-        flex: 1 1 calc(33.333% - 0.5rem);
-        font-size: 0.85rem;
-        padding: 0.5rem 0.25rem;
-    }
-}
     </style>
 </head>
 <body class="bg-light">
@@ -176,8 +216,8 @@
     <!-- Action Buttons -->
     <div class="col-12">
         <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-end" id="actionButtonsContainer">
-            <button id="syncBtn" class="btn btn-outline-warning flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center px-3">
-                <i class="fas fa-sync-alt me-1"></i> Sync
+            <button id="syncBtn" class="btn btn-warning flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center px-3 text-white">
+                <i class="fas fa-sync-alt me-1"></i> Update Data
                 <span id="unsyncedBadge" class="badge bg-danger ms-2 d-none">0</span>
             </button>
             <button id="addNewItemBtn" class="btn btn-primary flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center px-3">
@@ -299,727 +339,787 @@
     <!-- JavaScript Utama -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ✅ Ambil semua elemen penting
-            const requiredElements = {
-                itemModal: document.getElementById('itemModal'),
-                deleteConfirmModal: document.getElementById('deleteConfirmModal'),
-                form: document.getElementById('itemForm'),
-                pluInput: document.getElementById('plu'),
-                descriptionInput: document.getElementById('description'),
-                qtyInput: document.getElementById('qty'),
-                submitButton: document.getElementById('submitButton'),
-                deleteFromModalBtn: document.getElementById('deleteFromModalBtn'),
-                confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
-                modalLabel: document.getElementById('itemModalLabel'),
-                searchBox: document.getElementById('searchBox'),
-                tableBody: document.getElementById('tableBody'),
-                emptyState: document.getElementById('emptyState'),
-                syncBtn: document.getElementById('syncBtn'),
-                unsyncedBadge: document.getElementById('unsyncedBadge'),
-                pluError: document.getElementById('pluError'),
-                descriptionError: document.getElementById('descriptionError'),
-                toastContainer: document.querySelector('.toast-container'),
-                connectionStatus: document.getElementById('connectionStatus'),
-                connectionMessage: document.getElementById('connectionMessage'),
-                itemToDelete: document.getElementById('itemToDelete')
-            };
+    // ✅ Ambil semua elemen penting
+    const requiredElements = {
+        itemModal: document.getElementById('itemModal'),
+        deleteConfirmModal: document.getElementById('deleteConfirmModal'),
+        form: document.getElementById('itemForm'),
+        pluInput: document.getElementById('plu'),
+        descriptionInput: document.getElementById('description'),
+        qtyInput: document.getElementById('qty'),
+        submitButton: document.getElementById('submitButton'),
+        deleteFromModalBtn: document.getElementById('deleteFromModalBtn'),
+        confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
+        modalLabel: document.getElementById('itemModalLabel'),
+        searchBox: document.getElementById('searchBox'),
+        tableBody: document.getElementById('tableBody'),
+        emptyState: document.getElementById('emptyState'),
+        syncBtn: document.getElementById('syncBtn'),
+        unsyncedBadge: document.getElementById('unsyncedBadge'),
+        pluError: document.getElementById('pluError'),
+        descriptionError: document.getElementById('descriptionError'),
+        toastContainer: document.querySelector('.toast-container'),
+        connectionStatus: document.getElementById('connectionStatus'),
+        connectionMessage: document.getElementById('connectionMessage'),
+        itemToDelete: document.getElementById('itemToDelete')
+    };
 
-            // ✅ Validasi Bootstrap tersedia
-            if (typeof bootstrap === 'undefined') {
-                console.error('Bootstrap JS belum dimuat');
-                alert('Bootstrap JS belum dimuat. Pastikan Anda sudah include bootstrap.bundle.min.js');
+    // ✅ Validasi Bootstrap tersedia
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap JS belum dimuat');
+        alert('Bootstrap JS belum dimuat. Pastikan Anda sudah include bootstrap.bundle.min.js');
+        return;
+    }
+
+    // ✅ Validasi semua elemen penting
+    for (const [name, element] of Object.entries(requiredElements)) {
+        if (!element) {
+            console.error(`❌ Elemen '${name}' tidak ditemukan di DOM!`);
+            alert(`Kesalahan inisialisasi: Elemen '${name}' tidak ditemukan. Periksa HTML Anda.`);
+            return;
+        }
+    }
+
+    // Buat instance modal setelah validasi
+    const itemModal = new bootstrap.Modal(requiredElements.itemModal, { keyboard: true });
+    const deleteConfirmModal = new bootstrap.Modal(requiredElements.deleteConfirmModal);
+
+    // Konfigurasi Google Sheets - GANTI DENGAN URL ANDA
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzxWUyz4vGbGgAxKxSduGmHfdwF64DOtnEEodunxWYf67wcSmOoEgNeNyfoBsraquN0/exec';
+    let dataList = [];
+    let itemIndex = -1;
+    let currentFilter = 'all';
+    let sortField = 'plu';
+    let sortDirection = 'asc';
+    const LOCAL_STORAGE_KEY = 'unsynced_items';
+    const DELETED_ITEMS_KEY = 'deleted_items';
+
+    let retryBtn = null;
+    let deletedItemBackup = null;
+
+    // Format PLU to have leading zeros (e.g., 123 -> 00123)
+    function formatPLU(plu) {
+        return String(plu).padStart(5, '0');
+    }
+
+    // Capitalize each word in description
+    function formatDescription(description) {
+        return description
+            .trim()
+            .toLowerCase()
+            .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    // Check for duplicate PLU or description
+    function checkDuplicate(plu, description, excludeIndex = -1) {
+        return dataList.findIndex((item, index) => {
+            return index !== excludeIndex && item && (item.plu === plu || item.description.toLowerCase() === description.toLowerCase());
+        });
+    }
+
+    // Validate dataList integrity
+    function validateDataList(data) {
+        return data.every(item => 
+            item && 
+            typeof item.plu === 'number' && 
+            typeof item.description === 'string' && 
+            typeof item.qty === 'number' && 
+            typeof item.isSynced === 'boolean'
+        );
+    }
+
+    // Update connection status UI
+    function updateConnectionStatus(status, message) {
+        if (!requiredElements.connectionStatus || !requiredElements.connectionMessage) {
+            console.error('Elemen connectionStatus atau connectionMessage tidak ditemukan');
+            return;
+        }
+        requiredElements.connectionStatus.className = 'status-indicator';
+        requiredElements.connectionStatus.classList.remove('status-connected', 'status-disconnected', 'status-syncing');
+        if (status === 'connected') {
+            requiredElements.connectionStatus.classList.add('status-connected');
+        } else if (status === 'disconnected') {
+            requiredElements.connectionStatus.classList.add('status-disconnected');
+        } else if (status === 'syncing') {
+            requiredElements.connectionStatus.classList.add('status-syncing');
+        }
+        requiredElements.connectionMessage.textContent = message;
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0 mb-2`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        requiredElements.toastContainer.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+
+        // Handle undo button if exists
+        if (message.includes('Undo')) {
+            const undoBtn = toast.querySelector('.btn-undo');
+            if (undoBtn) {
+                undoBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    undoDelete();
+                });
+            }
+        }
+    }
+
+    // Cek koneksi internet
+    function checkOnline() {
+        if (!navigator.onLine) {
+            showToast('Tidak ada koneksi internet. Gunakan mode offline.', 'warning');
+            return false;
+        }
+        return true;
+    }
+
+    // Fungsi undo delete
+    function undoDelete() {
+        if (deletedItemBackup) {
+            dataList.push(deletedItemBackup);
+            deletedItemBackup = null;
+            renderTable(requiredElements.searchBox.value);
+            saveToLocalStorage();
+            showToast('Penghapusan dibatalkan', 'success');
+        }
+    }
+
+    // Load data from Google Sheets
+    async function loadDataFromSheets() {
+        if (!checkOnline()) {
+            updateConnectionStatus('disconnected', 'Tidak ada koneksi. Menggunakan data lokal.');
+            loadFromLocalStorage();
+            renderTable();
+            updateUnsyncedBadge();
+            return;
+        }
+        updateConnectionStatus('syncing', 'Mengambil data dari Google Sheets...');
+        
+        try {
+            const response = await fetch(scriptURL + '?action=get');
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+            }
+            
+            let result;
+            try {
+                result = await response.json();
+            } catch (error) {
+                throw new Error('Gagal memproses JSON dari server: ' + error.message);
+            }
+
+            console.log('📡 Respons dari server:', result);
+
+            if (result && result.status === 'success' && Array.isArray(result.data)) {
+                console.log('✅ Data dari server diterima:', result.data.length, 'item');
+
+                dataList = result.data.map(item => ({
+                    ...item,
+                    plu: parseInt(item.plu),
+                    qty: parseInt(item.qty),
+                    isSynced: true,
+                    hasBeenRendered: false
+                })).filter(item => !isNaN(item.plu) && !isNaN(item.qty));
+
+                loadFromLocalStorage();
+                renderTable();
+                updateUnsyncedBadge();
+                updateConnectionStatus('connected', 'Terhubung ke Google Sheets');
+                showToast(`Data berhasil dimuat (${dataList.length} item)`, 'success');
+            } else if (result && result.status === 'success' && result.data === null) {
+                console.log('✅ Server: data null — dianggap sebagai data kosong.');
+                dataList = [];
+                loadFromLocalStorage();
+                renderTable();
+                updateUnsyncedBadge();
+                updateConnectionStatus('connected', 'Terhubung (data kosong)');
+                showToast('Tidak ada data di server — menggunakan data lokal.', 'info');
+            } else {
+                console.error('❌ Format respons tidak valid:', result);
+                throw new Error('Format data tidak dikenali dari server');
+            }
+        } catch (error) {
+            console.error('⛔ Error saat load data dari Google Sheets:', error);
+            updateConnectionStatus('disconnected', 'Gagal memuat dari Google Sheets');
+            
+            if (error.message.includes('HTTP') || error.message.includes('JSON')) {
+                showToast('Gagal memuat data: ' + error.message, 'danger');
+            }
+
+            loadFromLocalStorage();
+            renderTable();
+            updateUnsyncedBadge();
+        }
+    }
+
+    // Sync data to Google Sheets with retry
+    async function syncDataToSheets(maxRetries = 3, retryDelay = 5000) {
+    const unsyncedItems = dataList.filter(item => !item.isSynced);
+    const deletedItems = getDeletedItemsFromLocalStorage();
+    
+    if (unsyncedItems.length === 0 && deletedItems.length === 0) {
+        showToast('Tidak ada data baru yang perlu disinkronkan', 'info');
+        return;
+    }
+
+    // Validasi data sebelum dikirim
+    if (!unsyncedItems.every(item => item.plu && item.description && !isNaN(item.qty))) {
+        showToast('Data tidak valid untuk sinkronisasi', 'danger');
+        return;
+    }
+
+    if (!checkOnline()) {
+        showToast('Tidak ada koneksi internet. Data disimpan lokal.', 'warning');
+        return;
+    }
+
+    updateConnectionStatus('syncing', 'Menyinkronkan data ke Google Sheets...');
+    requiredElements.syncBtn.classList.add('btn-loading');
+    requiredElements.syncBtn.disabled = true;
+
+    let retries = 0;
+    while (retries < maxRetries) {
+        try {
+            console.log('Mengirim data untuk sinkronisasi:', { unsyncedItems, deletedItems });
+            const response = await fetch(scriptURL, {
+                method: 'POST',
+                
+                body: JSON.stringify({
+                    action: 'sync',
+                    unsyncedItems,
+                    deletedItems
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Gagal menyinkronkan data ke server: ${response.status}`);
+            }
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (error) {
+                throw new Error('Gagal memproses respons server: Format JSON tidak valid');
+            }
+
+            console.log('Respons server:', result);
+
+            if (result && result.status === 'success') {
+                dataList.forEach(item => item.isSynced = true);
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                localStorage.removeItem(DELETED_ITEMS_KEY);
+                updateUnsyncedBadge();
+                updateConnectionStatus('connected', 'Data tersinkronisasi dengan Google Sheets');
+                showToast(`${unsyncedItems.length + deletedItems.length} item berhasil disinkronkan`, 'success');
+                if (retryBtn && document.body.contains(retryBtn)) {
+                    retryBtn.remove(); // Hapus tombol retry jika berhasil
+                    retryBtn = null;
+                }
+                return;
+            } else {
+                throw new Error(result.message || 'Gagal menyinkronkan data');
+            }
+        } catch (error) {
+            console.error('Error syncing data to Google Sheets:', error);
+            retries++;
+            if (retries < maxRetries) {
+                showToast(`Gagal menyinkronkan (percobaan ${retries}/${maxRetries}). Mencoba ulang dalam ${retryDelay/1000} detik...`, 'warning');
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                continue;
+            }
+            updateConnectionStatus('disconnected', 'Gagal menyinkronkan data');
+            showToast('Gagal menyinkronkan: ' + error.message, 'danger');
+            if (!retryBtn || !document.body.contains(retryBtn)) {
+                retryBtn = document.createElement('button');
+                retryBtn.className = 'btn btn-retry btn-sm ms-2 btn-warning';
+                retryBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Retry Sync';
+                retryBtn.onclick = async () => {
+                    retryBtn.classList.add('btn-loading');
+                    retryBtn.disabled = true;
+                    await syncDataToSheets(maxRetries, retryDelay);
+                    retryBtn.classList.remove('btn-loading');
+                    retryBtn.disabled = false;
+                };
+                requiredElements.syncBtn.parentNode.appendChild(retryBtn);
+            }
+        } finally {
+            requiredElements.syncBtn.classList.remove('btn-loading');
+            requiredElements.syncBtn.disabled = false;
+        }
+    }
+}
+
+    // Delete item from Google Sheets with retry
+    async function deleteItemFromSheets(item, maxRetries = 3, retryDelay = 5000) {
+        if (!checkOnline()) {
+            saveDeletedItemToLocalStorage(item);
+            return false;
+        }
+        updateConnectionStatus('syncing', 'Menghapus data dari Google Sheets...');
+        
+        let retries = 0;
+        while (retries < maxRetries) {
+            try {
+                console.log('Mengirim permintaan hapus:', { plu: item.plu, description: item.description });
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    
+                    body: JSON.stringify({
+                        action: 'delete',
+                        plu: item.plu,
+                        description: item.description
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Gagal menghapus data dari server: ${response.status}`);
+                }
+
+                let result;
+                try {
+                    result = await response.json();
+                } catch (error) {
+                    throw new Error('Gagal memproses respons server: Format JSON tidak valid');
+                }
+
+                console.log('Respons server untuk hapus:', result);
+
+                if (result && result.status === 'success') {
+                    updateConnectionStatus('connected', 'Data terhapus dari Google Sheets');
+                    return true;
+                } else {
+                    throw new Error(result.message || 'Gagal menghapus data');
+                }
+            } catch (error) {
+                console.error('Error deleting item from Google Sheets:', error);
+                retries++;
+                if (retries < maxRetries) {
+                    showToast(`Gagal menghapus (percobaan ${retries}/${maxRetries}). Mencoba ulang dalam ${retryDelay/1000} detik...`, 'warning');
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    continue;
+                }
+                updateConnectionStatus('disconnected', 'Gagal menghapus data. Menyimpan di lokal.');
+                saveDeletedItemToLocalStorage(item);
+                return false;
+            }
+        }
+    }
+
+    function loadFromLocalStorage() {
+        try {
+            const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedData) {
+                const unsyncedItems = JSON.parse(storedData);
+                if (!Array.isArray(unsyncedItems)) {
+                    throw new Error('Data lokal bukan array');
+                }
+                unsyncedItems.forEach(unsyncedItem => {
+                    if (!unsyncedItem.plu || !unsyncedItem.description || isNaN(unsyncedItem.qty)) {
+                        console.warn('Item lokal tidak valid:', unsyncedItem);
+                        return;
+                    }
+                    const existingIndex = dataList.findIndex(item => 
+                        item.plu === unsyncedItem.plu && 
+                        item.description === unsyncedItem.description
+                    );
+                    if (existingIndex > -1) {
+                        dataList[existingIndex].qty = unsyncedItem.qty;
+                        dataList[existingIndex].isSynced = false;
+                    } else {
+                        dataList.push({...unsyncedItem, isSynced: false, hasBeenRendered: false});
+                    }
+                });
+            }
+        } catch (error) {
+            console.error("Gagal memuat dari Local Storage:", error);
+            showToast('Gagal memuat data lokal: ' + error.message, 'danger');
+        }
+    }
+
+    function saveToLocalStorage() {
+        try {
+            const unsyncedItems = dataList.filter(item => !item.isSynced);
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(unsyncedItems));
+            updateUnsyncedBadge();
+        } catch (error) {
+            console.error("Gagal menyimpan ke Local Storage:", error);
+            showToast('Gagal menyimpan data ke penyimpanan lokal', 'danger');
+        }
+    }
+
+    function saveDeletedItemToLocalStorage(item) {
+        try {
+            const deletedItems = getDeletedItemsFromLocalStorage();
+            deletedItems.push(item);
+            localStorage.setItem(DELETED_ITEMS_KEY, JSON.stringify(deletedItems));
+            updateUnsyncedBadge();
+        } catch (error) {
+            console.error("Gagal menyimpan item terhapus ke Local Storage:", error);
+        }
+    }
+
+    function getDeletedItemsFromLocalStorage() {
+        try {
+            const storedData = localStorage.getItem(DELETED_ITEMS_KEY);
+            return storedData ? JSON.parse(storedData) : [];
+        } catch (error) {
+            console.error("Gagal memuat item terhapus dari Local Storage:", error);
+            return [];
+        }
+    }
+
+    function updateUnsyncedBadge() {
+        const unsyncedCount = dataList.filter(item => !item.isSynced).length;
+        const deletedCount = getDeletedItemsFromLocalStorage().length;
+        const totalUnsynced = unsyncedCount + deletedCount;
+        
+        requiredElements.unsyncedBadge.textContent = totalUnsynced;
+        requiredElements.unsyncedBadge.classList.toggle('d-none', totalUnsynced === 0);
+        
+        if (totalUnsynced > 0) {
+            requiredElements.syncBtn.classList.add('pulse');
+        } else {
+            requiredElements.syncBtn.classList.remove('pulse');
+        }
+    }
+
+    // Sort data
+    function sortData(data) {
+        return data.sort((a, b) => {
+            let valueA, valueB;
+            
+            switch(sortField) {
+                case 'plu':
+                    valueA = a.plu;
+                    valueB = b.plu;
+                    break;
+                case 'description':
+                    valueA = a.description.toLowerCase();
+                    valueB = b.description.toLowerCase();
+                    break;
+                case 'qty':
+                    valueA = a.qty;
+                    valueB = b.qty;
+                    break;
+                default:
+                    valueA = a.plu;
+                    valueB = b.plu;
+            }
+            
+            if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+            if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+
+    // Filter data
+    function filterData(data) {
+        switch(currentFilter) {
+            case 'inStock':
+                return data.filter(item => item.qty > 0);
+            case 'outOfStock':
+                return data.filter(item => item.qty === 0);
+            default:
+                return data;
+        }
+    }
+
+    function renderTable(filterText = '') {
+        requiredElements.tableBody.innerHTML = '';
+        
+        let filteredList = dataList.filter(item => {
+            return item && (
+                formatPLU(item.plu).includes(filterText.toLowerCase()) ||
+                item.description.toLowerCase().includes(filterText.toLowerCase())
+            );
+        });
+        
+        filteredList = filterData(filteredList);
+        filteredList = sortData(filteredList);
+
+        if (filteredList.length > 100) {
+            filteredList = filteredList.slice(0, 100);
+            showToast('Gunakan filter untuk melihat lebih banyak.', 'info');
+        }
+
+        if (filteredList.length === 0) {
+            requiredElements.emptyState.classList.remove('d-none');
+            return;
+        }
+        
+        requiredElements.emptyState.classList.add('d-none');
+
+        filteredList.forEach((item, index) => {
+            const originalIndex = dataList.findIndex(d => d.plu === item.plu && d.description === item.description && d.qty === item.qty);
+            const row = document.createElement('tr');
+            
+            if (!item.hasBeenRendered) {
+                row.classList.add('highlight');
+                item.hasBeenRendered = true;
+            }
+            
+            if (item.qty === 0) {
+                row.classList.add('table-danger');
+            }
+            
+            row.innerHTML = `
+                <td class="align-middle">${index + 1}</td>
+                <td class="align-middle">${formatPLU(item.plu)}</td>
+                <td class="align-middle">${item.description}</td>
+                <td class="align-middle">${item.qty}</td>
+                <td class="align-middle text-center">
+                    <button class="btn btn-sm btn-info text-white" onclick="editItem(${originalIndex})" title="Edit Barang">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                </td>
+            `;
+            requiredElements.tableBody.appendChild(row);
+        });
+        
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            const icon = th.querySelector('i');
+            if (th.dataset.sort === sortField) {
+                icon.className = sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+            } else {
+                icon.className = 'fas fa-sort';
+            }
+        });
+        
+        document.querySelectorAll('.badge-filter').forEach(badge => {
+            if (badge.dataset.filter === currentFilter) {
+                badge.classList.add('active');
+            } else {
+                badge.classList.remove('active');
+            }
+        });
+        
+        saveToLocalStorage();
+    }
+
+    // Sorting
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const field = th.dataset.sort;
+            
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                sortDirection = 'asc';
+            }
+            
+            renderTable(requiredElements.searchBox.value);
+        });
+    });
+
+    // Filter
+    document.querySelectorAll('.badge-filter').forEach(badge => {
+        badge.addEventListener('click', () => {
+            currentFilter = badge.dataset.filter;
+            renderTable(requiredElements.searchBox.value);
+        });
+    });
+
+    // Form submit
+    requiredElements.form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const pluValue = requiredElements.pluInput.value.trim();
+        const descriptionValue = requiredElements.descriptionInput.value.trim();
+        const qtyValue = requiredElements.qtyInput.value.trim();
+        const plu = pluValue ? parseInt(pluValue) : NaN;
+        const description = formatDescription(descriptionValue);
+        const qty = qtyValue ? parseInt(qtyValue) : NaN;
+
+        requiredElements.pluError.classList.add('d-none');
+        requiredElements.descriptionError.classList.add('d-none');
+
+        if (isNaN(plu) || plu < 0) {
+            requiredElements.pluError.querySelector('span').textContent = 'PLU harus berupa angka positif.';
+            requiredElements.pluError.classList.remove('d-none');
+            requiredElements.pluInput.focus();
+            return;
+        }
+
+        if (!description || !/[A-Za-z0-9\s]+/.test(description)) {
+            requiredElements.descriptionError.querySelector('span').textContent = 'Deskripsi hanya boleh berisi huruf, angka, dan spasi.';
+            requiredElements.descriptionError.classList.remove('d-none');
+            requiredElements.descriptionInput.focus();
+            return;
+        }
+
+        if (isNaN(qty) || qty < 0) {
+            showToast('Kuantitas harus berupa angka positif', 'warning');
+            requiredElements.qtyInput.focus();
+            return;
+        }
+
+        if (itemIndex > -1) {
+            if (!dataList[itemIndex]) {
+                showToast('Data tidak valid, silakan coba lagi', 'danger');
+                itemModal.hide();
+                return;
+            }
+            dataList[itemIndex].qty = qty;
+            dataList[itemIndex].isSynced = false;
+            itemModal.hide();
+            requiredElements.form.reset();
+            renderTable(requiredElements.searchBox.value);
+            saveToLocalStorage();
+            showToast('Barang berhasil diperbarui', 'success');
+        } else {
+            const duplicateIndex = checkDuplicate(plu, description);
+            if (duplicateIndex > -1 && dataList[duplicateIndex]) {
+                requiredElements.pluError.querySelector('span').textContent = `PLU atau Deskripsi sudah ada. Silakan edit item dengan PLU ${formatPLU(dataList[duplicateIndex].plu)}.`;
+                requiredElements.pluError.classList.remove('d-none');
+                setTimeout(() => {
+                    editItem(duplicateIndex);
+                }, 1000);
                 return;
             }
 
-            // ✅ Validasi semua elemen penting
-            for (const [name, element] of Object.entries(requiredElements)) {
-                if (!element) {
-                    console.error(`❌ Elemen '${name}' tidak ditemukan di DOM!`);
-                    alert(`Kesalahan inisialisasi: Elemen '${name}' tidak ditemukan. Periksa HTML Anda.`);
-                    return;
-                }
-            }
+            dataList.push({ plu, description, qty, isSynced: false, hasBeenRendered: false });
+            itemModal.hide();
+            requiredElements.form.reset();
+            renderTable(requiredElements.searchBox.value);
+            saveToLocalStorage();
+            showToast('Barang berhasil ditambahkan', 'success');
+        }
+    });
 
-            // Buat instance modal setelah validasi
-            const itemModal = new bootstrap.Modal(requiredElements.itemModal, { keyboard: true });
-            const deleteConfirmModal = new bootstrap.Modal(requiredElements.deleteConfirmModal);
+    // Add new item
+    document.getElementById('addNewItemBtn').addEventListener('click', function() {
+        requiredElements.form.reset();
+        itemIndex = -1;
+        requiredElements.submitButton.innerHTML = '<i class="fas fa-plus me-2"></i>Tambah Barang';
+        requiredElements.modalLabel.textContent = 'Input Data Barang';
+        requiredElements.deleteFromModalBtn.classList.add('d-none');
+        requiredElements.pluInput.removeAttribute('readonly');
+        requiredElements.descriptionInput.removeAttribute('readonly');
+        requiredElements.pluError.classList.add('d-none');
+        requiredElements.descriptionError.classList.add('d-none');
+        requiredElements.pluInput.focus();
+        itemModal.show();
+    });
 
-            // Konfigurasi Google Sheets - GANTI DENGAN URL ANDA
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbzjD43Gr6GijGBYJ2HBMMdhQcqLGcfZ1hgXht6aByQjJvsVjvQaVRVcCKpQ2ql5K_Vm/exec';
-            let dataList = [];
-            let itemIndex = -1;
-            let currentFilter = 'all';
-            let sortField = 'plu';
-            let sortDirection = 'asc';
-            const LOCAL_STORAGE_KEY = 'unsynced_items';
-            const DELETED_ITEMS_KEY = 'deleted_items';
+    // Edit item
+    window.editItem = function(index) {
+        if (!dataList[index]) {
+            showToast('Item tidak ditemukan', 'danger');
+            return;
+        }
+        const itemToEdit = dataList[index];
+        requiredElements.pluInput.value = itemToEdit.plu;
+        requiredElements.descriptionInput.value = itemToEdit.description;
+        requiredElements.qtyInput.value = itemToEdit.qty;
+        itemIndex = index;
+        requiredElements.submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Simpan Perubahan';
+        requiredElements.modalLabel.textContent = 'Edit Data Barang';
+        requiredElements.deleteFromModalBtn.classList.remove('d-none');
 
-            let retryBtn = null;
-            let deletedItemBackup = null;
+        requiredElements.deleteFromModalBtn.onclick = function() {
+            itemModal.hide();
+            requiredElements.itemToDelete.textContent = `${formatPLU(itemToEdit.plu)} - ${itemToEdit.description}`;
+            deleteConfirmModal.show();
 
-            // Format PLU to have leading zeros (e.g., 123 -> 00123)
-            function formatPLU(plu) {
-                return String(plu).padStart(5, '');
-            }
-
-            // Capitalize each word in description
-            function formatDescription(description) {
-                return description
-                    .trim()
-                    .toLowerCase()
-                    .replace(/\b\w/g, char => char.toUpperCase());
-            }
-
-            // Check for duplicate PLU or description
-            function checkDuplicate(plu, description, excludeIndex = -1) {
-                return dataList.findIndex((item, index) => {
-                    return index !== excludeIndex && item && (item.plu === plu || item.description.toLowerCase() === description.toLowerCase());
-                });
-            }
-
-            // Validate dataList integrity
-            function validateDataList(data) {
-                return data.every(item => 
-                    item && 
-                    typeof item.plu === 'number' && 
-                    typeof item.description === 'string' && 
-                    typeof item.qty === 'number' && 
-                    typeof item.isSynced === 'boolean'
-                );
-            }
-
-            // Update connection status UI
-            function updateConnectionStatus(status, message) {
-                if (!requiredElements.connectionStatus || !requiredElements.connectionMessage) {
-                    console.error('Elemen connectionStatus atau connectionMessage tidak ditemukan');
-                    return;
-                }
-                requiredElements.connectionStatus.className = 'status-indicator';
-                requiredElements.connectionStatus.classList.remove('status-connected', 'status-disconnected', 'status-syncing');
-                if (status === 'connected') {
-                    requiredElements.connectionStatus.classList.add('status-connected');
-                } else if (status === 'disconnected') {
-                    requiredElements.connectionStatus.classList.add('status-disconnected');
-                } else if (status === 'syncing') {
-                    requiredElements.connectionStatus.classList.add('status-syncing');
-                }
-                requiredElements.connectionMessage.textContent = message;
-            }
-
-            // Show toast notification
-            function showToast(message, type = 'info') {
-                const toast = document.createElement('div');
-                toast.className = `toast align-items-center text-white bg-${type} border-0 mb-2`;
-                toast.setAttribute('role', 'alert');
-                toast.setAttribute('aria-live', 'assertive');
-                toast.setAttribute('aria-atomic', 'true');
-                
-                toast.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                `;
-                
-                requiredElements.toastContainer.appendChild(toast);
-                const bsToast = new bootstrap.Toast(toast);
-                bsToast.show();
-                
-                toast.addEventListener('hidden.bs.toast', () => {
-                    toast.remove();
-                });
-
-                // Handle undo button if exists
-                if (message.includes('Undo')) {
-                    const undoBtn = toast.querySelector('.btn-undo');
-                    if (undoBtn) {
-                        undoBtn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            undoDelete();
-                        });
-                    }
-                }
-            }
-
-            // Cek koneksi internet
-            function checkOnline() {
-                if (!navigator.onLine) {
-                    showToast('Tidak ada koneksi internet. Gunakan mode offline.', 'warning');
-                    return false;
-                }
-                return true;
-            }
-
-            // Fungsi undo delete
-            function undoDelete() {
-                if (deletedItemBackup) {
-                    dataList.push(deletedItemBackup);
-                    deletedItemBackup = null;
-                    renderTable(requiredElements.searchBox.value);
-                    saveToLocalStorage();
-                    showToast('Penghapusan dibatalkan', 'success');
-                }
-            }
-
-            // Load data from Google Sheets
-            async function loadDataFromSheets() {
-                if (!checkOnline()) {
-                    updateConnectionStatus('disconnected', 'Tidak ada koneksi. Menggunakan data lokal.');
-                    loadFromLocalStorage();
-                    renderTable();
-                    updateUnsyncedBadge();
-                    return;
-                }
-                updateConnectionStatus('syncing', 'Mengambil data dari Google Sheets...');
-                
-                try {
-                    const response = await fetch(scriptURL + '?action=get');
-                    if (!response.ok) {
-                        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-                    }
-                    
-                    let result;
-                    try {
-                        result = await response.json();
-                    } catch (error) {
-                        throw new Error('Gagal memproses JSON dari server: ' + error.message);
-                    }
-
-                    console.log('📡 Respons dari server:', result);
-
-                    if (result && result.status === 'success' && Array.isArray(result.data)) {
-                        console.log('✅ Data dari server diterima:', result.data.length, 'item');
-
-                        dataList = result.data.map(item => ({
-                            ...item,
-                            plu: parseInt(item.plu),
-                            qty: parseInt(item.qty),
-                            isSynced: true,
-                            hasBeenRendered: false
-                        })).filter(item => !isNaN(item.plu) && !isNaN(item.qty));
-
-                        loadFromLocalStorage();
-                        renderTable();
-                        updateUnsyncedBadge();
-                        updateConnectionStatus('connected', 'Terhubung ke Google Sheets');
-                        showToast(`Data berhasil dimuat (${dataList.length} item)`, 'success');
-                    } else if (result && result.status === 'success' && result.data === null) {
-                        console.log('✅ Server: data null — dianggap sebagai data kosong.');
-                        dataList = [];
-                        loadFromLocalStorage();
-                        renderTable();
-                        updateUnsyncedBadge();
-                        updateConnectionStatus('connected', 'Terhubung (data kosong)');
-                        showToast('Tidak ada data di server — menggunakan data lokal.', 'info');
-                    } else {
-                        console.error('❌ Format respons tidak valid:', result);
-                        throw new Error('Format data tidak dikenali dari server');
-                    }
-                } catch (error) {
-                    console.error('⛔ Error saat load data dari Google Sheets:', error);
-                    updateConnectionStatus('disconnected', 'Gagal memuat dari Google Sheets');
-                    
-                    if (error.message.includes('HTTP') || error.message.includes('JSON')) {
-                        showToast('Gagal memuat data: ' + error.message, 'danger');
-                    }
-
-                    loadFromLocalStorage();
-                    renderTable();
-                    updateUnsyncedBadge();
-                }
-            }
-
-            // Sync data to Google Sheets
-            async function syncDataToSheets() {
-                const unsyncedItems = dataList.filter(item => !item.isSynced);
-                const deletedItems = getDeletedItemsFromLocalStorage();
-                
-                if (unsyncedItems.length === 0 && deletedItems.length === 0) {
-                    showToast('Tidak ada data baru yang perlu disinkronkan', 'info');
-                    return;
-                }
-
-                if (!checkOnline()) return;
-
-                updateConnectionStatus('syncing', 'Menyinkronkan data ke Google Sheets...');
-                requiredElements.syncBtn.classList.add('btn-loading');
-                requiredElements.syncBtn.disabled = true;
-
-                try {
-                    const response = await fetch(scriptURL, {
-                        method: 'POST',
-                        
-                        body: JSON.stringify({
-                            action: 'sync',
-                             unsyncedItems,
-                            deletedItems: deletedItems
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`Gagal menyinkronkan data ke server: ${response.status}`);
-                    }
-
-                    let result;
-                    try {
-                        result = await response.json();
-                    } catch (error) {
-                        throw new Error('Gagal memproses respons server: Format JSON tidak valid');
-                    }
-
-                    if (result && result.status === 'success') {
-                        dataList.forEach(item => item.isSynced = true);
-                        localStorage.removeItem(LOCAL_STORAGE_KEY);
-                        localStorage.removeItem(DELETED_ITEMS_KEY);
-                        updateUnsyncedBadge();
-                        updateConnectionStatus('connected', 'Data tersinkronisasi dengan Google Sheets');
-                        showToast(`${unsyncedItems.length + deletedItems.length} item berhasil disinkronkan`, 'success');
-                    } else {
-                        throw new Error(result.message || 'Gagal menyinkronkan data');
-                    }
-                } catch (error) {
-                    console.error('Error syncing data to Google Sheets:', error);
-                    updateConnectionStatus('disconnected', 'Gagal menyinkronkan data');
-                    showToast('Gagal menyinkronkan  ' + error.message, 'danger');
-                    if (!retryBtn || !document.body.contains(retryBtn)) {
-                        retryBtn = document.createElement('button');
-                        retryBtn.className = 'btn btn-retry btn-sm ms-2';
-                        retryBtn.textContent = 'Retry Sync';
-                        retryBtn.onclick = syncDataToSheets;
-                        requiredElements.syncBtn.parentNode.appendChild(retryBtn);
-                    }
-                } finally {
-                    requiredElements.syncBtn.classList.remove('btn-loading');
-                    requiredElements.syncBtn.disabled = false;
-                }
-            }
-
-            // Delete item from Google Sheets
-            async function deleteItemFromSheets(item) {
-                if (!checkOnline()) {
-                    saveDeletedItemToLocalStorage(item);
-                    return false;
-                }
-                updateConnectionStatus('syncing', 'Menghapus data dari Google Sheets...');
-                
-                try {
-                    const response = await fetch(scriptURL, {
-                        method: 'POST',
-                        
-                        body: JSON.stringify({
-                            action: 'delete',
-                            plu: item.plu,
-                            description: item.description
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`Gagal menghapus data dari server: ${response.status}`);
-                    }
-
-                    let result;
-                    try {
-                        result = await response.json();
-                    } catch (error) {
-                        throw new Error('Gagal memproses respons server: Format JSON tidak valid');
-                    }
-
-                    if (result && result.status === 'success') {
-                        updateConnectionStatus('connected', 'Data terhapus dari Google Sheets');
-                        return true;
-                    } else {
-                        throw new Error(result.message || 'Gagal menghapus data');
-                    }
-                } catch (error) {
-                    console.error('Error deleting item from Google Sheets:', error);
-                    updateConnectionStatus('disconnected', 'Gagal menghapus data. Menyimpan di lokal.');
-                    saveDeletedItemToLocalStorage(item);
-                    return false;
-                }
-            }
-
-            function loadFromLocalStorage() {
-                try {
-                    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-                    if (storedData) {
-                        const unsyncedItems = JSON.parse(storedData);
-                        if (!Array.isArray(unsyncedItems)) {
-                            throw new Error('Data lokal tidak valid');
-                        }
-                        unsyncedItems.forEach(unsyncedItem => {
-                            if (!unsyncedItem.plu || !unsyncedItem.description || isNaN(unsyncedItem.qty)) {
-                                return;
-                            }
-                            const existingIndex = dataList.findIndex(item => 
-                                item.plu === unsyncedItem.plu && 
-                                item.description === unsyncedItem.description
-                            );
-                            if (existingIndex > -1) {
-                                dataList[existingIndex].qty = unsyncedItem.qty;
-                                dataList[existingIndex].isSynced = false;
-                            } else {
-                                dataList.push({...unsyncedItem, isSynced: false});
-                            }
-                        });
-                    }
-                } catch (error) {
-                    console.error("Gagal memuat dari Local Storage:", error);
-                    showToast('Gagal memuat data dari penyimpanan lokal', 'danger');
-                }
-            }
-
-            function saveToLocalStorage() {
-                try {
-                    const unsyncedItems = dataList.filter(item => !item.isSynced);
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(unsyncedItems));
-                    updateUnsyncedBadge();
-                } catch (error) {
-                    console.error("Gagal menyimpan ke Local Storage:", error);
-                    showToast('Gagal menyimpan data ke penyimpanan lokal', 'danger');
-                }
-            }
-
-            function saveDeletedItemToLocalStorage(item) {
-                try {
-                    const deletedItems = getDeletedItemsFromLocalStorage();
-                    deletedItems.push(item);
-                    localStorage.setItem(DELETED_ITEMS_KEY, JSON.stringify(deletedItems));
-                } catch (error) {
-                    console.error("Gagal menyimpan item terhapus ke Local Storage:", error);
-                }
-            }
-
-            function getDeletedItemsFromLocalStorage() {
-                try {
-                    const storedData = localStorage.getItem(DELETED_ITEMS_KEY);
-                    return storedData ? JSON.parse(storedData) : [];
-                } catch (error) {
-                    console.error("Gagal memuat item terhapus dari Local Storage:", error);
-                    return [];
-                }
-            }
-
-            function updateUnsyncedBadge() {
-                const unsyncedCount = dataList.filter(item => !item.isSynced).length;
-                const deletedCount = getDeletedItemsFromLocalStorage().length;
-                const totalUnsynced = unsyncedCount + deletedCount;
-                
-                requiredElements.unsyncedBadge.textContent = totalUnsynced;
-                requiredElements.unsyncedBadge.classList.toggle('d-none', totalUnsynced === 0);
-                
-                if (totalUnsynced > 0) {
-                    requiredElements.syncBtn.classList.add('pulse');
-                } else {
-                    requiredElements.syncBtn.classList.remove('pulse');
-                }
-            }
-
-            // Sort data
-            function sortData(data) {
-                return data.sort((a, b) => {
-                    let valueA, valueB;
-                    
-                    switch(sortField) {
-                        case 'plu':
-                            valueA = a.plu;
-                            valueB = b.plu;
-                            break;
-                        case 'description':
-                            valueA = a.description.toLowerCase();
-                            valueB = b.description.toLowerCase();
-                            break;
-                        case 'qty':
-                            valueA = a.qty;
-                            valueB = b.qty;
-                            break;
-                        default:
-                            valueA = a.plu;
-                            valueB = b.plu;
-                    }
-                    
-                    if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
-                    if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
-                    return 0;
-                });
-            }
-
-            // Filter data
-            function filterData(data) {
-                switch(currentFilter) {
-                    case 'inStock':
-                        return data.filter(item => item.qty > 0);
-                    case 'outOfStock':
-                        return data.filter(item => item.qty === 0);
-                    default:
-                        return data;
-                }
-            }
-
-            function renderTable(filterText = '') {
-                requiredElements.tableBody.innerHTML = '';
-                
-                let filteredList = dataList.filter(item => {
-                    return item && (
-                        formatPLU(item.plu).includes(filterText.toLowerCase()) ||
-                        item.description.toLowerCase().includes(filterText.toLowerCase())
-                    );
-                });
-                
-                filteredList = filterData(filteredList);
-                filteredList = sortData(filteredList);
-
-                if (filteredList.length > 100) {
-                    filteredList = filteredList.slice(0, 100);
-                    showToast('Gunakan filter untuk melihat lebih banyak.', 'info');
-                }
-
-                if (filteredList.length === 0) {
-                    requiredElements.emptyState.classList.remove('d-none');
-                    return;
-                }
-                
-                requiredElements.emptyState.classList.add('d-none');
-
-                filteredList.forEach((item, index) => {
-                    const originalIndex = dataList.findIndex(d => d.plu === item.plu && d.description === item.description && d.qty === item.qty);
-                    const row = document.createElement('tr');
-                    
-                    if (!item.hasBeenRendered) {
-                        row.classList.add('highlight');
-                        item.hasBeenRendered = true;
-                    }
-                    
-                    if (item.qty === 0) {
-                        row.classList.add('table-danger');
-                    }
-                    
-                    row.innerHTML = `
-                        <td class="align-middle">${index + 1}</td>
-                        <td class="align-middle">${formatPLU(item.plu)}</td>
-                        <td class="align-middle">${item.description}</td>
-                        <td class="align-middle">${item.qty}</td>
-                        <td class="align-middle text-center">
-                            <button class="btn btn-sm btn-info text-white" onclick="editItem(${originalIndex})" title="Edit Barang">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                        </td>
-                    `;
-                    requiredElements.tableBody.appendChild(row);
-                });
-                
-                document.querySelectorAll('th[data-sort]').forEach(th => {
-                    const icon = th.querySelector('i');
-                    if (th.dataset.sort === sortField) {
-                        icon.className = sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
-                    } else {
-                        icon.className = 'fas fa-sort';
-                    }
-                });
-                
-                document.querySelectorAll('.badge-filter').forEach(badge => {
-                    if (badge.dataset.filter === currentFilter) {
-                        badge.classList.add('active');
-                    } else {
-                        badge.classList.remove('active');
-                    }
-                });
-                
-                saveToLocalStorage();
-            }
-
-            // Sorting
-            document.querySelectorAll('th[data-sort]').forEach(th => {
-                th.addEventListener('click', () => {
-                    const field = th.dataset.sort;
-                    
-                    if (sortField === field) {
-                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        sortField = field;
-                        sortDirection = 'asc';
-                    }
-                    
-                    renderTable(requiredElements.searchBox.value);
-                });
-            });
-
-            // Filter
-            document.querySelectorAll('.badge-filter').forEach(badge => {
-                badge.addEventListener('click', () => {
-                    currentFilter = badge.dataset.filter;
-                    renderTable(requiredElements.searchBox.value);
-                });
-            });
-
-            // Form submit
-            requiredElements.form.addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                const pluValue = requiredElements.pluInput.value.trim();
-                const descriptionValue = requiredElements.descriptionInput.value.trim();
-                const qtyValue = requiredElements.qtyInput.value.trim();
-                const plu = pluValue ? parseInt(pluValue) : NaN;
-                const description = formatDescription(descriptionValue);
-                const qty = qtyValue ? parseInt(qtyValue) : NaN;
-
-                requiredElements.pluError.classList.add('d-none');
-                requiredElements.descriptionError.classList.add('d-none');
-
-                if (isNaN(plu) || plu < 0) {
-                    requiredElements.pluError.querySelector('span').textContent = 'PLU harus berupa angka positif.';
-                    requiredElements.pluError.classList.remove('d-none');
-                    requiredElements.pluInput.focus();
-                    return;
-                }
-
-                if (!description || !/[A-Za-z0-9\s]+/.test(description)) {
-                    requiredElements.descriptionError.querySelector('span').textContent = 'Deskripsi hanya boleh berisi huruf, angka, dan spasi.';
-                    requiredElements.descriptionError.classList.remove('d-none');
-                    requiredElements.descriptionInput.focus();
-                    return;
-                }
-
-                if (isNaN(qty) || qty < 0) {
-                    showToast('Kuantitas harus berupa angka positif', 'warning');
-                    requiredElements.qtyInput.focus();
-                    return;
-                }
-
-                if (itemIndex > -1) {
-                    if (!dataList[itemIndex]) {
-                        showToast('Data tidak valid, silakan coba lagi', 'danger');
-                        itemModal.hide();
-                        return;
-                    }
-                    dataList[itemIndex].qty = qty;
-                    dataList[itemIndex].isSynced = false;
-                    itemModal.hide();
-                    requiredElements.form.reset();
-                    renderTable(requiredElements.searchBox.value);
-                    saveToLocalStorage();
-                    showToast('Barang berhasil diperbarui', 'success');
-                } else {
-                    const duplicateIndex = checkDuplicate(plu, description);
-                    if (duplicateIndex > -1 && dataList[duplicateIndex]) {
-                        requiredElements.pluError.querySelector('span').textContent = `PLU atau Deskripsi sudah ada. Silakan edit item dengan PLU ${formatPLU(dataList[duplicateIndex].plu)}.`;
-                        requiredElements.pluError.classList.remove('d-none');
-                        setTimeout(() => {
-                            editItem(duplicateIndex);
-                        }, 1000);
-                        return;
-                    }
-
-                    dataList.push({ plu, description, qty, isSynced: false, hasBeenRendered: false });
-                    itemModal.hide();
-                    requiredElements.form.reset();
-                    renderTable(requiredElements.searchBox.value);
-                    saveToLocalStorage();
-                    showToast('Barang berhasil ditambahkan', 'success');
-                }
-            });
-
-            // Add new item
-            document.getElementById('addNewItemBtn').addEventListener('click', function() {
-                requiredElements.form.reset();
-                itemIndex = -1;
-                requiredElements.submitButton.innerHTML = '<i class="fas fa-plus me-2"></i>Tambah Barang';
-                requiredElements.modalLabel.textContent = 'Input Data Barang';
-                requiredElements.deleteFromModalBtn.classList.add('d-none');
-                requiredElements.pluInput.removeAttribute('readonly');
-                requiredElements.descriptionInput.removeAttribute('readonly');
-                requiredElements.pluError.classList.add('d-none');
-                requiredElements.descriptionError.classList.add('d-none');
-                requiredElements.pluInput.focus();
-                itemModal.show();
-            });
-
-            // Edit item
-            window.editItem = function(index) {
-                if (!dataList[index]) {
-                    showToast('Item tidak ditemukan', 'danger');
-                    return;
-                }
-                const itemToEdit = dataList[index];
-                requiredElements.pluInput.value = itemToEdit.plu;
-                requiredElements.descriptionInput.value = itemToEdit.description;
-                requiredElements.qtyInput.value = itemToEdit.qty;
-                itemIndex = index;
-                requiredElements.submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Simpan Perubahan';
-                requiredElements.modalLabel.textContent = 'Edit Data Barang';
-                requiredElements.deleteFromModalBtn.classList.remove('d-none');
-
-                requiredElements.deleteFromModalBtn.onclick = function() {
-                    itemModal.hide();
-                    requiredElements.itemToDelete.textContent = `${formatPLU(itemToEdit.plu)} - ${itemToEdit.description}`;
-                    deleteConfirmModal.show();
-
-                    requiredElements.confirmDeleteBtn.onclick = async function() {
-                        deleteConfirmModal.hide();
-                        deletedItemBackup = { ...dataList[index] };
-                        await removeItem(index);
-                        showToast('Barang dihapus. <button class="btn btn-sm btn-light btn-undo">Undo</button>', 'info');
-                    };
-                };
-
-                requiredElements.pluInput.setAttribute('readonly', 'readonly');
-                requiredElements.descriptionInput.setAttribute('readonly', 'readonly');
-                requiredElements.pluError.classList.add('d-none');
-                requiredElements.descriptionError.classList.add('d-none');
-                requiredElements.qtyInput.focus();
-                itemModal.show();
+            requiredElements.confirmDeleteBtn.onclick = async function() {
+                deleteConfirmModal.hide();
+                deletedItemBackup = { ...dataList[index] };
+                await removeItem(index);
+                showToast('Barang dihapus. <button class="btn btn-sm btn-light btn-undo">Undo</button>', 'info');
             };
+        };
 
-            // Remove item
-            window.removeItem = async function(index) {
-                if (index >= 0 && index < dataList.length) {
-                    const removedItem = dataList[index];
-                    const success = await deleteItemFromSheets(removedItem);
-                    dataList.splice(index, 1);
-                    if (success) {
-                        showToast(`Barang "${removedItem.description}" telah dihapus dari Google Sheets`, 'success');
-                    } else {
-                        saveDeletedItemToLocalStorage(removedItem);
-                        showToast(`Barang "${removedItem.description}" telah dihapus (akan disinkron nanti)`, 'info');
-                    }
-                    itemModal.hide();
-                    renderTable(requiredElements.searchBox.value);
-                    saveToLocalStorage();
-                }
-            };
+        requiredElements.pluInput.setAttribute('readonly', 'readonly');
+        requiredElements.descriptionInput.setAttribute('readonly', 'readonly');
+        requiredElements.pluError.classList.add('d-none');
+        requiredElements.descriptionError.classList.add('d-none');
+        requiredElements.qtyInput.focus();
+        itemModal.show();
+    };
 
-            // Search debounce
-            let searchTimeout;
-            requiredElements.searchBox.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    renderTable(requiredElements.searchBox.value);
-                }, 300);
-            });
+    // Remove item
+    window.removeItem = async function(index) {
+        if (index >= 0 && index < dataList.length) {
+            const removedItem = dataList[index];
+            const success = await deleteItemFromSheets(removedItem);
+            dataList.splice(index, 1);
+            if (success) {
+                showToast(`Barang "${removedItem.description}" telah dihapus dari Google Sheets`, 'success');
+            } else {
+                saveDeletedItemToLocalStorage(removedItem);
+                showToast(`Barang "${removedItem.description}" telah dihapus (akan disinkron nanti)`, 'info');
+            }
+            itemModal.hide();
+            renderTable(requiredElements.searchBox.value);
+            saveToLocalStorage();
+        }
+    };
 
-            // Sync button
-            requiredElements.syncBtn.addEventListener('click', function() {
-                if (!validateDataList(dataList)) {
-                    showToast('Data lokal tidak valid, memuat ulang...', 'warning');
-                    dataList = [];
-                    loadDataFromSheets();
-                    return;
-                }
-                syncDataToSheets();
-            });
+    // Search debounce
+    let searchTimeout;
+    requiredElements.searchBox.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            renderTable(requiredElements.searchBox.value);
+        }, 300);
+    });
 
-            // Initialize
-            updateConnectionStatus('syncing', 'Menyiapkan aplikasi...');
+    // Sync button
+    requiredElements.syncBtn.addEventListener('click', function() {
+        if (!validateDataList(dataList)) {
+            showToast('Data lokal tidak valid, memuat ulang...', 'warning');
+            dataList = [];
             loadDataFromSheets();
-            
-            setTimeout(() => {
-                if (dataList.length === 0) {
-                    showToast('Selamat datang! Silakan tambahkan barang pertama Anda', 'info');
-                }
-            }, 1500);
+            return;
+        }
+        syncDataToSheets();
+    });
 
-        });
+    // Initialize
+    updateConnectionStatus('syncing', 'Menyiapkan aplikasi...');
+    loadDataFromSheets();
+    
+    setTimeout(() => {
+        if (dataList.length === 0) {
+            showToast('Selamat datang! Silakan tambahkan barang pertama Anda', 'info');
+        }
+    }, 1500);
+
+});
+
+// Mencegah zoom saat input difokuskan di Safari
+document.querySelectorAll('input, textarea').forEach(input => {
+    input.addEventListener('focus', function() {
+        document.querySelector('meta[name=viewport]').setAttribute('content', 
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+        );
+    });
+    input.addEventListener('blur', function() {
+        document.querySelector('meta[name=viewport]').setAttribute('content', 
+            'width=device-width, initial-scale=1.0'
+        );
+    });
+});
     </script>
 
 </body>
