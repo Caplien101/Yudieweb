@@ -184,6 +184,64 @@
         .table-danger {
             background-color: #f8d7da !important;
         }
+        
+        /* Tambahkan CSS ini di dalam tag <style> yang sudah ada */
+
+.table-hover tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tr.selected-row {
+    background-color: #e3f2fd !important; /* Biru muda yang lembut */
+    border-left: 4px solid #2196f3; /* Garis kiri biru untuk indikator */
+    box-shadow: inset 0 0 0 1px rgba(33, 150, 243, 0.1);
+}
+
+.table-hover tr.selected-row td {
+    color: #1976d2; /* Warna teks biru gelap untuk kontras yang baik */
+    font-weight: 500; /* Sedikit lebih tebal untuk menonjol */
+}
+
+.table-hover tr.selected-row:hover {
+    background-color: #bbdefb !important; /* Biru sedikit lebih gelap saat hover */
+    color: #1565c0; /* Biru lebih gelap saat hover */
+}
+
+/* Pastikan warna tetap readable di row dengan status habis */
+.table-hover tr.selected-row.table-danger {
+    background-color: #f4e6e6 !important; /* Merah muda lembut untuk row habis */
+    border-left: 4px solid #f44336; /* Garis merah untuk row habis */
+}
+
+.table-hover tr.selected-row.table-danger td {
+    color: #d32f2f; /* Merah gelap untuk kontras */
+}
+
+/* Efek highlight tetap berfungsi */
+.table-hover tr.selected-row.highlight {
+    background-color: #e3f2fd !important; /* Prioritaskan warna selected */
+}
+
+/* Animasi transisi yang smooth */
+.table-hover tr {
+    cursor: pointer;
+}
+
+.table-hover tr:not(.selected-row):hover {
+    background-color: rgba(33, 150, 243, 0.04); /* Hover default yang sangat ringan */
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 576px) {
+    .table-hover tr.selected-row {
+        border-left-width: 3px; /* Garis lebih tebal di mobile */
+    }
+    
+    .table-hover tr.selected-row td {
+        padding: 0.75rem 0.5rem; /* Padding lebih besar di mobile */
+    }
+}
+        
     </style>
 </head>
 <body class="bg-light">
@@ -207,20 +265,20 @@
     <!-- Filter Badges -->
     <div class="col-12">
     <div class="d-flex flex-wrap gap-2 justify-content-center" id="filterBadgesContainer">
-        <span class="badge-filter text-center py-2 rounded fw-medium" data-filter="all">Semua</span>
-        <span class="badge-filter text-center py-2 rounded fw-medium" data-filter="inStock">Tersedia</span>
-        <span class="badge-filter text-center py-2 rounded fw-medium" data-filter="outOfStock">Habis</span>
+        <span class="badge-filter text-center bi bi-bag-fill py-2 rounded fw-medium" data-filter="all"> Semua</span>
+        <span class="badge-filter text-center bi bi-bag-check-fill py-2 rounded fw-medium" data-filter="inStock"> Tersedia</span>
+        <span class="badge-filter text-center bi bi-bag-x-fill py-2 rounded fw-medium" data-filter="outOfStock"> Habis</span>
     </div>
 </div>
 
     <!-- Action Buttons -->
     <div class="col-12">
         <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-end" id="actionButtonsContainer">
-            <button id="syncBtn" class="btn btn-warning flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center px-3 text-white">
+            <button id="syncBtn" class="btn btn-success flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center bi bi-cloud-arrow-up px-3">
                 <i class="fas fa-sync-alt me-1"></i> Update Data
                 <span id="unsyncedBadge" class="badge bg-danger ms-2 d-none">0</span>
             </button>
-            <button id="addNewItemBtn" class="btn btn-primary flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center px-3">
+            <button id="addNewItemBtn" class="btn btn-primary flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center bi bi-plus-circle px-3">
                 <i class="fas fa-plus me-1"></i> Tambah Barang
             </button>
         </div>
@@ -338,7 +396,21 @@
 
     <!-- JavaScript Utama -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // Mencegah zoom saat input difokuskan di Safari
+document.querySelectorAll('input, textarea').forEach(input => {
+    input.addEventListener('focus', function() {
+        document.querySelector('meta[name=viewport]').setAttribute('content', 
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+        );
+    });
+    input.addEventListener('blur', function() {
+        document.querySelector('meta[name=viewport]').setAttribute('content', 
+            'width=device-width, initial-scale=1.0'
+        );
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
     // ✅ Ambil semua elemen penting
     const requiredElements = {
         itemModal: document.getElementById('itemModal'),
@@ -396,10 +468,11 @@
 
     let retryBtn = null;
     let deletedItemBackup = null;
+    let selectedRowIndex = -1; // Track row yang sedang dipilih
 
     // Format PLU to have leading zeros (e.g., 123 -> 00123)
     function formatPLU(plu) {
-        return String(plu).padStart(5, '0');
+        return String(plu).padStart(5, '');
     }
 
     // Capitalize each word in description
@@ -503,6 +576,41 @@
         }
     }
 
+    // Clear selection dari semua row
+    function clearRowSelection() {
+        document.querySelectorAll('.selected-row').forEach(row => {
+            row.classList.remove('selected-row');
+        });
+        selectedRowIndex = -1;
+    }
+
+    // Set selection ke row tertentu
+    function setRowSelection(index) {
+        clearRowSelection();
+        
+        if (index >= 0 && index < requiredElements.tableBody.children.length) {
+            const row = requiredElements.tableBody.children[index];
+            if (row) {
+                row.classList.add('selected-row');
+                selectedRowIndex = index;
+                
+                // Scroll ke row yang dipilih
+                row.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                });
+                
+                // Optional: Fokus ke tombol edit
+                const editBtn = row.querySelector('button');
+                if (editBtn) {
+                    setTimeout(() => editBtn.focus(), 100);
+                }
+                
+                
+            }
+        }
+    }
+
     // Load data from Google Sheets
     async function loadDataFromSheets() {
         if (!checkOnline()) {
@@ -530,7 +638,7 @@
             console.log('📡 Respons dari server:', result);
 
             if (result && result.status === 'success' && Array.isArray(result.data)) {
-                console.log('✅ Data dari server diterima:', result.data.length, 'item');
+                console.log('Data dari server diterima:', result.data.length, 'item');
 
                 dataList = result.data.map(item => ({
                     ...item,
@@ -546,7 +654,7 @@
                 updateConnectionStatus('connected', 'Terhubung ke Google Sheets');
                 showToast(`Data berhasil dimuat (${dataList.length} item)`, 'success');
             } else if (result && result.status === 'success' && result.data === null) {
-                console.log('✅ Server: data null — dianggap sebagai data kosong.');
+                console.log('Server: data null — dianggap sebagai data kosong.');
                 dataList = [];
                 loadFromLocalStorage();
                 renderTable();
@@ -573,100 +681,100 @@
 
     // Sync data to Google Sheets with retry
     async function syncDataToSheets(maxRetries = 3, retryDelay = 5000) {
-    const unsyncedItems = dataList.filter(item => !item.isSynced);
-    const deletedItems = getDeletedItemsFromLocalStorage();
-    
-    if (unsyncedItems.length === 0 && deletedItems.length === 0) {
-        showToast('Tidak ada data baru yang perlu disinkronkan', 'info');
-        return;
-    }
+        const unsyncedItems = dataList.filter(item => !item.isSynced);
+        const deletedItems = getDeletedItemsFromLocalStorage();
+        
+        if (unsyncedItems.length === 0 && deletedItems.length === 0) {
+            showToast('Tidak ada data baru yang perlu disinkronkan', 'info');
+            return;
+        }
 
-    // Validasi data sebelum dikirim
-    if (!unsyncedItems.every(item => item.plu && item.description && !isNaN(item.qty))) {
-        showToast('Data tidak valid untuk sinkronisasi', 'danger');
-        return;
-    }
+        // Validasi data sebelum dikirim
+        if (!unsyncedItems.every(item => item.plu && item.description && !isNaN(item.qty))) {
+            showToast('Data tidak valid untuk sinkronisasi', 'danger');
+            return;
+        }
 
-    if (!checkOnline()) {
-        showToast('Tidak ada koneksi internet. Data disimpan lokal.', 'warning');
-        return;
-    }
+        if (!checkOnline()) {
+            showToast('Tidak ada koneksi internet. Data disimpan lokal.', 'warning');
+            return;
+        }
 
-    updateConnectionStatus('syncing', 'Menyinkronkan data ke Google Sheets...');
-    requiredElements.syncBtn.classList.add('btn-loading');
-    requiredElements.syncBtn.disabled = true;
+        updateConnectionStatus('syncing', 'Menyinkronkan data ke Google Sheets...');
+        requiredElements.syncBtn.classList.add('btn-loading');
+        requiredElements.syncBtn.disabled = true;
 
-    let retries = 0;
-    while (retries < maxRetries) {
-        try {
-            console.log('Mengirim data untuk sinkronisasi:', { unsyncedItems, deletedItems });
-            const response = await fetch(scriptURL, {
-                method: 'POST',
-                
-                body: JSON.stringify({
-                    action: 'sync',
-                    unsyncedItems,
-                    deletedItems
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Gagal menyinkronkan data ke server: ${response.status}`);
-            }
-
-            let result;
+        let retries = 0;
+        while (retries < maxRetries) {
             try {
-                result = await response.json();
-            } catch (error) {
-                throw new Error('Gagal memproses respons server: Format JSON tidak valid');
-            }
+                console.log('Mengirim data untuk sinkronisasi:', { unsyncedItems, deletedItems });
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    
+                    body: JSON.stringify({
+                        action: 'sync',
+                        unsyncedItems,
+                        deletedItems
+                    })
+                });
 
-            console.log('Respons server:', result);
-
-            if (result && result.status === 'success') {
-                dataList.forEach(item => item.isSynced = true);
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
-                localStorage.removeItem(DELETED_ITEMS_KEY);
-                updateUnsyncedBadge();
-                updateConnectionStatus('connected', 'Data tersinkronisasi dengan Google Sheets');
-                showToast(`${unsyncedItems.length + deletedItems.length} item berhasil disinkronkan`, 'success');
-                if (retryBtn && document.body.contains(retryBtn)) {
-                    retryBtn.remove(); // Hapus tombol retry jika berhasil
-                    retryBtn = null;
+                if (!response.ok) {
+                    throw new Error(`Gagal menyinkronkan data ke server: ${response.status}`);
                 }
-                return;
-            } else {
-                throw new Error(result.message || 'Gagal menyinkronkan data');
+
+                let result;
+                try {
+                    result = await response.json();
+                } catch (error) {
+                    throw new Error('Gagal memproses respons server: Format JSON tidak valid');
+                }
+
+                console.log('Respons server:', result);
+
+                if (result && result.status === 'success') {
+                    dataList.forEach(item => item.isSynced = true);
+                    localStorage.removeItem(LOCAL_STORAGE_KEY);
+                    localStorage.removeItem(DELETED_ITEMS_KEY);
+                    updateUnsyncedBadge();
+                    updateConnectionStatus('connected', 'Data tersinkronisasi dengan Google Sheets');
+                    showToast(`${unsyncedItems.length + deletedItems.length} item berhasil disinkronkan`, 'success');
+                    if (retryBtn && document.body.contains(retryBtn)) {
+                        retryBtn.remove(); // Hapus tombol retry jika berhasil
+                        retryBtn = null;
+                    }
+                    return;
+                } else {
+                    throw new Error(result.message || 'Gagal menyinkronkan data');
+                }
+            } catch (error) {
+                console.error('Error syncing data to Google Sheets:', error);
+                retries++;
+                if (retries < maxRetries) {
+                    showToast(`Gagal menyinkronkan (percobaan ${retries}/${maxRetries}). Mencoba ulang dalam ${retryDelay/1000} detik...`, 'warning');
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    continue;
+                }
+                updateConnectionStatus('disconnected', 'Gagal menyinkronkan data');
+                showToast('Gagal menyinkronkan: ' + error.message, 'danger');
+                if (!retryBtn || !document.body.contains(retryBtn)) {
+                    retryBtn = document.createElement('button');
+                    retryBtn.className = 'btn btn-retry btn-sm ms-2 btn-warning';
+                    retryBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Retry Sync';
+                    retryBtn.onclick = async () => {
+                        retryBtn.classList.add('btn-loading');
+                        retryBtn.disabled = true;
+                        await syncDataToSheets(maxRetries, retryDelay);
+                        retryBtn.classList.remove('btn-loading');
+                        retryBtn.disabled = false;
+                    };
+                    requiredElements.syncBtn.parentNode.appendChild(retryBtn);
+                }
+            } finally {
+                requiredElements.syncBtn.classList.remove('btn-loading');
+                requiredElements.syncBtn.disabled = false;
             }
-        } catch (error) {
-            console.error('Error syncing data to Google Sheets:', error);
-            retries++;
-            if (retries < maxRetries) {
-                showToast(`Gagal menyinkronkan (percobaan ${retries}/${maxRetries}). Mencoba ulang dalam ${retryDelay/1000} detik...`, 'warning');
-                await new Promise(resolve => setTimeout(resolve, retryDelay));
-                continue;
-            }
-            updateConnectionStatus('disconnected', 'Gagal menyinkronkan data');
-            showToast('Gagal menyinkronkan: ' + error.message, 'danger');
-            if (!retryBtn || !document.body.contains(retryBtn)) {
-                retryBtn = document.createElement('button');
-                retryBtn.className = 'btn btn-retry btn-sm ms-2 btn-warning';
-                retryBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Retry Sync';
-                retryBtn.onclick = async () => {
-                    retryBtn.classList.add('btn-loading');
-                    retryBtn.disabled = true;
-                    await syncDataToSheets(maxRetries, retryDelay);
-                    retryBtn.classList.remove('btn-loading');
-                    retryBtn.disabled = false;
-                };
-                requiredElements.syncBtn.parentNode.appendChild(retryBtn);
-            }
-        } finally {
-            requiredElements.syncBtn.classList.remove('btn-loading');
-            requiredElements.syncBtn.disabled = false;
         }
     }
-}
 
     // Delete item from Google Sheets with retry
     async function deleteItemFromSheets(item, maxRetries = 3, retryDelay = 5000) {
@@ -843,6 +951,7 @@
         }
     }
 
+    // MODIFIED: Fungsi renderTable dengan fitur klik row
     function renderTable(filterText = '') {
         requiredElements.tableBody.innerHTML = '';
         
@@ -863,6 +972,7 @@
 
         if (filteredList.length === 0) {
             requiredElements.emptyState.classList.remove('d-none');
+            clearRowSelection(); // Clear selection saat tidak ada data
             return;
         }
         
@@ -881,20 +991,75 @@
                 row.classList.add('table-danger');
             }
             
+            // Tambahkan class selected-row jika ini adalah row yang dipilih
+            if (selectedRowIndex === index) {
+                row.classList.add('selected-row');
+            }
+            
             row.innerHTML = `
                 <td class="align-middle">${index + 1}</td>
                 <td class="align-middle">${formatPLU(item.plu)}</td>
                 <td class="align-middle">${item.description}</td>
                 <td class="align-middle">${item.qty}</td>
                 <td class="align-middle text-center">
-                    <button class="btn btn-sm btn-info text-white" onclick="editItem(${originalIndex})" title="Edit Barang">
-                        <i class="bi bi-pencil-square"></i>
+                    <button class="btn btn-sm" onclick="editItem(${originalIndex})" title="Edit Barang">
+                        <i class="bi bi-arrow-right-circle-fill"></i>
                     </button>
                 </td>
             `;
+            
+            // Tambahkan event listener untuk klik row
+            row.addEventListener('click', function(e) {
+                // Cek apakah klik pada tombol edit
+                if (e.target.closest('button')) {
+                    return; // Biarkan event onclick tombol edit bekerja
+                }
+                
+                // Clear selection dari semua row
+                clearRowSelection();
+                
+                // Tambahkan selected-row ke row yang diklik
+                this.classList.add('selected-row');
+                selectedRowIndex = index;
+                
+                // Scroll ke row yang dipilih
+                this.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                });
+                
+                // Fokus ke tombol edit
+                const editBtn = this.querySelector('button');
+                if (editBtn) {
+                    setTimeout(() => editBtn.focus(), 100);
+                }
+                
+               
+                
+                // Prevent event bubbling
+                e.stopPropagation();
+            });
+            
+            // Tambahkan event listener untuk keyboard navigation (optional)
+            row.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+            
             requiredElements.tableBody.appendChild(row);
         });
         
+        // Restore selection jika row masih ada
+        if (selectedRowIndex >= 0 && selectedRowIndex < filteredList.length) {
+            const row = requiredElements.tableBody.children[selectedRowIndex];
+            if (row && !row.classList.contains('selected-row')) {
+                row.classList.add('selected-row');
+            }
+        }
+        
+        // Update sorting icons
         document.querySelectorAll('th[data-sort]').forEach(th => {
             const icon = th.querySelector('i');
             if (th.dataset.sort === sortField) {
@@ -904,6 +1069,7 @@
             }
         });
         
+        // Update filter badges
         document.querySelectorAll('.badge-filter').forEach(badge => {
             if (badge.dataset.filter === currentFilter) {
                 badge.classList.add('active');
@@ -915,7 +1081,65 @@
         saveToLocalStorage();
     }
 
-    // Sorting
+    // MODIFIED: Edit item function untuk bekerja dengan selected row
+    window.editItem = function(index) {
+        // Clear selection saat edit
+        clearRowSelection();
+        
+        if (!dataList[index]) {
+            showToast('Item tidak ditemukan', 'danger');
+            return;
+        }
+        const itemToEdit = dataList[index];
+        requiredElements.pluInput.value = itemToEdit.plu;
+        requiredElements.descriptionInput.value = itemToEdit.description;
+        requiredElements.qtyInput.value = itemToEdit.qty;
+        itemIndex = index;
+        requiredElements.submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Simpan Perubahan';
+        requiredElements.modalLabel.textContent = 'Edit Data Barang';
+        requiredElements.deleteFromModalBtn.classList.remove('d-none');
+
+        requiredElements.deleteFromModalBtn.onclick = function() {
+            itemModal.hide();
+            requiredElements.itemToDelete.textContent = `${formatPLU(itemToEdit.plu)} - ${itemToEdit.description}`;
+            deleteConfirmModal.show();
+
+            requiredElements.confirmDeleteBtn.onclick = async function() {
+                deleteConfirmModal.hide();
+                deletedItemBackup = { ...dataList[index] };
+                await removeItem(index);
+                showToast('Barang dihapus. <button class="btn btn-sm btn-light btn-undo">Undo</button>', 'info');
+            };
+        };
+
+        requiredElements.pluInput.setAttribute('readonly', 'readonly');
+        requiredElements.descriptionInput.setAttribute('readonly', 'readonly');
+        requiredElements.pluError.classList.add('d-none');
+        requiredElements.descriptionError.classList.add('d-none');
+        requiredElements.qtyInput.focus();
+        itemModal.show();
+    };
+
+    // MODIFIED: Remove item function
+    window.removeItem = async function(index) {
+        if (index >= 0 && index < dataList.length) {
+            const removedItem = dataList[index];
+            const success = await deleteItemFromSheets(removedItem);
+            dataList.splice(index, 1);
+            if (success) {
+                showToast(`Barang "${removedItem.description}" telah dihapus dari Google Sheets`, 'success');
+            } else {
+                saveDeletedItemToLocalStorage(removedItem);
+                showToast(`Barang "${removedItem.description}" telah dihapus (akan disinkron nanti)`, 'info');
+            }
+            itemModal.hide();
+            clearRowSelection(); // Clear selection saat hapus
+            renderTable(requiredElements.searchBox.value);
+            saveToLocalStorage();
+        }
+    };
+
+    // Sorting - Clear selection saat sort
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {
             const field = th.dataset.sort;
@@ -927,16 +1151,63 @@
                 sortDirection = 'asc';
             }
             
+            clearRowSelection(); // Clear selection saat sorting
             renderTable(requiredElements.searchBox.value);
         });
     });
 
-    // Filter
+    // Filter - Clear selection saat filter berubah
     document.querySelectorAll('.badge-filter').forEach(badge => {
         badge.addEventListener('click', () => {
             currentFilter = badge.dataset.filter;
+            clearRowSelection(); // Clear selection saat filter berubah
             renderTable(requiredElements.searchBox.value);
         });
+    });
+
+    // Search debounce - Clear selection saat search
+    let searchTimeout;
+    requiredElements.searchBox.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            clearRowSelection(); // Clear selection saat search
+            renderTable(requiredElements.searchBox.value);
+        }, 300);
+    });
+
+    // Keyboard navigation (optional enhancement)
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return; // Skip jika sedang mengetik
+        }
+        
+        const selectedRow = document.querySelector('.selected-row');
+        let currentIndex = selectedRowIndex;
+        
+        if (e.key === 'ArrowDown' || e.key === 'j') {
+            e.preventDefault();
+            currentIndex = Math.min(currentIndex + 1, requiredElements.tableBody.children.length - 1);
+            setRowSelection(currentIndex);
+        } else if (e.key === 'ArrowUp' || e.key === 'k') {
+            e.preventDefault();
+            currentIndex = Math.max(currentIndex - 1, 0);
+            setRowSelection(currentIndex);
+        } else if (e.key === 'Enter' && selectedRow) {
+            e.preventDefault();
+            const editBtn = selectedRow.querySelector('button');
+            if (editBtn) {
+                editBtn.click();
+            }
+        } else if ((e.key === 'Delete' || e.key === 'x') && selectedRow) {
+            e.preventDefault();
+            const originalIndex = dataList.findIndex(d => 
+                d.plu === parseInt(selectedRow.cells[1].textContent) && 
+                d.description === selectedRow.cells[2].textContent
+            );
+            if (originalIndex > -1) {
+                editItem(originalIndex); // Buka modal edit, lalu hapus dari sana
+            }
+        }
     });
 
     // Form submit
@@ -1008,6 +1279,8 @@
 
     // Add new item
     document.getElementById('addNewItemBtn').addEventListener('click', function() {
+        // Clear selection saat tambah item baru
+        clearRowSelection();
         requiredElements.form.reset();
         itemIndex = -1;
         requiredElements.submitButton.innerHTML = '<i class="fas fa-plus me-2"></i>Tambah Barang';
@@ -1019,69 +1292,6 @@
         requiredElements.descriptionError.classList.add('d-none');
         requiredElements.pluInput.focus();
         itemModal.show();
-    });
-
-    // Edit item
-    window.editItem = function(index) {
-        if (!dataList[index]) {
-            showToast('Item tidak ditemukan', 'danger');
-            return;
-        }
-        const itemToEdit = dataList[index];
-        requiredElements.pluInput.value = itemToEdit.plu;
-        requiredElements.descriptionInput.value = itemToEdit.description;
-        requiredElements.qtyInput.value = itemToEdit.qty;
-        itemIndex = index;
-        requiredElements.submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Simpan Perubahan';
-        requiredElements.modalLabel.textContent = 'Edit Data Barang';
-        requiredElements.deleteFromModalBtn.classList.remove('d-none');
-
-        requiredElements.deleteFromModalBtn.onclick = function() {
-            itemModal.hide();
-            requiredElements.itemToDelete.textContent = `${formatPLU(itemToEdit.plu)} - ${itemToEdit.description}`;
-            deleteConfirmModal.show();
-
-            requiredElements.confirmDeleteBtn.onclick = async function() {
-                deleteConfirmModal.hide();
-                deletedItemBackup = { ...dataList[index] };
-                await removeItem(index);
-                showToast('Barang dihapus. <button class="btn btn-sm btn-light btn-undo">Undo</button>', 'info');
-            };
-        };
-
-        requiredElements.pluInput.setAttribute('readonly', 'readonly');
-        requiredElements.descriptionInput.setAttribute('readonly', 'readonly');
-        requiredElements.pluError.classList.add('d-none');
-        requiredElements.descriptionError.classList.add('d-none');
-        requiredElements.qtyInput.focus();
-        itemModal.show();
-    };
-
-    // Remove item
-    window.removeItem = async function(index) {
-        if (index >= 0 && index < dataList.length) {
-            const removedItem = dataList[index];
-            const success = await deleteItemFromSheets(removedItem);
-            dataList.splice(index, 1);
-            if (success) {
-                showToast(`Barang "${removedItem.description}" telah dihapus dari Google Sheets`, 'success');
-            } else {
-                saveDeletedItemToLocalStorage(removedItem);
-                showToast(`Barang "${removedItem.description}" telah dihapus (akan disinkron nanti)`, 'info');
-            }
-            itemModal.hide();
-            renderTable(requiredElements.searchBox.value);
-            saveToLocalStorage();
-        }
-    };
-
-    // Search debounce
-    let searchTimeout;
-    requiredElements.searchBox.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            renderTable(requiredElements.searchBox.value);
-        }, 300);
     });
 
     // Sync button
@@ -1105,19 +1315,17 @@
         }
     }, 1500);
 
-});
-
-// Mencegah zoom saat input difokuskan di Safari
-document.querySelectorAll('input, textarea').forEach(input => {
-    input.addEventListener('focus', function() {
-        document.querySelector('meta[name=viewport]').setAttribute('content', 
-            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-        );
-    });
-    input.addEventListener('blur', function() {
-        document.querySelector('meta[name=viewport]').setAttribute('content', 
-            'width=device-width, initial-scale=1.0'
-        );
+    // Event listener untuk clear selection saat klik di luar tabel
+    document.addEventListener('click', function(e) {
+        const table = requiredElements.tableBody.closest('table');
+        const isClickInsideTable = table.contains(e.target);
+        
+        if (!isClickInsideTable && selectedRowIndex >= 0) {
+            // Delay untuk menghindari konflik dengan klik row
+            setTimeout(() => {
+                clearRowSelection();
+            }, 100);
+        }
     });
 });
     </script>
