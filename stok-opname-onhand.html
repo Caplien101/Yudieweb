@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Stok Opname - On Hand</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+      background-color: #f8fafc;
+      line-height: 1.5;
+    }
+    @media screen and (-webkit-min-device-pixel-ratio:0) {
+      select, textarea, input { font-size: 16px !important; }
+    }
+    .onhand-card {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .onhand-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .onhand-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, #10b981, #34d399);
+      border-radius: 10px 0 0 10px;
+      opacity: 0.7;
+    }
+    .onhand-card .plu-col {
+      position: relative;
+      z-index: 1;
+      width: 15%; min-width: 70px; font-weight: 600; 
+    }
+    .onhand-card .desc-col { 
+      position: relative;
+      z-index: 1;
+      width: 65%; min-width: 120px; color: #475569; font-size: 0.95rem; 
+    }
+    .onhand-card .onhand-col { 
+      position: relative;
+      z-index: 1;
+      width: 20%; min-width: 60px; text-align: center; 
+    }
+    .onhand-input { 
+      width: 100%; 
+      text-align: center; 
+      font-weight: 700; 
+      font-size: 1rem;
+      padding: 0.5rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #f8fafc;
+    }
+    .onhand-input:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+      outline: none;
+      background: #fff;
+    }
+    .onhand-input:invalid {
+      border-color: #ef4444;
+    }
+    .onhand-input.completed {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+    /* Sembunyikan spinner arrows pada input number untuk kemudahan input/hapus */
+    .onhand-input::-webkit-outer-spin-button,
+    .onhand-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .onhand-input {
+      -moz-appearance: textfield;
+    }
+    #toastContainer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+    }
+    .sticky-search {
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .progress-section {
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .progress-bar-custom {
+      background: linear-gradient(to right, #10b981, #34d399);
+      border-radius: 10px;
+    }
+    footer {
+      background: #1e293b;
+      color: #cbd5e1;
+    }
+    .alert-custom {
+      border-left: 4px solid #10b981;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      margin-bottom: 1rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #94a3b8;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    .btn-primary {
+      background-color: #10b981;
+      border-color: #10b981;
+    }
+    .btn-primary:hover {
+      background-color: #059669;
+      border-color: #047857;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    @media (max-width: 575px) {
+      .onhand-card .plu-col { width: 20%; min-width: 60px; }
+      .onhand-card .desc-col { width: 50%; min-width: 100px; font-size: 0.85rem; }
+      .onhand-card .onhand-col { width: 30%; min-width: 50px; }
+      .onhand-input { font-size: 0.95rem; padding: 0.4rem; }
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<div class="container py-4">
+  <h2 class="mb-4 text-center fw-bold text-success">
+    <i class="bi bi-hand-thumbs-up me-2"></i>Input On Hand
+  </h2>
+  
+  <!-- Alert untuk instruksi singkat -->
+  <div class="alert alert-success alert-custom d-flex align-items-center" role="alert">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    <div>Masukkan jumlah stok on hand untuk setiap item. Total item: <span id="totalItems" class="fw-bold">0</span></div>
+  </div>
+  
+  <!-- Progress Section untuk UX -->
+  <div class="progress-section">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="text-muted small">Progres Input On Hand</span>
+      <span class="text-muted small" id="completedCount">0 / <span id="totalData">0</span></span>
+    </div>
+    <div class="progress" style="height: 6px;">
+      <div class="progress-bar progress-bar-custom" id="progressBar" role="progressbar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="sticky-top bg-white py-3 shadow-sm sticky-search" style="margin-top: -1.5rem; margin-bottom: 1.5rem;">
+    <div class="container">
+      <div class="input-group">
+        <span class="input-group-text bg-success text-white"><i class="bi bi-search"></i></span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Cari PLU atau Deskripsi...">
+        <button class="btn btn-outline-secondary" type="button" id="clearSearch" title="Hapus pencarian">
+          <i class="bi bi-x-circle"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="onHandCards"></div>
+
+  <div class="text-center mt-4">
+    <button id="finishBtn" class="btn btn-success btn-lg" disabled>
+      <span class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+      <i class="bi bi-check-circle me-2"></i>Selesai & Lanjutkan
+    </button>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<!-- Sticky Footer -->
+<footer class="bg-dark text-light text-center py-2 mt-auto" style="position: sticky; bottom: 0; z-index: 100;">
+  <small>© 2025 Stok Opname System • v1.1</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  if (sessionStorage.getItem('stokOpnameStep') !== '1') {
+    window.location.replace('stok-opname.html');
+  }
+
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4-KfGgF2sS29CJN24JKUgWj7UfmPFIaKXu0GzqQ_xhHVd7reD7g0Bqi-DMQvmf-nb/exec';
+  let stockData = JSON.parse(localStorage.getItem('stok_opname_session')) || [];
+  let searchTimeout;
+  let currentFilteredData = [];
+
+  function saveToStorage() {
+    localStorage.setItem('stok_opname_session', JSON.stringify(stockData));
+  }
+
+  function updateProgress() {
+    const total = stockData.length;
+    const completed = stockData.filter(item => item.onHand >= 0).length;
+    document.getElementById('completedCount').innerHTML = `${completed} / <span id="totalData">${total}</span>`;
+    document.getElementById('totalItems').textContent = total;
+    const percentage = total > 0 ? (completed / total) * 100 : 0;
+    document.getElementById('progressBar').style.width = `${percentage}%`;
+    document.getElementById('finishBtn').disabled = completed < total;
+  }
+
+  function renderCards(data = stockData) {
+    currentFilteredData = data;
+    const c = document.getElementById('onHandCards');
+    c.innerHTML = '';
+    if (data.length === 0) {
+      c.innerHTML = `
+        <div class="text-center text-muted py-4">
+          <i class="bi bi-inbox display-4 mb-3"></i>
+          <p>Tidak ada data stok ditemukan.</p>
+        </div>
+      `;
+      return;
+    }
+    data.forEach(item => {
+      const isCompleted = item.onHand >= 0;
+      const checkIcon = isCompleted ? '<i class="bi bi-check-circle-fill text-success me-1"></i>' : '<i class="bi bi-circle text-muted me-1"></i>';
+      c.innerHTML += `
+        <div class="onhand-card">
+          <div class="plu-col">${item.plu}</div>
+          <div class="desc-col">${item.description}</div>
+          <div class="onhand-col">
+            <div class="d-flex align-items-center justify-content-center">
+              ${checkIcon}
+              <input type="number" 
+                     class="form-control onhand-input ${isCompleted ? 'completed' : ''}" 
+                     value="${item.onHand !== undefined ? item.onHand : ''}" 
+                     min="0" 
+                     step="1"
+                     data-plu="${item.plu}"
+                     aria-label="Jumlah on hand untuk ${item.description}"
+                     oninput="updateOnHandByPlu(this.dataset.plu, this.value)"
+                     onblur="if(this.value === '') updateOnHandByPlu(this.dataset.plu, this.value)"
+                     required>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    updateProgress();
+  }
+
+  window.updateOnHandByPlu = function(plu, valueStr) {
+    const item = stockData.find(x => x.plu == plu);
+    if (item) {
+      const newValue = valueStr === '' ? 0 : parseInt(valueStr) || 0;
+      const wasCompleted = item.onHand >= 0;
+      item.onHand = newValue;
+      
+      // Update class pada input yang sedang aktif (tanpa re-render)
+      const input = document.querySelector(`input[data-plu="${plu}"]`);
+      if (input) {
+        input.value = newValue;
+        if (newValue >= 0) {
+          if (!wasCompleted) {
+            input.classList.add('completed');
+            // Update icon secara manual jika diperlukan, tapi karena di flex, cukup class
+          }
+        } else {
+          input.classList.remove('completed');
+        }
+      }
+      
+      // Feedback visual: highlight card sementara
+      const card = input ? input.closest('.onhand-card') : null;
+      if (card) {
+        card.style.borderLeftColor = '#10b981';
+        setTimeout(() => {
+          card.style.borderLeftColor = '';
+        }, 500);
+      }
+      
+      saveToStorage();
+      updateProgress();
+    }
+  };
+
+  function showToast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const color = type === 'success' ? 'bg-success' : 'bg-danger';
+    const icon = type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-triangle-fill';
+    const el = document.createElement('div');
+    el.className = `toast align-items-center text-white ${color} border-0`;
+    el.innerHTML = `<div class="d-flex"><div class="toast-body"><i class="${icon} me-2"></i>${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+    c.appendChild(el);
+    new bootstrap.Toast(el, { autohide: true, delay: 3000 }).show();
+    el.addEventListener('hidden.bs.toast', () => el.remove());
+  }
+
+  document.getElementById('finishBtn').onclick = () => {
+    const btn = document.getElementById('finishBtn');
+    btn.disabled = true;
+    btn.querySelector('.spinner-border').classList.remove('d-none');
+
+    // Validasi: pastikan semua input diisi (minimal 0)
+    let allFilled = true;
+    stockData.forEach(item => {
+      if (item.onHand < 0 || item.onHand === undefined) {
+        allFilled = false;
+      }
+    });
+    if (!allFilled) {
+      showToast('Harap lengkapi semua input on hand dengan angka >= 0.', 'danger');
+      btn.disabled = false;
+      btn.querySelector('.spinner-border').classList.add('d-none');
+      return;
+    }
+
+    saveToStorage();
+    showToast('On Hand berhasil disimpan!', 'success');
+    sessionStorage.setItem('stokOpnameStep', '2');
+    setTimeout(() => window.location.replace('ringkasan-selisih.html'), 1500);
+  };
+
+  // Clear search button
+  document.getElementById('clearSearch').onclick = () => {
+    document.getElementById('searchInput').value = '';
+    renderCards();
+  };
+
+  // Debounced search
+  document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      const term = this.value.toLowerCase().trim();
+      if (term === '') {
+        renderCards();
+      } else {
+        const filtered = stockData.filter(item =>
+          item.plu.toString().includes(term) || 
+          item.description.toLowerCase().includes(term)
+        );
+        renderCards(filtered);
+      }
+    }, 300); // Debounce 300ms untuk UX lebih smooth
+  });
+
+  renderCards();
+
+  // Fokus otomatis ke search pada load
+  window.addEventListener('load', () => {
+    document.getElementById('searchInput').focus();
+  });
+</script>
+</body>
+</html>
