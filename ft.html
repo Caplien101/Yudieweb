@@ -1,508 +1,302 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Database Search with Google Sheets</title>
-  <!-- Inter Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
+  <title>Database 100K+ Rows - FINAL NO ERROR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.min.js"></script>
   <style>
-    /* Global box-sizing */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      max-width: 900px;
-      margin: 10px auto;
-      padding: 10px;
-      background-color: #f0f2f5;
-      color: #202124;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-weight: 600;
-      font-size: 1.75rem;
-    }
-
-    .search-container {
-      position: sticky;
-      top: 0;
-      background-color: #f0f2f5;
-      padding: 10px 10px 10px 10px;
-      z-index: 1000;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 100%;
-    }
-
-    .search-wrapper {
-      position: relative;
-      width: 100%;
-      margin-bottom: 12px;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 10px 40px 10px 12px; /* ruang kiri & kanan */
-      font-size: 14px;
-      border: 2px solid #dfe1e5;
-      border-radius: 8px;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      font-family: inherit;
-      max-width: 100%;
-    }
-
-    input[type="text"]:focus {
-      border-color: #6200ea;
-      box-shadow: 0 0 6px rgba(98, 0, 234, 0.25);
-    }
-
-    input[type="text"]::placeholder {
-      color: #9aa0a6;
-    }
-
-    .clear-button {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #9aa0a6;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-
-    .clear-button:hover,
-    .clear-button:focus {
-      color: #d32f2f;
-      background-color: rgba(211, 47, 47, 0.08);
-      outline: none;
-    }
-
-    .clear-button svg {
-      stroke: currentColor;
-      stroke-width: 2.5;
-      width: 16px;
-      height: 16px;
-    }
-
-    .refresh-button {
-      padding: 8px 16px;
-      border-radius: 6px;
-      background: #6200ea;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background 0.2s ease;
-      font-family: inherit;
-      width: 100%;
-      margin-top: 4px;
-    }
-
-    @media (min-width: 601px) {
-      .refresh-button {
-        width: auto;
-        margin-top: 0;
-      }
-    }
-
-    .refresh-button:hover {
-      background: #4500a0;
-    }
-
-    .refresh-button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    .card-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background-color: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    }
-
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 12px;
-      color: #5f6368;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .card p.question {
-      margin: 8px 0;
-      font-size: 14px;
-      color: #1a73e8;
-      font-weight: 500;
-    }
-
-    .card p.answer {
-      margin: 8px 0;
-      font-size: 13px;
-      color: #d81b60;
-    }
-
-    .highlight {
-      background: linear-gradient(90deg, #ffeb3b, #ffd700);
-      padding: 1px 4px;
-      border-radius: 3px;
-      color: #333;
-      font-weight: 600;
-    }
-
-    .loading {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #6200ea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      z-index: 2000;
-    }
-
-    @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    .error, .no-results {
-      text-align: center;
-      margin: 24px 0;
-      padding: 12px;
-      border-radius: 8px;
-      display: none;
-      font-weight: 500;
-    }
-
-    .error {
-      color: #d32f2f;
-      background-color: #ffebee;
-    }
-
-    .no-results {
-      color: #5f6368;
-      background-color: #f8f9fa;
-    }
-
-    @media (max-width: 600px) {
-      body { padding: 8px; margin: 8px; }
-      h1 { font-size: 1.5rem; margin-bottom: 16px; }
-      input[type="text"] { padding: 9px 36px 9px 10px; font-size: 14px; }
-      .refresh-button { font-size: 14px; padding: 8px 14px; }
-      .card-container { grid-template-columns: 1fr; gap: 12px; }
-      .card { padding: 14px; }
-    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; max-width: 1000px; margin: 0 auto; padding: 12px; background: #f5f5f5; color: #1f1f1f; }
+    h1 { font-size: 1.6rem; margin-bottom: 16px; text-align: center; color: #6200ea; }
+    .search-container { position: sticky; top: 0; background: #f5f5f5; padding: 12px 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border-radius: 12px; }
+    .search-wrapper { position: relative; }
+    input[type="text"] { width: 100%; padding: 14px 44px 14px 16px; font-size: 16px; border: 2px solid #ddd; border-radius: 12px; outline: none; transition: all 0.2s; }
+    input[type="text"]:focus { border-color: #6200ea; box-shadow: 0 0 0 4px rgba(98,0,234,0.15); }
+    .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #888; font-size: 20px; }
+    .refresh-btn { margin-top: 10px; width: 100%; padding: 12px; background: #6200ea; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    .refresh-btn:hover { background: #3700b3; }
+    .stats { text-align: center; color: #555; font-size: 0.9rem; margin: 10px 0; font-weight: 600; }
+    .virtual-list { height: calc(100vh - 280px); position: relative; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; background: white; }
+    .card { background: white; margin: 8px 4px; padding: 16px; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .card h3 { margin: 0 0 8px; font-size: 0.8rem; color: #666; text-transform: uppercase; }
+    .card p { margin: 6px 0; font-size: 14px; line-height: 1.5; }
+    .card p.question { color: #1a73e8; font-weight: 600; }
+    .card p.answer { color: #d81b60; }
+    .highlight { background: #ffeb3b; padding: 0 3px; border-radius: 3px; font-weight: 600; }
+    .loading, .error, .no-results { text-align: center; padding: 20px; border-radius: 12px; margin: 20px 0; display: none; font-weight: 500; }
+    .loading { background: #e3f2fd; color: #1976d2; }
+    .error { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+    .no-results { background: #f8f9fa; color: #666; }
+    .debug { background: #fff3e0; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 200px; overflow: auto; display: block; margin: 10px 0; border: 1px solid #ffcc80; }
+    @media (max-width: 600px) { .virtual-list { height: calc(100vh - 260px); } }
   </style>
 </head>
 <body>
   <h1>Database Functional Test</h1>
   <div class="search-container">
     <div class="search-wrapper">
-      <input
-        type="text"
-        id="searchInput"
-        placeholder="Search by category, question, or answer…"
-        aria-label="Search database"
-      />
-      <button type="button" id="clearButton" class="clear-button" aria-label="Clear search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <input type="text" id="searchInput" placeholder="Ketik kategori / pertanyaan / jawaban…" autocomplete="off">
+      <button class="clear-btn" id="clearBtn" aria-label="Clear">X</button>
     </div>
-    <button id="refreshButton" class="refresh-button">Refresh Data</button>
+    <button class="refresh-btn" id="refreshBtn">Refresh Data</button>
   </div>
 
-  <div class="loading" id="loadingSpinner" aria-live="polite" aria-busy="true"></div>
-  <div class="error" id="errorMessage" aria-live="assertive"></div>
-  <div class="no-results" id="noResultsMessage" aria-live="polite">No results found.</div>
-  <div class="card-container" id="cardContainer"></div>
+  <div class="stats" id="stats">Memuat data…</div>
+  <div class="loading" id="loading">Sedang mengunduh dari Google Sheets…</div>
+  <div class="error" id="error"></div>
+  <div class="no-results" id="noResults">Tidak ada hasil ditemukan.</div>
+  <pre class="debug" id="debug">Log akan muncul di sini...</pre>
+  <div class="virtual-list" id="virtualList"></div>
 
   <script>
-    const STORAGE_KEY = 'sheetData';
-    const STORAGE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
-    const APPS_SCRIPT_URL =
-      'https://script.google.com/macros/s/AKfycbzO8vWceVFSdWXGBfIuclWR5mm_1TFSWnw03EYDVC1vCrFfgl78YoS1UAyfP2ebVsdc/exec';
+    // GANTI INI SAJA!
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRRmp9wYJi6ckuinfc6DznbGZ3KVke_O4jJd1eix1ZnSEGW29nUBL979OHIyQCluYe/exec';
+    
+    const PAGE_SIZE = 2000;
+    const DB_NAME = 'SheetDB_Ultimate';
+    const STORE_NAME = 'rows';
 
-    // DOM Elements
-    const searchInput = document.getElementById('searchInput');
-    const clearButton = document.getElementById('clearButton');
-    const refreshButton = document.getElementById('refreshButton');
-    const cardContainer = document.getElementById('cardContainer');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const errorMessage = document.getElementById('errorMessage');
-    const noResultsMessage = document.getElementById('noResultsMessage');
-
-    // Utility: escape HTML
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    // IndexedDB - Compatible semua browser
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 3);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (db.objectStoreNames.contains(STORE_NAME)) db.deleteObjectStore(STORE_NAME);
+          db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
     }
 
-    // Utility: escape regex
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    async function getAllData() {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      return new Promise((resolve) => {
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result.map(r => r.data));
+      });
     }
 
-    // Highlight per kata
-    function highlightText(text, searchTerm) {
-      if (!searchTerm || !text) return escapeHtml(text);
-      const words = [...new Set(
-        searchTerm.trim().toLowerCase().split(/\s+/).filter(w => w.length > 0)
-      )];
-      if (words.length === 0) return escapeHtml(text);
-      let highlighted = escapeHtml(text);
-      words
-        .sort((a, b) => b.length - a.length)
-        .forEach(word => {
-          const regex = new RegExp(`(${escapeRegExp(word)})`, 'gi');
-          highlighted = highlighted.replace(regex, '<span class="highlight">$1</span>');
-        });
-      return highlighted;
+    async function saveChunk(chunk) {
+      const db = await openDB();
+ (await openDB());
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      chunk.forEach(item => store.add({ data: item }));
+      return new Promise((resolve) => tx.oncomplete = resolve);
     }
 
-    // Create card
-    function createCard(item, searchTerm) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <h3>${highlightText(item.category || '—', searchTerm)}</h3>
-        <p class="question">Q: ${highlightText(item.pertanyaan || '—', searchTerm)}</p>
-        <p class="answer">A: ${highlightText(item.jawaban || '—', searchTerm)}</p>
-      `;
-      return card;
+    async function clearDB() {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.clear();
+      return new Promise((resolve) => tx.oncomplete = resolve);
     }
 
-    // UI Helpers
-    function toggleLoading(show) {
-      loadingSpinner.style.display = show ? 'block' : 'none';
-      refreshButton.disabled = show;
-    }
-
-    function showError(message) {
-      errorMessage.textContent = message;
-      errorMessage.style.display = 'block';
-      noResultsMessage.style.display = 'none';
-    }
-
-    function hideMessages() {
-      errorMessage.style.display = 'none';
-      noResultsMessage.style.display = 'none';
-    }
-
-    function showNoResults(show = true) {
-      noResultsMessage.style.display = show ? 'block' : 'none';
-    }
-
-    // Populate cards with relevance scoring
-    function populateCards(data, searchTerm = '') {
-      hideMessages();
-      cardContainer.innerHTML = '';
-
-      if (!data || data.length === 0) {
-        showNoResults(true);
-        return;
+    // Virtual Scroller
+    class VirtualScroller {
+      constructor(container, rowHeight = 128) {
+        this.container = container;
+        this.rowHeight = rowHeight;
+        this.items = [];
+        this.visibleCount = Math.ceil(innerHeight / rowHeight) + 20;
+        this.render = this.render.bind(this);
+        container.addEventListener('scroll', this.render);
+        addEventListener('resize', this.render);
       }
-
-      const searchWords = searchTerm
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(word => word.length > 0);
-
-      if (searchWords.length === 0) {
+      setItems(items) {
+        this.items = items;
+        this.container.innerHTML = `<div style="height:${items.length * this.rowHeight}px"></div>`;
+        this.render();
+      }
+      render() {
+        const scrollTop = this.container.scrollTop;
+        const start = Math.max(0, Math.floor(scrollTop / this.rowHeight) - 10);
+        const end = Math.min(this.items.length, start + this.visibleCount);
         const fragment = document.createDocumentFragment();
-        data.forEach((item, index) => {
-          const card = createCard(item, '');
-          card.style.animationDelay = `${index * 0.03}s`;
-          fragment.appendChild(card);
-        });
-        cardContainer.appendChild(fragment);
-        return;
+        for (let i = start; i < end; i++) {
+          const item = this.items[i];
+          if (!item) continue;
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.style.cssText = `position:absolute;top:${i * this.rowHeight}px;width:100%;left:0;right:0;`;
+          div.innerHTML = `
+            <h3>${item.category || '—'}</h3>
+            <p class="question">Q: ${item.pertanyaan || '—'}</p>
+            <p class="answer">A: ${item.jawaban || '—'}</p>
+          `;
+          fragment.appendChild(div);
+        }
+        const placeholder = this.container.firstChild || document.createElement('div');
+        placeholder.style.height = `${this.items.length * this.rowHeight}px`;
+        this.container.innerHTML = '';
+        this.container.appendChild(placeholder);
+        this.container.appendChild(fragment);
       }
-
-      const scoredItems = data.map(item => {
-        const fullText = [
-          item.category || '',
-          item.pertanyaan || '',
-          item.jawaban || ''
-        ].join(' ').toLowerCase();
-        const matchedWords = searchWords.filter(word => fullText.includes(word));
-        return { ...item, _score: matchedWords.length };
-      });
-
-      const filtered = scoredItems.filter(item => item._score > 0);
-      if (filtered.length === 0) {
-        showNoResults(true);
-        return;
-      }
-
-      filtered.sort((a, b) => {
-        if (b._score !== a._score) return b._score - a._score;
-        return (a.pertanyaan || '').localeCompare(b.pertanyaan || '');
-      });
-
-      showNoResults(false);
-      const fragment = document.createDocumentFragment();
-      filtered.forEach((item, index) => {
-        const { _score, ...cleanItem } = item;
-        const card = createCard(cleanItem, searchTerm);
-        card.style.animationDelay = `${index * 0.03}s`;
-        fragment.appendChild(card);
-      });
-      cardContainer.appendChild(fragment);
     }
 
-    // Debounce
-    const debounce = (func, wait) => {
-      let timeout;
-      return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func(...args), wait);
-      };
+    // Main App
+    const els = {
+      searchInput: document.getElementById('searchInput'),
+      clearBtn: document.getElementById('clearBtn'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      stats: document.getElementById('stats'),
+      loading: document.getElementById('loading'),
+      error: document.getElementById('error'),
+      noResults: document.getElementById('noResults'),
+      debug: document.getElementById('debug'),
+      virtualList: document.getElementById('virtualList')
     };
 
-    // Storage
-    function getStoredData() {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          const { data, timestamp } = JSON.parse(stored);
-          if (Date.now() - timestamp < STORAGE_EXPIRY) {
-            return data;
-          } else {
-            localStorage.removeItem(STORAGE_KEY);
-          }
-        } catch (e) {
-          localStorage.removeItem(STORAGE_KEY);
-        }
-      }
-      return null;
+    let allData = [], searchEngine = null, scroller = null;
+
+    function highlight(text, term) {
+      if (!term) return text;
+      const words = term.trim().split(/\s+/);
+      let result = text;
+      words.forEach(w => {
+        const regex = new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        result = result.replace(regex, '<span class="highlight">$1</span>');
+      });
+      return result;
     }
 
-    function storeData(data) {
-      try {
-        const payload = JSON.stringify({ data, timestamp: Date.now() });
-        if (payload.length <= 5 * 1024 * 1024) {
-          localStorage.setItem(STORAGE_KEY, payload);
-        }
-      } catch (e) {
-        console.warn('Failed to store data');
-      }
+    function renderResults(results, term = '') {
+      els.noResults.style.display = results.length === 0 ? 'block' : 'none';
+      if (results.length === 0) return;
+      const display = results.map(r => ({
+        id: r.id,
+        category: highlight(r.category || '—', term),
+        pertanyaan: highlight(r.pertanyaan || '—', term),
+        jawaban: highlight(r.jawaban || '—', term)
+      }));
+      if (!scroller) scroller = new VirtualScroller(els.virtualList);
+      scroller.setItems(display);
     }
 
-    // Fetch data
-    async function fetchSheetData() {
-      toggleLoading(true);
-      hideMessages();
-
-      try {
-        const response = await fetch(APPS_SCRIPT_URL, { method: 'GET' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const result = await response.json();
-        if (!result?.success || !Array.isArray(result.data)) throw new Error('Invalid API response');
-
-        const formatted = result.data
-          .map(item => ({
-            category: String(item.category || '').trim(),
-            pertanyaan: String(item.pertanyaan || '').trim(),
-            jawaban: String(item.jawaban || '').trim(),
-          }))
-          .filter(item => item.category || item.pertanyaan || item.jawaban);
-
-        if (formatted.length === 0) throw new Error('No valid data found');
-
-        storeData(formatted);
-        populateCards(formatted);
-      } catch (error) {
-        console.error('Fetch error:', error);
-        showError(`Failed to load data: ${error.message}`);
-      } finally {
-        toggleLoading(false);
+    const debouncedSearch = debounce(() => {
+      const term = els.searchInput.value.trim().toLowerCase();
+      if (!searchEngine) return;
+      if (!term) {
+        renderResults(allData);
+        els.stats.textContent = `Total: ${allData.length.toLocaleString()} data`;
+        return;
       }
-    }
-
-    // 🔥 Clear button logic
-    function toggleClearButton() {
-      clearButton.style.display = searchInput.value.trim() ? 'flex' : 'none';
-    }
-
-    const handleSearch = debounce(() => {
-      const term = searchInput.value;
-      const stored = getStoredData();
-      if (stored) {
-        populateCards(stored, term);
-      }
+      const results = searchEngine.search(term, { fuzzy: 0.2, prefix: true });
+      renderResults(results, term);
+      els.stats.textContent = `${results.length} hasil ditemukan`;
     }, 300);
 
-    // Event listeners
-    searchInput.addEventListener('input', () => {
-      toggleClearButton();
-      handleSearch();
-    });
+    async function fetchAllData(force = false) {
+      els.loading.style.display = 'block';
+      els.error.style.display = 'none';
+      els.debug.textContent = 'Memulai pengunduhan...\n';
 
-    searchInput.addEventListener('focus', toggleClearButton);
+      if (!force) {
+        try {
+          const cached = await getAllData();
+          if (cached && cached.length > 0) {
+            allData = cached.flat().map((item, index) => ({ ...item, id: index + 1 }));
+            initSearch();
+            els.loading.style.display = 'none';
+            els.stats.textContent = `Dari cache: ${allData.length.toLocaleString()} baris`;
+            els.debug.textContent += 'Cache berhasil dimuat!\n';
+            return;
+          }
+        } catch (e) { console.warn('Cache gagal:', e); }
+      }
 
-    clearButton.addEventListener('click', () => {
-      searchInput.value = '';
-      toggleClearButton();
-      handleSearch();
-      searchInput.focus();
-    });
+      try {
+        await clearDB();
+        let page = 1, fetched = 0, globalIndex = 0;
 
-    refreshButton.addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
-      fetchSheetData();
-    });
+        while (true) {
+          const url = `${APPS_SCRIPT_URL}?page=${page}&limit=${PAGE_SIZE}`;
+          els.debug.textContent += `→ GET halaman ${page}\n`;
 
-    // Init
-    function init() {
-      const cached = getStoredData();
-      if (cached && cached.length > 0) {
-        populateCards(cached);
-      } else {
-        fetchSheetData();
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = await res.json();
+
+          if (!json.success || !Array.isArray(json.data)) {
+            throw new Error('Format data salah dari server');
+          }
+
+          const chunk = json.data.map(row => ({
+            id: ++globalIndex,
+            category: String(row.category || row.Category || row.kategori || '').trim(),
+            pertanyaan: String(row.pertanyaan || row.Pertanyaan || row.question || '').trim(),
+            jawaban: String(row.jawaban || row.Jawaban || row.answer || '').trim()
+          })).filter(r => r.category || r.pertanyaan || r.jawaban);
+
+          if (chunk.length === 0) break;
+
+          await saveChunk(chunk.map(c => ({ data: c }))); // simpan dengan wrapper
+          fetched += chunk.length;
+          els.stats.textContent = `Downloaded: ${fetched.toLocaleString()} baris...`;
+
+          if (json.data.length < PAGE_SIZE) break;
+          page++;
+          await new Promise(r => setTimeout(r, 150));
+        }
+
+        allData = (await getAllData()).flat().map(d => d.data);
+        initSearch();
+        els.stats.textContent = `SUCCESS! ${allData.length.toLocaleString()} data siap!`;
+        els.debug.textContent += `SELESAI! Total: ${allData.length} baris\n`;
+      } catch (err) {
+        els.error.textContent = 'ERROR: ' + err.message;
+        els.error.style.display = 'block';
+        els.debug.textContent += 'ERROR: ' + err.message + '\n';
+        console.error(err);
+      } finally {
+        els.loading.style.display = 'none';
       }
     }
 
-    init();
+    function initSearch() {
+      searchEngine = new MiniSearch({
+        idField: 'id',
+        fields: ['category', 'pertanyaan', 'jawaban'],
+        storeFields: ['id', 'category', 'pertanyaan', 'jawaban'],
+        searchOptions: { fuzzy: 0.2, prefix: true }
+      });
+      searchEngine.addAll(allData);
+      renderResults(allData);
+    }
+
+    function debounce(func, wait) {
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => func(...args), wait);
+      };
+    }
+
+    // Events
+    els.searchInput.addEventListener('input', () => {
+      els.clearBtn.style.display = els.searchInput.value ? 'block' : 'none';
+      debouncedSearch();
+    });
+    els.clearBtn.addEventListener('click', () => {
+      els.searchInput.value = '';
+      els.clearBtn.style.display = 'none';
+      debouncedSearch();
+      els.searchInput.focus();
+    });
+    els.refreshBtn.addEventListener('click', () => {
+      if (confirm('Refresh semua data? (bisa lama)')) fetchAllData(true);
+    });
+
+    // START
+    fetchAllData();
   </script>
 </body>
 </html>
