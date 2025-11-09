@@ -2,46 +2,77 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Database 100K+ Rows - FINAL NO ERROR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#6200ea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>DB 100K+ Rows - FINAL DYNAMIC HEIGHT</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.min.js"></script>
+  <link rel="manifest" href="data:application/manifest+json,{
+    \"name\":\"Database 100K+\",
+    \"short_name\":\"DB100K\",
+    \"start_url\":\".\",
+    \"display\":\"standalone\",
+    \"background_color\":\"#6200ea\",
+    \"theme_color\":\"#6200ea\",
+    \"icons\":[{\"src\":\"https://cdn.jsdelivr.net/gh/posidung/icons/db512.png\",\"sizes\":\"512x512\",\"type\":\"image/png\"}]
+  }">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; max-width: 1000px; margin: 0 auto; padding: 12px; background: #f5f5f5; color: #1f1f1f; }
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 12px; background: #f5f5f5; color: #1f1f1f; transition: all 0.3s; }
+    body.dark { background: #121212; color: #e0e0e0; }
     h1 { font-size: 1.6rem; margin-bottom: 16px; text-align: center; color: #6200ea; }
+    body.dark h1 { color: #bb86fc; }
     .search-container { position: sticky; top: 0; background: #f5f5f5; padding: 12px 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border-radius: 12px; }
+    body.dark .search-container { background: #1e1e1e; }
     .search-wrapper { position: relative; }
     input[type="text"] { width: 100%; padding: 14px 44px 14px 16px; font-size: 16px; border: 2px solid #ddd; border-radius: 12px; outline: none; transition: all 0.2s; }
     input[type="text"]:focus { border-color: #6200ea; box-shadow: 0 0 0 4px rgba(98,0,234,0.15); }
-    .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #888; font-size: 20px; }
-    .refresh-btn { margin-top: 10px; width: 100%; padding: 12px; background: #6200ea; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
-    .refresh-btn:hover { background: #3700b3; }
+    body.dark input[type="text"] { background: #2d2d2d; border-color: #444; color: white; }
+    .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #888; font-size: 20px; display: none; }
+    .btn-group { display: flex; gap: 8px; margin-top: 10px; }
+    .refresh-btn, .theme-btn { flex: 1; padding: 12px; background: #6200ea; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    .refresh-btn:hover, .theme-btn:hover { background: #3700b3; }
     .stats { text-align: center; color: #555; font-size: 0.9rem; margin: 10px 0; font-weight: 600; }
-    .virtual-list { height: calc(100vh - 280px); position: relative; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; background: white; }
-    .card { background: white; margin: 8px 4px; padding: 16px; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    body.dark .stats { color: #aaa; }
+    .virtual-list { height: calc(100vh - 260px); position: relative; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; background: white; }
+    body.dark .virtual-list { background: #1e1e1e; border-color: #444; }
+    @media (max-width: 600px) { .virtual-list { height: calc(100vh - 280px); } }
+    .card { background: white; margin: 12px 8px; padding: 16px; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.1); position: absolute; width: calc(100% - 16px); left: 8px; transition: transform 0.2s; }
+    body.dark .card { background: #2d2d2d; box-shadow: 0 1px 6px rgba(0,0,0,0.3); }
     .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .card h3 { margin: 0 0 8px; font-size: 0.8rem; color: #666; text-transform: uppercase; }
+    body.dark .card h3 { color: #aaa; }
     .card p { margin: 6px 0; font-size: 14px; line-height: 1.5; }
     .card p.question { color: #1a73e8; font-weight: 600; }
     .card p.answer { color: #d81b60; }
+    body.dark .card p.question { color: #8ab4f8; }
+    body.dark .card p.answer { color: #f28b82; }
     .highlight { background: #ffeb3b; padding: 0 3px; border-radius: 3px; font-weight: 600; }
+    body.dark .highlight { background: #5f5f00; }
     .loading, .error, .no-results { text-align: center; padding: 20px; border-radius: 12px; margin: 20px 0; display: none; font-weight: 500; }
     .loading { background: #e3f2fd; color: #1976d2; }
     .error { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
     .no-results { background: #f8f9fa; color: #666; }
-    .debug { background: #fff3e0; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 200px; overflow: auto; display: block; margin: 10px 0; border: 1px solid #ffcc80; }
-    @media (max-width: 600px) { .virtual-list { height: calc(100vh - 260px); } }
+    body.dark .no-results { background: #2d2d2d; color: #aaa; }
+    .debug { background: #fff3e0; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 200px; overflow: auto; margin: 10px 0; border: 1px solid #ffcc80; }
+    body.dark .debug { background: #3d3d00; color: #ffcc80; }
+    .skeleton { background: #eee; border-radius: 8px; animation: pulse 1.5s infinite; height: 100px; margin: 12px 8px; }
+    body.dark .skeleton { background: #333; }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
   </style>
 </head>
 <body>
-  <h1>Database Functional Test</h1>
+  <h1>Database 100K+ Rows</h1>
   <div class="search-container">
     <div class="search-wrapper">
       <input type="text" id="searchInput" placeholder="Ketik kategori / pertanyaan / jawaban…" autocomplete="off">
       <button class="clear-btn" id="clearBtn" aria-label="Clear">X</button>
     </div>
-    <button class="refresh-btn" id="refreshBtn">Refresh Data</button>
+    <div class="btn-group">
+      <button class="refresh-btn" id="refreshBtn">Refresh Data</button>
+      <button class="theme-btn" id="themeBtn">Dark Mode</button>
+    </div>
   </div>
 
   <div class="stats" id="stats">Memuat data…</div>
@@ -49,17 +80,20 @@
   <div class="error" id="error"></div>
   <div class="no-results" id="noResults">Tidak ada hasil ditemukan.</div>
   <pre class="debug" id="debug">Log akan muncul di sini...</pre>
-  <div class="virtual-list" id="virtualList"></div>
+  <div class="virtual-list" id="virtualList">
+    <div class="card skeleton"></div>
+    <div class="card skeleton"></div>
+    <div class="card skeleton"></div>
+  </div>
 
   <script>
-    // GANTI INI SAJA!
+    // GANTI URL INI SAJA!
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRRmp9wYJi6ckuinfc6DznbGZ3KVke_O4jJd1eix1ZnSEGW29nUBL979OHIyQCluYe/exec';
     
     const PAGE_SIZE = 2000;
     const DB_NAME = 'SheetDB_Ultimate';
     const STORE_NAME = 'rows';
 
-    // IndexedDB - Compatible semua browser
     function openDB() {
       return new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, 3);
@@ -85,7 +119,6 @@
 
     async function saveChunk(chunk) {
       const db = await openDB();
- (await openDB());
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
       chunk.forEach(item => store.add({ data: item }));
@@ -100,53 +133,107 @@
       return new Promise((resolve) => tx.oncomplete = resolve);
     }
 
-    // Virtual Scroller
-    class VirtualScroller {
-      constructor(container, rowHeight = 128) {
+    class DynamicVirtualScroller {
+      constructor(container) {
         this.container = container;
-        this.rowHeight = rowHeight;
         this.items = [];
-        this.visibleCount = Math.ceil(innerHeight / rowHeight) + 20;
+        this.heights = [];
+        this.positions = [];
+        this.visibleCount = 30;
         this.render = this.render.bind(this);
-        container.addEventListener('scroll', this.render);
-        addEventListener('resize', this.render);
+        this.measureHeight = this.measureHeight.bind(this);
+        container.addEventListener('scroll', debounce(this.render, 10));
+        addEventListener('resize', debounce(this.render, 100));
       }
+
       setItems(items) {
         this.items = items;
-        this.container.innerHTML = `<div style="height:${items.length * this.rowHeight}px"></div>`;
+        this.heights = new Array(items.length).fill(120); // fallback
+        this.positions = new Array(items.length);
+        this.calculatePositions();
+        this.container.innerHTML = `<div style="height:${this.positions[this.positions.length-1] + this.heights[this.heights.length-1]}px"></div>`;
         this.render();
       }
+
+      calculatePositions() {
+        let pos = 0;
+        for (let i = 0; i < this.items.length; i++) {
+          this.positions[i] = pos;
+          pos += this.heights[i] + 24; // 24 = margin top+bottom
+        }
+      }
+
+      measureHeight(index, element) {
+        const height = element.offsetHeight;
+        if (this.heights[index] !== height) {
+          this.heights[index] = height;
+          this.calculatePositions();
+          this.container.firstChild.style.height = `${this.positions[this.positions.length-1] + this.heights[this.heights.length-1]}px`;
+        }
+      }
+
       render() {
+        if (!this.items.length) return;
         const scrollTop = this.container.scrollTop;
-        const start = Math.max(0, Math.floor(scrollTop / this.rowHeight) - 10);
-        const end = Math.min(this.items.length, start + this.visibleCount);
+        const viewportHeight = this.container.clientHeight;
+        let start = 0;
+        let end = this.items.length;
+
+        // Binary search untuk start
+        for (let i = 0; i < this.items.length; i++) {
+          if (this.positions[i] > scrollTop - 500) {
+            start = Math.max(0, i - 10);
+            break;
+          }
+        }
+        // Binary search untuk end
+        for (let i = start; i < this.items.length; i++) {
+          if (this.positions[i] > scrollTop + viewportHeight + 500) {
+            end = i + 10;
+            break;
+          }
+        }
+        end = Math.min(end, this.items.length);
+
+        // Hapus card di luar viewport
+        this.container.querySelectorAll('.card').forEach(card => {
+          const idx = parseInt(card.dataset.index);
+          if (idx < start || idx >= end) card.remove();
+        });
+
         const fragment = document.createDocumentFragment();
         for (let i = start; i < end; i++) {
+          if (this.container.querySelector(`[data-index="${i}"]`)) continue;
           const item = this.items[i];
-          if (!item) continue;
           const div = document.createElement('div');
           div.className = 'card';
-          div.style.cssText = `position:absolute;top:${i * this.rowHeight}px;width:100%;left:0;right:0;`;
+          div.dataset.index = i;
+          div.style.cssText = `position:absolute;top:${this.positions[i]}px;width:calc(100% - 16px);left:8px;`;
           div.innerHTML = `
             <h3>${item.category || '—'}</h3>
             <p class="question">Q: ${item.pertanyaan || '—'}</p>
             <p class="answer">A: ${item.jawaban || '—'}</p>
           `;
+          div.addEventListener('load', () => this.measureHeight(i, div));
           fragment.appendChild(div);
         }
-        const placeholder = this.container.firstChild || document.createElement('div');
-        placeholder.style.height = `${this.items.length * this.rowHeight}px`;
-        this.container.innerHTML = '';
-        this.container.appendChild(placeholder);
         this.container.appendChild(fragment);
+
+        // Ukur tinggi setelah render
+        requestAnimationFrame(() => {
+          this.container.querySelectorAll('.card').forEach(card => {
+            const idx = parseInt(card.dataset.index);
+            if (idx >= start && idx < end) this.measureHeight(idx, card);
+          });
+        });
       }
     }
 
-    // Main App
     const els = {
       searchInput: document.getElementById('searchInput'),
       clearBtn: document.getElementById('clearBtn'),
       refreshBtn: document.getElementById('refreshBtn'),
+      themeBtn: document.getElementById('themeBtn'),
       stats: document.getElementById('stats'),
       loading: document.getElementById('loading'),
       error: document.getElementById('error'),
@@ -177,7 +264,7 @@
         pertanyaan: highlight(r.pertanyaan || '—', term),
         jawaban: highlight(r.jawaban || '—', term)
       }));
-      if (!scroller) scroller = new VirtualScroller(els.virtualList);
+      if (!scroller) scroller = new DynamicVirtualScroller(els.virtualList);
       scroller.setItems(display);
     }
 
@@ -203,14 +290,19 @@
         try {
           const cached = await getAllData();
           if (cached && cached.length > 0) {
-            allData = cached.flat().map((item, index) => ({ ...item, id: index + 1 }));
+            allData = cached.map((wrapper, i) => ({
+              ...wrapper.data,
+              id: i + 1
+            }));
             initSearch();
             els.loading.style.display = 'none';
-            els.stats.textContent = `Dari cache: ${allData.length.toLocaleString()} baris`;
+            els.stats.textContent = `Cache: ${allData.length.toLocaleString()} baris`;
             els.debug.textContent += 'Cache berhasil dimuat!\n';
             return;
           }
-        } catch (e) { console.warn('Cache gagal:', e); }
+        } catch (e) { 
+          console.warn('Cache error:', e); 
+        }
       }
 
       try {
@@ -220,14 +312,11 @@
         while (true) {
           const url = `${APPS_SCRIPT_URL}?page=${page}&limit=${PAGE_SIZE}`;
           els.debug.textContent += `→ GET halaman ${page}\n`;
-
           const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const json = await res.json();
 
-          if (!json.success || !Array.isArray(json.data)) {
-            throw new Error('Format data salah dari server');
-          }
+          if (!json.success || !Array.isArray(json.data)) throw new Error('Format salah');
 
           const chunk = json.data.map(row => ({
             id: ++globalIndex,
@@ -238,7 +327,7 @@
 
           if (chunk.length === 0) break;
 
-          await saveChunk(chunk.map(c => ({ data: c }))); // simpan dengan wrapper
+          await saveChunk(chunk.map(c => ({ data: c })));
           fetched += chunk.length;
           els.stats.textContent = `Downloaded: ${fetched.toLocaleString()} baris...`;
 
@@ -247,9 +336,9 @@
           await new Promise(r => setTimeout(r, 150));
         }
 
-        allData = (await getAllData()).flat().map(d => d.data);
+        allData = (await getAllData()).map(d => d.data);
         initSearch();
-        els.stats.textContent = `SUCCESS! ${allData.length.toLocaleString()} data siap!`;
+        els.stats.textContent = `SUCCESS! ${allData.length.toLocaleString()} data`;
         els.debug.textContent += `SELESAI! Total: ${allData.length} baris\n`;
       } catch (err) {
         els.error.textContent = 'ERROR: ' + err.message;
@@ -280,7 +369,11 @@
       };
     }
 
-    // Events
+    els.themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      els.themeBtn.textContent = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+    });
+
     els.searchInput.addEventListener('input', () => {
       els.clearBtn.style.display = els.searchInput.value ? 'block' : 'none';
       debouncedSearch();
@@ -295,7 +388,13 @@
       if (confirm('Refresh semua data? (bisa lama)')) fetchAllData(true);
     });
 
-    // START
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        els.searchInput.focus();
+      }
+    });
+
     fetchAllData();
   </script>
 </body>
