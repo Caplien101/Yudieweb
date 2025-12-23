@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring Stok Gudang</title>
+
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <style>
+    /* === VARIABLES & GLOBAL === */
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #6c757d;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --warning: #f39c12;
+      --info: #3498db;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --border-radius: 10px;
+      --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 0;
+      color: #333;
+    }
+
+    /* === LOGIN PAGE === */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      border: none;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .login-card .card-header {
+      background: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      border: none;
+    }
+
+    .login-card .card-body {
+      padding: 2rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+      border: 1.5px solid #e1e5e9;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      transition: var(--transition);
+      background-color: #fff;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+    }
+
+    .input-group-text {
+      background-color: #f8f9fa;
+      border: 1.5px solid #e1e5e9;
+    }
+
+    /* === MAIN APP === */
+    #mainApp {
+      min-height: 100vh;
+      background: #f5f7fa;
+    }
+
+    /* Header */
+    .app-header {
+      background: white;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--dark);
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    .app-title i {
+      color: var(--primary);
+      font-size: 1.8rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #555;
+    }
+
+    /* Main Content */
+    .main-content {
+      padding: 2rem 0;
+    }
+
+    /* Dashboard Cards */
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--box-shadow);
+      border-left: 5px solid var(--primary);
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card h6 {
+      color: #777;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-card .icon {
+      font-size: 2.5rem;
+      color: var(--primary);
+      opacity: 0.2;
+      position: absolute;
+      right: 20px;
+      top: 20px;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-success {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .btn-outline-primary {
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      border-color: var(--warning);
+    }
+
+    /* Search Box */
+    .search-container {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-container i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+    }
+
+    .search-container input {
+      padding-left: 45px;
+      border-radius: 50px;
+      border: 1.5px solid #e1e5e9;
+      height: 50px;
+      font-size: 1rem;
+    }
+
+    /* Table */
+    .table-container {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .table-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-header h5 {
+      margin: 0;
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .table {
+      margin: 0;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table thead {
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    }
+
+    .table th {
+      padding: 1rem;
+      font-weight: 700;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+      white-space: nowrap;
+    }
+
+    .table td {
+      padding: 1rem;
+      vertical-align: middle;
+      border-bottom: 1px solid #eee;
+    }
+
+    .table tbody tr {
+      transition: var(--transition);
+    }
+
+    .table tbody tr:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.002);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .table tbody tr.clickable {
+      cursor: pointer;
+    }
+
+    .table tbody tr.clickable:hover {
+      background-color: #e8f4ff;
+    }
+
+    /* Loading Overlay untuk Modal */
+    .modal-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1050;
+      border-radius: var(--border-radius);
+    }
+
+    .modal-loading .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: var(--primary);
+    }
+
+    /* Efek untuk baris yang sedang diproses */
+    .row-processing {
+      background-color: rgba(67, 97, 238, 0.1) !important;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .row-processing::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.2), transparent);
+      animation: loadingShimmer 1.5s infinite;
+    }
+
+    @keyframes loadingShimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* Quantity Badges */
+    .qty-badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .qty-low {
+      color: #d63031;
+    }
+
+    .qty-medium {
+      color: #e67e22;
+    }
+
+    .qty-high {
+      color: #27ae60;
+    }
+
+    /* Loading Spinner */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+    }
+
+    .loading-spinner {
+      width: 3rem;
+      height: 3rem;
+      border-width: 3px;
+      color: var(--primary);
+    }
+
+    /* Modals */
+    .modal-content {
+      border-radius: var(--border-radius);
+      border: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+      background: linear-gradient(to right, var(--primary), #5a6fd8);
+      color: white;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      padding: 1.5rem;
+      border: none;
+    }
+
+    .modal-title {
+      font-weight: 700;
+    }
+
+    .modal-header .btn-close {
+      filter: invert(1);
+      opacity: 0.8;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      position: relative;
+      min-height: 200px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #eee;
+      padding: 1.5rem;
+    }
+
+    /* Suggestion List */
+    .suggestion-list {
+      position: absolute;
+      width: 85%;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 0 0 8px 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .suggestion-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: var(--transition);
+    }
+
+    .suggestion-item:hover {
+      background-color: #f0f7ff;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    /* History Items */
+    .history-item {
+      padding: 1rem;
+      border-left: 4px solid var(--primary);
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .history-item.in {
+      border-left-color: var(--success);
+    }
+
+    .history-item.out {
+      border-left-color: var(--danger);
+    }
+
+    /* Footer */
+    .app-footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #777;
+      font-size: 0.9rem;
+      border-top: 1px solid #eee;
+      background: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      
+      .user-info {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .action-buttons {
+        justify-content: center;
+      }
+      
+      .dashboard-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      .table-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+      
+      .table th, .table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+      }
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div id="loginPage">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="card-header">
+          <h4 class="mb-0"><i class="bi bi-box-seam"></i> Monitoring Stok Gudang</h4>
+          <small class="opacity-75">Sistem Manajemen Inventori</small>
+        </div>
+        <div class="card-body">
+          <div class="mb-4 text-center">
+            <h5 class="mb-1">Selamat Datang</h5>
+            <p class="text-muted">Silakan masuk ke akun Anda</p>
+          </div>
+          
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input type="text" id="username" class="form-control" placeholder="Masukkan username" />
+            </div>
+            <div class="form-text">Masukkan NIK</div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input type="password" id="password" class="form-control" placeholder="Masukkan password" />
+            </div>
+            <div class="form-text">Password kombinasi angka dan huruf (min. 6 karakter)</div>
+          </div>
+          
+          <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+          
+          <button id="loginBtn" class="btn btn-primary w-100 py-2 d-flex justify-content-center align-items-center">
+            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+            <span class="btn-text">Login</span>
+          </button>
+          
+          <div class="mt-4 text-center text-muted">
+            <small>© 2023 Inventory System v1.0</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="mainApp" class="d-none">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="container">
+        <div class="header-content">
+          <div class="app-title">
+            <i class="bi bi-box-seam"></i>
+            <span>Monitoring Stok Gudang</span>
+          </div>
+          
+          <div class="user-info">
+            <div class="user-name" id="userDisplay"></div>
+            <div class="dropdown">
+              <div class="user-avatar dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-person"></i>
+              </div>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#" id="logoutLink"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="container">
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+            <i class="bi bi-plus-circle"></i> Tambah Item Baru
+          </button>
+          <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#mutasiModal">
+            <i class="bi bi-arrow-left-right"></i> Mutasi Stok
+          </button>
+          <button type="button" class="btn btn-outline-primary" id="refreshBtn">
+            <i class="bi bi-arrow-clockwise"></i> Refresh Data
+          </button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-container">
+          <i class="bi bi-search"></i>
+          <input type="text" id="searchInput" class="form-control" placeholder="Cari produk berdasarkan PLU atau deskripsi..." />
+        </div>
+
+        <!-- Table -->
+        <div class="table-container fade-in">
+          <div class="table-header">
+            <h5><i class="bi bi-table me-2"></i> Daftar Stok Produk</h5>
+            <div class="text-muted" id="tableInfo">Memuat data...</div>
+          </div>
+          
+          <div id="tableLoader" class="loading-container">
+            <div class="spinner-border loading-spinner" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-3">Memuat data stok...</div>
+          </div>
+          
+          <div class="table-responsive d-none" id="tableContent">
+            <table class="table" id="stockTable">
+              <thead>
+                <tr>
+                  <th>PLU</th>
+                  <th>Deskripsi Produk</th>
+                  <th>Stok Tersedia</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="container">
+        <div>© 2025 Inventory Management System | Made with <i class="bi bi-heart-fill text-danger"></i></div>
+        <small class="text-muted">Versi 1.0.0 | Terakhir diperbarui: <span id="lastUpdated">-</span></small>
+      </div>
+    </footer>
+
+    <!-- Modal Mutasi -->
+    <div class="modal fade" id="mutasiModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-arrow-left-right me-2"></i> Mutasi Stok</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Pilih Produk</label>
+              <input type="text" id="pluSearch" class="form-control" placeholder="Ketik PLU atau nama produk..." autocomplete="off" />
+              <div class="suggestion-list" id="suggestionList"></div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Jenis Mutasi</label>
+              <select id="mutasiSelect" class="form-select">
+                <option value="">-- Pilih jenis mutasi --</option>
+                <option value="ambil">Ambil Stok</option>
+                <option value="tambah">Tambah Stok</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Jumlah <span id="currentStockLabel" class="text-muted"></span></label>
+              <input type="number" id="qtyInput" class="form-control" min="1" value="1" />
+              <div id="qtyInfo" class="form-text"></div>
+            </div>
+            
+           
+            
+            <input type="hidden" id="selectedPlu" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-success" id="simpanMutasiBtn">
+              <span class="spinner-border spinner-border-sm me-2 d-none"></span>
+              <span class="btn-text">Simpan Mutasi</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Tambah Item -->
+    <div class="modal fade" id="addItemModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i> Tambah Item Baru</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">PLU <span class="text-danger">*</span></label>
+              <input type="text" id="newPlu" class="form-control" placeholder="Contoh: 2001" />
+              <div id="pluError" class="text-danger mt-1 small"></div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Deskripsi Produk <span class="text-danger">*</span></label>
+              <input type="text" id="newDesc" class="form-control" placeholder="Contoh: Susu Sapi Murni 1L" />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Stok Awal</label>
+              <input type="number" id="newQty" class="form-control" value="0" min="0" />
+              <div class="form-text">Isi dengan 0 jika produk belum tersedia</div>
+            </div>
+            
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-success" id="simpanItemBaruBtn">
+              <span class="spinner-border spinner-border-sm me-2 d-none"></span>
+              <span class="btn-text">Simpan Item</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Riwayat -->
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-clock-history me-2"></i> Riwayat Mutasi: <span id="historyPlu"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Loading Overlay -->
+            <div id="historyLoadingOverlay" class="modal-loading">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <div class="mt-3 fw-semibold text-primary">Memuat riwayat transaksi...</div>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="historyEmpty" class="text-center py-5 d-none">
+              <div class="mb-4">
+                <i class="bi bi-clock-history fs-1 text-muted opacity-50"></i>
+              </div>
+              <h5 class="text-muted mb-2">Belum ada riwayat transaksi</h5>
+              <p class="text-muted small">Tidak ada riwayat mutasi untuk produk ini.</p>
+            </div>
+            
+            <!-- Error State -->
+            <div id="historyError" class="text-center py-5 d-none">
+              <div class="mb-4">
+                <i class="bi bi-exclamation-triangle fs-1 text-danger"></i>
+              </div>
+              <h5 class="text-danger mb-2">Gagal memuat riwayat</h5>
+              <p class="text-muted small" id="historyErrorMessage"></p>
+              <button class="btn btn-sm btn-outline-primary mt-2" id="retryHistoryBtn">
+                <i class="bi bi-arrow-clockwise"></i> Coba Lagi
+              </button>
+            </div>
+            
+            <!-- History Content -->
+            <div id="historyContent" class="d-none"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+      <div id="toastContainer" class="toast-container"></div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // === KONFIGURASI ===
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzfupoPJonTLdFcAeCnLXqc0y1VAqCiuzOOyQKdikI4iIM2KvIXFnLnvgy1SuBeGvr5Zg/exec';
+
+    // === VARIABEL GLOBAL ===
+    let stockData = [];
+    let selectedPlu = null;
+    let currentUser = null;
+    let lastDataUpdate = null;
+    let currentHistoryPlu = null;
+    let historyModalInstance = null;
+    let clickedRowElement = null;
+
+    // === UTILITAS ===
+    function validateUsername(username) {
+      return /^\d+$/.test(username) && username.length >= 3;
+    }
+
+    function validatePassword(password) {
+      const hasDigit = /\d/.test(password);
+      const hasLetter = /[a-zA-Z]/.test(password);
+      return hasDigit && hasLetter && password.length >= 6;
+    }
+
+    // === FUNGSI LOADING ===
+    function setLoading(targetId, isLoading) {
+      if (targetId === 'table') {
+        const loader = document.getElementById('tableLoader');
+        const tableContent = document.getElementById('tableContent');
+        if (loader && tableContent) {
+          if (isLoading) {
+            loader.classList.remove('d-none');
+            tableContent.classList.add('d-none');
+          } else {
+            loader.classList.add('d-none');
+            tableContent.classList.remove('d-none');
+          }
+        }
+        return;
+      }
+
+      const btn = document.getElementById(targetId);
+      if (!btn) return;
+
+      const spinner = btn.querySelector('.spinner-border');
+      if (spinner) {
+        if (isLoading) {
+          spinner.classList.remove('d-none');
+        } else {
+          spinner.classList.add('d-none');
+        }
+      }
+
+      if (isLoading) {
+        btn.disabled = true;
+      } else {
+        btn.disabled = false;
+      }
+    }
+
+    // === NOTIFIKASI ===
+    function showToast(message, type = 'success') {
+      const toastId = 'toast-' + Date.now();
+      const icon = type === 'success' ? 'check-circle' : 
+                   type === 'warning' ? 'exclamation-triangle' : 
+                   type === 'info' ? 'info-circle' : 'exclamation-circle';
+      
+      const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert">
+          <div class="d-flex">
+            <div class="toast-body d-flex align-items-center">
+              <i class="bi bi-${icon} me-2"></i>
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      `;
+      
+      const container = document.getElementById('toastContainer');
+      if (container) {
+        container.insertAdjacentHTML('beforeend', toastHtml);
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+        toast.show();
+        
+        toastElement.addEventListener('hidden.bs.toast', () => {
+          toastElement.remove();
+        });
+      }
+    }
+
+    // === UPDATE WAKTU ===
+    function updateLastUpdated() {
+      const now = new Date();
+      const options = { 
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      const lastUpdatedEl = document.getElementById('lastUpdated');
+      if (lastUpdatedEl) {
+        lastUpdatedEl.textContent = now.toLocaleTimeString('id-ID', options);
+      }
+      lastDataUpdate = now;
+    }
+
+    // === LOGIN ===
+    async function handleLogin() {
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const username = usernameInput?.value?.trim();
+      const password = passwordInput?.value;
+      const errorEl = document.getElementById('loginError');
+
+      if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.add('d-none');
+      }
+
+      // Validasi username
+      if (!validateUsername(username)) {
+        if (errorEl) {
+          errorEl.textContent = 'Username harus angka (minimal 3 digit)';
+          errorEl.classList.remove('d-none');
+        }
+        usernameInput?.focus();
+        return;
+      }
+
+      // Validasi password
+      if (!validatePassword(password)) {
+        if (errorEl) {
+          errorEl.textContent = 'Password harus kombinasi angka & huruf (minimal 6 karakter)';
+          errorEl.classList.remove('d-none');
+        }
+        passwordInput?.focus();
+        return;
+      }
+
+      setLoading('loginBtn', true);
+
+      try {
+        const response = await fetch(GAS_URL + '?action=login', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            username, 
+            password,
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          currentUser = username;
+          sessionStorage.setItem('username', username);
+          sessionStorage.setItem('loginTime', new Date().toISOString());
+          
+          showMainApp(username);
+          loadInventory();
+          showToast(`Selamat datang, ${username}!`, 'success');
+          
+          // Clear login form
+          usernameInput.value = '';
+          passwordInput.value = '';
+        } else {
+          if (errorEl) {
+            errorEl.textContent = result.error || 'Username atau password salah';
+            errorEl.classList.remove('d-none');
+          }
+          showToast('Login gagal', 'danger');
+          passwordInput?.focus();
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        if (errorEl) {
+          errorEl.textContent = 'Gagal terhubung ke server';
+          errorEl.classList.remove('d-none');
+        }
+        showToast('Koneksi gagal', 'danger');
+      } finally {
+        setLoading('loginBtn', false);
+      }
+    }
+
+    // === TAMPILKAN APLIKASI UTAMA ===
+    function showMainApp(username) {
+      const loginPage = document.getElementById('loginPage');
+      const mainApp = document.getElementById('mainApp');
+      const userDisplay = document.getElementById('userDisplay');
+
+      if (loginPage) loginPage.classList.add('d-none');
+      if (mainApp) mainApp.classList.remove('d-none');
+      if (userDisplay) {
+        userDisplay.textContent = `User: ${username}`;
+      }
+
+      updateLastUpdated();
+    }
+
+    // === LOGOUT ===
+    function handleLogout(e) {
+      if (e) e.preventDefault();
+      
+      if (confirm('Yakin ingin logout?')) {
+        sessionStorage.removeItem('username');
+        sessionStorage.removeItem('loginTime');
+        currentUser = null;
+        
+        const mainApp = document.getElementById('mainApp');
+        const loginPage = document.getElementById('loginPage');
+        
+        if (mainApp) mainApp.classList.add('d-none');
+        if (loginPage) {
+          loginPage.classList.remove('d-none');
+          const usernameEl = document.getElementById('username');
+          const passwordEl = document.getElementById('password');
+          const errorEl = document.getElementById('loginError');
+          
+          if (usernameEl) usernameEl.value = '';
+          if (passwordEl) passwordEl.value = '';
+          if (errorEl) {
+            errorEl.textContent = '';
+            errorEl.classList.add('d-none');
+          }
+          
+          setTimeout(() => {
+            if (usernameEl) usernameEl.focus();
+          }, 100);
+        }
+        
+        showToast('Anda telah logout', 'info');
+      }
+    }
+
+    // === LOAD DATA INVENTARIS ===
+    async function loadInventory() {
+      setLoading('table', true);
+      
+      try {
+        const response = await fetch(GAS_URL + '?action=getInventory&_t=' + Date.now());
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          stockData = Array.isArray(result.data) ? result.data : [];
+          renderTable(stockData);
+          updateLastUpdated();
+          
+          // Reset search
+          const searchInput = document.getElementById('searchInput');
+          if (searchInput) searchInput.value = '';
+          
+          // Update count info
+          const tableInfo = document.getElementById('tableInfo');
+          if (tableInfo) {
+            tableInfo.textContent = `${stockData.length} produk ditemukan`;
+          }
+          
+          // Cache data
+          sessionStorage.setItem('cachedInventory', JSON.stringify(stockData));
+        } else {
+          throw new Error(result.error || 'Gagal memuat data');
+        }
+      } catch (err) {
+        console.error('Gagal memuat stok:', err);
+        
+        // Coba dari cache
+        const cachedData = sessionStorage.getItem('cachedInventory');
+        if (cachedData) {
+          try {
+            stockData = JSON.parse(cachedData);
+            renderTable(stockData);
+            showToast('Menampilkan data cache (offline)', 'warning');
+            
+            const tableInfo = document.getElementById('tableInfo');
+            if (tableInfo) {
+              tableInfo.textContent = `${stockData.length} produk (data cache)`;
+            }
+          } catch (cacheErr) {
+            showToast('Gagal memuat data stok', 'danger');
+          }
+        } else {
+          showToast('Gagal memuat data stok', 'danger');
+        }
+      } finally {
+        setLoading('table', false);
+      }
+    }
+
+    // === RENDER TABEL (VERSI SEDERHANA) ===
+    function renderTable(data) {
+      const tbody = document.querySelector('#stockTable tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      
+      if (!Array.isArray(data) || data.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `
+          <td colspan="3" class="text-center py-5">
+            <div class="mb-3">
+              <i class="bi bi-inbox fs-1 text-muted"></i>
+            </div>
+            <p class="text-muted mb-0">Tidak ada data stok</p>
+            <p class="small text-muted">Klik "Tambah Item Baru" untuk memulai</p>
+          </td>
+        `;
+        tbody.appendChild(emptyRow);
+        return;
+      }
+
+      data.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.className = 'clickable';
+        
+        // Tambahkan atribut data-plu untuk memudahkan pencarian
+        row.setAttribute('data-plu', item.plu);
+        
+        // Warna baris berdasarkan stok
+        let rowClass = '';
+        let qty = parseInt(item.qty) || 0;
+        
+        if (qty === 0) {
+          rowClass = 'table-white';
+        } else if (qty < 10) {
+          rowClass = 'table-white';
+        }
+        
+        if (rowClass) {
+          row.classList.add(rowClass);
+        }
+        
+        // Efek animasi fade in bertahap
+        row.style.animationDelay = `${index * 0.05}s`;
+        row.classList.add('fade-in');
+        
+        // Hanya 3 kolom: PLU, Description, Qty
+        row.innerHTML = `
+          <td class="fw-semibold">${item.plu}</td>
+          <td>${item.description || '-'}</td>
+          <td class="text-end fw-bold ${qty === 0 ? 'text-danger' : qty < 10 ? 'text-warning' : 'text-success'}">
+            ${qty.toLocaleString()}
+          </td>
+        `;
+        
+        // Klik row untuk lihat riwayat
+        row.addEventListener('click', function() {
+          // Simpan referensi baris yang diklik
+          clickedRowElement = this;
+          
+          // Tambahkan efek loading pada baris
+          this.classList.add('row-processing');
+          
+          // Tampilkan riwayat
+          showHistory(item.plu);
+        });
+        
+        tbody.appendChild(row);
+      });
+    }
+
+    // === TAMPILKAN RIWAYAT DENGAN LOADING ===
+    async function showHistory(plu) {
+      // Simpan PLU yang sedang diproses
+      currentHistoryPlu = plu;
+      
+      // Tampilkan loading di modal body
+      const historyLoadingOverlay = document.getElementById('historyLoadingOverlay');
+      const historyContent = document.getElementById('historyContent');
+      const historyEmpty = document.getElementById('historyEmpty');
+      const historyError = document.getElementById('historyError');
+      
+      if (historyLoadingOverlay) historyLoadingOverlay.classList.remove('d-none');
+      if (historyContent) historyContent.classList.add('d-none');
+      if (historyEmpty) historyEmpty.classList.add('d-none');
+      if (historyError) historyError.classList.add('d-none');
+      
+      // Set PLU di judul modal
+      const historyPluEl = document.getElementById('historyPlu');
+      if (historyPluEl) historyPluEl.textContent = plu;
+      
+      // Tampilkan modal segera
+      const historyModal = document.getElementById('historyModal');
+      if (!historyModalInstance) {
+        historyModalInstance = new bootstrap.Modal(historyModal);
+      }
+      
+      historyModalInstance.show();
+      
+      try {
+        // Ambil data riwayat
+        const response = await fetch(GAS_URL + '?action=getHistory&plu=' + encodeURIComponent(plu) + '&_t=' + Date.now());
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          const historyList = Array.isArray(result.data) ? result.data : [];
+          
+          if (historyList.length === 0) {
+            // Tampilkan empty state
+            if (historyEmpty) historyEmpty.classList.remove('d-none');
+          } else {
+            // Render riwayat
+            renderHistoryContent(historyList, plu);
+            if (historyContent) historyContent.classList.remove('d-none');
+          }
+        } else {
+          throw new Error(result.error || 'Gagal memuat riwayat');
+        }
+      } catch (err) {
+        console.error('Gagal memuat riwayat:', err);
+        
+        // Tampilkan error state
+        if (historyError) {
+          historyError.classList.remove('d-none');
+          const errorMessage = document.getElementById('historyErrorMessage');
+          if (errorMessage) {
+            errorMessage.textContent = err.message || 'Terjadi kesalahan saat memuat data';
+          }
+        }
+      } finally {
+        // Sembunyikan loading
+        if (historyLoadingOverlay) historyLoadingOverlay.classList.add('d-none');
+        
+        // Hapus efek processing dari baris yang diklik
+        if (clickedRowElement) {
+          setTimeout(() => {
+            clickedRowElement.classList.remove('row-processing');
+            clickedRowElement = null;
+          }, 300);
+        }
+      }
+    }
+
+    // === RENDER KONTEN RIWAYAT ===
+    function renderHistoryContent(historyList, plu) {
+      const historyContent = document.getElementById('historyContent');
+      if (!historyContent) return;
+      
+      // Urutkan berdasarkan tanggal terbaru
+      const sortedHistory = [...historyList].sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+      );
+      
+      const historyItems = sortedHistory.map(h => {
+        const sign = h.type === 'ambil' ? '–' : '+';
+        const time = new Date(h.timestamp).toLocaleString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const typeClass = h.type === 'tambah' ? 'in' : 'out';
+        const typeColor = h.type === 'tambah' ? 'success' : 'danger';
+        
+        return `
+          <div class="history-item ${typeClass} mb-2 p-3 border-start border-3 border-${typeColor} bg-light">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <span class="badge bg-${typeColor}">
+                ${h.type === 'tambah' ? '<i class="bi bi-plus-circle me-1"></i> Penambahan' : '<i class="bi bi-dash-circle me-1"></i> Pengurangan'}
+              </span>
+              <small class="text-muted">${time}</small>
+            </div>
+            <div class="mb-1">
+              <span class="fs-5 fw-bold text-${typeColor}">${sign}${h.change}</span>
+              <span class="text-muted ms-2">→ Stok baru: <span class="fw-semibold">${h.newQty}</span></span>
+            </div>
+            <div class="small text-muted">
+              <i class="bi bi-person"></i> ${h.username || '-'}
+              ${h.note ? `• <span class="fst-italic">"${h.note}"</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      historyContent.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="text-muted small">
+            <i class="bi bi-list-check me-1"></i> Total ${sortedHistory.length} transaksi
+          </div>
+          <button class="btn btn-sm btn-outline-primary" id="refreshHistoryBtn" data-plu="${plu}">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+        <div style="max-height: 400px; overflow-y: auto;" class="pe-2">
+          ${historyItems}
+        </div>
+      `;
+      
+      // Event untuk refresh riwayat
+      const refreshBtn = document.getElementById('refreshHistoryBtn');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          showHistory(plu);
+        });
+      }
+    }
+
+    // === SUGGESTION SYSTEM ===
+    function initSuggestion() {
+      const pluSearch = document.getElementById('pluSearch');
+      const suggestionList = document.getElementById('suggestionList');
+      
+      if (!pluSearch || !suggestionList) return;
+
+      pluSearch.addEventListener('input', () => {
+        const term = pluSearch.value.toLowerCase().trim();
+        suggestionList.innerHTML = '';
+        suggestionList.style.display = 'none';
+        
+        if (!term || term.length < 1) {
+          selectedPlu = null;
+          updateQtyInfo();
+          return;
+        }
+        
+        const matches = stockData.filter(item =>
+          item.plu.toLowerCase().includes(term) ||
+          item.description.toLowerCase().includes(term)
+        ).slice(0, 6);
+        
+        if (matches.length > 0) {
+          matches.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            
+            // Warna berdasarkan stok
+            let qtyClass = 'text-success';
+            if (item.qty === 0) qtyClass = 'text-danger';
+            else if (item.qty < 10) qtyClass = 'text-warning';
+            
+            div.innerHTML = `
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>${item.plu}</strong>
+                  <span class="text-muted ms-2">${item.description.substring(0, 30)}${item.description.length > 30 ? '...' : ''}</span>
+                </div>
+                <span class="badge bg-light text-dark">
+                  <span class="${qtyClass} fw-bold">${item.qty}</span>
+                </span>
+              </div>
+            `;
+            
+            div.addEventListener('click', () => {
+              pluSearch.value = `${item.plu} – ${item.description}`;
+              selectedPlu = item.plu;
+              suggestionList.style.display = 'none';
+              updateQtyInfo();
+              
+              setTimeout(() => {
+                document.getElementById('mutasiSelect').focus();
+              }, 100);
+            });
+            
+            suggestionList.appendChild(div);
+          });
+          
+          suggestionList.style.display = 'block';
+        }
+      });
+
+      // Hide suggestion ketika klik di luar
+      document.addEventListener('click', (e) => {
+        if (!pluSearch.contains(e.target) && !suggestionList.contains(e.target)) {
+          suggestionList.style.display = 'none';
+        }
+      });
+    }
+
+    // === UPDATE INFO QUANTITY ===
+    function updateQtyInfo() {
+      const qtyInfo = document.getElementById('qtyInfo');
+      const qtyInput = document.getElementById('qtyInput');
+      const btnSave = document.getElementById('simpanMutasiBtn');
+      const mutasiSelect = document.getElementById('mutasiSelect');
+      
+      if (!qtyInfo || !qtyInput || !btnSave || !mutasiSelect) return;
+
+      const tipe = mutasiSelect.value;
+      qtyInfo.textContent = '';
+      qtyInput.disabled = false;
+      qtyInput.value = 1;
+      btnSave.disabled = false;
+
+      if (!selectedPlu || !tipe) {
+        qtyInput.disabled = true;
+        btnSave.disabled = true;
+        return;
+      }
+
+      const item = stockData.find(i => i.plu === selectedPlu);
+      if (!item) {
+        qtyInfo.innerHTML = '<span class="text-danger">Produk tidak ditemukan</span>';
+        qtyInput.disabled = true;
+        btnSave.disabled = true;
+        return;
+      }
+
+      const currentQty = parseInt(item.qty) || 0;
+
+      if (tipe === 'ambil') {
+        if (currentQty === 0) {
+          qtyInfo.innerHTML = '<span class="text-danger">Stok kosong</span>';
+          qtyInput.disabled = true;
+          qtyInput.value = 0;
+          btnSave.disabled = true;
+        } else {
+          qtyInfo.textContent = `Stok tersedia: ${currentQty}`;
+          qtyInput.min = 1;
+          qtyInput.max = currentQty;
+        }
+      } else {
+        qtyInfo.textContent = `Stok saat ini: ${currentQty}`;
+        qtyInput.min = 1;
+        qtyInput.removeAttribute('max');
+      }
+      
+      if (tipe && selectedPlu) {
+        setTimeout(() => {
+          qtyInput.focus();
+          qtyInput.select();
+        }, 100);
+      }
+    }
+
+    // === HANDLE MUTASI STOK ===
+    async function handleMutateStock() {
+      const mutasiSelect = document.getElementById('mutasiSelect');
+      const qtyInput = document.getElementById('qtyInput');
+      const mutasiNote = document.getElementById('mutasiNote');
+      
+      if (!selectedPlu) {
+        showToast('Pilih produk terlebih dahulu', 'warning');
+        document.getElementById('pluSearch').focus();
+        return;
+      }
+      
+      const tipe = mutasiSelect?.value;
+      if (!tipe) {
+        showToast('Pilih jenis mutasi', 'warning');
+        mutasiSelect.focus();
+        return;
+      }
+      
+      const qtyChange = parseInt(qtyInput?.value);
+      if (isNaN(qtyChange) || qtyChange <= 0) {
+        showToast('Jumlah harus lebih dari 0', 'warning');
+        qtyInput.focus();
+        return;
+      }
+
+      // Validasi stok untuk pengambilan
+      if (tipe === 'ambil') {
+        const item = stockData.find(i => i.plu === selectedPlu);
+        if (item && qtyChange > item.qty) {
+          showToast(`Jumlah melebihi stok tersedia`, 'danger');
+          qtyInput.focus();
+          return;
+        }
+      }
+
+      const username = sessionStorage.getItem('username') || currentUser;
+      const note = mutasiNote?.value?.trim() || '';
+
+      setLoading('simpanMutasiBtn', true);
+
+      try {
+        const response = await fetch(GAS_URL + '?action=mutateStock', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            plu: selectedPlu, 
+            type: tipe, 
+            change: qtyChange, 
+            username,
+            note,
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          const modal = bootstrap.Modal.getInstance(document.getElementById('mutasiModal'));
+          if (modal) modal.hide();
+          
+          resetMutasiForm();
+          loadInventory();
+          
+          const actionText = tipe === 'tambah' ? 'ditambahkan' : 'diambil';
+          showToast(`Stok ${selectedPlu} berhasil ${actionText}`, 'success');
+          
+        } else {
+          showToast(result.error || 'Gagal melakukan mutasi', 'danger');
+        }
+      } catch (err) {
+        console.error('Error mutasi:', err);
+        showToast('Gagal menghubungi server', 'danger');
+      } finally {
+        setLoading('simpanMutasiBtn', false);
+      }
+    }
+
+    // === RESET FORM MUTASI ===
+    function resetMutasiForm() {
+      const pluSearch = document.getElementById('pluSearch');
+      const mutasiSelect = document.getElementById('mutasiSelect');
+      const qtyInput = document.getElementById('qtyInput');
+      const mutasiNote = document.getElementById('mutasiNote');
+      const suggestionList = document.getElementById('suggestionList');
+      
+      if (pluSearch) pluSearch.value = '';
+      if (mutasiSelect) mutasiSelect.value = '';
+      if (qtyInput) {
+        qtyInput.value = '1';
+        qtyInput.disabled = true;
+      }
+      if (mutasiNote) mutasiNote.value = '';
+      if (suggestionList) suggestionList.style.display = 'none';
+      
+      selectedPlu = null;
+      
+      const qtyInfo = document.getElementById('qtyInfo');
+      if (qtyInfo) qtyInfo.textContent = '';
+    }
+
+    // === TAMBAH ITEM BARU ===
+    async function handleAddNewItem() {
+      const newPlu = document.getElementById('newPlu')?.value?.trim();
+      const newDesc = document.getElementById('newDesc')?.value?.trim();
+      const newQty = parseInt(document.getElementById('newQty')?.value) || 0;
+      const errorEl = document.getElementById('pluError');
+
+      if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.add('d-none');
+      }
+
+      // Validasi PLU
+      if (!newPlu) {
+        if (errorEl) {
+          errorEl.textContent = 'PLU wajib diisi';
+          errorEl.classList.remove('d-none');
+        }
+        document.getElementById('newPlu').focus();
+        return;
+      }
+
+      // Validasi format PLU (angka saja)
+      if (!/^\d+$/.test(newPlu)) {
+        if (errorEl) {
+          errorEl.textContent = 'PLU harus berupa angka';
+          errorEl.classList.remove('d-none');
+        }
+        document.getElementById('newPlu').focus();
+        return;
+      }
+
+      // Validasi deskripsi
+      if (!newDesc) {
+        showToast('Deskripsi produk wajib diisi', 'warning');
+        document.getElementById('newDesc').focus();
+        return;
+      }
+
+      // Cek duplikasi PLU
+      if (stockData.some(i => i.plu === newPlu)) {
+        if (errorEl) {
+          errorEl.textContent = 'PLU sudah ada';
+          errorEl.classList.remove('d-none');
+        }
+        document.getElementById('newPlu').focus();
+        return;
+      }
+
+      const username = sessionStorage.getItem('username') || currentUser;
+      setLoading('simpanItemBaruBtn', true);
+
+      try {
+        const response = await fetch(GAS_URL + '?action=addNewItem', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            plu: newPlu, 
+            description: newDesc, 
+            qty: newQty, 
+            username,
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
+          if (modal) modal.hide();
+          
+          resetAddItemForm();
+          loadInventory();
+          
+          showToast(`Produk ${newPlu} berhasil ditambahkan`, 'success');
+          
+        } else {
+          if (errorEl) {
+            errorEl.textContent = result.error || 'Gagal menambah item';
+            errorEl.classList.remove('d-none');
+          }
+        }
+      } catch (err) {
+        console.error('Error tambah item:', err);
+        if (errorEl) {
+          errorEl.textContent = 'Gagal menghubungi server';
+          errorEl.classList.remove('d-none');
+        }
+      } finally {
+        setLoading('simpanItemBaruBtn', false);
+      }
+    }
+
+    // === RESET FORM TAMBAH ITEM ===
+    function resetAddItemForm() {
+      const newPlu = document.getElementById('newPlu');
+      const newDesc = document.getElementById('newDesc');
+      const newQty = document.getElementById('newQty');
+      const errorEl = document.getElementById('pluError');
+      
+      if (newPlu) newPlu.value = '';
+      if (newDesc) newDesc.value = '';
+      if (newQty) newQty.value = '0';
+      if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.add('d-none');
+      }
+    }
+
+    // === PENCARIAN ===
+    function initSearch() {
+      const searchInput = document.getElementById('searchInput');
+      if (!searchInput) return;
+      
+      let searchTimeout;
+      
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        
+        searchTimeout = setTimeout(() => {
+          const term = searchInput.value.toLowerCase().trim();
+          
+          if (term.length === 0) {
+            renderTable(stockData);
+            
+            const tableInfo = document.getElementById('tableInfo');
+            if (tableInfo) {
+              tableInfo.textContent = `${stockData.length} produk`;
+            }
+            return;
+          }
+          
+          const filtered = stockData.filter(item =>
+            item.plu.toLowerCase().includes(term) ||
+            item.description.toLowerCase().includes(term)
+          );
+          
+          renderTable(filtered);
+          
+          const tableInfo = document.getElementById('tableInfo');
+          if (tableInfo) {
+            tableInfo.textContent = filtered.length === 0 
+              ? 'Tidak ditemukan' 
+              : `${filtered.length} hasil ditemukan`;
+          }
+        }, 300);
+      });
+    }
+
+    // === SHORTCUT KEYBOARD ===
+    function initKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        // Skip jika di dalam input/textarea
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+          return;
+        }
+        
+        // Ctrl+N untuk tambah item
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+          e.preventDefault();
+          const modal = new bootstrap.Modal(document.getElementById('addItemModal'));
+          modal.show();
+        }
+        
+        // Ctrl+M untuk mutasi
+        if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+          e.preventDefault();
+          const modal = new bootstrap.Modal(document.getElementById('mutasiModal'));
+          modal.show();
+        }
+        
+        // F5 untuk refresh
+        if (e.key === 'F5') {
+          e.preventDefault();
+          loadInventory();
+        }
+        
+        // Ctrl+K atau / untuk fokus search
+        if ((e.ctrlKey && e.key === 'k') || e.key === '/') {
+          e.preventDefault();
+          const searchInput = document.getElementById('searchInput');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+      });
+    }
+
+    // === EVENT MODAL ===
+    function initModalEvents() {
+      // Modal mutasi
+      const mutasiModal = document.getElementById('mutasiModal');
+      if (mutasiModal) {
+        mutasiModal.addEventListener('show.bs.modal', () => {
+          selectedPlu = null;
+          updateQtyInfo();
+        });
+        
+        mutasiModal.addEventListener('shown.bs.modal', () => {
+          document.getElementById('pluSearch').focus();
+        });
+      }
+      
+      // Modal tambah item
+      const addItemModal = document.getElementById('addItemModal');
+      if (addItemModal) {
+        addItemModal.addEventListener('show.bs.modal', () => {
+          resetAddItemForm();
+        });
+        
+        addItemModal.addEventListener('shown.bs.modal', () => {
+          document.getElementById('newPlu').focus();
+        });
+      }
+      
+      // Modal riwayat
+      const historyModal = document.getElementById('historyModal');
+      if (historyModal) {
+        historyModal.addEventListener('hidden.bs.modal', () => {
+          // Reset semua state modal riwayat
+          currentHistoryPlu = null;
+          
+          const historyLoadingOverlay = document.getElementById('historyLoadingOverlay');
+          const historyContent = document.getElementById('historyContent');
+          const historyEmpty = document.getElementById('historyEmpty');
+          const historyError = document.getElementById('historyError');
+          
+          if (historyLoadingOverlay) historyLoadingOverlay.classList.add('d-none');
+          if (historyContent) {
+            historyContent.classList.add('d-none');
+            historyContent.innerHTML = '';
+          }
+          if (historyEmpty) historyEmpty.classList.add('d-none');
+          if (historyError) historyError.classList.add('d-none');
+        });
+      }
+    }
+
+    // === AUTO REFRESH ===
+    function initAutoRefresh() {
+      // Refresh setiap 2 menit jika app terbuka
+      setInterval(() => {
+        const mainApp = document.getElementById('mainApp');
+        if (mainApp && !mainApp.classList.contains('d-none')) {
+          // Hanya refresh jika data lebih dari 1 menit yang lalu
+          if (lastDataUpdate && (new Date() - lastDataUpdate) > 60000) {
+            loadInventory();
+          }
+        }
+      }, 2 * 60 * 1000);
+    }
+
+    // === CHECK SESSION ===
+    function checkSession() {
+      const username = sessionStorage.getItem('username');
+      const loginTime = sessionStorage.getItem('loginTime');
+      
+      if (username && loginTime) {
+        const loginDate = new Date(loginTime);
+        const now = new Date();
+        const hoursDiff = (now - loginDate) / (1000 * 60 * 60);
+        
+        // Session expired setelah 8 jam
+        if (hoursDiff > 8) {
+          sessionStorage.clear();
+          return false;
+        }
+        
+        return true;
+      }
+      
+      return false;
+    }
+
+    // === INISIALISASI APLIKASI ===
+    function initApp() {
+      // Check session
+      if (checkSession()) {
+        const username = sessionStorage.getItem('username');
+        showMainApp(username);
+        loadInventory();
+      } else {
+        // Fokus ke username field
+        setTimeout(() => {
+          const usernameEl = document.getElementById('username');
+          if (usernameEl) usernameEl.focus();
+        }, 100);
+      }
+
+      // Event listeners untuk login
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', handleLogin);
+        
+        // Enter untuk login
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        if (usernameInput && passwordInput) {
+          usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+              passwordInput.focus();
+            }
+          });
+          
+          passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+              handleLogin();
+            }
+          });
+        }
+      }
+
+      // Event listener untuk logout
+      const logoutLink = document.getElementById('logoutLink');
+      if (logoutLink) {
+        logoutLink.addEventListener('click', handleLogout);
+      }
+
+      // Event listener untuk mutasi
+      const simpanMutasiBtn = document.getElementById('simpanMutasiBtn');
+      if (simpanMutasiBtn) {
+        simpanMutasiBtn.addEventListener('click', handleMutateStock);
+      }
+
+      // Event listener untuk tambah item
+      const simpanItemBaruBtn = document.getElementById('simpanItemBaruBtn');
+      if (simpanItemBaruBtn) {
+        simpanItemBaruBtn.addEventListener('click', handleAddNewItem);
+      }
+
+      // Event listener untuk select mutasi
+      const mutasiSelect = document.getElementById('mutasiSelect');
+      if (mutasiSelect) {
+        mutasiSelect.addEventListener('change', updateQtyInfo);
+      }
+
+      // Event listener untuk refresh button
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          loadInventory();
+          showToast('Data diperbarui', 'info');
+        });
+      }
+
+      // Event listener untuk quantity input
+      const qtyInput = document.getElementById('qtyInput');
+      if (qtyInput) {
+        qtyInput.addEventListener('input', () => {
+          const mutasiSelect = document.getElementById('mutasiSelect');
+          const tipe = mutasiSelect?.value;
+          
+          if (tipe === 'ambil' && selectedPlu) {
+            const item = stockData.find(i => i.plu === selectedPlu);
+            if (item && parseInt(qtyInput.value) > item.qty) {
+              qtyInput.value = item.qty;
+            }
+          }
+        });
+      }
+
+      // Event listener untuk retry history
+      const retryHistoryBtn = document.getElementById('retryHistoryBtn');
+      if (retryHistoryBtn) {
+        retryHistoryBtn.addEventListener('click', () => {
+          if (currentHistoryPlu) {
+            showHistory(currentHistoryPlu);
+          }
+        });
+      }
+
+      // Inisialisasi fitur
+      initSuggestion();
+      initSearch();
+      initKeyboardShortcuts();
+      initModalEvents();
+      initAutoRefresh();
+
+      // Update waktu setiap 30 detik
+      setInterval(updateLastUpdated, 30000);
+    }
+
+    // === JALANKAN SAAT DOM SIAP ===
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
