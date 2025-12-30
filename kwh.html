@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencatat kWh Listrik Harian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        }
+        @media (max-width: 768px) {
+            .mobile-stack {
+                display: flex;
+                flex-direction: column;
+            }
+            .mobile-text-sm {
+                font-size: 0.875rem;
+            }
+            .mobile-text-xs {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-6 md:mb-10">
+            <h1 class="text-2xl md:text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-bolt text-yellow-500 mr-2 md:mr-3"></i>
+                Pencatat kWh Listrik Harian
+            </h1>
+            <p class="text-gray-600 text-sm md:text-base">Catat saldo token listrik harian dan dapatkan prediksi kapan token akan habis</p>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 mb-6 md:mb-8">
+            <div class="bg-white rounded-xl p-3 md:p-6 card-shadow mobile-stack">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-blue-100 p-2 md:p-3 mr-2 md:mr-4">
+                        <i class="fas fa-wallet text-blue-600 text-lg md:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs md:text-sm">Saldo Terakhir</p>
+                        <p id="current-balance" class="text-lg md:text-2xl font-bold text-gray-800">0 kWh</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-3 md:p-6 card-shadow mobile-stack">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-green-100 p-2 md:p-3 mr-2 md:mr-4">
+                        <i class="fas fa-chart-line text-green-600 text-lg md:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs md:text-sm">Rata-rata Harian</p>
+                        <p id="average-usage" class="text-lg md:text-2xl font-bold text-gray-800">0 kWh</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-span-2 md:col-span-1 bg-white rounded-xl p-3 md:p-6 card-shadow mobile-stack">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-purple-100 p-2 md:p-3 mr-2 md:mr-4">
+                        <i class="fas fa-calendar-alt text-purple-600 text-lg md:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs md:text-sm">Prediksi Sisa Hari</p>
+                        <p id="remaining-days" class="text-lg md:text-2xl font-bold text-gray-800">0 hari</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-span-2 md:col-span-1 bg-white rounded-xl p-3 md:p-6 card-shadow mobile-stack">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-yellow-100 p-2 md:p-3 mr-2 md:mr-4">
+                        <i class="fas fa-calendar-check text-yellow-600 text-lg md:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs md:text-sm">Prediksi Habis</p>
+                        <p id="predicted-date" class="text-sm md:text-lg font-bold text-gray-800">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-span-2 md:col-span-1 bg-white rounded-xl p-3 md:p-6 card-shadow mobile-stack">
+                <div class="flex items-center">
+                    <div class="rounded-full bg-red-100 p-2 md:p-3 mr-2 md:mr-4">
+                        <i class="fas fa-calculator text-red-600 text-lg md:text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs md:text-sm">Estimasi Biaya</p>
+                        <p id="estimated-cost" class="text-sm md:text-lg font-bold text-gray-800">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="bg-white rounded-2xl p-4 md:p-8 card-shadow mb-6 md:mb-8">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 flex items-center">
+                <i class="fas fa-plus-circle text-blue-500 mr-2 md:mr-3"></i>
+                Input Saldo Harian
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div>
+                    <div class="mb-4 md:mb-6">
+                        <label class="block text-gray-700 mb-2 font-medium text-sm md:text-base">Tanggal Input</label>
+                        <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0">
+                            <div class="relative flex-grow">
+                                <input type="date" id="input-date" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition text-sm md:text-base">
+                            </div>
+                            <button id="today-btn" class="md:ml-3 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-3 rounded-lg transition font-medium text-sm md:text-base">
+                                Hari Ini
+                            </button>
+                        </div>
+                        <p class="text-xs md:text-sm text-gray-500 mt-2">Input dimulai dari tanggal 1 setiap bulan</p>
+                    </div>
+                    
+                    <div class="mb-4 md:mb-6">
+                        <label class="block text-gray-700 mb-2 font-medium text-sm md:text-base">Sisa Saldo Token (kWh)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500 text-sm md:text-base">kWh</span>
+                            <input type="number" id="balance-input" class="w-full pl-12 md:pl-12 p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition text-sm md:text-base" placeholder="Misal: 100" min="0" step="0.01">
+                        </div>
+                        <p class="text-xs md:text-sm text-gray-500 mt-2">Masukkan sisa saldo token listrik untuk tanggal tersebut</p>
+                    </div>
+                </div>
+                
+                <div class="mb-4 md:mb-6">
+                    <label class="block text-gray-700 mb-2 font-medium text-sm md:text-base">Harga per kWh (Rp)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-500 text-sm md:text-base">Rp</span>
+                        <input type="number" id="price-per-kwh" class="w-full pl-10 md:pl-10 p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition text-sm md:text-base" placeholder="Misal: 1500" min="0" value="1500">
+                    </div>
+                    <p class="text-xs md:text-sm text-gray-500 mt-2">Untuk perhitungan estimasi pembelian token</p>
+                    
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p class="text-blue-800 font-medium mb-2 flex items-center text-sm md:text-base">
+                            <i class="fas fa-info-circle mr-2"></i> Cara Penggunaan:
+                        </p>
+                        <ol class="text-blue-700 text-xs md:text-sm list-decimal pl-4 md:pl-5">
+                            <li class="mb-1">Setiap hari input sisa saldo token listrik (dalam kWh)</li>
+                            <li class="mb-1">Sistem menghitung pemakaian hari sebelumnya</li>
+                            <li class="mb-1">Rata-rata pemakaian dihitung otomatis</li>
+                            <li>Prediksi kapan token habis akan muncul</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="save-btn" class="w-full gradient-bg text-white py-3 md:py-4 rounded-lg font-bold text-base md:text-lg hover:opacity-90 transition flex items-center justify-center mt-4">
+                <i class="fas fa-save mr-2 md:mr-3"></i>
+                Simpan Data Harian ke Google Sheets
+            </button>
+            
+            <div id="save-status" class="mt-4 p-3 hidden rounded-lg">
+                <p class="text-sm flex items-center">
+                    <i class="fas mr-2"></i>
+                    <span></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="bg-white rounded-2xl p-4 md:p-8 card-shadow mb-6 md:mb-8">
+            <div class="flex justify-between items-center mb-4 md:mb-6">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-history text-green-500 mr-2 md:mr-3"></i>
+                    Riwayat Pemakaian Harian
+                </h2>
+                <button id="refresh-data" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 md:px-4 py-1 md:py-2 rounded-lg font-medium transition flex items-center text-xs md:text-sm">
+                    <i class="fas fa-sync-alt mr-1 md:mr-2"></i> Refresh Data
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto rounded-lg border border-gray-200 mb-4 md:mb-6">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sisa Saldo</th>
+                            <th class="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemakaian</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table" class="bg-white divide-y divide-gray-200">
+                        <!-- Data akan diisi oleh JavaScript -->
+                        <tr id="empty-row">
+                            <td colspan="3" class="px-4 py-6 md:py-8 text-center text-gray-500">
+                                <i class="fas fa-database text-xl md:text-3xl mb-2 md:mb-3 block"></i>
+                                <span class="text-sm md:text-base">Belum ada data. Mulai input saldo harian Anda.</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-2 md:space-y-0">
+                <div>
+                    <p class="text-gray-600 text-xs md:text-sm">Total Data: <span id="total-data" class="font-bold">0</span> hari</p>
+                    <p class="text-gray-600 text-xs md:text-sm">Total Pemakaian: <span id="total-usage" class="font-bold">0</span> kWh</p>
+                </div>
+                <div>
+                    <button id="export-csv" class="bg-green-100 hover:bg-green-200 text-green-700 px-3 md:px-4 py-1 md:py-2 rounded-lg font-medium transition flex items-center text-xs md:text-sm">
+                        <i class="fas fa-file-csv mr-1 md:mr-2"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Alert -->
+        <div id="prediction-alert" class="hidden mb-6 md:mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 p-4 md:p-6 rounded-lg shadow-md">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl md:text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-base md:text-lg font-bold text-gray-800" id="alert-title">Prediksi Sisa Saldo</h3>
+                    <div class="mt-2 text-gray-700 text-sm md:text-base" id="alert-content">
+                        <!-- Konten alert akan diisi oleh JavaScript -->
+                    </div>
+                    <div class="mt-3 md:mt-4">
+                        <button id="close-alert" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 md:px-4 py-1 md:py-2 rounded-md font-medium transition text-sm md:text-base">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estimation Section -->
+        <div class="bg-white rounded-2xl p-4 md:p-8 card-shadow mb-6 md:mb-8">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 flex items-center">
+                <i class="fas fa-calculator text-red-500 mr-2 md:mr-3"></i>
+                Estimasi Pembelian Token Bulan Berikutnya
+            </h2>
+            
+            <div class="mb-4 md:mb-6 p-4 md:p-6 bg-gray-50 rounded-lg">
+                <h3 class="font-bold text-gray-700 mb-3 text-sm md:text-base">Perhitungan Estimasi</h3>
+                
+                <div class="space-y-3 md:space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Rata-rata pemakaian harian:</span>
+                        <span id="est-average-usage" class="font-bold text-sm md:text-base">0 kWh</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Jumlah hari bulan berikutnya:</span>
+                        <span id="est-next-month-days" class="font-bold text-sm md:text-base">0 hari</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center pt-2 md:pt-3 border-t border-gray-300">
+                        <span class="text-gray-700 font-medium text-sm md:text-base">Estimasi kebutuhan token:</span>
+                        <span id="est-token-need" class="font-bold text-blue-600 text-base md:text-lg">0 kWh</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Harga per kWh:</span>
+                        <span id="est-price-per-kwh" class="font-bold text-sm md:text-base">Rp 0</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center pt-2 md:pt-3 border-t border-gray-300">
+                        <span class="text-gray-700 font-medium text-sm md:text-base">Estimasi total biaya:</span>
+                        <span id="est-total-cost" class="font-bold text-green-600 text-lg md:text-xl">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <p class="text-yellow-800 font-medium mb-2 flex items-center text-sm md:text-base">
+                    <i class="fas fa-lightbulb mr-2"></i> Catatan:
+                </p>
+                <p class="text-yellow-700 text-xs md:text-sm">
+                    Estimasi dihitung berdasarkan: <strong>Rata-rata pemakaian harian × Jumlah hari di bulan berikutnya × Harga per kWh</strong>. 
+                    Data disimpan otomatis ke Google Sheets setiap kali Anda menekan tombol "Simpan Data Harian".
+                </p>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="bg-white rounded-2xl p-4 md:p-8 card-shadow mb-6 md:mb-8">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 flex items-center">
+                <i class="fas fa-info-circle text-blue-500 mr-2 md:mr-3"></i>
+                Informasi Sistem
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm md:text-base">Tentang Aplikasi</h3>
+                    <ul class="text-gray-700 text-xs md:text-sm space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>Data tersimpan otomatis di Google Sheets</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>Perhitungan dilakukan secara real-time</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>Dapat diakses dari perangkat apapun</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm md:text-base">Data Tersimpan Aman</h3>
+                    <p class="text-gray-700 text-xs md:text-sm mb-3">
+                        Semua data Anda tersimpan dengan aman di Google Sheets dan dapat diakses kapan saja.
+                    </p>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="pt-6 md:pt-8 border-t border-gray-200 text-center text-gray-600 text-xs md:text-sm">
+            <p>Aplikasi Pencatat kWh Listrik Harian &copy; <span id="current-year"></span></p>
+            <p class="mt-1 md:mt-2">Data tersimpan otomatis di Google Sheets</p>
+        </footer>
+    </div>
+
+    <script>
+        // Inisialisasi variabel
+        let electricityData = [];
+        const PRICE_STORAGE_KEY = 'electricityPricePerKwh';
+        
+        // URL Google Apps Script - Hardcoded
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQs-e1FkVmcwdQmWHsJzqyRxl3HOnFcet2iZ8bGjUHLGo0RiFlVM9vXVvedHQGSRp4VQ/exec';
+        
+        // Elemen DOM
+        const inputDate = document.getElementById('input-date');
+        const balanceInput = document.getElementById('balance-input');
+        const saveBtn = document.getElementById('save-btn');
+        const historyTable = document.getElementById('history-table');
+        const emptyRow = document.getElementById('empty-row');
+        const todayBtn = document.getElementById('today-btn');
+        const predictionAlert = document.getElementById('prediction-alert');
+        const alertContent = document.getElementById('alert-content');
+        const alertTitle = document.getElementById('alert-title');
+        const closeAlert = document.getElementById('close-alert');
+        const pricePerKwhInput = document.getElementById('price-per-kwh');
+        const saveStatus = document.getElementById('save-status');
+        const exportCsvBtn = document.getElementById('export-csv');
+        const refreshDataBtn = document.getElementById('refresh-data');
+        
+        // Statistik elemen
+        const currentBalanceEl = document.getElementById('current-balance');
+        const averageUsageEl = document.getElementById('average-usage');
+        const remainingDaysEl = document.getElementById('remaining-days');
+        const predictedDateEl = document.getElementById('predicted-date');
+        const totalDataEl = document.getElementById('total-data');
+        const totalUsageEl = document.getElementById('total-usage');
+        const estimatedCostEl = document.getElementById('estimated-cost');
+        
+        // Estimasi elemen
+        const estAverageUsageEl = document.getElementById('est-average-usage');
+        const estNextMonthDaysEl = document.getElementById('est-next-month-days');
+        const estTokenNeedEl = document.getElementById('est-token-need');
+        const estPricePerKwhEl = document.getElementById('est-price-per-kwh');
+        const estTotalCostEl = document.getElementById('est-total-cost');
+        
+        // Inisialisasi
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // Set tanggal hari ini sebagai default
+        function setDefaultDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            inputDate.value = `${year}-${month}-${day}`;
+            inputDate.min = `${year}-${month}-01`;
+            inputDate.max = `${year}-${month}-${day}`;
+        }
+        
+        // Event Listeners
+        todayBtn.addEventListener('click', setDefaultDate);
+        
+        // Load data awal
+        async function loadInitialData() {
+            // Load harga per kWh dari localStorage
+            const savedPrice = localStorage.getItem(PRICE_STORAGE_KEY);
+            if (savedPrice) {
+                pricePerKwhInput.value = savedPrice;
+                estPricePerKwhEl.textContent = `Rp ${parseInt(savedPrice).toLocaleString('id-ID')}`;
+            } else {
+                // Default harga
+                pricePerKwhInput.value = "1500";
+                estPricePerKwhEl.textContent = "Rp 1.500";
+            }
+            
+            // Load data dari Google Sheets
+            await fetchDataFromGoogleSheets();
+        }
+        
+        // Ambil data dari Google Sheets
+        async function fetchDataFromGoogleSheets() {
+            showStatus('Mengambil data dari Google Sheets...', 'loading', saveStatus);
+            
+            try {
+                // Tambahkan timestamp untuk menghindari cache
+                const fetchUrl = `${GOOGLE_SCRIPT_URL}?t=${new Date().getTime()}`;
+                const response = await fetch(fetchUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data && Array.isArray(data)) {
+                    electricityData = data;
+                    electricityData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    updateUI();
+                    showStatus('Data berhasil diambil dari Google Sheets', 'success', saveStatus);
+                } else if (data.error) {
+                    throw new Error(data.error);
+                } else {
+                    electricityData = [];
+                    updateUI();
+                    showStatus('Belum ada data di Google Sheets', 'info', saveStatus);
+                }
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showStatus(`Gagal mengambil data: ${error.message}`, 'error', saveStatus);
+                electricityData = [];
+                updateUI();
+            }
+        }
+        
+        // Format angka (tanpa Rp)
+        function formatNumber(value) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+        
+        // Format mata uang Rupiah
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Format tanggal
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+        
+        // Format tanggal lengkap
+        function formatLongDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+        
+        // Dapatkan jumlah hari di bulan berikutnya
+        function getDaysInNextMonth() {
+            const now = new Date();
+            const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const nextNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+            const daysInNextMonth = Math.floor((nextNextMonth - nextMonth) / (1000 * 60 * 60 * 24));
+            
+            const monthNames = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            const nextMonthName = monthNames[nextMonth.getMonth()];
+            
+            return {
+                days: daysInNextMonth,
+                monthName: nextMonthName
+            };
+        }
+        
+        // Hitung pemakaian harian
+        function calculateDailyUsage() {
+            electricityData.forEach(entry => {
+                entry.usage = 0;
+            });
+            
+            for (let i = 0; i < electricityData.length - 1; i++) {
+                const currentBalance = electricityData[i].balance;
+                const nextBalance = electricityData[i + 1].balance;
+                electricityData[i].usage = currentBalance - nextBalance;
+                
+                if (electricityData[i].usage < 0) {
+                    electricityData[i].usage = 0;
+                }
+            }
+        }
+        
+        // Hitung statistik
+        function calculateStats() {
+            if (electricityData.length === 0) {
+                currentBalanceEl.textContent = '0 kWh';
+                averageUsageEl.textContent = '0 kWh';
+                remainingDaysEl.textContent = '0 hari';
+                predictedDateEl.textContent = '-';
+                totalDataEl.textContent = '0';
+                totalUsageEl.textContent = '0';
+                estimatedCostEl.textContent = '-';
+                return;
+            }
+            
+            const lastBalance = electricityData[electricityData.length - 1].balance;
+            currentBalanceEl.textContent = `${formatNumber(lastBalance)} kWh`;
+            
+            let totalUsage = 0;
+            let daysWithUsage = 0;
+            
+            for (let i = 0; i < electricityData.length - 1; i++) {
+                if (electricityData[i].usage > 0) {
+                    totalUsage += electricityData[i].usage;
+                    daysWithUsage++;
+                }
+            }
+            
+            totalUsageEl.textContent = formatNumber(totalUsage);
+            
+            const averageUsage = daysWithUsage > 0 ? totalUsage / daysWithUsage : 0;
+            averageUsageEl.textContent = `${formatNumber(averageUsage)} kWh`;
+            
+            let remainingDays = 0;
+            let predictedDate = '-';
+            
+            if (averageUsage > 0 && lastBalance > 0) {
+                remainingDays = Math.floor(lastBalance / averageUsage);
+                remainingDaysEl.textContent = `${remainingDays} hari`;
+                
+                const lastDate = new Date(electricityData[electricityData.length - 1].date);
+                lastDate.setDate(lastDate.getDate() + remainingDays);
+                predictedDate = formatDate(lastDate);
+                predictedDateEl.textContent = predictedDate;
+                
+                showPredictionAlert(lastBalance, averageUsage, remainingDays, lastDate);
+            } else {
+                remainingDaysEl.textContent = '0 hari';
+                predictedDateEl.textContent = '-';
+            }
+            
+            totalDataEl.textContent = electricityData.length;
+            calculateEstimation(averageUsage);
+        }
+        
+        // Hitung estimasi pembelian token
+        function calculateEstimation(averageUsage) {
+            const pricePerKwh = parseFloat(pricePerKwhInput.value) || 0;
+            const nextMonthInfo = getDaysInNextMonth();
+            const estimatedTokenNeed = averageUsage * nextMonthInfo.days;
+            
+            estAverageUsageEl.textContent = `${formatNumber(averageUsage)} kWh`;
+            estNextMonthDaysEl.textContent = `${nextMonthInfo.days} hari (${nextMonthInfo.monthName})`;
+            estTokenNeedEl.textContent = `${formatNumber(estimatedTokenNeed)} kWh`;
+            estPricePerKwhEl.textContent = `Rp ${pricePerKwh.toLocaleString('id-ID')}`;
+            
+            const estimatedCost = estimatedTokenNeed * pricePerKwh;
+            estTotalCostEl.textContent = formatRupiah(estimatedCost);
+            estimatedCostEl.textContent = formatRupiah(estimatedCost);
+            
+            // Simpan harga ke localStorage
+            localStorage.setItem(PRICE_STORAGE_KEY, pricePerKwh);
+        }
+        
+        // Tampilkan alert prediksi
+        function showPredictionAlert(balance, average, days, predDate) {
+            const formattedDate = formatLongDate(predDate);
+            
+            alertContent.innerHTML = `
+                <p class="mb-2">Berdasarkan data yang Anda input:</p>
+                <ul class="list-disc pl-5 mb-3">
+                    <li>Saldo terakhir: <strong>${formatNumber(balance)} kWh</strong></li>
+                    <li>Rata-rata pemakaian: <strong>${formatNumber(average)} kWh/hari</strong></li>
+                    <li>Prediksi saldo cukup untuk: <strong>${days} hari</strong></li>
+                </ul>
+                <p class="font-bold text-lg">Saldo token Anda diperkirakan akan habis pada:</p>
+                <p class="text-2xl font-bold text-blue-600 my-2">${formattedDate}</p>
+                <p class="text-sm text-gray-600">Perhitungan ini berdasarkan rata-rata pemakaian.</p>
+            `;
+            
+            predictionAlert.classList.remove('hidden');
+        }
+        
+        // Update UI
+        function updateUI() {
+            if (electricityData.length === 0) {
+                emptyRow.classList.remove('hidden');
+                const rows = historyTable.querySelectorAll('tr:not(#empty-row)');
+                rows.forEach(row => row.remove());
+            } else {
+                emptyRow.classList.add('hidden');
+                const rows = historyTable.querySelectorAll('tr:not(#empty-row)');
+                rows.forEach(row => row.remove());
+                
+                calculateDailyUsage();
+                
+                electricityData.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    row.className = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                    
+                    let usageDisplay = '';
+                    let usageClass = 'px-3 py-2 md:px-4 md:py-3 whitespace-nowrap';
+                    
+                    if (index === electricityData.length - 1) {
+                        usageDisplay = '-';
+                    } else if (entry.usage > 0) {
+                        usageDisplay = `${formatNumber(entry.usage)} kWh`;
+                        usageClass += ' text-green-600 font-medium';
+                    } else {
+                        usageDisplay = '0 kWh';
+                    }
+                    
+                    row.innerHTML = `
+                        <td class="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap font-medium text-xs md:text-sm">${formatDate(entry.date)}</td>
+                        <td class="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-xs md:text-sm">${formatNumber(entry.balance)} kWh</td>
+                        <td class="${usageClass} text-xs md:text-sm">
+                            ${usageDisplay}
+                        </td>
+                    `;
+                    
+                    historyTable.appendChild(row);
+                });
+            }
+            
+            calculateStats();
+        }
+        
+        // Simpan data ke Google Sheets
+        async function saveDataToGoogleSheets(data) {
+            showStatus('Menyimpan data ke Google Sheets...', 'loading', saveStatus);
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                // Karena no-cors, kita tidak bisa membaca response
+                // Tapi kita anggap berhasil jika tidak ada error
+                setTimeout(() => {
+                    showStatus('Data berhasil disimpan ke Google Sheets', 'success', saveStatus);
+                }, 1000);
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`Gagal menyimpan data: ${error.message}`, 'error', saveStatus);
+                return false;
+            }
+        }
+        
+        // Simpan data baru
+        saveBtn.addEventListener('click', async function() {
+            const date = inputDate.value;
+            const balance = parseFloat(balanceInput.value);
+            
+            if (!date) {
+                showStatus('Silakan pilih tanggal!', 'error', saveStatus);
+                return;
+            }
+            
+            if (isNaN(balance) || balance < 0) {
+                showStatus('Silakan masukkan saldo yang valid!', 'error', saveStatus);
+                balanceInput.focus();
+                return;
+            }
+            
+            const inputDay = new Date(date).getDate();
+            if (electricityData.length === 0 && inputDay !== 1) {
+                showStatus('Untuk data pertama, harap input tanggal 1 terlebih dahulu!', 'error', saveStatus);
+                return;
+            }
+            
+            // Cek apakah tanggal sudah ada
+            const existingIndex = electricityData.findIndex(entry => entry.date === date);
+            if (existingIndex !== -1) {
+                if (confirm('Data untuk tanggal ini sudah ada. Apakah Anda ingin memperbarui data?')) {
+                    electricityData[existingIndex].balance = balance;
+                } else {
+                    return;
+                }
+            } else {
+                // Tambah data baru
+                electricityData.push({
+                    date: date,
+                    balance: balance,
+                    usage: 0
+                });
+                
+                // Urutkan berdasarkan tanggal
+                electricityData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            }
+            
+            // Data untuk dikirim ke Google Sheets
+            const dataToSave = {
+                date: date,
+                balance: balance,
+                usage: 0
+            };
+            
+            // Simpan ke Google Sheets
+            const saved = await saveDataToGoogleSheets(dataToSave);
+            
+            if (saved) {
+                // Update UI
+                updateUI();
+                
+                // Reset form input
+                balanceInput.value = '';
+                setDefaultDate();
+                
+                // Refresh data dari Google Sheets setelah 2 detik
+                setTimeout(async () => {
+                    await fetchDataFromGoogleSheets();
+                }, 2000);
+            }
+        });
+        
+        // Event listener untuk input harga per kWh
+        pricePerKwhInput.addEventListener('input', function() {
+            const averageUsage = parseFloat(averageUsageEl.textContent.split(' ')[0].replace('.', '').replace(',', '.')) || 0;
+            calculateEstimation(averageUsage);
+        });
+        
+        // Tampilkan status
+        function showStatus(message, type, element) {
+            element.classList.remove('hidden');
+            const icon = element.querySelector('i');
+            const text = element.querySelector('span');
+            
+            element.className = `p-3 rounded-lg ${type === 'success' ? 'bg-green-100 border border-green-200' : 
+                               type === 'error' ? 'bg-red-100 border border-red-200' : 
+                               type === 'warning' ? 'bg-yellow-100 border border-yellow-200' : 
+                               type === 'info' ? 'bg-blue-100 border border-blue-200' : 
+                               'bg-blue-100 border border-blue-200'}`;
+            
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-green-500' : 
+                             type === 'error' ? 'fa-times-circle text-red-500' : 
+                             type === 'warning' ? 'fa-exclamation-triangle text-yellow-500' : 
+                             type === 'info' ? 'fa-info-circle text-blue-500' : 
+                             'fa-spinner fa-spin text-blue-500'} mr-2`;
+            
+            text.textContent = message;
+            text.className = `${type === 'success' ? 'text-green-700' : 
+                             type === 'error' ? 'text-red-700' : 
+                             type === 'warning' ? 'text-yellow-700' : 
+                             type === 'info' ? 'text-blue-700' : 
+                             'text-blue-700'}`;
+            
+            // Sembunyikan setelah 5 detik
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, 5000);
+            }
+        }
+        
+        // Export ke CSV
+        exportCsvBtn.addEventListener('click', function() {
+            if (electricityData.length === 0) {
+                showStatus('Tidak ada data untuk diexport', 'warning', saveStatus);
+                return;
+            }
+            
+            calculateDailyUsage();
+            
+            let csv = 'Tanggal,Sisa Saldo (kWh),Pemakaian (kWh)\n';
+            
+            electricityData.forEach(entry => {
+                const usage = entry.usage || 0;
+                csv += `${entry.date},${entry.balance},${usage}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `data-kwh-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showStatus('Data berhasil diexport ke CSV', 'success', saveStatus);
+        });
+        
+        // Refresh data dari Google Sheets
+        refreshDataBtn.addEventListener('click', async function() {
+            await fetchDataFromGoogleSheets();
+        });
+        
+        // Tutup alert prediksi
+        closeAlert.addEventListener('click', function() {
+            predictionAlert.classList.add('hidden');
+        });
+        
+        // Inisialisasi
+        setDefaultDate();
+        loadInitialData();
+    </script>
+</body>
+</html>
