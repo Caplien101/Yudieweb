@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <!-- VIEWPORT DIPERBAIKI untuk mencegah zooming di Safari -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>Input Data Harian - Daily & PSM</title>
+  
+  <!-- Font Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Ikon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent; /* Hilangkan highlight biru saat tap di iOS */
+    }
+    
+    /* Mencegah zoom pada input di Safari iOS */
+    @supports (-webkit-touch-callout: none) {
+      /* CSS khusus untuk Safari iOS */
+      input, select, textarea {
+        font-size: 16px !important; /* Font size minimum 16px untuk hindari zoom */
+      }
+      
+      /* Untuk input type="date" di Safari */
+      input[type="date"] {
+        min-height: 48px; /* Tinggi minimum untuk hindari zoom */
+      }
+      
+      /* Untuk select di Safari */
+      select {
+        min-height: 48px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+    }
+    
+    /* Disable spin buttons untuk number input */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    input[type="number"] { 
+      -moz-appearance: textfield;
+    }
+    
+    /* Pastikan font size cukup besar untuk semua input */
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px !important; /* Minimum 16px untuk cegah zoom di iOS */
+    }
+    
+    /* CSS untuk desktop - bisa gunakan font lebih kecil */
+    @media (min-width: 768px) {
+      input:not([type="checkbox"]):not([type="radio"]),
+      select,
+      textarea {
+        font-size: 14px !important; /* Di desktop bisa lebih kecil */
+      }
+    }
+    
+    /* Fokus state yang tidak menyebabkan zoom */
+    .no-zoom-input {
+      font-size: 16px;
+      transform: translateZ(0); /* Trick untuk performa iOS */
+      -webkit-transform: translateZ(0);
+    }
+    
+    /* Custom scrollbar untuk tampilan lebih baik */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1a1;
+    }
+    
+    /* Animasi dan efek */
+    .form-card {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .smooth-transition {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .input-focus {
+      transition: all 0.3s ease;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+    
+    .input-focus:focus {
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      border-color: #4f46e5;
+    }
+    
+    /* Loading animation */
+    .loader {
+      border-top-color: #4f46e5;
+      animation: spinner 0.6s linear infinite;
+    }
+    
+    @keyframes spinner {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Success animation */
+    .success-animation {
+      animation: successPop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes successPop {
+      0% { transform: scale(0.9); opacity: 0; }
+      70% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    /* Style untuk input error */
+    .input-error {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+    
+    /* Style untuk input valid */
+    .input-valid {
+      border-color: #10b981 !important;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen py-4 md:py-8 px-3 md:px-8">
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8 md:mb-10">
+      <div class="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg mb-3 md:mb-4">
+        <i class="fas fa-clipboard-list text-xl md:text-2xl"></i>
+      </div>
+      <h1 class="text-2xl md:text-4xl font-bold text-gray-800 mb-2">
+        Input Laporan Shift
+      </h1>
+      <p class="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
+        Form Laporan <span class="font-semibold text-indigo-600">Sales</span> dan <span class="font-semibold text-purple-600">Produk Spesial Mingguan</span>
+      </p>
+    </div>
+
+    <!-- Card utama form -->
+    <div class="form-card bg-white rounded-xl md:rounded-2xl overflow-hidden">
+      <div class="h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+      
+      <div class="p-4 md:p-8">
+        <!-- Form header -->
+        <div class="mb-6 md:mb-8">
+          <div class="flex items-center mb-2">
+            <div class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 mr-3">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800">Informasi User</h2>
+          </div>
+          <p class="text-gray-600 text-sm md:text-base ml-12">Masukkan tanggal, shift dan NIK kamu</p>
+        </div>
+
+        <!-- Field Umum -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+              <i class="fas fa-calendar-day text-indigo-500 mr-2"></i>
+              Tanggal <span class="text-red-500 ml-1">*</span>
+              <span id="date-hint" class="ml-2 text-xs font-normal text-gray-500 hidden md:inline">(Hari ini)</span>
+            </label>
+            <div class="relative">
+              <input type="date" id="tanggal" required
+                class="no-zoom-input w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent input-focus" />
+              <div class="absolute left-3 top-3.5 text-gray-400">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div id="today-badge" class="absolute right-3 top-3 text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full font-medium hidden">
+                Hari Ini
+              </div>
+            </div>
+            <p id="date-info" class="text-xs text-gray-500 mt-1"></p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+              <i class="fas fa-clock text-indigo-500 mr-2"></i>
+              Shift <span class="text-red-500 ml-1">*</span>
+            </label>
+            <div class="relative">
+              <select id="shift" required
+                class="no-zoom-input w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent input-focus appearance-none">
+                <option value="">Pilih Shift</option>
+                <option value="1">Shift 1 (Pagi)</option>
+                <option value="2">Shift 2 (Siang)</option>
+                <option value="3">Shift 3 (Malam)</option>
+              </select>
+              <div class="absolute left-3 top-3.5 text-gray-400">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="absolute right-3 top-3.5 text-gray-400 pointer-events-none">
+                <i class="fas fa-chevron-down"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+              <i class="fas fa-id-card text-indigo-500 mr-2"></i>
+              NIK <span class="text-red-500 ml-1">*</span>
+              <span class="ml-2 text-xs font-normal text-gray-500">(Hanya angka)</span>
+            </label>
+            <div class="relative">
+              <input type="text" id="nik" inputmode="numeric" pattern="[0-9]*" placeholder="Contoh: 05120478" required
+                class="no-zoom-input w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent input-focus" />
+              <div class="absolute left-3 top-3.5 text-gray-400">
+                <i class="fas fa-user"></i>
+              </div>
+              <div id="nik-validation" class="absolute right-3 top-3.5 hidden">
+                <i class="fas fa-check-circle text-green-500" id="nik-valid-icon"></i>
+                <i class="fas fa-exclamation-circle text-red-500 hidden" id="nik-error-icon"></i>
+              </div>
+            </div>
+            <p id="nik-error" class="text-xs text-red-500 mt-1 hidden"></p>
+          </div>
+        </div>
+
+        <!-- Section Daily -->
+        <div class="mb-8 md:mb-10">
+          <div class="flex items-center justify-between mb-4 md:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg md:rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white mr-3 md:mr-4 shadow">
+                <i class="fas fa-chart-line text-base md:text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-lg md:text-xl font-bold text-gray-800">Input Sales</h2>
+                <p class="text-gray-600 text-xs md:text-sm">Masukkan data sales shift kamu</p>
+              </div>
+            </div>
+            <span class="badge bg-indigo-100 text-indigo-800 font-medium text-xs px-2 py-1 rounded-full">8 Field</span>
+          </div>
+          
+          <div class="bg-gradient-to-r from-indigo-50 to-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-indigo-100">
+            <div id="daily-fields" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"></div>
+          </div>
+        </div>
+
+        <!-- Section PSM -->
+        <div class="mb-8 md:mb-10">
+          <div class="flex items-center justify-between mb-4 md:mb-6">
+            <div class="flex items-center">
+              <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg md:rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white mr-3 md:mr-4 shadow">
+                <i class="fas fa-boxes text-base md:text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-lg md:text-xl font-bold text-gray-800">Produk Spesial Mingguan</h2>
+                <p class="text-gray-600 text-xs md:text-sm">Masukkan kuantitas jual per item</p>
+              </div>
+            </div>
+            <span class="badge bg-purple-100 text-purple-800 font-medium text-xs px-2 py-1 rounded-full" id="product-count">Memuat...</span>
+          </div>
+          
+          <div class="bg-gradient-to-r from-purple-50 to-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-purple-100">
+            <div id="psm-fields" class="text-gray-600">
+              <div class="flex flex-col items-center justify-center py-8 md:py-10">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8 md:h-10 md:w-10 mb-3 md:mb-4"></div>
+                <p class="text-gray-600 text-sm md:text-base">Memuat daftar produk...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col md:flex-row items-center justify-between pt-4 md:pt-6 border-t border-gray-200">
+          <div class="mb-4 md:mb-0 text-center md:text-left">
+            <p class="text-gray-600 text-xs md:text-sm mb-1">
+              <i class="fas fa-info-circle text-indigo-500 mr-1"></i>
+              Pastikan semua field terisi dengan benar
+            </p>
+            <p class="text-gray-500 text-xs">
+              Field bertanda <span class="text-red-500">*</span> wajib diisi
+            </p>
+          </div>
+          
+          <div class="flex space-x-3 md:space-x-4 w-full md:w-auto">
+            <button id="reset-btn" class="flex-1 md:flex-none px-4 md:px-8 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg md:rounded-xl hover:bg-gray-50 smooth-transition text-sm md:text-base">
+              <i class="fas fa-redo mr-2"></i>Reset
+            </button>
+            <button id="submit-btn"
+              class="flex-1 md:flex-none px-4 md:px-10 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg md:rounded-xl shadow-md md:shadow-lg smooth-transition hover:shadow-lg disabled:cursor-not-allowed flex items-center justify-center text-sm md:text-base">
+              <i class="fas fa-paper-plane mr-2"></i>
+              <span>Submit Data</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Message -->
+        <div id="status" class="mt-6 md:mt-8"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-6 md:mt-8 text-gray-500 text-xs md:text-sm">
+      <p>© 2026 Daily & PSM Data Collection System</p>
+    </div>
+  </div>
+
+  <script>
+  const MACRO_URL = 'https://script.google.com/macros/s/AKfycbynoMy-ytTnpYOLWAk2j6aU2T4TxTYlobdsNjbADQ2Pks1ZfEwL1bSEUwL_L3nw0WBH/exec';
+
+  // Fungsi untuk mendeteksi device iOS/Safari
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+  
+  // Fungsi untuk mendeteksi Safari browser
+  function isSafari() {
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  }
+  
+  // Fungsi untuk mencegah zoom pada input focus di iOS
+  function preventZoomOnFocus() {
+    if (isIOS()) {
+      // Tambahkan event listener untuk mencegah zoom
+      document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.addEventListener('focus', function() {
+          // Set viewport scale tetap 1.0
+          document.querySelector('meta[name="viewport"]').setAttribute('content', 
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        });
+        
+        el.addEventListener('blur', function() {
+          // Kembalikan viewport ke semula
+          document.querySelector('meta[name="viewport"]').setAttribute('content', 
+            'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+        });
+      });
+    }
+  }
+
+  // Fungsi untuk format tanggal menjadi YYYY-MM-DD
+  function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Fungsi untuk format tanggal Indonesia
+  function formatDateIndonesia(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('id-ID', options);
+  }
+
+  // Fungsi untuk validasi NIK (hanya angka)
+  function validateNIK(nik) {
+    // Hanya angka, minimal 4 digit, maksimal 12 digit
+    const nikRegex = /^\d{8}$/;
+    return nikRegex.test(nik);
+  }
+
+  // Fungsi untuk update tampilan NIK validation
+  function updateNIKValidation() {
+    const nikInput = document.getElementById('nik');
+    const nikValue = nikInput.value.trim();
+    const validationDiv = document.getElementById('nik-validation');
+    const validIcon = document.getElementById('nik-valid-icon');
+    const errorIcon = document.getElementById('nik-error-icon');
+    const errorText = document.getElementById('nik-error');
+    
+    if (nikValue === '') {
+      validationDiv.classList.add('hidden');
+      errorText.classList.add('hidden');
+      nikInput.classList.remove('input-error', 'input-valid');
+    } else if (validateNIK(nikValue)) {
+      validationDiv.classList.remove('hidden');
+      validIcon.classList.remove('hidden');
+      errorIcon.classList.add('hidden');
+      errorText.classList.add('hidden');
+      nikInput.classList.remove('input-error');
+      nikInput.classList.add('input-valid');
+    } else {
+      validationDiv.classList.remove('hidden');
+      validIcon.classList.add('hidden');
+      errorIcon.classList.remove('hidden');
+      errorText.classList.remove('hidden');
+      errorText.textContent = 'NIK harus berupa angka (8 digit)';
+      nikInput.classList.remove('input-valid');
+      nikInput.classList.add('input-error');
+    }
+  }
+
+  // Fungsi untuk update tampilan tanggal
+  function updateDateDisplay() {
+    const tanggalInput = document.getElementById('tanggal');
+    const today = new Date();
+    const selectedDate = new Date(tanggalInput.value);
+    const dateInfo = document.getElementById('date-info');
+    const todayBadge = document.getElementById('today-badge');
+    
+    // Format hari ini untuk perbandingan
+    const todayFormatted = formatDate(today);
+    const selectedFormatted = formatDate(selectedDate);
+    
+    // Update info tanggal
+    dateInfo.textContent = formatDateIndonesia(selectedDate);
+    
+    // Tampilkan badge "Hari Ini" jika tanggal yang dipilih adalah hari ini
+    if (todayFormatted === selectedFormatted) {
+      todayBadge.classList.remove('hidden');
+    } else {
+      todayBadge.classList.add('hidden');
+    }
+  }
+
+  // Load produk PSM
+  async function loadProduk() {
+    try {
+      const container = document.getElementById('psm-fields');
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-8 md:py-10">
+          <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8 md:h-10 md:w-10 mb-3 md:mb-4"></div>
+          <p class="text-gray-600 text-sm md:text-base">Memuat daftar produk...</p>
+        </div>
+      `;
+
+      const response = await fetch(`${MACRO_URL}?action=getProduk`);
+      const result = await response.json();
+      
+      container.innerHTML = '';
+
+      if (!result.produk || result.produk.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 md:py-8">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-3 md:mb-4">
+              <i class="fas fa-exclamation-triangle text-yellow-600 text-xl md:text-2xl"></i>
+            </div>
+            <h3 class="text-base md:text-lg font-semibold text-gray-700 mb-1 md:mb-2">Tidak ada produk</h3>
+            <p class="text-gray-600 text-sm md:text-base">Tidak ada produk ditemukan di sheet psm_question.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Update product count badge
+      document.getElementById('product-count').textContent = `${result.produk.length} Produk`;
+
+      const grid = document.createElement('div');
+      grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5';
+
+      result.produk.forEach((produk, index) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-cube text-purple-500 mr-1"></i>
+            ${produk} <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <input type="number" min="0" placeholder="0" data-produk="${produk}" required
+              class="no-zoom-input w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus text-center text-base md:text-lg" />
+            <div class="absolute left-3 top-3.5 text-gray-400">
+              <i class="fas fa-hashtag"></i>
+            </div>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+
+      container.appendChild(grid);
+    } catch (err) {
+      document.getElementById('psm-fields').innerHTML = `
+        <div class="text-center py-6 md:py-8">
+          <div class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3 md:mb-4">
+            <i class="fas fa-exclamation-circle text-red-600 text-xl md:text-2xl"></i>
+          </div>
+          <h3 class="text-base md:text-lg font-semibold text-gray-700 mb-1 md:mb-2">Gagal Memuat Produk</h3>
+          <p class="text-gray-600 text-sm md:text-base">Periksa koneksi internet atau URL macro.</p>
+          <button onclick="loadProduk()" class="mt-3 md:mt-4 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 smooth-transition text-sm md:text-base">
+            <i class="fas fa-sync-alt mr-2"></i>Coba Lagi
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // Load field Daily
+  function loadDailyFields() {
+    const fields = [
+      {id: 'spd', label: 'SPD', icon: 'fa-chart-bar'},
+      {id: 'std', label: 'STD', icon: 'fa-chart-bar'},
+      {id: 'member', label: 'Member', icon: 'fa-users'},
+      {id: 'new_member', label: 'New Member', icon: 'fa-user-plus'},
+      {id: 'pwp', label: 'PWP', icon: 'fa-award'},
+      {id: 'sertis', label: 'Sertis', icon: 'fa-certificate'},
+      {id: 'sueger', label: 'Sueger', icon: 'fa-comments'},
+      {id: 'ceban', label: 'Ceban', icon: 'fa-box'}
+    ];
+
+    const container = document.getElementById('daily-fields');
+    fields.forEach((f) => {
+      container.innerHTML += `
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas ${f.icon} text-indigo-500 mr-1"></i>
+            ${f.label} <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <input type="number" min="0" id="${f.id}" placeholder="0" required
+              class="no-zoom-input w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent input-focus text-center text-base md:text-lg" />
+            <div class="absolute left-3 top-3.5 text-gray-400">
+              <i class="fas fa-hashtag"></i>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // Submit semua data
+  async function submitAll() {
+    const statusDiv = document.getElementById('status');
+    const btn = document.getElementById('submit-btn');
+    statusDiv.innerHTML = '';
+
+    // Validasi field umum
+    const tanggal = document.getElementById('tanggal');
+    const shift = document.getElementById('shift');
+    const nik = document.getElementById('nik');
+    const nikValue = nik.value.trim();
+
+    // Validasi NIK terlebih dahulu
+    if (!validateNIK(nikValue)) {
+      showError(statusDiv, "NIK harus berupa angka (8 digit)!");
+      updateNIKValidation();
+      nik.focus();
+      return;
+    }
+
+    if (!tanggal.checkValidity() || !shift.checkValidity() || !nik.checkValidity()) {
+      showError(statusDiv, "Tanggal, Shift, dan NIK wajib diisi!");
+      return;
+    }
+
+    // Validasi Daily
+    const dailyInputs = document.querySelectorAll('#daily-fields input');
+    for (let input of dailyInputs) {
+      if (!input.checkValidity()) {
+        showError(statusDiv, "Semua field Sales harus diisi (minimal 0)!");
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.focus();
+        return;
+      }
+    }
+
+    // Validasi PSM
+    const psmInputs = document.querySelectorAll('#psm-fields input');
+    for (let input of psmInputs) {
+      if (!input.checkValidity()) {
+        showError(statusDiv, "Qty semua produk harus diisi (minimal 0)!");
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.focus();
+        return;
+      }
+    }
+
+    // Kumpulkan data
+    const dailyData = {};
+    dailyInputs.forEach(i => dailyData[i.id] = parseInt(i.value) || 0);
+
+    const psmData = [];
+    psmInputs.forEach(i => {
+      const qty = parseInt(i.value) || 0;
+      psmData.push({ produk: i.dataset.produk, qty });
+    });
+
+    const payload = { tanggal: tanggal.value, shift: shift.value, nik: nikValue, dailyData, psmData };
+
+    try {
+      // Ubah tampilan button menjadi loading
+      btn.disabled = true;
+      btn.innerHTML = `
+        <div class="loader ease-linear rounded-full border-2 border-t-2 border-white h-4 w-4 md:h-5 md:w-5 mr-2"></div>
+        <span class="text-sm md:text-base">Menyimpan...</span>
+      `;
+
+      const res = await fetch(MACRO_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'text/plain' }
+      });
+
+      const result = await res.json();
+
+      if (result.status === 'success') {
+        showSuccess(statusDiv, "Data berhasil disimpan! Mengarahkan ke dashboard...");
+        
+        // Reset form setelah data berhasil disimpan
+        setTimeout(() => {
+          resetForm();
+          
+          // Redirect ke dashboard setelah form di-reset
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        }, 1500);
+      } else {
+        showError(statusDiv, `Gagal menyimpan: ${result.message || 'Error'}`);
+      }
+    } catch (err) {
+      showError(statusDiv, "Koneksi gagal. Periksa internet dan coba lagi.");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <i class="fas fa-paper-plane mr-2"></i>
+        <span class="text-sm md:text-base">Submit Data</span>
+      `;
+    }
+  }
+
+  // Fungsi untuk menampilkan pesan error
+  function showError(container, message) {
+    container.innerHTML = `
+      <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg success-animation">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-circle text-red-500 text-lg"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-red-700 font-medium text-sm md:text-base">${message}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Fungsi untuk menampilkan pesan sukses
+  function showSuccess(container, message) {
+    container.innerHTML = `
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg success-animation">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-check-circle text-green-500 text-lg"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-green-700 font-medium text-sm md:text-base">${message}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Reset form
+  function resetForm() {
+    // Reset semua input number
+    document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+    
+    // Reset NIK
+    document.getElementById('nik').value = '';
+    updateNIKValidation();
+    
+    // Reset shift
+    document.getElementById('shift').value = '';
+    
+    // Set tanggal ke hari ini
+    const today = new Date();
+    const todayFormatted = formatDate(today);
+    document.getElementById('tanggal').value = todayFormatted;
+    updateDateDisplay();
+    
+    // Tampilkan pesan reset berhasil
+    const statusDiv = document.getElementById('status');
+    statusDiv.innerHTML = `
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg success-animation">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-redo text-blue-500 text-lg"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-blue-700 font-medium text-sm md:text-base">Form berhasil direset. Mengarahkan ke dashboard...</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Event listener untuk membatasi input NIK hanya angka
+  function setupNIKValidation() {
+    const nikInput = document.getElementById('nik');
+    
+    // Event untuk membatasi input hanya angka
+    nikInput.addEventListener('input', function(e) {
+      // Hapus karakter non-angka
+      this.value = this.value.replace(/[^0-9]/g, '');
+      updateNIKValidation();
+    });
+    
+    // Event untuk paste (mencegah paste karakter non-angka)
+    nikInput.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+      const numbersOnly = pastedText.replace(/[^0-9]/g, '');
+      document.execCommand('insertText', false, numbersOnly);
+      updateNIKValidation();
+    });
+  }
+
+  // Init
+  window.onload = () => {
+    loadProduk();
+    loadDailyFields();
+    
+    // Setup validasi NIK
+    setupNIKValidation();
+    
+    // Set tanggal default ke hari ini
+    const today = new Date();
+    const todayFormatted = formatDate(today);
+    document.getElementById('tanggal').value = todayFormatted;
+    updateDateDisplay();
+    
+    // Event listener untuk perubahan tanggal
+    document.getElementById('tanggal').addEventListener('change', updateDateDisplay);
+    
+    // Tambahkan event listener untuk submit button
+    document.getElementById('submit-btn').onclick = submitAll;
+    
+    // Tambahkan event listener untuk reset button
+    document.getElementById('reset-btn').onclick = function() {
+      resetForm();
+      
+      // Redirect ke dashboard setelah reset manual
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1500);
+    };
+    
+    // Aktifkan pencegahan zoom untuk iOS/Safari
+    preventZoomOnFocus();
+    
+    // Log device type untuk debugging
+    if (isIOS()) {
+      console.log("iOS device detected - zoom prevention activated");
+    }
+    if (isSafari()) {
+      console.log("Safari browser detected - applying Safari-specific fixes");
+    }
+  };
+</script>
+</body>
+</html>
