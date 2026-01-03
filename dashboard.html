@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard PSM - Monitoring Produk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+        
+        .sidebar {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            height: calc(100vh - 80px);
+            position: sticky;
+            top: 20px;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px 15px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .progress {
+            height: 8px;
+            margin-top: 5px;
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+        
+        .badge-shift {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+        }
+        
+        .shift-1 {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .shift-2 {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .shift-3 {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .filter-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .last-update {
+            font-size: 0.8rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .nav-link.active {
+            font-weight: 600;
+            background-color: rgba(52, 152, 219, 0.1) !important;
+            color: var(--secondary-color) !important;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .nav-link {
+            color: #495057;
+            padding: 10px 15px;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        .total-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .achievement-card {
+            border-left: 4px solid;
+        }
+        
+        .achievement-good {
+            border-left-color: var(--success-color);
+        }
+        
+        .achievement-warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .achievement-danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .achievement-percentage {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .achievement-good .achievement-percentage {
+            color: var(--success-color);
+        }
+        
+        .achievement-warning .achievement-percentage {
+            color: var(--warning-color);
+        }
+        
+        .achievement-danger .achievement-percentage {
+            color: var(--danger-color);
+        }
+        
+        .progress-thin {
+            height: 6px;
+            margin-top: 2px;
+        }
+        
+        .parameter-card {
+            height: 100%;
+        }
+        
+        .parameter-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .parameter-target {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .gap-positive {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .gap-negative {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+        
+        .gap-neutral {
+            color: var(--warning-color);
+            font-weight: 600;
+        }
+        
+        .summary-row {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                height: auto;
+                margin-bottom: 20px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.8rem;
+            }
+        }
+        
+        .tab-content {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .data-period {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .psm-toko-filter {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .product-badge {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+        }
+        
+        .progress-sm {
+            height: 6px;
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard Toko</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-link last-update">Last Update: <span id="lastUpdateTime">Loading...</span></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="sidebar p-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-tab="dashboard">
+                                <i class="bi bi-house-door me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="daily">
+                                <i class="bi bi-calendar-day me-2"></i>Data Harian
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="psm_nik.html">
+                                <i class="bi bi-people me-2"></i>PSM per NIK
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="target">
+                                <i class="bi bi-bullseye me-2"></i>Target
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <div class="filter-container">
+                                <h6 class="mb-3"><i class="bi bi-funnel me-2"></i>Filter Data</h6>
+                                <div class="mb-3">
+                                    <label for="startDateFilter" class="form-label">Tanggal Awal</label>
+                                    <input type="date" class="form-control" id="startDateFilter">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="endDateFilter" class="form-label">Tanggal Akhir</label>
+                                    <input type="date" class="form-control" id="endDateFilter">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="shiftFilter" class="form-label">Shift</label>
+                                    <select class="form-select" id="shiftFilter">
+                                        <option value="all">Semua Shift</option>
+                                        <option value="1">Shift 1</option>
+                                        <option value="2">Shift 2</option>
+                                        <option value="3">Shift 3</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productFilter" class="form-label">Produk</label>
+                                    <select class="form-select" id="productFilter">
+                                        <option value="all">Semua Produk</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="nikFilter" class="form-label">NIK</label>
+                                    <select class="form-select" id="nikFilter">
+                                        <option value="all">Semua NIK</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary w-100" id="applyFilter">
+                                    <i class="bi bi-filter-circle me-2"></i>Terapkan Filter
+                                </button>
+                                <button class="btn btn-outline-secondary w-100 mt-2" id="resetFilter">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Reset Filter
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="main-content">
+                    <!-- Dashboard Tab -->
+                    <div id="dashboardTab" class="tab-content">
+                        <!-- Header dengan Periode -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Ringkasan Pencapaian</h5>
+                                        <p class="data-period mb-0" id="dataPeriod">Periode: Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card total-card">
+                                    <div class="card-body stat-card">
+                                        <div class="stat-value" id="totalSPD">0</div>
+                                        <div class="stat-label">Total SPD Toko</div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" id="spdProgress" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-white-50">Target: <span id="spdTarget">0</span> | Pencapaian: <span id="spdAchievement">0%</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body stat-card">
+                                        <div class="stat-value" id="totalSTD">0</div>
+                                        <div class="stat-label">Total STD Toko</div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" id="stdProgress" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted">Target: <span id="stdTarget">0</span> | Pencapaian: <span id="stdAchievement">0%</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body stat-card">
+                                        <div class="stat-value" id="totalMember">0</div>
+                                        <div class="stat-label">Total Member Toko</div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" id="memberProgress" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted">Target: <span id="memberTarget">0</span> | Pencapaian: <span id="memberAchievement">0%</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pencapaian Parameter Harian -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="bi bi-graph-up me-2"></i>Pencapaian Focus Marketing
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row" id="dailyParameters">
+                                            <!-- Parameter cards will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PSM Toko dengan Filter Terpisah -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-shop me-2"></i>Pencapaian Produk PSM - Toko
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary" id="exportPsmToko">
+                                                <i class="bi bi-download me-1"></i>Export
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Filter khusus untuk PSM Toko -->
+                                        <div class="psm-toko-filter mb-4">
+                                            <h6 class="mb-3">Filter Periode PSM Toko</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label for="psmTokoStartDate" class="form-label">Tanggal Awal</label>
+                                                    <input type="date" class="form-control" id="psmTokoStartDate">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="psmTokoEndDate" class="form-label">Tanggal Akhir</label>
+                                                    <input type="date" class="form-control" id="psmTokoEndDate">
+                                                </div>
+                                                <div class="col-md-4 d-flex align-items-end">
+                                                    <button class="btn btn-primary w-100" id="applyPsmTokoFilter">
+                                                        <i class="bi bi-filter-circle me-2"></i>Terapkan Filter
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p class="data-period mt-2 mb-0" id="psmTokoPeriod">Periode: Loading...</p>
+                                        </div>
+                                        
+                                        <div class="table-responsive">
+                                            <table class="table table-hover" id="psmTokoTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Produk</th>
+                                                        <th>Target</th>
+                                                        <th>Actual</th>
+                                                        <th>Pencapaian</th>
+                                                        <th>Gap</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Data will be populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Data Tab -->
+                    <div id="dailyTab" class="tab-content" style="display: none;">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-calendar-day me-2"></i>Data Harian per NIK
+                                </div>
+                                <div>
+                                    <span class="data-period me-3" id="dailyDataPeriod"></span>
+                                    <button class="btn btn-sm btn-outline-primary" id="exportDaily">
+                                        <i class="bi bi-download me-1"></i>Export
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="dailyTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Tanggal</th>
+                                                <th>Shift</th>
+                                                <th>NIK</th>
+                                                <th>SPD</th>
+                                                <th>STD</th>
+                                                <th>Member</th>
+                                                <th>New Member</th>
+                                                <th>PWP</th>
+                                                <th>Sertis</th>
+                                                <th>Sueger</th>
+                                                <th>Ceban</th>
+                                                <th>Timestamp</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Tab -->
+                    <div id="targetTab" class="tab-content" style="display: none;">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="bi bi-bullseye me-2"></i>Target Harian
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover" id="targetDailyTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tanggal</th>
+                                                        <th>SPD</th>
+                                                        <th>STD</th>
+                                                        <th>Member</th>
+                                                        <th>New Member</th>
+                                                        <th>PWP</th>
+                                                        <th>Sertis</th>
+                                                        <th>Sueger</th>
+                                                        <th>Ceban</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Data will be populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="bi bi-box-seam me-2"></i>Target PSM (Mingguan)
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover" id="targetPSMTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Produk</th>
+                                                        <th>Target per NIK</th>
+                                                        <th>Target Toko</th>
+                                                        <th>Periode</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Data will be populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyAMHSitI4dej7PJCU3TAZbwK3voIxLFONo1uD7AKPQ7dvB3CUjBuIwd86LCRVyhsPY/exec';
+        
+        // Global variables
+        let allData = {};
+        let filteredData = {};
+        let currentStartDate, currentEndDate;
+        let psmTokoStartDate, psmTokoEndDate;
+        
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date range (today - 7 days to today)
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            
+            const todayStr = today.toISOString().split('T')[0];
+            const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+            
+            // Set default dates for main filter
+            document.getElementById('startDateFilter').value = sevenDaysAgoStr;
+            document.getElementById('endDateFilter').value = todayStr;
+            
+            currentStartDate = sevenDaysAgoStr;
+            currentEndDate = todayStr;
+            
+            // Set default dates for PSM Toko filter
+            document.getElementById('psmTokoStartDate').value = sevenDaysAgoStr;
+            document.getElementById('psmTokoEndDate').value = todayStr;
+            
+            psmTokoStartDate = sevenDaysAgoStr;
+            psmTokoEndDate = todayStr;
+            
+            // Load data from API
+            loadData();
+            
+            // Setup event listeners
+            setupEventListeners();
+        });
+        
+        // Function to load data from API
+        async function loadData() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(API_URL);
+                allData = await response.json();
+                
+                console.log('Data loaded:', allData);
+                
+                // Populate filter options
+                populateFilters();
+                
+                // Apply initial filters
+                applyFilters();
+                
+                // Update PSM Toko table
+                updatePsmTokoTable();
+                
+                showLoading(false);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showLoading(false);
+                alert('Gagal memuat data dari server. Silakan coba lagi.');
+            }
+        }
+        
+        // Function to apply filters (for main dashboard)
+        function applyFilters() {
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
+            const shiftFilter = document.getElementById('shiftFilter').value;
+            const productFilter = document.getElementById('productFilter').value;
+            const nikFilter = document.getElementById('nikFilter').value;
+            
+            // Store current date range
+            currentStartDate = startDate;
+            currentEndDate = endDate;
+            
+            // Start with all data
+            filteredData = JSON.parse(JSON.stringify(allData));
+            
+            // Apply date range filter
+            if (startDate && endDate) {
+                const startDateObj = new Date(startDate);
+                const endDateObj = new Date(endDate);
+                endDateObj.setHours(23, 59, 59, 999); // Set to end of day
+                
+                // Filter data_psm
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => {
+                        const itemDate = new Date(item.tanggal);
+                        return itemDate >= startDateObj && itemDate <= endDateObj;
+                    });
+                }
+                
+                // Filter data_daily
+                if (filteredData.data_daily) {
+                    filteredData.data_daily = filteredData.data_daily.filter(item => {
+                        const itemDate = new Date(item.tanggal);
+                        return itemDate >= startDateObj && itemDate <= endDateObj;
+                    });
+                }
+            }
+            
+            // Apply shift filter
+            if (shiftFilter !== 'all') {
+                const shift = parseInt(shiftFilter);
+                
+                // Filter data_psm
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => item.shift === shift);
+                }
+                
+                // Filter data_daily
+                if (filteredData.data_daily) {
+                    filteredData.data_daily = filteredData.data_daily.filter(item => item.shift === shift);
+                }
+            }
+            
+            // Apply product filter
+            if (productFilter !== 'all') {
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => item.nama_produk === productFilter);
+                }
+            }
+            
+            // Apply NIK filter
+            if (nikFilter !== 'all') {
+                const nik = parseInt(nikFilter);
+                
+                // Filter data_psm
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => item.nik === nik);
+                }
+                
+                // Filter data_daily
+                if (filteredData.data_daily) {
+                    filteredData.data_daily = filteredData.data_daily.filter(item => item.nik === nik);
+                }
+            }
+            
+            // Update UI with filtered data
+            updateDashboard();
+            updatePeriodText();
+        }
+        
+        // Function to apply PSM Toko filter
+        function applyPsmTokoFilter() {
+            const startDate = document.getElementById('psmTokoStartDate').value;
+            const endDate = document.getElementById('psmTokoEndDate').value;
+            
+            // Store current date range for PSM Toko
+            psmTokoStartDate = startDate;
+            psmTokoEndDate = endDate;
+            
+            // Update PSM Toko table
+            updatePsmTokoTable();
+        }
+        
+        // Function to update dashboard with data
+        function updateDashboard() {
+            // Update summary cards dengan perhitungan yang benar
+            updateSummaryCards();
+            
+            // Update parameter cards
+            updateParameterCards();
+            
+            // Update tables
+            updateTables();
+        }
+        
+        // Function to update summary cards dengan perhitungan yang benar
+        function updateSummaryCards() {
+            const dailyData = filteredData.data_daily || [];
+            const targetDaily = allData.target_daily || []; // Use all target data for calculation
+            
+            // Calculate totals for TOKO (gabungan semua NIK) untuk periode yang difilter
+            const totalSPD = dailyData.reduce((sum, item) => sum + (item.spd || 0), 0);
+            const totalSTD = dailyData.reduce((sum, item) => sum + (item.std || 0), 0);
+            const totalMember = dailyData.reduce((sum, item) => sum + (item.member || 0), 0);
+            const totalNewMember = dailyData.reduce((sum, item) => sum + (item.new_member || 0), 0);
+            const totalPWP = dailyData.reduce((sum, item) => sum + (item.pwp || 0), 0);
+            const totalSertis = dailyData.reduce((sum, item) => sum + (item.sertis || 0), 0);
+            const totalSueger = dailyData.reduce((sum, item) => sum + (item.sueger || 0), 0);
+            const totalCeban = dailyData.reduce((sum, item) => sum + (item.ceban || 0), 0);
+            
+            // Calculate target totals for the filtered period
+            const startDate = new Date(currentStartDate);
+            const endDate = new Date(currentEndDate);
+            
+            let spdTarget = 0;
+            let stdTarget = 0;
+            let memberTarget = 0;
+            let newMemberTarget = 0;
+            let pwpTarget = 0;
+            let sertisTarget = 0;
+            let suegerTarget = 0;
+            let cebanTarget = 0;
+            
+            targetDaily.forEach(item => {
+                const itemDate = new Date(item.Tanggal);
+                if (itemDate >= startDate && itemDate <= endDate) {
+                    spdTarget += item.spd || 0;
+                    stdTarget += item.std || 0;
+                    memberTarget += item.member || 0;
+                    newMemberTarget += item.new_member || 0;
+                    pwpTarget += item.pwp || 0;
+                    sertisTarget += item.sertis || 0;
+                    suegerTarget += item.sueger || 0;
+                    cebanTarget += item.ceban || 0;
+                }
+            });
+            
+            // Calculate achievement percentages
+            const spdPercentage = spdTarget > 0 ? Math.min(100, Math.round((totalSPD / spdTarget) * 100)) : 0;
+            const stdPercentage = stdTarget > 0 ? Math.min(100, Math.round((totalSTD / stdTarget) * 100)) : 0;
+            const memberPercentage = memberTarget > 0 ? Math.min(100, Math.round((totalMember / memberTarget) * 100)) : 0;
+            const newMemberPercentage = newMemberTarget > 0 ? Math.min(100, Math.round((totalNewMember / newMemberTarget) * 100)) : 0;
+            const pwpPercentage = pwpTarget > 0 ? Math.min(100, Math.round((totalPWP / pwpTarget) * 100)) : 0;
+            const sertisPercentage = sertisTarget > 0 ? Math.min(100, Math.round((totalSertis / sertisTarget) * 100)) : 0;
+            const suegerPercentage = suegerTarget > 0 ? Math.min(100, Math.round((totalSueger / suegerTarget) * 100)) : 0;
+            const cebanPercentage = cebanTarget > 0 ? Math.min(100, Math.round((totalCeban / cebanTarget) * 100)) : 0;
+            
+            // Update DOM elements
+            document.getElementById('totalSPD').textContent = formatNumber(totalSPD);
+            document.getElementById('totalSTD').textContent = formatNumber(totalSTD);
+            document.getElementById('totalMember').textContent = formatNumber(totalMember);
+            
+            document.getElementById('spdTarget').textContent = formatNumber(spdTarget);
+            document.getElementById('stdTarget').textContent = formatNumber(stdTarget);
+            document.getElementById('memberTarget').textContent = formatNumber(memberTarget);
+            
+            document.getElementById('spdAchievement').textContent = `${spdPercentage}%`;
+            document.getElementById('stdAchievement').textContent = `${stdPercentage}%`;
+            document.getElementById('memberAchievement').textContent = `${memberPercentage}%`;
+            
+            // Update progress bars
+            document.getElementById('spdProgress').style.width = `${spdPercentage}%`;
+            document.getElementById('stdProgress').style.width = `${stdPercentage}%`;
+            document.getElementById('memberProgress').style.width = `${memberPercentage}%`;
+            
+            // Store calculated data for later use
+            window.dailyTotals = {
+                totalSPD, totalSTD, totalMember, totalNewMember,
+                totalPWP, totalSertis, totalSueger, totalCeban,
+                spdTarget, stdTarget, memberTarget, newMemberTarget,
+                pwpTarget, sertisTarget, suegerTarget, cebanTarget,
+                spdPercentage, stdPercentage, memberPercentage,
+                newMemberPercentage, pwpPercentage, sertisPercentage,
+                suegerPercentage, cebanPercentage
+            };
+        }
+        
+        // Function to update parameter cards
+        function updateParameterCards() {
+            const totals = window.dailyTotals || {};
+            const container = document.getElementById('dailyParameters');
+            
+            if (!container) return;
+            
+            const parameters = [
+                { key: 'new_member', label: 'New Member', value: totals.totalNewMember, target: totals.newMemberTarget, percentage: totals.newMemberPercentage || 0 },
+                { key: 'pwp', label: 'PWP', value: totals.totalPWP, target: totals.pwpTarget, percentage: totals.pwpPercentage || 0 },
+                { key: 'sertis', label: 'Sertis', value: totals.totalSertis, target: totals.sertisTarget, percentage: totals.sertisPercentage || 0 },
+                { key: 'sueger', label: 'Sueger', value: totals.totalSueger, target: totals.suegerTarget, percentage: totals.suegerPercentage || 0 },
+                { key: 'ceban', label: 'Ceban', value: totals.totalCeban, target: totals.cebanTarget, percentage: totals.cebanPercentage || 0 }
+            ];
+            
+            container.innerHTML = '';
+            
+            parameters.forEach(param => {
+                const cardClass = param.percentage >= 100 ? 'achievement-good' : 
+                                param.percentage >= 70 ? 'achievement-warning' : 'achievement-danger';
+                
+                const cardHtml = `
+                    <div class="col-md-4 col-6 mb-3">
+                        <div class="card ${cardClass} parameter-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stat-label">${param.label}</div>
+                                        <div class="parameter-value">${formatNumber(param.value || 0)}</div>
+                                        <div class="parameter-target">Target: ${formatNumber(param.target || 0)}</div>
+                                    </div>
+                                    <div class="achievement-percentage">
+                                        ${param.percentage}%
+                                    </div>
+                                </div>
+                                <div class="progress progress-thin mt-2">
+                                    <div class="progress-bar" style="width: ${param.percentage}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML += cardHtml;
+            });
+        }
+        
+        // Function to update tables
+        function updateTables() {
+            updateDailyTable();
+            updateTargetTables();
+            updateLastUpdateTime();
+        }
+        
+        // Function to update daily data table
+        function updateDailyTable() {
+            const dailyData = filteredData.data_daily || [];
+            const tableBody = document.querySelector('#dailyTable tbody');
+            
+            if (!tableBody) return;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add rows
+            dailyData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Format date
+                const date = new Date(item.tanggal);
+                const formattedDate = date.toLocaleDateString('id-ID');
+                
+                // Format timestamp
+                const time = new Date(item.timestamp);
+                const formattedTime = time.toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td><span class="badge-shift shift-${item.shift}">${item.shift}</span></td>
+                    <td>${item.nik}</td>
+                    <td>${formatNumber(item.spd)}</td>
+                    <td>${item.std}</td>
+                    <td>${item.member}</td>
+                    <td>${item.new_member}</td>
+                    <td>${item.pwp}</td>
+                    <td>${item.sertis}</td>
+                    <td>${item.sueger}</td>
+                    <td>${item.ceban}</td>
+                    <td>${formattedTime}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Function to update PSM Toko table dengan filter terpisah
+        function updatePsmTokoTable() {
+            const psmData = allData.data_psm || [];
+            const targetPSM = allData.target_psm || [];
+            const tableBody = document.querySelector('#psmTokoTable tbody');
+            
+            if (!tableBody) return;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Apply PSM Toko date filter
+            const startDate = new Date(psmTokoStartDate);
+            const endDate = new Date(psmTokoEndDate);
+            endDate.setHours(23, 59, 59, 999);
+            
+            // Filter PSM data based on PSM Toko date range
+            const filteredPsmData = psmData.filter(item => {
+                const itemDate = new Date(item.tanggal);
+                return itemDate >= startDate && itemDate <= endDate;
+            });
+            
+            // Group actual data by product
+            const productActuals = {};
+            
+            filteredPsmData.forEach(item => {
+                const product = item.nama_produk;
+                if (!productActuals[product]) {
+                    productActuals[product] = 0;
+                }
+                productActuals[product] += item.qty;
+            });
+            
+            // Calculate target for each product based on date range
+            const productTargets = calculateProductTargets(targetPSM, startDate, endDate);
+            
+            // Calculate total row values
+            let totalActual = 0;
+            let totalTarget = 0;
+            
+            // Get all unique products
+            const allProducts = [...new Set([...Object.keys(productActuals), ...Object.keys(productTargets)])].sort();
+            
+            // Create table rows
+            allProducts.forEach(product => {
+                const actual = productActuals[product] || 0;
+                const target = productTargets[product] || 0;
+                const achievement = target > 0 ? Math.round((actual / target) * 100) : (actual > 0 ? 100 : 0);
+                const gap = actual - target;
+                
+                totalActual += actual;
+                totalTarget += target;
+                
+                const row = document.createElement('tr');
+                const gapClass = getGapClass(gap);
+                
+                row.innerHTML = `
+                    <td><strong>${product}</strong></td>
+                    <td>${formatNumber(target)}</td>
+                    <td>${formatNumber(actual)}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress flex-grow-1 me-2 progress-sm">
+                                <div class="progress-bar ${achievement >= 100 ? 'bg-success' : achievement >= 70 ? 'bg-warning' : 'bg-danger'}" 
+                                     style="width: ${Math.min(achievement, 100)}%"></div>
+                            </div>
+                            <span>${achievement}%</span>
+                        </div>
+                    </td>
+                    <td class="${gapClass}">${formatNumber(gap)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add total row
+            const totalAchievement = totalTarget > 0 ? Math.round((totalActual / totalTarget) * 100) : 0;
+            const totalGap = totalActual - totalTarget;
+            const totalGapClass = getGapClass(totalGap);
+            
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'summary-row';
+            totalRow.innerHTML = `
+                <td><strong>TOTAL</strong></td>
+                <td><strong>${formatNumber(totalTarget)}</strong></td>
+                <td><strong>${formatNumber(totalActual)}</strong></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="progress flex-grow-1 me-2" style="height: 10px;">
+                            <div class="progress-bar ${totalAchievement >= 100 ? 'bg-success' : totalAchievement >= 70 ? 'bg-warning' : 'bg-danger'}" 
+                                 style="width: ${Math.min(totalAchievement, 100)}%"></div>
+                        </div>
+                        <span><strong>${totalAchievement}%</strong></span>
+                    </div>
+                </td>
+                <td class="${totalGapClass}"><strong>${formatNumber(totalGap)}</strong></td>
+            `;
+            
+            tableBody.appendChild(totalRow);
+            
+            // Update PSM Toko period text
+            updatePsmTokoPeriodText();
+        }
+        
+        // Function to calculate product targets based on date range
+        function calculateProductTargets(targetPSM, startDate, endDate) {
+            const productTargets = {};
+            
+            targetPSM.forEach(target => {
+                const targetStart = new Date(target.start_date);
+                const targetEnd = new Date(target.end_date);
+                
+                // Check if date ranges overlap
+                if (startDate <= targetEnd && endDate >= targetStart) {
+                    // Calculate overlapping days
+                    const overlapStart = new Date(Math.max(startDate.getTime(), targetStart.getTime()));
+                    const overlapEnd = new Date(Math.min(endDate.getTime(), targetEnd.getTime()));
+                    
+                    // Calculate number of days in overlap
+                    const overlapDays = Math.max(0, Math.floor((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1);
+                    
+                    // Calculate total days in target period
+                    const totalTargetDays = Math.floor((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    // Calculate proportional target
+                    if (totalTargetDays > 0) {
+                        const proportion = overlapDays / totalTargetDays;
+                        const product = target.nama_produk;
+                        
+                        if (!productTargets[product]) {
+                            productTargets[product] = 0;
+                        }
+                        
+                        // Add proportional target toko
+                        productTargets[product] += Math.round(target.target_toko * proportion);
+                    }
+                }
+            });
+            
+            return productTargets;
+        }
+        
+        // Function to update target tables
+        function updateTargetTables() {
+            const targetDaily = allData.target_daily || [];
+            const targetPSM = allData.target_psm || [];
+            
+            // Filter target_daily based on date range
+            const startDate = new Date(currentStartDate);
+            const endDate = new Date(currentEndDate);
+            
+            const filteredTargetDaily = targetDaily.filter(item => {
+                const itemDate = new Date(item.Tanggal);
+                return itemDate >= startDate && itemDate <= endDate;
+            });
+            
+            // Update daily target table
+            const dailyTableBody = document.querySelector('#targetDailyTable tbody');
+            if (dailyTableBody) {
+                dailyTableBody.innerHTML = '';
+                
+                filteredTargetDaily.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    // Format date
+                    const date = new Date(item.Tanggal);
+                    const formattedDate = date.toLocaleDateString('id-ID');
+                    
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>${formatNumber(item.spd)}</td>
+                        <td>${item.std}</td>
+                        <td>${item.member}</td>
+                        <td>${item.new_member}</td>
+                        <td>${item.pwp}</td>
+                        <td>${item.sertis}</td>
+                        <td>${item.sueger}</td>
+                        <td>${item.ceban}</td>
+                    `;
+                    
+                    dailyTableBody.appendChild(row);
+                });
+            }
+            
+            // Update PSM target table - show all targets
+            const psmTableBody = document.querySelector('#targetPSMTable tbody');
+            if (psmTableBody) {
+                psmTableBody.innerHTML = '';
+                
+                targetPSM.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    // Format dates
+                    const startDate = new Date(item.start_date);
+                    const endDate = new Date(item.end_date);
+                    const formattedStartDate = startDate.toLocaleDateString('id-ID');
+                    const formattedEndDate = endDate.toLocaleDateString('id-ID');
+                    
+                    row.innerHTML = `
+                        <td>${item.nama_produk}</td>
+                        <td>${item.target_pernik}</td>
+                        <td>${item.target_toko}</td>
+                        <td>${formattedStartDate} - ${formattedEndDate}</td>
+                    `;
+                    
+                    psmTableBody.appendChild(row);
+                });
+            }
+        }
+        
+        // Function to get gap class based on value
+        function getGapClass(gap) {
+            if (gap > 0) return 'gap-positive';
+            if (gap < 0) return 'gap-negative';
+            return 'gap-neutral';
+        }
+        
+        // Function to update period text
+        function updatePeriodText() {
+            const startDate = new Date(currentStartDate);
+            const endDate = new Date(currentEndDate);
+            
+            const formattedStartDate = startDate.toLocaleDateString('id-ID');
+            const formattedEndDate = endDate.toLocaleDateString('id-ID');
+            
+            const periodText = `Periode: ${formattedStartDate} - ${formattedEndDate}`;
+            
+            // Update period elements
+            document.getElementById('dataPeriod').textContent = periodText;
+            document.getElementById('dailyDataPeriod').textContent = periodText;
+        }
+        
+        // Function to update PSM Toko period text
+        function updatePsmTokoPeriodText() {
+            const startDate = new Date(psmTokoStartDate);
+            const endDate = new Date(psmTokoEndDate);
+            
+            const formattedStartDate = startDate.toLocaleDateString('id-ID');
+            const formattedEndDate = endDate.toLocaleDateString('id-ID');
+            
+            const periodText = `Periode: ${formattedStartDate} - ${formattedEndDate}`;
+            
+            document.getElementById('psmTokoPeriod').textContent = periodText;
+        }
+        
+        // Function to populate filter options
+        function populateFilters() {
+            const psmData = allData.data_psm || [];
+            const dailyData = allData.data_daily || [];
+            const productFilter = document.getElementById('productFilter');
+            const nikFilter = document.getElementById('nikFilter');
+            
+            // Get unique products
+            const products = [...new Set(psmData.map(item => item.nama_produk))].sort();
+            
+            // Get unique NIKs
+            const nikList = [...new Set([
+                ...psmData.map(item => item.nik),
+                ...dailyData.map(item => item.nik)
+            ])].sort((a, b) => a - b);
+            
+            // Clear existing options (except the first "all" option)
+            while (productFilter.options.length > 1) {
+                productFilter.remove(1);
+            }
+            
+            // Add product options
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product;
+                option.textContent = product;
+                productFilter.appendChild(option);
+            });
+            
+            while (nikFilter.options.length > 1) {
+                nikFilter.remove(1);
+            }
+            
+            // Add NIK options
+            nikList.forEach(nik => {
+                const option = document.createElement('option');
+                option.value = nik;
+                option.textContent = nik;
+                nikFilter.appendChild(option);
+            });
+        }
+        
+        // Function to setup event listeners
+        function setupEventListeners() {
+            console.log('Setting up event listeners...');
+            
+            // Tab navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Jika link memiliki href (seperti link ke psm_nik.html), biarkan default behavior
+                    if (this.hasAttribute('href') && this.getAttribute('href') !== '#') {
+                        return; // Biarkan browser menangani navigasi
+                    }
+                    
+                    e.preventDefault();
+                    
+                    console.log('Tab clicked:', this.getAttribute('data-tab'));
+                    
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.nav-link').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    // Show selected tab content
+                    const tabId = this.getAttribute('data-tab') + 'Tab';
+                    const tabElement = document.getElementById(tabId);
+                    if (tabElement) {
+                        tabElement.style.display = 'block';
+                        console.log('Showing tab:', tabId);
+                        
+                        // Update tables for the active tab
+                        switch(tabId) {
+                            case 'dailyTab':
+                                console.log('Updating daily table...');
+                                updateDailyTable();
+                                break;
+                            case 'targetTab':
+                                console.log('Updating target tables...');
+                                updateTargetTables();
+                                break;
+                        }
+                    }
+                });
+            });
+            
+            // Main filter button
+            document.getElementById('applyFilter').addEventListener('click', function() {
+                console.log('Apply filter clicked');
+                applyFilters();
+            });
+            
+            // PSM Toko filter button
+            document.getElementById('applyPsmTokoFilter').addEventListener('click', function() {
+                console.log('PSM Toko filter clicked');
+                applyPsmTokoFilter();
+            });
+            
+            // Reset filter button
+            document.getElementById('resetFilter').addEventListener('click', function() {
+                // Reset to default date range (today - 7 days to today)
+                const today = new Date();
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(today.getDate() - 7);
+                
+                const todayStr = today.toISOString().split('T')[0];
+                const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+                
+                document.getElementById('startDateFilter').value = sevenDaysAgoStr;
+                document.getElementById('endDateFilter').value = todayStr;
+                document.getElementById('shiftFilter').value = 'all';
+                document.getElementById('productFilter').value = 'all';
+                document.getElementById('nikFilter').value = 'all';
+                
+                // Reset filtered data to all data with default date range
+                applyFilters();
+            });
+            
+            // Export buttons
+            document.getElementById('exportDaily').addEventListener('click', function() {
+                exportToCSV(filteredData.data_daily, 'data_harian.csv');
+            });
+            
+            document.getElementById('exportPsmToko').addEventListener('click', function() {
+                const psmData = allData.data_psm || [];
+                const targetPSM = allData.target_psm || [];
+                const startDate = new Date(psmTokoStartDate);
+                const endDate = new Date(psmTokoEndDate);
+                endDate.setHours(23, 59, 59, 999);
+                
+                // Filter PSM data based on PSM Toko date range
+                const filteredPsmData = psmData.filter(item => {
+                    const itemDate = new Date(item.tanggal);
+                    return itemDate >= startDate && itemDate <= endDate;
+                });
+                
+                // Group actual data by product
+                const productActuals = {};
+                
+                filteredPsmData.forEach(item => {
+                    const product = item.nama_produk;
+                    if (!productActuals[product]) {
+                        productActuals[product] = 0;
+                    }
+                    productActuals[product] += item.qty;
+                });
+                
+                // Calculate target for each product
+                const productTargets = calculateProductTargets(targetPSM, startDate, endDate);
+                
+                // Convert to export format
+                const exportData = [];
+                
+                // Get all unique products
+                const allProducts = [...new Set([...Object.keys(productActuals), ...Object.keys(productTargets)])].sort();
+                
+                allProducts.forEach(product => {
+                    const actual = productActuals[product] || 0;
+                    const target = productTargets[product] || 0;
+                    const achievement = target > 0 ? Math.round((actual / target) * 100) : (actual > 0 ? 100 : 0);
+                    const gap = actual - target;
+                    
+                    exportData.push({
+                        'Produk': product,
+                        'Target Toko': target,
+                        'Actual Toko': actual,
+                        'Pencapaian (%)': achievement,
+                        'Gap': gap
+                    });
+                });
+                
+                exportToCSV(exportData, 'psm_toko.csv');
+            });
+            
+            console.log('Event listeners setup complete');
+        }
+        
+        // Function to export data to CSV
+        function exportToCSV(data, filename) {
+            if (!data || data.length === 0) {
+                alert('Tidak ada data untuk diexport.');
+                return;
+            }
+            
+            // Convert data to CSV
+            const headers = Object.keys(data[0]);
+            const csvRows = [];
+            
+            // Add header row
+            csvRows.push(headers.join(','));
+            
+            // Add data rows
+            data.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header];
+                    // Handle values that might contain commas
+                    return typeof value === 'string' && value.includes(',') 
+                        ? `"${value}"` 
+                        : value;
+                });
+                csvRows.push(values.join(','));
+            });
+            
+            // Create CSV string
+            const csvString = csvRows.join('\n');
+            
+            // Create blob and download link
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Function to update last update time
+        function updateLastUpdateTime() {
+            const psmData = allData.data_psm || [];
+            if (psmData.length === 0) return;
+            
+            // Find the latest timestamp
+            const latestTimestamp = psmData.reduce((latest, item) => {
+                const itemTime = new Date(item.timestamp);
+                return itemTime > latest ? itemTime : latest;
+            }, new Date(0));
+            
+            // Format the time
+            const formattedTime = latestTimestamp.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const formattedDate = latestTimestamp.toLocaleDateString('id-ID');
+            
+            document.getElementById('lastUpdateTime').textContent = `${formattedDate} ${formattedTime}`;
+        }
+        
+        // Function to format numbers with thousands separator
+        function formatNumber(num) {
+            if (num === undefined || num === null) return '0';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        // Function to show/hide loading spinner
+        function showLoading(show) {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (loadingSpinner) {
+                loadingSpinner.style.display = show ? 'flex' : 'none';
+            }
+            
+            if (mainContent) {
+                mainContent.style.display = show ? 'none' : 'block';
+            }
+        }
+    </script>
+</body>
+</html>
