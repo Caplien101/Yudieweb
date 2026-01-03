@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSM per Personil - Dashboard Toko</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .data-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .gap-positive {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .gap-negative {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+        
+        .gap-neutral {
+            color: var(--warning-color);
+            font-weight: 600;
+        }
+        
+        .progress-sm {
+            height: 8px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .product-section {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .product-header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-bottom: 1px solid #dee2e6;
+            border-top: 2px solid #3498db;
+            font-size: 1.1em;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .achievement-cell {
+            min-width: 120px;
+        }
+        
+        .employee-nik {
+            color: #666;
+            font-size: 0.85em;
+            font-family: monospace;
+        }
+        
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .employee-badge {
+            background-color: #e9ecef;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            display: inline-block;
+            margin-top: 3px;
+        }
+        
+        .stats-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stats-section {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .stats-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+        
+        .stats-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stats-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .success-item {
+            color: var(--success-color);
+        }
+        
+        .warning-item {
+            color: var(--warning-color);
+        }
+        
+        .danger-item {
+            color: var(--danger-color);
+        }
+        
+        .info-badge {
+            font-size: 0.8em;
+            padding: 2px 6px;
+            margin-left: 5px;
+        }
+        
+        .percentage-badge {
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .target-summary {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="bi bi-people me-2"></i>PSM Personil Toko</h1>
+            <p class="mb-0">Monitoring Pencapaian Produk PSM per Personil</p>
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="filter-card">
+            <h5 class="mb-3"><i class="bi bi-funnel me-2"></i>Filter Data</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="startDate" class="form-label">Tanggal Awal</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-3">
+                    <label for="endDate" class="form-label">Tanggal Akhir</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+                <div class="col-md-2">
+                    <label for="shiftFilter" class="form-label">Shift</label>
+                    <select class="form-select" id="shiftFilter">
+                        <option value="all">Semua</option>
+                        <option value="1">Shift 1</option>
+                        <option value="2">Shift 2</option>
+                        <option value="3">Shift 3</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="productFilter" class="form-label">Produk</label>
+                    <select class="form-select" id="productFilter">
+                        <option value="all">Semua</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="nikFilter" class="form-label">Personil</label>
+                    <select class="form-select" id="nikFilter">
+                        <option value="all">Semua</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="showAllNik" checked>
+                        <label class="form-check-label" for="showAllNik">
+                            <i class="bi bi-eye me-1"></i>Tampilkan semua personil
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="showGapOnly">
+                        <label class="form-check-label" for="showGapOnly">
+                            <i class="bi bi-filter-circle me-1"></i>Hanya tampilkan GAP negatif
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary me-2" id="applyFilter">
+                        <i class="bi bi-filter-circle me-2"></i>Terapkan Filter
+                    </button>
+                    <button class="btn btn-outline-secondary" id="resetFilter">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <span id="dataPeriod" class="text-muted">Periode: Loading...</span>
+                <span id="employeeCount" class="badge bg-info ms-2">0 personil</span>
+                <span id="totalTargetBadge" class="badge bg-secondary ms-1">Target: 0</span>
+            </div>
+        </div>
+        
+        <!-- Stats Information -->
+        <div class="stats-card">
+            <h5 class="mb-3"><i class="bi bi-graph-up me-2"></i>Informasi Performa</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stats-section">
+                        <h6><i class="bi bi-trophy-fill text-warning me-2"></i>Top 3 Pencapaian Tertinggi</h6>
+                        <div class="target-summary">
+                            <small>Target Total: <span id="totalTargetValue">0</span></small>
+                        </div>
+                        <ul class="stats-list" id="topPerformers">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-section">
+                        <h6><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Pencapaian Terendah</h6>
+                        <div class="target-summary">
+                            <small>Target Total: <span id="totalTargetValue2">0</span></small>
+                        </div>
+                        <ul class="stats-list" id="lowestPerformer">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-section">
+                        <h6><i class="bi bi-check-circle-fill text-success me-2"></i>Mencapai Target per Produk</h6>
+                        <div class="target-summary">
+                            <small>Hanya yang mencapai 100% per produk</small>
+                        </div>
+                        <ul class="stats-list" id="achievedTarget">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Section -->
+        <div class="data-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-table me-2"></i>Data PSM per Personil
+                    <span class="badge bg-primary ms-2" id="rowCount">0 baris</span>
+                    <span class="badge bg-secondary ms-1" id="productCount">0 produk</span>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" id="exportData">
+                        <i class="bi bi-download me-1"></i>Export CSV
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="psmTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Personil</th>
+                            <th>Target per Personil</th>
+                            <th>Actual per Personil</th>
+                            <th class="achievement-cell">Pencapaian</th>
+                            <th>GAP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Data akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Info Panel -->
+        <div class="alert alert-info mt-3">
+            <h6><i class="bi bi-info-circle me-2"></i>Informasi</h6>
+            <ul class="mb-0">
+                <li>Data diambil dari Google Apps Script API</li>
+                <li>Target dihitung secara proporsional berdasarkan periode yang dipilih</li>
+                <li>GAP = Actual - Target (positif = melebihi target, negatif = di bawah target)</li>
+                <li><strong>Target total sama untuk semua personil</strong> - perbandingan berdasarkan actual penjualan</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5>Memuat data dari server...</h5>
+            <p class="text-muted" id="loadingText">Mengambil data PSM dan target</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==============================================
+        // KONFIGURASI
+        // ==============================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyAMHSitI4dej7PJCU3TAZbwK3voIxLFONo1uD7AKPQ7dvB3CUjBuIwd86LCRVyhsPY/exec';
+        
+        // Variabel global
+        let allData = {};
+        let currentStartDate, currentEndDate;
+        let nikToNameMap = {}; // Untuk mapping NIK ke Nama
+        let currentProductGroupsWithTarget = {}; // Untuk menyimpan data saat ini untuk stats
+        let totalTargetForAll = 0; // Target total yang sama untuk semua personil
+        
+        // ==============================================
+        // FUNGSI UTAMA
+        // ==============================================
+        
+        // Fungsi utama untuk memuat data
+        async function loadData() {
+            try {
+                showLoading(true, 'Menghubungkan ke server...');
+                
+                // Ambil data dari API
+                const response = await fetch(API_URL);
+                allData = await response.json();
+                
+                console.log('✅ Data berhasil diambil dari API');
+                console.log(`📊 Data PSM: ${allData.data_psm?.length || 0} record`);
+                console.log(`🎯 Target PSM: ${allData.target_psm?.length || 0} record`);
+                console.log(`👤 Data NIK: ${allData.data_nik?.length || 0} record`);
+                
+                // Proses data NIK untuk mapping
+                processNIKData();
+                
+                // Setup tanggal default
+                setupDefaultDates();
+                
+                // Setup filter options
+                populateFilters();
+                
+                // Terapkan filter awal
+                applyFilters();
+                
+                showLoading(false);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showLoading(false);
+                alert('Gagal memuat data dari server. Silakan refresh halaman.');
+            }
+        }
+        
+        // Proses data NIK untuk mapping NIK -> Nama
+        function processNIKData() {
+            const nikRecords = allData.data_nik || [];
+            nikToNameMap = {};
+            
+            nikRecords.forEach(record => {
+                const nik = record.nik ? record.nik.toString() : null;
+                const nama = record.nama || 'Tidak diketahui';
+                
+                if (nik) {
+                    nikToNameMap[nik] = nama;
+                }
+            });
+            
+            console.log(`✅ Mapping NIK ke Nama: ${Object.keys(nikToNameMap).length} personil`);
+            
+            // Update badge jumlah personil
+            document.getElementById('employeeCount').textContent = `${Object.keys(nikToNameMap).length} personil`;
+        }
+        
+        // Ambil nama personil berdasarkan NIK
+        function getEmployeeName(nik) {
+            const nikStr = nik ? nik.toString() : '';
+            return nikToNameMap[nikStr] || `Personil ${nikStr}`;
+        }
+        
+        // Setup tanggal default (7 hari terakhir)
+        function setupDefaultDates() {
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            
+            const todayStr = today.toISOString().split('T')[0];
+            const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+            
+            document.getElementById('startDate').value = sevenDaysAgoStr;
+            document.getElementById('endDate').value = todayStr;
+            
+            currentStartDate = sevenDaysAgoStr;
+            currentEndDate = todayStr;
+            
+            updatePeriodText();
+        }
+        
+        // Isi dropdown filter
+        function populateFilters() {
+            const psmData = allData.data_psm || [];
+            
+            // Produk
+            const products = [...new Set(psmData.map(item => item.nama_produk))].sort();
+            const productFilter = document.getElementById('productFilter');
+            
+            // Clear existing options
+            while (productFilter.options.length > 1) {
+                productFilter.remove(1);
+            }
+            
+            // Add product options
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product;
+                option.textContent = product;
+                productFilter.appendChild(option);
+            });
+            
+            console.log(`📦 Produk ditemukan: ${products.length} item`);
+            
+            // Personil (NIK)
+            const nikList = [...new Set(psmData.map(item => item.nik))].sort((a, b) => a - b);
+            const nikFilter = document.getElementById('nikFilter');
+            
+            // Clear existing options
+            while (nikFilter.options.length > 1) {
+                nikFilter.remove(1);
+            }
+            
+            // Add NIK options dengan nama personil
+            nikList.forEach(nik => {
+                const option = document.createElement('option');
+                option.value = nik;
+                const employeeName = getEmployeeName(nik);
+                option.textContent = `${employeeName} (${nik})`;
+                nikFilter.appendChild(option);
+            });
+            
+            console.log(`👤 Personil ditemukan: ${nikList.length} orang`);
+        }
+        
+        // Terapkan filter
+        function applyFilters() {
+            console.log('🔧 Menerapkan filter...');
+            
+            // Ambil nilai filter
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const shiftFilter = document.getElementById('shiftFilter').value;
+            const productFilter = document.getElementById('productFilter').value;
+            const nikFilter = document.getElementById('nikFilter').value;
+            
+            // Simpan tanggal
+            currentStartDate = startDate;
+            currentEndDate = endDate;
+            
+            // Update teks periode
+            updatePeriodText();
+            
+            // Proses data
+            processAndDisplayData();
+        }
+        
+        // Proses dan tampilkan data
+        function processAndDisplayData() {
+            try {
+                const psmData = allData.data_psm || [];
+                const targetPSM = allData.target_psm || [];
+                
+                // Ambil nilai filter
+                const startDate = new Date(currentStartDate);
+                const endDate = new Date(currentEndDate);
+                endDate.setHours(23, 59, 59, 999);
+                
+                const shiftFilter = document.getElementById('shiftFilter').value;
+                const productFilter = document.getElementById('productFilter').value;
+                const nikFilter = document.getElementById('nikFilter').value;
+                const showAllNik = document.getElementById('showAllNik').checked;
+                const showGapOnly = document.getElementById('showGapOnly').checked;
+                
+                console.log(`📅 Filter periode: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`);
+                console.log(`⚙️ Filter lainnya: Shift=${shiftFilter}, Produk=${productFilter}, NIK=${nikFilter}`);
+                console.log(`👁️ Tampilkan semua personil: ${showAllNik}, Hanya GAP negatif: ${showGapOnly}`);
+                
+                // 1. Filter data PSM berdasarkan tanggal
+                let filteredPsmData = psmData.filter(item => {
+                    const itemDate = new Date(item.tanggal);
+                    return itemDate >= startDate && itemDate <= endDate;
+                });
+                
+                console.log(`📊 Data setelah filter tanggal: ${filteredPsmData.length} record`);
+                
+                // Filter shift
+                if (shiftFilter !== 'all') {
+                    const shift = parseInt(shiftFilter);
+                    filteredPsmData = filteredPsmData.filter(item => item.shift === shift);
+                    console.log(`📊 Data setelah filter shift: ${filteredPsmData.length} record`);
+                }
+                
+                // Filter produk
+                if (productFilter !== 'all') {
+                    filteredPsmData = filteredPsmData.filter(item => item.nama_produk === productFilter);
+                    console.log(`📊 Data setelah filter produk: ${filteredPsmData.length} record`);
+                }
+                
+                // Filter NIK
+                if (nikFilter !== 'all') {
+                    const nik = parseInt(nikFilter);
+                    filteredPsmData = filteredPsmData.filter(item => item.nik === nik);
+                    console.log(`📊 Data setelah filter NIK: ${filteredPsmData.length} record`);
+                }
+                
+                // 2. Kelompokkan data: Produk -> NIK -> Total Qty
+                const productGroups = {};
+                
+                filteredPsmData.forEach(item => {
+                    const product = item.nama_produk;
+                    const nik = item.nik;
+                    const qty = parseInt(item.qty) || 0;
+                    
+                    if (!productGroups[product]) {
+                        productGroups[product] = {};
+                    }
+                    
+                    if (!productGroups[product][nik]) {
+                        productGroups[product][nik] = 0;
+                    }
+                    
+                    productGroups[product][nik] += qty;
+                });
+                
+                const totalCombinations = Object.keys(productGroups).reduce((total, product) => {
+                    return total + Object.keys(productGroups[product]).length;
+                }, 0);
+                
+                console.log(`📦 Data dikelompokkan: ${Object.keys(productGroups).length} produk, ${totalCombinations} kombinasi`);
+                
+                // 3. HITUNG TARGET TOTAL YANG SAMA UNTUK SEMUA KARYAWAN
+                totalTargetForAll = 0;
+                
+                // Hitung target per produk untuk periode yang dipilih
+                targetPSM.forEach(targetItem => {
+                    const targetStart = new Date(targetItem.start_date);
+                    const targetEnd = new Date(targetItem.end_date);
+                    const product = targetItem.nama_produk;
+                    
+                    // Cek overlap periode
+                    if (startDate <= targetEnd && endDate >= targetStart) {
+                        const overlapStart = new Date(Math.max(startDate.getTime(), targetStart.getTime()));
+                        const overlapEnd = new Date(Math.min(endDate.getTime(), targetEnd.getTime()));
+                        const overlapDays = Math.max(0, Math.floor((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1);
+                        
+                        const targetTotalDays = Math.floor((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
+                        
+                        if (targetTotalDays > 0) {
+                            const proportion = overlapDays / targetTotalDays;
+                            const targetPerNik = Math.round(targetItem.target_pernik * proportion);
+                            
+                            // Tambahkan ke total target (sama untuk semua personil)
+                            totalTargetForAll += targetPerNik;
+                        }
+                    }
+                });
+                
+                // Update badge target total
+                document.getElementById('totalTargetBadge').textContent = `Target: ${formatNumber(totalTargetForAll)}`;
+                document.getElementById('totalTargetValue').textContent = formatNumber(totalTargetForAll);
+                document.getElementById('totalTargetValue2').textContent = formatNumber(totalTargetForAll);
+                
+                console.log(`🎯 Target total untuk semua personil: ${totalTargetForAll}`);
+                
+                // 4. Hitung target untuk setiap NIK di setiap produk (untuk tampilan tabel)
+                currentProductGroupsWithTarget = {};
+                
+                // Salin data actual
+                Object.keys(productGroups).forEach(product => {
+                    currentProductGroupsWithTarget[product] = {};
+                    Object.keys(productGroups[product]).forEach(nik => {
+                        currentProductGroupsWithTarget[product][nik] = {
+                            actual: productGroups[product][nik],
+                            target: 0
+                        };
+                    });
+                });
+                
+                // Hitung target per NIK per produk (untuk tampilan detail di tabel)
+                targetPSM.forEach(targetItem => {
+                    const targetStart = new Date(targetItem.start_date);
+                    const targetEnd = new Date(targetItem.end_date);
+                    const product = targetItem.nama_produk;
+                    
+                    // Cek overlap periode
+                    if (startDate <= targetEnd && endDate >= targetStart) {
+                        const overlapStart = new Date(Math.max(startDate.getTime(), targetStart.getTime()));
+                        const overlapEnd = new Date(Math.min(endDate.getTime(), targetEnd.getTime()));
+                        const overlapDays = Math.max(0, Math.floor((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1);
+                        
+                        const targetTotalDays = Math.floor((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
+                        
+                        if (targetTotalDays > 0) {
+                            const proportion = overlapDays / targetTotalDays;
+                            const targetPerNik = Math.round(targetItem.target_pernik * proportion);
+                            
+                            // Distribusikan target ke semua NIK yang menjual produk ini
+                            if (currentProductGroupsWithTarget[product]) {
+                                Object.keys(currentProductGroupsWithTarget[product]).forEach(nik => {
+                                    currentProductGroupsWithTarget[product][nik].target += targetPerNik;
+                                });
+                            }
+                        }
+                    }
+                });
+                
+                // 5. Hitung dan tampilkan statistik performa berdasarkan persentase dengan target yang sama
+                calculateAndDisplayStats();
+                
+                // 6. Tampilkan data di tabel dengan pengelompokan produk
+                displayGroupedTableData(currentProductGroupsWithTarget, showAllNik, showGapOnly);
+                
+            } catch (error) {
+                console.error('Error processing data:', error);
+                showError('Terjadi kesalahan dalam memproses data.');
+            }
+        }
+        
+        // Hitung dan tampilkan statistik performa berdasarkan persentase dengan target yang sama
+        function calculateAndDisplayStats() {
+            try {
+                // 1. Hitung total actual per personil (semua produk)
+                const employeeActualTotals = {};
+                
+                Object.keys(currentProductGroupsWithTarget).forEach(product => {
+                    Object.keys(currentProductGroupsWithTarget[product]).forEach(nik => {
+                        const data = currentProductGroupsWithTarget[product][nik];
+                        const actual = data.actual || 0;
+                        
+                        if (!employeeActualTotals[nik]) {
+                            employeeActualTotals[nik] = {
+                                totalActual: 0,
+                                achievements: [] // Untuk menyimpan pencapaian per produk
+                            };
+                        }
+                        
+                        employeeActualTotals[nik].totalActual += actual;
+                        
+                        // Hitung pencapaian per produk (target per produk masih dihitung untuk analisis per produk)
+                        const targetPerProduct = data.target || 0;
+                        const achievementPerProduct = targetPerProduct > 0 ? Math.round((actual / targetPerProduct) * 100) : 0;
+                        employeeActualTotals[nik].achievements.push({
+                            product: product,
+                            achievement: achievementPerProduct,
+                            actual: actual,
+                            target: targetPerProduct
+                        });
+                    });
+                });
+                
+                // 2. Hitung persentase total per personil DENGAN TARGET YANG SAMA
+                const employeePercentages = [];
+                
+                Object.keys(employeeActualTotals).forEach(nik => {
+                    const totals = employeeActualTotals[nik];
+                    const percentage = totalTargetForAll > 0 ? 
+                        Math.round((totals.totalActual / totalTargetForAll) * 100) : 0;
+                    
+                    employeePercentages.push({
+                        nik: nik,
+                        employeeName: getEmployeeName(nik),
+                        percentage: percentage,
+                        totalActual: totals.totalActual,
+                        totalTarget: totalTargetForAll, // SAMA UNTUK SEMUA
+                        achievements: totals.achievements
+                    });
+                });
+                
+                // 3. Hitung 3 pencapaian tertinggi (berdasarkan persentase total dengan target yang sama)
+                const topPerformers = [...employeePercentages]
+                    .filter(item => totalTargetForAll > 0) // Hanya jika ada target
+                    .sort((a, b) => b.percentage - a.percentage)
+                    .slice(0, 3);
+                
+                // Update UI untuk top performers
+                const topPerformersList = document.getElementById('topPerformers');
+                if (topPerformers.length > 0) {
+                    topPerformersList.innerHTML = '';
+                    topPerformers.forEach((item, index) => {
+                        const li = document.createElement('li');
+                        li.className = 'success-item';
+                        
+                        // Tentukan warna badge berdasarkan persentase
+                        let badgeClass = 'bg-success';
+                        if (item.percentage >= 200) {
+                            badgeClass = 'bg-primary';
+                        } else if (item.percentage >= 150) {
+                            badgeClass = 'bg-success';
+                        } else if (item.percentage >= 100) {
+                            badgeClass = 'bg-warning';
+                        } else {
+                            badgeClass = 'bg-info';
+                        }
+                        
+                        li.innerHTML = `
+                            <strong>${item.employeeName}</strong>
+                            <br>
+                            <small>Actual ${formatNumber(item.totalActual)} / Target ${formatNumber(item.totalTarget)}</small>
+                            <span class="badge ${badgeClass} percentage-badge">${item.percentage}%</span>
+                            <span class="badge bg-warning info-badge">${index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
+                        `;
+                        topPerformersList.appendChild(li);
+                    });
+                } else {
+                    topPerformersList.innerHTML = '<li class="text-muted">Tidak ada data</li>';
+                }
+                
+                // 4. Hitung 1 pencapaian terendah (berdasarkan persentase total dengan target yang sama)
+                const lowestPerformer = [...employeePercentages]
+                    .filter(item => totalTargetForAll > 0 && item.totalActual > 0) // Hanya yang memiliki target dan penjualan
+                    .sort((a, b) => a.percentage - b.percentage)[0];
+                
+                // Update UI untuk lowest performer
+                const lowestPerformerList = document.getElementById('lowestPerformer');
+                if (lowestPerformer) {
+                    // Tentukan warna berdasarkan persentase
+                    let textClass = 'danger-item';
+                    if (lowestPerformer.percentage >= 100) {
+                        textClass = 'success-item';
+                    } else if (lowestPerformer.percentage >= 70) {
+                        textClass = 'warning-item';
+                    }
+                    
+                    lowestPerformerList.innerHTML = `
+                        <li class="${textClass}">
+                            <strong>${lowestPerformer.employeeName}</strong>
+                            <br>
+                            <small>Actual ${formatNumber(lowestPerformer.totalActual)} / Target ${formatNumber(lowestPerformer.totalTarget)}</small>
+                            <span class="badge ${lowestPerformer.percentage >= 100 ? 'bg-success' : 'bg-danger'} percentage-badge">${lowestPerformer.percentage}%</span>
+                        </li>
+                    `;
+                } else {
+                    lowestPerformerList.innerHTML = '<li class="text-muted">Tidak ada data</li>';
+                }
+                
+                // 5. Hitung personil yang mencapai target per produk (achievement >= 100% per produk)
+                const achievedTargetPerProduct = [];
+                
+                employeePercentages.forEach(employee => {
+                    // Cari produk-produk yang mencapai target (≥ 100%) berdasarkan target per produk
+                    const productsAchieved = employee.achievements
+                        .filter(achievement => achievement.achievement >= 100)
+                        .map(achievement => achievement.product);
+                    
+                    if (productsAchieved.length > 0) {
+                        achievedTargetPerProduct.push({
+                            nik: employee.nik,
+                            employeeName: employee.employeeName,
+                            products: productsAchieved,
+                            count: productsAchieved.length,
+                            totalProducts: employee.achievements.length
+                        });
+                    }
+                });
+                
+                // Urutkan berdasarkan jumlah produk yang mencapai target
+                achievedTargetPerProduct.sort((a, b) => b.count - a.count);
+                
+                // Update UI untuk achieved target per produk
+                const achievedTargetList = document.getElementById('achievedTarget');
+                if (achievedTargetPerProduct.length > 0) {
+                    achievedTargetList.innerHTML = '';
+                    // Batasi maksimal 5 item untuk tampilan yang rapi
+                    const displayItems = achievedTargetPerProduct.slice(0, 5);
+                    displayItems.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'success-item';
+                        
+                        // Format daftar produk
+                        const productsText = item.products.length <= 2 ? 
+                            item.products.join(', ') : 
+                            `${item.products[0]}, ${item.products[1]} +${item.products.length - 2}`;
+                        
+                        li.innerHTML = `
+                            <strong>${item.employeeName}</strong>
+                            <br>
+                            <small>${productsText}</small>
+                            <span class="badge bg-success info-badge">${item.count}/${item.totalProducts}</span>
+                        `;
+                        achievedTargetList.appendChild(li);
+                    });
+                    
+                    // Jika ada lebih dari 5, tambahkan indikator
+                    if (achievedTargetPerProduct.length > 5) {
+                        const li = document.createElement('li');
+                        li.className = 'text-muted';
+                        li.innerHTML = `<small>dan ${achievedTargetPerProduct.length - 5} lainnya...</small>`;
+                        achievedTargetList.appendChild(li);
+                    }
+                } else {
+                    achievedTargetList.innerHTML = '<li class="text-muted">Belum ada yang mencapai target per produk</li>';
+                }
+                
+                console.log(`📈 Statistik: ${topPerformers.length} top performers (%), ${lowestPerformer ? '1' : '0'} lowest performer (%), ${achievedTargetPerProduct.length} mencapai target per produk`);
+                console.log(`🎯 Target total yang sama untuk semua: ${totalTargetForAll}`);
+                
+            } catch (error) {
+                console.error('Error calculating stats:', error);
+                // Set default values jika error
+                document.getElementById('topPerformers').innerHTML = '<li class="text-muted">Error menghitung data</li>';
+                document.getElementById('lowestPerformer').innerHTML = '<li class="text-muted">Error menghitung data</li>';
+                document.getElementById('achievedTarget').innerHTML = '<li class="text-muted">Error menghitung data</li>';
+            }
+        }
+        
+        // Tampilkan data di tabel dengan pengelompokan produk
+        function displayGroupedTableData(productGroups, showAllNik, showGapOnly) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            let totalRows = 0;
+            let totalProducts = 0;
+            
+            // Jika tidak ada data
+            if (Object.keys(productGroups).length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Tidak ada data yang ditampilkan</strong>
+                                <div class="mt-2">
+                                    <small>
+                                        Coba:
+                                        1. Centang "Tampilkan semua personil"
+                                        2. Hapus centang "Hanya tampilkan GAP negatif"
+                                        3. Perluas periode tanggal
+                                        4. Pilih filter yang lebih umum
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('rowCount').textContent = `0 baris`;
+                document.getElementById('productCount').textContent = `0 produk`;
+                return;
+            }
+            
+            // Urutkan produk secara alfabet
+            const sortedProducts = Object.keys(productGroups).sort();
+            
+            sortedProducts.forEach(product => {
+                // Urutkan NIK berdasarkan nama personil
+                const sortedNik = Object.keys(productGroups[product])
+                    .sort((a, b) => {
+                        const nameA = getEmployeeName(a).toLowerCase();
+                        const nameB = getEmployeeName(b).toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    });
+                
+                // Filter NIK yang akan ditampilkan
+                const nikToDisplay = sortedNik.filter(nik => {
+                    const data = productGroups[product][nik];
+                    const actual = data.actual || 0;
+                    const target = data.target || 0;
+                    const gap = actual - target;
+                    
+                    // Terapkan filter checkbox
+                    if (showGapOnly && gap >= 0) {
+                        return false;
+                    }
+                    
+                    if (!showAllNik && gap >= 0) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                // Jika ada NIK yang akan ditampilkan untuk produk ini
+                if (nikToDisplay.length > 0) {
+                    totalProducts++;
+                    
+                    // Tambahkan header produk
+                    const headerRow = document.createElement('tr');
+                    headerRow.className = 'product-header';
+                    headerRow.innerHTML = `
+                        <td colspan="5">
+                            <i class="bi bi-box me-2"></i>
+                            <strong>${product}</strong>
+                            <span class="badge bg-secondary ms-2">${nikToDisplay.length} personil</span>
+                        </td>
+                    `;
+                    tableBody.appendChild(headerRow);
+                    
+                    // Tambahkan baris untuk setiap NIK
+                    nikToDisplay.forEach(nik => {
+                        const data = productGroups[product][nik];
+                        const actual = data.actual || 0;
+                        const target = data.target || 0;
+                        const achievement = target > 0 ? Math.round((actual / target) * 100) : 0;
+                        const gap = actual - target;
+                        
+                        // Tentukan kelas CSS untuk gap
+                        let gapClass = 'gap-neutral';
+                        let gapSign = '';
+                        
+                        if (gap > 0) {
+                            gapClass = 'gap-positive';
+                            gapSign = '+';
+                        } else if (gap < 0) {
+                            gapClass = 'gap-negative';
+                        }
+                        
+                        // Tentukan warna progress bar
+                        let progressBarClass = 'bg-danger';
+                        if (achievement >= 100) {
+                            progressBarClass = 'bg-success';
+                        } else if (achievement >= 70) {
+                            progressBarClass = 'bg-warning';
+                        }
+                        
+                        // Dapatkan nama personil
+                        const employeeName = getEmployeeName(nik);
+                        
+                        // Buat baris tabel
+                        const row = document.createElement('tr');
+                        
+                        row.innerHTML = `
+                            <td>
+                                <div class="employee-info">
+                                    <strong>${employeeName}</strong>
+                                    <div class="employee-nik">
+                                        <span class="employee-badge">NIK: ${nik}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${formatNumber(target)}</td>
+                            <td>${formatNumber(actual)}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2 progress-sm">
+                                        <div class="progress-bar ${progressBarClass}" 
+                                             style="width: ${Math.min(achievement, 100)}%"></div>
+                                    </div>
+                                    <span class="ms-1" style="min-width: 40px;">${achievement}%</span>
+                                </div>
+                            </td>
+                            <td class="${gapClass}">${gapSign}${formatNumber(gap)}</td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                        totalRows++;
+                    });
+                }
+            });
+            
+            // Update jumlah baris dan produk
+            document.getElementById('rowCount').textContent = `${totalRows} baris`;
+            document.getElementById('productCount').textContent = `${totalProducts} produk`;
+            
+            // Jika tidak ada data yang ditampilkan
+            if (totalRows === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Tidak ada data yang ditampilkan</strong>
+                                <div class="mt-2">
+                                    <small>
+                                        Coba:
+                                        1. Centang "Tampilkan semua personil"
+                                        2. Hapus centang "Hanya tampilkan GAP negatif"
+                                        3. Perluas periode tanggal
+                                        4. Pilih filter yang lebih umum
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            console.log(`✅ Data ditampilkan: ${totalProducts} produk, ${totalRows} baris`);
+        }
+        
+        // ==============================================
+        // FUNGSI HELPER
+        // ==============================================
+        
+        // Format angka dengan separator ribuan
+        function formatNumber(num) {
+            if (num === undefined || num === null) return '0';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        // Update teks periode
+        function updatePeriodText() {
+            const start = new Date(currentStartDate);
+            const end = new Date(currentEndDate);
+            
+            const formattedStart = start.toLocaleDateString('id-ID');
+            const formattedEnd = end.toLocaleDateString('id-ID');
+            
+            document.getElementById('dataPeriod').textContent = 
+                `Periode: ${formattedStart} - ${formattedEnd}`;
+        }
+        
+        // Tampilkan/sembunyikan loading
+        function showLoading(show, message = 'Memuat...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            
+            if (show) {
+                loadingText.textContent = message;
+                overlay.style.display = 'flex';
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
+        
+        // Tampilkan error
+        function showError(message) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-danger py-5">
+                        <i class="bi bi-x-circle me-2"></i>
+                        ${message}
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Export data ke CSV
+        function exportToCSV() {
+            // Implementasi export CSV
+            alert('Fitur export akan diimplementasikan');
+        }
+        
+        // ==============================================
+        // EVENT LISTENERS
+        // ==============================================
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tombol terapkan filter
+            document.getElementById('applyFilter').addEventListener('click', applyFilters);
+            
+            // Tombol reset
+            document.getElementById('resetFilter').addEventListener('click', function() {
+                setupDefaultDates();
+                document.getElementById('shiftFilter').value = 'all';
+                document.getElementById('productFilter').value = 'all';
+                document.getElementById('nikFilter').value = 'all';
+                document.getElementById('showAllNik').checked = true;
+                document.getElementById('showGapOnly').checked = false;
+                
+                console.log('🔄 Filter direset ke default');
+                applyFilters();
+            });
+            
+            // Checkbox filter
+            document.getElementById('showAllNik').addEventListener('change', applyFilters);
+            document.getElementById('showGapOnly').addEventListener('change', applyFilters);
+            
+            // Tombol export
+            document.getElementById('exportData').addEventListener('click', exportToCSV);
+            
+            // Input tanggal: auto-apply ketika diubah
+            document.getElementById('startDate').addEventListener('change', applyFilters);
+            document.getElementById('endDate').addEventListener('change', applyFilters);
+            
+            // Dropdown filter: auto-apply ketika diubah
+            document.getElementById('shiftFilter').addEventListener('change', applyFilters);
+            document.getElementById('productFilter').addEventListener('change', applyFilters);
+            document.getElementById('nikFilter').addEventListener('change', applyFilters);
+        }
+        
+        // ==============================================
+        // INISIALISASI
+        // ==============================================
+        
+        // Jalankan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Halaman PSM per Personil dimuat');
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load data
+            loadData();
+        });
+        
+        // Ekspos fungsi ke window untuk debugging dari console browser
+        window.debugPSM = {
+            loadData: loadData,
+            applyFilters: applyFilters,
+            getData: () => allData,
+            getNikMap: () => nikToNameMap,
+            getEmployeeName: getEmployeeName,
+            getTotalTarget: () => totalTargetForAll
+        };
+        
+    </script>
+</body>
+</html>
