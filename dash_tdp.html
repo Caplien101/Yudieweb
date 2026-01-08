@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard KPI Analytics - Live Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --spd-color: #3b82f6;
+            --std-color: #10b981;
+            --apc-color: #8b5cf6;
+            --gm-color: #f59e0b;
+            --nsb-color: #ef4444;
+            --oos-color: #ec4899;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        .kpi-card-content {
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .param-description {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+            font-size: 0.75rem;
+        }
+        
+        .history-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .progress-container {
+            margin-top: auto;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .change-positive {
+            color: #10b981;
+        }
+        
+        .change-negative {
+            color: #ef4444;
+        }
+        
+        .negative-value {
+            color: #ef4444;
+        }
+        
+        @media (max-width: 768px) {
+            .kpi-card-content {
+                min-height: auto;
+            }
+            
+            .history-container {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Main Container -->
+    <div class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-600 to-purple-700 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4 md:py-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-xl md:text-3xl font-bold">Dashboard KPI Analytics</h1>
+                        <div class="flex flex-wrap items-center gap-2 mt-2 text-xs md:text-sm">
+                            <span class="bg-white/20 px-2 py-1 rounded" id="period-display">Loading...</span>
+                            <span class="text-white/80" id="comparison-period-display"></span>
+                            <span class="bg-green-500/20 px-2 py-1 rounded" id="days-count">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 md:gap-4">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-2 md:p-3 min-w-[120px] md:min-w-[140px]">
+                            <div class="text-xs opacity-80">Overall Growth</div>
+                            <div class="text-lg md:text-xl font-bold text-green-300" id="overall-growth">Loading...</div>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-2 md:p-3 min-w-[120px] md:min-w-[140px]">
+                            <div class="text-xs opacity-80">Target Achievement</div>
+                            <div class="text-lg md:text-xl font-bold" id="target-achievement">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-3 md:px-4 py-4 md:py-6">
+            <!-- Filter Section -->
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4">Filter Data</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Periode Filter -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mode Perbandingan</label>
+                            <div class="flex space-x-2">
+                                <button id="btn-actual-target" class="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg">Actual vs Target</button>
+                                <button id="btn-month-comparison" class="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200">Bulanan</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Date Range Filter -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Rentang Tanggal</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Dari Tanggal</label>
+                                        <input type="date" id="date-from" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Sampai Tanggal</label>
+                                        <input type="date" id="date-to" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Filter & Actions -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Cepat</label>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition quick-filter" data-days="7">7 Hari Terakhir</button>
+                                <button class="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition quick-filter" data-days="14">14 Hari Terakhir</button>
+                                <button class="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition quick-filter" data-days="30">30 Hari</button>
+                                <button id="btn-all-data" class="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition">Semua Data</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Actions</label>
+                            <div class="flex space-x-2">
+                                <button id="btn-apply-filter" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition flex-1">
+                                    <i class="fas fa-filter mr-2"></i> Terapkan
+                                </button>
+                                <button id="btn-refresh-data" class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
+                                    <i class="fas fa-sync-alt mr-2"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Info -->
+                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                            <div class="flex items-start">
+                                <i class="fas fa-database text-blue-500 mt-1 mr-2"></i>
+                                <div class="text-sm text-blue-700">
+                                    <strong>Data Source:</strong> Google Apps Script API<br>
+                                    <strong>Total Data:</strong> <span id="total-data-count">Loading...</span> records
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards Grid -->
+            <div id="kpi-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                <!-- Cards akan di-generate oleh JavaScript -->
+                <div class="col-span-3 text-center py-12" id="loading-cards">
+                    <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full loading-spinner mx-auto mb-4"></div>
+                    <p class="text-gray-500">Loading KPI data...</p>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="bg-white rounded-xl shadow-md p-4 md:p-5 mb-6 md:mb-8">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-4 md:mb-6">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-2 lg:mb-0">Daily Trend Analysis</h2>
+                    
+                    <!-- Chart Parameter Filter -->
+                    <div class="flex flex-col sm:flex-row gap-3 md:gap-4">
+                        <div class="flex items-center">
+                            <label class="block text-sm font-medium text-gray-700 mr-2">Parameter:</label>
+                            <div class="flex flex-wrap gap-1 md:gap-2">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" class="chart-param" value="spd" checked>
+                                    <span class="ml-1 text-xs md:text-sm text-gray-700">SPD</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" class="chart-param" value="std">
+                                    <span class="ml-1 text-xs md:text-sm text-gray-700">STD</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" class="chart-param" value="apc">
+                                    <span class="ml-1 text-xs md:text-sm text-gray-700">APC</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" class="chart-param" value="gm">
+                                    <span class="ml-1 text-xs md:text-sm text-gray-700">GM</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <label class="block text-sm font-medium text-gray-700 mr-2">Chart:</label>
+                            <select id="chart-type" class="border border-gray-300 rounded-lg px-2 py-1 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="line">Line Chart</option>
+                                <option value="bar">Bar Chart</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart Containers -->
+                <div id="chart-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div class="col-span-2 text-center py-12" id="loading-charts">
+                        <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full loading-spinner mx-auto mb-4"></div>
+                        <p class="text-gray-500">Loading chart data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Data Table -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6 md:mb-8">
+                <div class="p-4 md:p-5 border-b border-gray-200 sticky-header">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <div>
+                            <h2 class="text-lg md:text-xl font-bold text-gray-800">Daily Data Input</h2>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1" id="table-subtitle">Actual vs Target comparison</p>
+                        </div>
+                        <div class="flex space-x-2 mt-2 md:mt-0">
+                            <button class="px-3 py-2 border border-gray-300 text-gray-700 text-xs md:text-sm font-medium rounded-lg hover:bg-gray-50 transition" onclick="exportToCSV()">
+                                <i class="fas fa-file-export mr-1 md:mr-2"></i> Export CSV
+                            </button>
+                            <button class="px-3 py-2 bg-blue-600 text-white text-xs md:text-sm font-medium rounded-lg hover:bg-blue-700 transition" onclick="toggleViewMode()">
+                                <i class="fas fa-exchange-alt mr-1 md:mr-2"></i> Toggle View
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- History Table Container -->
+                <div class="history-container scrollbar-custom">
+                    <table class="w-full" id="history-table">
+                        <thead class="bg-gray-50">
+                            <tr class="text-xs md:text-sm">
+                                <th class="py-3 px-3 md:px-4 text-left font-medium text-gray-700">Tanggal</th>
+                                <th class="py-3 px-3 md:px-4 text-left font-medium text-gray-700">SPD (Juta)</th>
+                                <th class="py-3 px-3 md:px-4 text-left font-medium text-gray-700">STD</th>
+                                <th class="py-3 px-3 md:px-4 text-left font-medium text-gray-700">APC (Ribu)</th>
+                                <th class="py-3 px-3 md:px-4 text-left font-medium text-gray-700">GM (%)</th>
+                                <th class="py-3 px-3 md:px-4 text-left font-medium text-gray-700">OOS (%)</th>
+                                <th class="py-3 px-3 md:px-4 text-left font-medium text-gray-700">NSB (Ribu)</th>
+                                
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="8" class="py-8 text-center text-gray-500">
+                                    <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full loading-spinner mx-auto mb-4"></div>
+                                    <p>Loading table data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Table Footer -->
+                <div class="p-3 md:p-4 border-t border-gray-200 bg-gray-50">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <div class="text-xs md:text-sm text-gray-600 mb-2 md:mb-0">
+                            Menampilkan <span id="displayed-count">0</span> dari <span id="total-count">0</span> data
+                        </div>
+                        <div class="text-xs md:text-sm text-gray-600">
+                            <span id="data-update-time">Last updated: Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mt-6 md:mt-8 py-4 md:py-6 text-center text-gray-500 text-xs md:text-sm border-t border-gray-200">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-2 md:mb-0">
+                        Dashboard KPI Analytics v3.0 • <span id="data-range-display">Connected to Google Apps Script</span>
+                    </div>
+                    <div class="flex space-x-3 md:space-x-4">
+                        <button onclick="showAPIDocs()" class="text-gray-500 hover:text-blue-600 transition">
+                            <i class="fas fa-code mr-1"></i> API Docs
+                        </button>
+                        <button onclick="showDataStructure()" class="text-gray-500 hover:text-blue-600 transition">
+                            <i class="fas fa-info-circle mr-1"></i> Data Info
+                        </button>
+                        <button onclick="showHelp()" class="text-gray-500 hover:text-blue-600 transition">Help</button>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-4 md:p-6 max-w-sm w-full mx-4">
+            <div class="flex flex-col items-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 border-4 border-blue-200 border-t-blue-600 rounded-full loading-spinner mb-3 md:mb-4"></div>
+                <h3 class="text-base md:text-lg font-semibold text-gray-800 mb-2">Fetching Data</h3>
+                <p class="text-xs md:text-sm text-gray-600 text-center" id="loading-message">Loading data from Google Apps Script...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript untuk Dashboard dengan API Integration -->
+   <script>
+    // =================== KONFIGURASI API ===================
+    const API_CONFIG = {
+        baseUrl: 'https://script.google.com/macros/s/AKfycbxlOhrZCDtM-Lcl3WrngT9MQG0PSna6djV3bHieLuHuvFHr_NZiHmN9FtO5Zrm3e3Fllg/exec',
+        cacheDuration: 5 * 60 * 1000,
+        enableCache: true
+    };
+
+    // =================== KONFIGURASI PARAMETER ===================
+    const PARAM_CONFIG = {
+        spd: {
+            name: 'SPD',
+            fullName: 'Sales per Day',
+            unit: 'IDR',
+            type: 'sum',
+            decimalPlaces: 0,
+            format: (value) => {
+                if (value >= 1000000000) {
+                    return `Rp ${(value / 1000000000).toFixed(3).replace('.', ',')} M`;
+                } else if (value >= 1000000) {
+                    return `Rp ${(value / 1000000).toFixed(3).replace('.', ',')} Jt`;
+                } else if (value >= 1000) {
+                    return `Rp ${(value / 1000).toFixed(3).replace('.', ',')} Rb`;
+                }
+                return `Rp ${value.toLocaleString('id-ID')}`;
+            },
+            tableFormat: (value) => {
+                return value.toLocaleString('id-ID');
+            },
+            inputMultiplier: 1,
+            isPositive: true
+        },
+        std: {
+            name: 'STD',
+            fullName: 'Struk Transaction per Day',
+            unit: '',
+            type: 'sum',
+            decimalPlaces: 0,
+            format: (value) => {
+                return value.toLocaleString('id-ID');
+            },
+            tableFormat: (value) => {
+                return value.toLocaleString('id-ID');
+            },
+            inputMultiplier: 1,
+            isPositive: true
+        },
+        apc: {
+            name: 'APC',
+            fullName: 'Average Purchase Customer',
+            unit: 'IDR',
+            type: 'average',
+            decimalPlaces: 0,
+            format: (value) => {
+                if (value >= 1000000) {
+                    return `Rp ${(value / 1000000).toFixed(3).replace('.', ',')} Jt`;
+                } else if (value >= 1000) {
+                    return `Rp ${(value / 1000).toFixed(3).replace('.', ',')} Rb`;
+                }
+                return `Rp ${value.toLocaleString('id-ID')}`;
+            },
+            tableFormat: (value) => {
+                return (value / 1000).toFixed(3).replace('.', ',') + 'K';
+            },
+            inputMultiplier: 1,
+            isPositive: true
+        },
+        gm: {
+            name: 'GM',
+            fullName: 'Gross Margin',
+            unit: '%',
+            type: 'average',
+            decimalPlaces: 2,
+            format: (value) => value.toFixed(2).replace('.', ',') + '%',
+            tableFormat: (value) => value.toFixed(2).replace('.', ',') + '%',
+            inputMultiplier: 1,
+            isPositive: true
+        },
+        oos: {
+            name: 'OOS',
+            fullName: 'Out of Stock',
+            unit: '%',
+            type: 'average',
+            decimalPlaces: 1,
+            format: (value) => value.toFixed(1).replace('.', ',') + '%',
+            tableFormat: (value) => value.toFixed(1).replace('.', ',') + '%',
+            inputMultiplier: 1,
+            isPositive: false
+        },
+        nsb: {
+            name: 'NSB',
+            fullName: 'Nota Selisih Barang',
+            unit: 'IDR',
+            type: 'sum',
+            decimalPlaces: 0,
+            format: (value) => {
+                if (value >= 1000000000) {
+                    return `Rp ${(value / 1000000000).toFixed(3).replace('.', ',')} M`;
+                } else if (value >= 1000000) {
+                    return `Rp ${(value / 1000000).toFixed(3).replace('.', ',')} Jt`;
+                } else if (value >= 1000) {
+                    return `Rp ${(value / 1000).toFixed(3).replace('.', ',')} Rb`;
+                }
+                return `Rp ${value.toLocaleString('id-ID')}`;
+            },
+            tableFormat: (value) => {
+                if (value >= 1000000) {
+                    return (value / 1000000).toFixed(1).replace('.', ',') + ' Jt';
+                } else if (value >= 1000) {
+                    return (value / 1000).toFixed(1).replace('.', ',') + 'K';
+                }
+                return value.toLocaleString('id-ID');
+            },
+            inputMultiplier: 1,
+            isPositive: false
+        }
+    };
+
+    const PARAM_COLORS = {
+        spd: '#3b82f6',
+        std: '#10b981',
+        apc: '#8b5cf6',
+        gm: '#f59e0b',
+        nsb: '#ef4444',
+        oos: '#ec4899'
+    };
+
+    // =================== STATE APLIKASI ===================
+    const appState = {
+        rawData: {
+            actual: [],
+            target: []
+        },
+        filteredData: {
+            actual: [],
+            target: []
+        },
+        previousPeriodData: {
+            actual: []
+        },
+        viewMode: 'actual-target',
+        comparisonMode: 'actual-target',
+        dateRange: {
+            from: null,
+            to: null
+        },
+        selectedChartParams: ['spd', 'gm'],
+        chartType: 'line',
+        isLoading: false,
+        lastUpdate: null,
+        cache: new Map(),
+        cacheTimestamp: null
+    };
+
+    // =================== INITIALIZATION ===================
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            setupEventListeners();
+            await loadInitialData();
+            applyDefaultFilter();
+        } catch (error) {
+            console.error('Initialization error:', error);
+            showError('Gagal menginisialisasi dashboard: ' + error.message);
+        }
+    });
+
+    // =================== SETUP FUNCTIONS ===================
+    function setupDefaultDates() {
+        if (appState.rawData.actual.length > 0) {
+            const sortedData = [...appState.rawData.actual].sort((a, b) => a.date - b.date);
+            
+            const january2026Data = sortedData.filter(item => 
+                item.date.getFullYear() === 2026 && item.date.getMonth() === 0
+            );
+            
+            if (january2026Data.length > 0) {
+                const minDate = january2026Data[0].date;
+                const maxDate = january2026Data[january2026Data.length - 1].date;
+                
+                appState.dateRange = {
+                    from: minDate,
+                    to: maxDate
+                };
+            } else {
+                const minDate = sortedData[0].date;
+                const maxDate = sortedData[sortedData.length - 1].date;
+                
+                appState.dateRange = {
+                    from: minDate,
+                    to: maxDate
+                };
+            }
+            
+            document.getElementById('date-from').valueAsDate = appState.dateRange.from;
+            document.getElementById('date-to').valueAsDate = appState.dateRange.to;
+        } else {
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            
+            appState.dateRange = {
+                from: sevenDaysAgo,
+                to: today
+            };
+            
+            document.getElementById('date-from').valueAsDate = sevenDaysAgo;
+            document.getElementById('date-to').valueAsDate = today;
+        }
+    }
+
+    function setupEventListeners() {
+        document.getElementById('btn-actual-target').addEventListener('click', () => {
+            setComparisonMode('actual-target');
+        });
+        
+        document.getElementById('btn-month-comparison').addEventListener('click', () => {
+            setComparisonMode('month-comparison');
+        });
+        
+        document.querySelectorAll('.quick-filter').forEach(btn => {
+            btn.addEventListener('click', function() {
+                applyQuickFilter(parseInt(this.dataset.days));
+            });
+        });
+        
+        document.getElementById('btn-all-data').addEventListener('click', showAllData);
+        document.getElementById('btn-apply-filter').addEventListener('click', applyDateFilter);
+        document.getElementById('btn-refresh-data').addEventListener('click', refreshAllData);
+        
+        document.querySelectorAll('.chart-param').forEach(checkbox => {
+            checkbox.addEventListener('change', updateChartSelection);
+        });
+        
+        document.getElementById('chart-type').addEventListener('change', function() {
+            appState.chartType = this.value;
+            renderCharts();
+        });
+        
+        document.getElementById('date-from').addEventListener('change', validateDateRange);
+        document.getElementById('date-to').addEventListener('change', validateDateRange);
+    }
+
+    // =================== DATA FETCHING ===================
+    async function fetchDataFromAPI() {
+        showLoading('Mengambil data dari Google Apps Script...');
+        
+        try {
+            const url = API_CONFIG.baseUrl;
+            const timestamp = new Date().getTime();
+            const fetchUrl = `${url}?t=${timestamp}`;
+            
+            const response = await fetch(fetchUrl, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.status !== 'success') {
+                throw new Error('API returned non-success status');
+            }
+            
+            processAPIData(data);
+            appState.lastUpdate = new Date();
+            
+            if (API_CONFIG.enableCache) {
+                appState.cache.set('apiData', {
+                    data: data,
+                    timestamp: Date.now()
+                });
+            }
+            
+            return data;
+            
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            
+            const cached = appState.cache.get('apiData');
+            if (cached && (Date.now() - cached.timestamp) < API_CONFIG.cacheDuration) {
+                showWarning('Menggunakan data cache. Tidak dapat terhubung ke server.');
+                processAPIData(cached.data);
+                return cached.data;
+            }
+            
+            throw new Error('Gagal mengambil data dari server. ' + error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function processAPIData(apiData) {
+        appState.rawData.actual = apiData.data_sales.map(item => ({
+            date: parseDate(item.tanggal),
+            rawDate: item.tanggal,
+            spd: Number(item.spd) || 0,
+            std: Number(item.std) || 0,
+            apc: Number(item.apc) || 0,
+            gm: Number(item.gm) || 0,
+            oos: Number(item.oos) || 0,
+            nsb: Number(item.nsb) || 0,
+            timestamp: item.timestamp || ''
+        }));
+        
+        appState.rawData.target = apiData.target_sales.map(item => ({
+            date: parseDate(item.tanggal),
+            rawDate: item.tanggal,
+            spd: Number(item.spd) || 0,
+            std: Number(item.std) || 0,
+            apc: Number(item.apc) || 0,
+            gm: Number(item.gm) || 0,
+            oos: Number(item.oos) || 0,
+            nsb: Number(item.nsb) || 0
+        }));
+        
+        appState.rawData.actual.sort((a, b) => a.date - b.date);
+        appState.rawData.target.sort((a, b) => a.date - b.date);
+        
+        setupDefaultDates();
+        updateDataInfo();
+    }
+
+    function parseDate(dateString) {
+        if (!dateString) return new Date();
+        
+        if (dateString.includes('/')) {
+            const parts = dateString.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const year = parseInt(parts[2], 10);
+                return new Date(year, month, day, 0, 0, 0);
+            }
+        }
+        
+        if (dateString.includes('-')) {
+            return new Date(dateString + 'T00:00:00');
+        }
+        
+        return new Date(dateString);
+    }
+
+    // =================== DATA FILTERING ===================
+    function filterDataByDateRange(data, fromDate, toDate) {
+        if (!data || !data.length) return [];
+        
+        const from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
+        
+        const to = new Date(toDate);
+        to.setHours(23, 59, 59, 999);
+        
+        return data.filter(item => {
+            const itemDate = item.date;
+            return itemDate >= from && itemDate <= to;
+        });
+    }
+
+    // PERBAIKAN: Fungsi untuk mengambil periode sebelumnya dengan tanggal yang sama di bulan sebelumnya
+    function calculatePreviousPeriodDates(fromDate, toDate) {
+        // Buat tanggal untuk bulan sebelumnya dengan tanggal yang sama
+        const previousFrom = new Date(fromDate);
+        previousFrom.setMonth(previousFrom.getMonth() - 1);
+        
+        const previousTo = new Date(toDate);
+        previousTo.setMonth(previousTo.getMonth() - 1);
+        
+        // Handle kasus ketika tanggal tidak valid (misal: 31 Februari)
+        const lastDayOfPreviousMonthFrom = new Date(previousFrom.getFullYear(), previousFrom.getMonth() + 1, 0).getDate();
+        if (previousFrom.getDate() > lastDayOfPreviousMonthFrom) {
+            previousFrom.setDate(lastDayOfPreviousMonthFrom);
+        }
+        
+        const lastDayOfPreviousMonthTo = new Date(previousTo.getFullYear(), previousTo.getMonth() + 1, 0).getDate();
+        if (previousTo.getDate() > lastDayOfPreviousMonthTo) {
+            previousTo.setDate(lastDayOfPreviousMonthTo);
+        }
+        
+        return {
+            from: previousFrom,
+            to: previousTo
+        };
+    }
+
+    function applyDateFilter() {
+        const fromInput = document.getElementById('date-from').value;
+        const toInput = document.getElementById('date-to').value;
+        
+        if (!fromInput || !toInput) {
+            showError('Silakan pilih rentang tanggal yang valid');
+            return;
+        }
+        
+        const fromDate = parseDate(fromInput);
+        const toDate = parseDate(toInput);
+        
+        if (fromDate > toDate) {
+            showError('Tanggal "Dari" tidak boleh lebih besar dari tanggal "Sampai"');
+            return;
+        }
+        
+        appState.dateRange = { from: fromDate, to: toDate };
+        applyFilter();
+    }
+
+    function applyQuickFilter(days) {
+        const today = new Date();
+        const fromDate = new Date();
+        fromDate.setDate(today.getDate() - days);
+        
+        document.getElementById('date-from').valueAsDate = fromDate;
+        document.getElementById('date-to').valueAsDate = today;
+        
+        applyDateFilter();
+    }
+
+    function showAllData() {
+        if (!appState.rawData.actual.length) {
+            showError('Tidak ada data yang tersedia');
+            return;
+        }
+        
+        const dates = appState.rawData.actual.map(d => d.date);
+        const minDate = new Date(Math.min(...dates));
+        const maxDate = new Date(Math.max(...dates));
+        
+        document.getElementById('date-from').valueAsDate = minDate;
+        document.getElementById('date-to').valueAsDate = maxDate;
+        
+        applyDateFilter();
+    }
+
+    function applyFilter() {
+        const fromInput = document.getElementById('date-from').value;
+        const toInput = document.getElementById('date-to').value;
+        
+        if (!fromInput || !toInput) {
+            showError('Silakan pilih rentang tanggal terlebih dahulu');
+            return;
+        }
+        
+        const fromDate = parseDate(fromInput);
+        const toDate = parseDate(toInput);
+        
+        if (fromDate > toDate) {
+            showError('Tanggal "Dari" tidak boleh lebih besar dari tanggal "Sampai"');
+            return;
+        }
+        
+        appState.dateRange = { from: fromDate, to: toDate };
+        
+        if (!appState.rawData.actual.length) {
+            showError('Data belum dimuat. Silakan refresh.');
+            return;
+        }
+        
+        appState.filteredData.actual = filterDataByDateRange(
+            appState.rawData.actual,
+            appState.dateRange.from,
+            appState.dateRange.to
+        );
+        
+        appState.filteredData.target = filterDataByDateRange(
+            appState.rawData.target,
+            appState.dateRange.from,
+            appState.dateRange.to
+        );
+        
+        // Hitung periode sebelumnya dengan tanggal yang sama di bulan sebelumnya
+        const previousDates = calculatePreviousPeriodDates(appState.dateRange.from, appState.dateRange.to);
+        
+        appState.previousPeriodData.actual = filterDataByDateRange(
+            appState.rawData.actual,
+            previousDates.from,
+            previousDates.to
+        );
+        
+        console.log('Current period:', formatDateForLog(appState.dateRange.from), 'to', formatDateForLog(appState.dateRange.to));
+        console.log('Previous period (same dates previous month):', formatDateForLog(previousDates.from), 'to', formatDateForLog(previousDates.to));
+        console.log('Current period data count:', appState.filteredData.actual.length);
+        console.log('Previous period data count:', appState.previousPeriodData.actual.length);
+        console.log('Previous period dates found:', appState.previousPeriodData.actual.map(d => d.rawDate));
+        
+        updateDashboard();
+    }
+
+    function formatDateForLog(date) {
+        return date.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+
+    function applyDefaultFilter() {
+        if (!appState.dateRange.from || !appState.dateRange.to) {
+            setupDefaultDates();
+        }
+        applyDateFilter();
+    }
+
+    // =================== DATA AGGREGATION ===================
+    function calculateAggregatedData(data, param) {
+        if (!data || !data.length) return 0;
+        
+        const config = PARAM_CONFIG[param];
+        
+        if (config.type === 'sum') {
+            return data.reduce((total, item) => total + (item[param] || 0), 0);
+        } else {
+            const sum = data.reduce((total, item) => total + (item[param] || 0), 0);
+            return data.length > 0 ? sum / data.length : 0;
+        }
+    }
+
+    function calculateGrowthVsPrevious(currentValue, previousValue, param) {
+        if (previousValue === 0 || previousValue === null || previousValue === undefined) {
+            return null;
+        }
+        
+        const growth = ((currentValue - previousValue) / previousValue) * 100;
+        
+        const config = PARAM_CONFIG[param];
+        return config.isPositive ? growth : -growth;
+    }
+
+    function getTrend(growth) {
+        if (growth === null) return 'neutral';
+        return growth >= 0 ? 'up' : 'down';
+    }
+
+    // =================== DASHBOARD RENDERING ===================
+    async function updateDashboard() {
+        if (!appState.filteredData.actual.length && !appState.filteredData.target.length) {
+            showError('Tidak ada data dalam rentang tanggal yang dipilih');
+            return;
+        }
+        
+        updatePeriodDisplay();
+        renderKPICards();
+        renderCharts();
+        renderHistoryTable();
+        updateDataInfo();
+    }
+
+    function renderKPICards() {
+        const container = document.getElementById('kpi-cards');
+        
+        const loadingElement = document.getElementById('loading-cards');
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+        
+        container.innerHTML = '';
+        
+        Object.keys(PARAM_CONFIG).forEach(param => {
+            const config = PARAM_CONFIG[param];
+            
+            const actualValue = calculateAggregatedData(appState.filteredData.actual, param);
+            const targetValue = calculateAggregatedData(appState.filteredData.target, param);
+            const previousValue = calculateAggregatedData(appState.previousPeriodData.actual, param);
+            
+            const growth = calculateGrowthVsPrevious(actualValue, previousValue, param);
+            const trend = getTrend(growth);
+            
+            const achievement = targetValue > 0 ? (actualValue / targetValue) * 100 : 0;
+            const gap = actualValue - targetValue;
+            
+            const card = createKPICard(param, actualValue, targetValue, growth, trend, achievement, gap, previousValue);
+            container.appendChild(card);
+        });
+    }
+
+    // PERBAIKAN: UI untuk menampilkan selisih nilai (bukan persentase) pada "Growth vs Previous"
+    function createKPICard(param, actualValue, targetValue, growth, trend, achievement, gap, previousValue) {
+        const config = PARAM_CONFIG[param];
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow-md overflow-hidden card-hover animate-fade-in';
+        
+        // Warna dan icon untuk badge (persentase growth)
+        let growthColor, growthIcon, growthText;
+        
+        if (growth === null) {
+            growthColor = 'text-gray-800 bg-gray-100';
+            growthIcon = 'fa-minus';
+            growthText = 'N/A';
+        } else {
+            growthColor = trend === 'up' ? 'text-green-800 bg-green-100' : 
+                         trend === 'down' ? 'text-red-800 bg-red-100' : 
+                         'text-gray-800 bg-gray-100';
+            
+            growthIcon = trend === 'up' ? 'fa-arrow-up' : 
+                        trend === 'down' ? 'fa-arrow-down' : 'fa-minus';
+            
+            growthText = `${growth >= 0 ? '+' : ''}${growth.toFixed(1).replace('.', ',')}%`;
+        }
+        
+        // Warna untuk gap
+        let gapColor = 'text-gray-700';
+        if (!config.isPositive) {
+            gapColor = gap <= 0 ? 'text-green-600' : 'text-red-600';
+        } else {
+            gapColor = gap >= 0 ? 'text-green-600' : 'text-red-600';
+        }
+        
+        // Hitung selisih nilai (actual - previous) untuk Growth vs Previous
+        const hasPreviousData = previousValue !== null && previousValue !== undefined && previousValue !== 0;
+        let differenceValue = 0;
+        let differenceDisplay = 'N/A';
+        let differenceColor = 'text-gray-600';
+        
+        if (hasPreviousData) {
+            differenceValue = actualValue - previousValue;
+            
+            // Tentukan warna berdasarkan apakah selisih baik atau buruk
+            if (config.isPositive) {
+                differenceColor = differenceValue >= 0 ? 'text-green-600' : 'text-red-600';
+            } else {
+                differenceColor = differenceValue <= 0 ? 'text-green-600' : 'text-red-600';
+            }
+            
+            const formattedDifference = config.format(differenceValue);
+            // Tambahkan tanda + jika positif (format sudah menangani negatif)
+            differenceDisplay = differenceValue >= 0 ? '+' + formattedDifference : formattedDifference;
+        }
+        
+        card.innerHTML = `
+            <div class="p-4 kpi-card-content">
+                <!-- Card Header dengan badge persentase growth -->
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-bold text-gray-800 truncate">${config.name}</h3>
+                        <p class="param-description text-gray-500 mt-1">${config.fullName} (${config.unit})</p>
+                    </div>
+                    <div class="${growthColor} px-2 py-1 rounded-full text-xs font-semibold flex items-center shrink-0 ml-2">
+                        <i class="fas ${growthIcon} mr-1 text-xs"></i> ${growthText}
+                    </div>
+                </div>
+                
+                <!-- Current Value -->
+                <div class="mb-3">
+                    <div class="text-2xl md:text-3xl font-bold text-gray-900 truncate">${config.format(actualValue)}</div>
+                    <div class="text-sm text-gray-500 mt-1">Target: ${config.format(targetValue)}</div>
+                    ${hasPreviousData ? `<div class="text-xs text-gray-400 mt-1">Sebelumnya: ${config.format(previousValue)}</div>` : ''}
+                </div>
+                
+                <!-- Progress Bar (Achievement vs Target) -->
+                <div class="progress-container">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-600">Achievement vs Target</span>
+                        <span class="font-semibold ${achievement >= 100 ? 'text-green-600' : 'text-blue-600'}">
+                            ${achievement.toFixed(1).replace('.', ',')}%
+                        </span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full ${achievement >= 100 ? 'bg-green-600' : 'bg-blue-600'}" 
+                              style="width: ${Math.min(achievement, 100)}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Additional Info -->
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <div class="text-gray-500">Gap vs Target</div>
+                            <div class="font-semibold ${gapColor} truncate">
+                                ${gap >= 0 ? '+' : ''}${config.format(gap)}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500">Growth vs Last Month</div>
+                            <div class="font-semibold ${differenceColor} truncate">
+                                ${differenceDisplay}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+
+    function renderCharts() {
+        const container = document.getElementById('chart-grid');
+        
+        const loadingElement = document.getElementById('loading-charts');
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+        
+        container.innerHTML = '';
+        
+        if (appState.selectedChartParams.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-2 text-center py-12">
+                    <i class="fas fa-chart-line text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500">Pilih parameter untuk menampilkan grafik</p>
+                </div>
+            `;
+            return;
+        }
+        
+        appState.selectedChartParams.forEach(param => {
+            const config = PARAM_CONFIG[param];
+            const chartId = `chart-${param}`;
+            const chartCard = document.createElement('div');
+            chartCard.className = 'bg-white border border-gray-200 rounded-xl p-3 md:p-4';
+            
+            chartCard.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-sm md:text-base">${config.name} (${config.unit})</h3>
+                        <p class="text-xs text-gray-500">${config.fullName}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-gray-500">${config.type === 'sum' ? 'SUM' : 'AVG'}</span>
+                        <span class="w-3 h-3 rounded-full" style="background-color: ${PARAM_COLORS[param]}"></span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="${chartId}"></canvas>
+                </div>
+            `;
+            
+            container.appendChild(chartCard);
+            
+            setTimeout(() => renderIndividualChart(chartId, param), 100);
+        });
+    }
+
+    function renderIndividualChart(canvasId, param) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        const config = PARAM_CONFIG[param];
+        
+        const labels = appState.filteredData.actual.map(d => 
+            d.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+        );
+        
+        const actualData = appState.filteredData.actual.map(d => d[param]);
+        const targetData = appState.filteredData.target.map(d => d[param]);
+        
+        let chartLabels = labels;
+        if (appState.filteredData.target.length > appState.filteredData.actual.length) {
+            chartLabels = appState.filteredData.target.map(d => 
+                d.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+            );
+        }
+        
+        if (canvas.chart) {
+            canvas.chart.destroy();
+        }
+        
+        canvas.chart = new Chart(ctx, {
+            type: appState.chartType,
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: `${config.name} (Actual)`,
+                        data: actualData,
+                        borderColor: PARAM_COLORS[param],
+                        backgroundColor: hexToRgba(PARAM_COLORS[param], 0.1),
+                        borderWidth: 2,
+                        fill: appState.chartType === 'line',
+                        tension: 0.4
+                    },
+                    {
+                        label: `${config.name} (Target)`,
+                        data: targetData,
+                        borderColor: hexToRgba(PARAM_COLORS[param], 0.5),
+                        backgroundColor: hexToRgba(PARAM_COLORS[param], 0.05),
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: getChartOptions(param)
+        });
+    }
+
+    function getChartOptions(param) {
+        const config = PARAM_CONFIG[param];
+        
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    bodyFont: {
+                        size: 11
+                    },
+                    titleFont: {
+                        size: 11
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += config.format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Tanggal',
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: param !== 'apc' && param !== 'gm',
+                    title: {
+                        display: true,
+                        text: config.unit,
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        borderDash: [5, 5]
+                    },
+                    ticks: {
+                        font: {
+                            size: 10
+                        },
+                        callback: function(value) {
+                            return config.format(value);
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        };
+    }
+
+    function renderHistoryTable() {
+        const tbody = document.getElementById('history-table-body');
+        const displayedCount = document.getElementById('displayed-count');
+        const totalCount = document.getElementById('total-count');
+        
+        tbody.innerHTML = '';
+        
+        if (!appState.filteredData.actual.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="py-8 text-center text-gray-500">
+                        <i class="fas fa-database text-3xl text-gray-300 mb-3"></i>
+                        <p>Tidak ada data dalam rentang tanggal yang dipilih</p>
+                    </td>
+                </tr>
+            `;
+            displayedCount.textContent = '0';
+            totalCount.textContent = appState.rawData.actual.length;
+            return;
+        }
+        
+        const sortedData = [...appState.filteredData.actual].sort((a, b) => b.date - a.date);
+        
+        sortedData.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition';
+            
+            const dateStr = item.date.toLocaleDateString('id-ID', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short'
+            });
+            
+            const nsbClass = item.nsb < 0 ? 'negative-value' : '';
+            
+            row.innerHTML = `
+                <td class="py-3 px-3 md:px-4">
+                    <div class="font-medium text-xs md:text-sm">${dateStr}</div>
+                    <div class="text-xs text-gray-500">${item.rawDate}</div>
+                </td>
+                <td class="py-3 px-3 md:px-4">
+                    <div class="font-semibold text-xs md:text-sm">
+                        ${item.spd.toLocaleString('id-ID')}
+                    </div>
+                </td>
+                <td class="py-3 px-3 md:px-4">
+                    <div class="font-semibold text-xs md:text-sm">${PARAM_CONFIG.std.tableFormat(item.std)}</div>
+                </td>
+                <td class="py-3 px-3 md:px-4">
+                    <div class="font-semibold text-xs md:text-sm">${PARAM_CONFIG.apc.tableFormat(item.apc)}</div>
+                </td>
+                <td class="py-3 px-3 md:px-4">
+                    <div class="font-semibold text-xs md:text-sm">${item.gm.toFixed(2).replace('.', ',')}%</div>
+                </td>
+                <td class="py-3 px-3 md:px-4">
+                    <div class="font-semibold text-xs md:text-sm">${item.oos.toFixed(1).replace('.', ',')}%</div>
+                </td>
+                <td class="py-3 px-3 md:px-4 ${nsbClass}">
+                    <div class="font-semibold text-xs md:text-sm">${PARAM_CONFIG.nsb.tableFormat(item.nsb)}</div>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        });
+        
+        displayedCount.textContent = sortedData.length;
+        totalCount.textContent = appState.rawData.actual.length;
+        
+        const now = new Date();
+        document.getElementById('data-update-time').textContent = 
+            `Last updated: ${now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}`;
+    }
+
+    // =================== UI UPDATES ===================
+    function updatePeriodDisplay() {
+        const periodDisplay = document.getElementById('period-display');
+        const comparisonDisplay = document.getElementById('comparison-period-display');
+        const daysCount = document.getElementById('days-count');
+        const dataRangeDisplay = document.getElementById('data-range-display');
+        
+        const fromStr = appState.dateRange.from.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        const toStr = appState.dateRange.to.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        periodDisplay.textContent = `Periode: ${fromStr} - ${toStr}`;
+        
+        if (appState.comparisonMode === 'actual-target') {
+            comparisonDisplay.textContent = 'Actual vs Target';
+        } else {
+            comparisonDisplay.textContent = 'Bulanan Comparison';
+        }
+        
+        const diffTime = Math.abs(appState.dateRange.to - appState.dateRange.from);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        daysCount.textContent = `${diffDays} hari`;
+        
+        dataRangeDisplay.textContent = `Data: ${fromStr} - ${toStr}`;
+        
+        updateOverallMetrics();
+    }
+
+    function updateOverallMetrics() {
+        let totalGrowth = 0;
+        let count = 0;
+        
+        Object.keys(PARAM_CONFIG).forEach(param => {
+            const actualValue = calculateAggregatedData(appState.filteredData.actual, param);
+            const previousValue = calculateAggregatedData(appState.previousPeriodData.actual, param);
+            
+            const growth = calculateGrowthVsPrevious(actualValue, previousValue, param);
+            if (growth !== null) {
+                totalGrowth += growth;
+                count++;
+            }
+        });
+        
+        const avgGrowth = count > 0 ? totalGrowth / count : 0;
+        const overallGrowthEl = document.getElementById('overall-growth');
+        
+        if (count > 0) {
+            overallGrowthEl.textContent = avgGrowth >= 0 ? `+${avgGrowth.toFixed(1).replace('.', ',')}%` : `${avgGrowth.toFixed(1).replace('.', ',')}%`;
+            overallGrowthEl.className = `text-lg md:text-xl font-bold ${avgGrowth >= 0 ? 'text-green-300' : 'text-red-300'}`;
+        } else {
+            overallGrowthEl.textContent = 'N/A';
+            overallGrowthEl.className = 'text-lg md:text-xl font-bold text-gray-300';
+        }
+        
+        updateOverallAchievement();
+    }
+
+    function updateOverallAchievement() {
+        let totalAchievement = 0;
+        let count = 0;
+        
+        Object.keys(PARAM_CONFIG).forEach(param => {
+            const actualValue = calculateAggregatedData(appState.filteredData.actual, param);
+            const targetValue = calculateAggregatedData(appState.filteredData.target, param);
+            
+            if (targetValue > 0) {
+                let achievement = (actualValue / targetValue) * 100;
+                
+                if (!PARAM_CONFIG[param].isPositive) {
+                    if (actualValue <= targetValue) {
+                        achievement = 100 + ((targetValue - actualValue) / targetValue) * 100;
+                    }
+                }
+                
+                totalAchievement += Math.min(achievement, 200);
+                count++;
+            }
+        });
+        
+        const avgAchievement = count > 0 ? totalAchievement / count : 0;
+        document.getElementById('target-achievement').textContent = `${Math.min(avgAchievement, 100).toFixed(0)}%`;
+    }
+
+    function updateDataInfo() {
+        const totalDataCount = document.getElementById('total-data-count');
+        const tableSubtitle = document.getElementById('table-subtitle');
+        
+        totalDataCount.textContent = appState.rawData.actual.length;
+        
+        if (appState.comparisonMode === 'actual-target') {
+            tableSubtitle.textContent = 'Daily Actual Data';
+        } else {
+            tableSubtitle.textContent = 'Monthly comparison';
+        }
+    }
+
+    // =================== MODE MANAGEMENT ===================
+    function setComparisonMode(mode) {
+        appState.comparisonMode = mode;
+        
+        const actualTargetBtn = document.getElementById('btn-actual-target');
+        const monthComparisonBtn = document.getElementById('btn-month-comparison');
+        
+        if (mode === 'actual-target') {
+            actualTargetBtn.classList.add('bg-blue-600', 'text-white');
+            actualTargetBtn.classList.remove('bg-gray-100', 'text-gray-700');
+            monthComparisonBtn.classList.add('bg-gray-100', 'text-gray-700');
+            monthComparisonBtn.classList.remove('bg-blue-600', 'text-white');
+        } else {
+            monthComparisonBtn.classList.add('bg-blue-600', 'text-white');
+            monthComparisonBtn.classList.remove('bg-gray-100', 'text-gray-700');
+            actualTargetBtn.classList.add('bg-gray-100', 'text-gray-700');
+            actualTargetBtn.classList.remove('bg-blue-600', 'text-white');
+        }
+        
+        updateDashboard();
+    }
+
+    function toggleViewMode() {
+        appState.viewMode = appState.viewMode === 'actual-target' ? 'actual-only' : 'actual-target';
+        renderHistoryTable();
+    }
+
+    // =================== CHART FUNCTIONS ===================
+    function updateChartSelection() {
+        const selected = [];
+        document.querySelectorAll('.chart-param:checked').forEach(checkbox => {
+            selected.push(checkbox.value);
+        });
+        
+        if (selected.length > 2) {
+            this.checked = false;
+            return;
+        }
+        
+        appState.selectedChartParams = selected;
+        renderCharts();
+    }
+
+    // =================== UTILITY FUNCTIONS ===================
+    function hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function showLoading(message = 'Loading...') {
+        const modal = document.getElementById('loading-modal');
+        const messageEl = document.getElementById('loading-message');
+        
+        messageEl.textContent = message;
+        modal.classList.remove('hidden');
+        appState.isLoading = true;
+    }
+
+    function hideLoading() {
+        const modal = document.getElementById('loading-modal');
+        modal.classList.add('hidden');
+        appState.isLoading = false;
+    }
+
+    function showError(message) {
+        alert(`Error: ${message}`);
+    }
+
+    function showWarning(message) {
+        console.warn(message);
+    }
+
+    function validateDateRange() {
+        const fromDate = new Date(document.getElementById('date-from').value);
+        const toDate = new Date(document.getElementById('date-to').value);
+        
+        if (fromDate > toDate) {
+            alert('Tanggal "Dari" tidak boleh lebih besar dari tanggal "Sampai"');
+            document.getElementById('date-from').value = document.getElementById('date-to').value;
+        }
+    }
+
+    // =================== DATA MANAGEMENT ===================
+    async function loadInitialData() {
+        try {
+            await fetchDataFromAPI();
+            showSuccess('Data berhasil dimuat dari Google Apps Script');
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    async function refreshAllData() {
+        appState.cache.clear();
+        
+        try {
+            await fetchDataFromAPI();
+            applyFilter();
+            showSuccess('Data berhasil direfresh');
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    // =================== EXPORT FUNCTIONS ===================
+    function exportToCSV() {
+        if (!appState.filteredData.actual.length) {
+            showError('Tidak ada data untuk diexport');
+            return;
+        }
+        
+        const headers = ['Tanggal', 'SPD (IDR)', 'STD', 'APC (IDR)', 'GM (%)', 'OOS (%)', 'NSB (IDR)'];
+        const csvRows = [headers.join(',')];
+        
+        const sortedData = [...appState.filteredData.actual].sort((a, b) => b.date - a.date);
+        
+        sortedData.forEach(item => {
+            const row = [
+                item.rawDate,
+                item.spd,
+                item.std,
+                item.apc,
+                item.gm.toFixed(2).replace('.', ','),
+                item.oos.toFixed(1).replace('.', ','),
+                item.nsb
+            ];
+            
+            csvRows.push(row.join(','));
+        });
+        
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `kpi-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // =================== HELPER FUNCTIONS ===================
+    function showSuccess(message) {
+        console.log(message);
+    }
+
+    function showAPIDocs() {
+        alert('API Endpoint:\n' + API_CONFIG.baseUrl + '\n\nData Format:\n- data_sales: Actual data\n- target_sales: Target data');
+    }
+
+    function showDataStructure() {
+        const dataInfo = `
+Data Structure:
+
+Actual Data: ${appState.rawData.actual.length} records
+Target Data: ${appState.rawData.target.length} records
+
+Parameters:
+1. SPD: Sales per Day (in IDR, SUM)
+2. STD: Sales Transaction per Day (count, SUM)
+3. APC: Average Purchase per Customer (IDR, AVERAGE)
+4. GM: Gross Margin (%, AVERAGE)
+5. OOS: Out of Stock (%, AVERAGE)
+6. NSB: Net Stock Balance (IDR, SUM, can be negative)
+            `;
+        
+        alert(dataInfo);
+    }
+
+    function showHelp() {
+        alert(`
+Dashboard KPI Analytics - Help
+
+1. Filter Data:
+   - Pilih rentang tanggal menggunakan date picker
+   - Gunakan filter cepat untuk periode umum
+   - Klik "Semua Data" untuk melihat semua data yang tersedia
+
+2. KPI Cards:
+   - Badge: Persentase growth vs periode sebelumnya
+   - Achievement: Persentase pencapaian vs target
+   - Gap: Selisih nilai vs target
+   - Growth vs Previous: Selisih nilai vs periode sebelumnya
+
+3. Charts:
+   - Pilih hingga 2 parameter untuk ditampilkan
+   - Chart menampilkan trend harian actual vs target
+
+4. History Table:
+   - Menampilkan data harian actual
+   - Export ke CSV untuk analisis lebih lanjut
+
+5. Refresh Data:
+   - Klik tombol Refresh untuk mengambil data terbaru dari server
+            `);
+    }
+</script>
+</body>
+</html>
