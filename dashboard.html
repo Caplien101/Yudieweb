@@ -777,6 +777,117 @@
         setupEventListeners();
     });
     
+    // ==================== UTILITY FUNCTIONS ====================
+    
+    // Function to parse date string with automatic format detection
+    function parseDateString(dateString) {
+        if (!dateString) return new Date();
+        
+        // If already a Date object, return it
+        if (dateString instanceof Date) {
+            return dateString;
+        }
+        
+        let date;
+        
+        // 1. Try format dd/mm/yyyy (from target data)
+        if (typeof dateString === 'string' && dateString.includes('/')) {
+            const parts = dateString.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+                const year = parseInt(parts[2], 10);
+                
+                // Create Date object in local time
+                date = new Date(year, month, day);
+                
+                // Validate: check if parsing was successful and year matches
+                if (!isNaN(date.getTime()) && date.getFullYear() === year) {
+                    // Reset time to 00:00:00 for consistent comparison
+                    date.setHours(0, 0, 0, 0);
+                    return date;
+                }
+            }
+        }
+        
+        // 2. Try format yyyy-mm-dd (from form data)
+        if (typeof dateString === 'string' && dateString.includes('-')) {
+            const parts = dateString.split('-');
+            
+            // Check if it's yyyy-mm-dd format (year first)
+            if (parts.length === 3 && parts[0].length === 4) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+                
+                // Create Date object in local time (NOT using new Date() directly)
+                date = new Date(year, month, day);
+                
+                // Validate
+                if (!isNaN(date.getTime()) && date.getFullYear() === year) {
+                    // Reset time to 00:00:00 for consistent comparison
+                    date.setHours(0, 0, 0, 0);
+                    return date;
+                }
+            }
+        }
+        
+        // 3. Fallback: try standard Date parsing
+        date = new Date(dateString);
+        
+        // If still invalid, return current date
+        if (isNaN(date.getTime())) {
+            console.warn('Invalid date:', dateString, 'Using current date.');
+            date = new Date();
+        }
+        
+        // Reset time to 00:00:00 for consistency
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+    
+    // Function to format date to dd/mm/yyyy
+    function formatDateToDMY(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+    
+    // Function to format numbers with thousands separator
+    function formatNumber(num) {
+        if (num === undefined || num === null || num === '') return '0';
+        if (typeof num === 'string') {
+            // Remove any non-numeric characters except decimal point
+            num = num.replace(/[^\d.-]/g, '');
+            num = parseFloat(num) || 0;
+        }
+        return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+    
+    // Function to get gap class based on value
+    function getGapClass(gap) {
+        if (gap > 0) return 'gap-positive';
+        if (gap < 0) return 'gap-negative';
+        return 'gap-neutral';
+    }
+    
+    // Function to show/hide loading spinner
+    function showLoading(show) {
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const mainContent = document.querySelector('.main-content');
+        
+        if (loadingSpinner) {
+            loadingSpinner.style.display = show ? 'flex' : 'none';
+        }
+        
+        if (mainContent) {
+            mainContent.style.display = show ? 'none' : 'block';
+        }
+    }
+    
+    // ==================== MAIN FUNCTIONS ====================
+    
     // Function to load data from API
     async function loadData() {
         try {
@@ -917,7 +1028,7 @@
         updateTables();
     }
     
-    // Function to update summary cards dengan perhitungan yang benar
+    // Function to update summary cards
     function updateSummaryCards() {
         console.log('Updating summary cards...');
         const dailyData = filteredData.data_daily || [];
@@ -939,7 +1050,7 @@
         const totalRTE = dailyData.reduce((sum, item) => sum + (parseFloat(item.rte) || 0), 0);
         const totalRTD = dailyData.reduce((sum, item) => sum + (parseFloat(item.rtd) || 0), 0);
         
-        // Calculate target totals for the filtered period - PERBAIKAN UTAMA
+        // Calculate target totals for the filtered period
         const startDate = parseDateString(currentStartDate);
         const endDate = parseDateString(currentEndDate);
         
@@ -961,13 +1072,13 @@
         
         while (currentDate <= endDateLoop) {
             const dateStr = currentDate.toISOString().split('T')[0];
-            const formattedDate = formatDateToDMY(currentDate);
             
             // Find target for this specific date
             const targetForDate = targetDaily.find(item => {
                 try {
-                    const itemDate = parseDateString(item.Tanggal, 'dd/mm/yyyy');
-                    return itemDate.toISOString().split('T')[0] === dateStr;
+                    const itemDate = parseDateString(item.Tanggal);
+                    const itemDateStr = itemDate.toISOString().split('T')[0];
+                    return itemDateStr === dateStr;
                 } catch (e) {
                     console.error('Error parsing target date:', item.Tanggal, e);
                     return false;
@@ -1164,7 +1275,7 @@
         });
     }
     
-    // Function to update PSM Toko table dengan filter terpisah - PERBAIKAN UTAMA DISINI
+    // Function to update PSM Toko table
     function updatePsmTokoTable() {
         console.log('Updating PSM Toko table...');
         const psmData = allData.data_psm || [];
@@ -1210,7 +1321,7 @@
         
         console.log('Product actuals:', productActuals);
         
-        // PERBAIKAN UTAMA: Hitung target berdasarkan apakah ada filter NIK atau tidak
+        // Hitung target berdasarkan apakah ada filter NIK atau tidak
         const nikFilter = document.getElementById('nikFilter').value;
         const productTargets = calculateProductTargets(targetPSM, startDate, endDate, nikFilter);
         
@@ -1286,7 +1397,7 @@
         updatePsmTokoPeriodText();
     }
     
-    // PERBAIKAN UTAMA: Fungsi untuk menghitung target produk berdasarkan filter NIK
+    // Fungsi untuk menghitung target produk berdasarkan filter NIK
     function calculateProductTargets(targetPSM, startDate, endDate, nikFilter) {
         const productTargets = {};
         
@@ -1298,8 +1409,8 @@
         
         targetPSM.forEach(target => {
             try {
-                const targetStart = parseDateString(target.start_date, 'dd/mm/yyyy');
-                const targetEnd = parseDateString(target.end_date, 'dd/mm/yyyy');
+                const targetStart = parseDateString(target.start_date);
+                const targetEnd = parseDateString(target.end_date);
                 
                 // Set time to end of day for end date
                 targetEnd.setHours(23, 59, 59, 999);
@@ -1359,7 +1470,7 @@
         
         const filteredTargetDaily = targetDaily.filter(item => {
             try {
-                const itemDate = parseDateString(item.Tanggal, 'dd/mm/yyyy');
+                const itemDate = parseDateString(item.Tanggal);
                 return itemDate >= startDate && itemDate <= endDate;
             } catch (e) {
                 console.error('Error parsing date in target_daily:', item.Tanggal, e);
@@ -1376,7 +1487,7 @@
                 const row = document.createElement('tr');
                 
                 // Format date
-                const date = parseDateString(item.Tanggal, 'dd/mm/yyyy');
+                const date = parseDateString(item.Tanggal);
                 const formattedDate = date.toLocaleDateString('id-ID');
                 
                 row.innerHTML = `
@@ -1408,8 +1519,8 @@
                 
                 try {
                     // Format dates
-                    const startDate = parseDateString(item.start_date, 'dd/mm/yyyy');
-                    const endDate = parseDateString(item.end_date, 'dd/mm/yyyy');
+                    const startDate = parseDateString(item.start_date);
+                    const endDate = parseDateString(item.end_date);
                     const formattedStartDate = startDate.toLocaleDateString('id-ID');
                     const formattedEndDate = endDate.toLocaleDateString('id-ID');
                     
@@ -1426,13 +1537,6 @@
                 }
             });
         }
-    }
-    
-    // Function to get gap class based on value
-    function getGapClass(gap) {
-        if (gap > 0) return 'gap-positive';
-        if (gap < 0) return 'gap-negative';
-        return 'gap-neutral';
     }
     
     // Function to update period text
@@ -1517,72 +1621,6 @@
             option.textContent = nik;
             nikFilter.appendChild(option);
         });
-    }
-    
-    // ==================== UTILITY FUNCTIONS ====================
-    
-    // Function to parse date string with different formats
-    function parseDateString(dateString, format = 'yyyy-mm-dd') {
-        if (!dateString) return new Date();
-        
-        let date;
-        
-        if (format === 'dd/mm/yyyy') {
-            // Handle format "dd/mm/yyyy"
-            const parts = dateString.split('/');
-            if (parts.length === 3) {
-                const day = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
-                const year = parseInt(parts[2], 10);
-                date = new Date(year, month, day);
-            } else {
-                date = new Date(dateString);
-            }
-        } else {
-            // Handle format "yyyy-mm-dd"
-            date = new Date(dateString);
-        }
-        
-        // If date is invalid, return current date
-        if (isNaN(date.getTime())) {
-            console.warn('Invalid date:', dateString, 'Using current date.');
-            return new Date();
-        }
-        
-        return date;
-    }
-    
-    // Function to format date to dd/mm/yyyy
-    function formatDateToDMY(date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    }
-    
-    // Function to format numbers with thousands separator
-    function formatNumber(num) {
-        if (num === undefined || num === null || num === '') return '0';
-        if (typeof num === 'string') {
-            // Remove any non-numeric characters except decimal point
-            num = num.replace(/[^\d.-]/g, '');
-            num = parseFloat(num) || 0;
-        }
-        return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-    
-    // Function to show/hide loading spinner
-    function showLoading(show) {
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const mainContent = document.querySelector('.main-content');
-        
-        if (loadingSpinner) {
-            loadingSpinner.style.display = show ? 'flex' : 'none';
-        }
-        
-        if (mainContent) {
-            mainContent.style.display = show ? 'none' : 'block';
-        }
     }
     
     // Function to update last update time
@@ -1694,13 +1732,13 @@
         return actuals;
     }
     
-    // Function to get target data for WhatsApp report - PERBAIKAN UTAMA
+    // Function to get target data for WhatsApp report
     function getWhatsAppTargetData(tanggal) {
         console.log('Getting WhatsApp target data for date:', tanggal);
         const targetDaily = allData.target_daily || [];
         const targetPSM = allData.target_psm || [];
         
-        // PERBAIKAN: Gunakan rentang tanggal filter, bukan hanya tanggal awal
+        // Gunakan rentang tanggal filter, bukan hanya tanggal awal
         const startDate = parseDateString(currentStartDate);
         const endDate = parseDateString(currentEndDate);
         
@@ -1726,8 +1764,9 @@
             // Find target for this specific date
             const targetForDate = targetDaily.find(item => {
                 try {
-                    const itemDate = parseDateString(item.Tanggal, 'dd/mm/yyyy');
-                    return itemDate.toISOString().split('T')[0] === dateStr;
+                    const itemDate = parseDateString(item.Tanggal);
+                    const itemDateStr = itemDate.toISOString().split('T')[0];
+                    return itemDateStr === dateStr;
                 } catch (e) {
                     console.error('Error parsing target date:', item.Tanggal, e);
                     return false;
@@ -1766,8 +1805,8 @@
         
         targetPSM.forEach(target => {
             try {
-                const targetStart = parseDateString(target.start_date, 'dd/mm/yyyy');
-                const targetEnd = parseDateString(target.end_date, 'dd/mm/yyyy');
+                const targetStart = parseDateString(target.start_date);
+                const targetEnd = parseDateString(target.end_date);
                 
                 // Check if date ranges overlap
                 if (startDate <= targetEnd && endDate >= targetStart) {
