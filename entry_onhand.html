@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2: Onhand</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+</head>
+<body class="bg-white p-6 pb-24 font-sans">
+    <div class="max-w-md mx-auto">
+        <header class="mb-10 text-center">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tighter uppercase italic">Onhand Sistem</h1>
+            <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mt-1">Input Data Komputer</p>
+        </header>
+
+        <div id="container" class="space-y-12"></div>
+
+        <button onclick="saveAll()" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-slate-900 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl active:scale-95 transition-all">
+            Review Selisih
+        </button>
+    </div>
+
+    <script>
+        function render() {
+            const container = document.getElementById('container');
+            const order = JSON.parse(localStorage.getItem('master_order') || "[]");
+            
+            order.forEach(bc => {
+                const d = JSON.parse(localStorage.getItem('stok_' + bc));
+                if(!d) return;
+                const div = document.createElement('div');
+                div.className = "flex flex-col items-center border-b border-slate-50 pb-10";
+                div.innerHTML = `
+                    <svg id="b-${d.barcode}"></svg>
+                    <p class="text-[10px] font-black text-slate-400 uppercase mt-4 mb-4 text-center px-6 leading-tight">${d.desc}</p>
+                    <div class="w-full bg-slate-50 p-4 rounded-3xl border-2 border-slate-100 focus-within:border-indigo-500 transition-all">
+                        <input type="number" data-bc="${d.barcode}" value="${d.onhand_sistem||0}" 
+                               class="oh-input w-full bg-transparent text-center text-4xl font-black text-slate-800 outline-none" placeholder="0">
+                    </div>`;
+                container.appendChild(div);
+                JsBarcode(`#b-${d.barcode}`, d.barcode, {height: 45, width: 1.6, fontSize: 12});
+            });
+        }
+        function saveAll() {
+            document.querySelectorAll('.oh-input').forEach(i => {
+                const d = JSON.parse(localStorage.getItem('stok_'+i.dataset.bc));
+                d.onhand_sistem = Number(i.value);
+                localStorage.setItem('stok_'+i.dataset.bc, JSON.stringify(d));
+            });
+            window.location.href='review_selisih.html';
+        }
+        render();
+    </script>
+</body>
+</html>
