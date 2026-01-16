@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 1: Fisik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .animate-slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .loader { border-top-color: #3498db; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-24 font-sans">
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+            <span id="toastIcon"></span>
+            <span id="toastMsg" class="text-xs font-bold uppercase tracking-wider"></span>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto p-4">
+        <header class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black text-slate-800 tracking-tighter">FISIK TOKO</h1>
+                <p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Tahap 1: Area Sales</p>
+            </div>
+            <button onclick="location.href='entry_onhand.html'" class="bg-indigo-600 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-indigo-200 active:scale-95 transition-all">Lanjut</button>
+        </header>
+
+        <button id="btnFetch" onclick="fetchMaster()" class="w-full bg-slate-900 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all mb-6">
+            <i class="fa-solid fa-cloud-arrow-down"></i> Ambil Master Data
+        </button>
+
+        <div id="itemList" class="space-y-3"></div>
+    </div>
+
+    <div id="modalEntry" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end justify-center z-50 p-4">
+        <div class="bg-white rounded-t-[2.5rem] p-8 w-full max-w-md shadow-2xl animate-slide-up">
+            <div class="w-12 h-1 bg-slate-100 rounded-full mx-auto mb-6"></div>
+            <h2 id="mTitle" class="text-lg font-black text-slate-800 mb-1"></h2>
+            <p id="mSub" class="text-[10px] font-mono text-slate-400 uppercase mb-6"></p>
+
+            <div class="space-y-4">
+                <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200 opacity-60">
+                    <label class="text-[9px] font-black text-slate-500 uppercase block mb-1 tracking-tighter text-left">Gudang Mako</label>
+                    <div id="mTitipan" class="text-2xl font-black text-slate-400 text-left">0</div>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-200">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-[9px] font-black text-blue-500 uppercase">Gudang Toko</label>
+                        <button onclick="syncGTokoParsial()" id="btnSync" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-[8px] font-black uppercase flex items-center gap-1">
+                            <i class="fa-solid fa-sync-alt" id="syncIcon"></i> Update Master
+                        </button>
+                    </div>
+                    <input type="number" id="mG_toko" class="w-full bg-transparent text-4xl font-black text-slate-800 outline-none" placeholder="0">
+                </div>
+
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-[9px] font-black text-emerald-500 uppercase text-left w-full">Tambah Rak (+)</label>
+                        <button onclick="resetRak()" class="bg-white text-red-500 border border-red-100 px-3 py-1.5 rounded-xl text-[8px] font-black uppercase whitespace-nowrap">Reset Rak</button>
+                    </div>
+                    <input type="number" id="mAddRak" class="w-full bg-transparent text-4xl font-black text-slate-800 outline-none" placeholder="0">
+                    <p class="text-[9px] mt-2 font-bold text-emerald-600 uppercase text-left">Tersimpan: <span id="mRakNow">0</span></p>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="closeModal()" class="flex-1 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Tutup</button>
+                    <button onclick="saveLocal()" class="flex-[2] bg-slate-900 text-white py-4 rounded-2xl text-[11px] font-black uppercase shadow-xl tracking-widest">Simpan Data</button>
+                </div>
+            </div>
+            <input type="hidden" id="activeBc">
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwajGbKT3lhIdu5FjbQlqgtn1VDhw0Us5UYQzBIrqVjHd-_xYlF3ZYxcgnRMi3fknOu_A/exec";
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').innerHTML = type === 'success' ? '<i class="fa-solid fa-circle-check text-emerald-400"></i>' : '<i class="fa-solid fa-circle-exclamation text-red-400"></i>';
+            toast.classList.replace('opacity-0', 'opacity-100');
+            setTimeout(() => toast.classList.replace('opacity-100', 'opacity-0'), 2500);
+        }
+
+        async function fetchMaster() {
+            const btn = document.getElementById('btnFetch');
+            btn.innerHTML = '<div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> MENGAMBIL DATA...';
+            btn.disabled = true;
+            try {
+                const res = await fetch(GAS_URL);
+                const data = await res.json();
+                const orderMap = [];
+                data.forEach((item, index) => {
+                    orderMap.push(item.barcode);
+                    const local = JSON.parse(localStorage.getItem('stok_' + item.barcode) || "{}");
+                    localStorage.setItem('stok_' + item.barcode, JSON.stringify({...item, rak: local.rak || 0, onhand_sistem: local.onhand_sistem || 0}));
+                });
+                localStorage.setItem('master_order', JSON.stringify(orderMap));
+                renderItems();
+                showToast("Master Data Berhasil Dimuat");
+            } catch (e) { showToast("Gagal Koneksi!", "error"); }
+            finally { 
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Ambil Master Data';
+                btn.disabled = false;
+            }
+        }
+
+        function renderItems() {
+            const list = document.getElementById('itemList'); list.innerHTML = '';
+            const order = JSON.parse(localStorage.getItem('master_order') || "[]");
+            
+            order.forEach(bc => {
+                const d = JSON.parse(localStorage.getItem('stok_' + bc));
+                if(!d) return;
+                const total = (Number(d.g_toko)||0) + (Number(d.rak)||0) + (Number(d.g_titipan||0));
+                list.innerHTML += `
+                    <div onclick="openModal('${d.barcode}')" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex justify-between items-center active:scale-95 transition-all">
+                        <div class="text-left"><h3 class="text-sm font-bold text-slate-700">${d.desc}</h3><p class="text-[9px] font-mono text-slate-300 uppercase">PLU: ${d.plu}</p></div>
+                        <div class="bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100 text-center min-w-[60px]">
+                            <span class="text-[7px] font-black text-slate-400 block uppercase mb-1">Fisik</span>
+                            <span class="text-sm font-black text-slate-700">${total}</span>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function openModal(bc) {
+            const d = JSON.parse(localStorage.getItem('stok_' + bc));
+            document.getElementById('activeBc').value = bc;
+            document.getElementById('mTitle').innerText = d.desc;
+            document.getElementById('mSub').innerText = `PLU ${d.plu} | ${bc}`;
+            document.getElementById('mTitipan').innerText = d.g_titipan || 0;
+            document.getElementById('mG_toko').value = d.g_toko || 0;
+            document.getElementById('mRakNow').innerText = d.rak || 0;
+            document.getElementById('mAddRak').value = '';
+            document.getElementById('modalEntry').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modalEntry').classList.add('hidden'); }
+
+        async function syncGTokoParsial() {
+            const bc = document.getElementById('activeBc').value;
+            const val = Number(document.getElementById('mG_toko').value);
+            const btn = document.getElementById('btnSync');
+            const icon = document.getElementById('syncIcon');
+            
+            btn.disabled = true; icon.classList.add('animate-spin');
+            try {
+                await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "UPDATE_GTOKO_PARSIAL", barcode: bc, g_toko: val }) });
+                const d = JSON.parse(localStorage.getItem('stok_' + bc));
+                d.g_toko = val;
+                localStorage.setItem('stok_' + bc, JSON.stringify(d));
+                showToast("Update Master Berhasil");
+                renderItems();
+            } catch (e) { showToast("Gagal Update!", "error"); }
+            finally { btn.disabled = false; icon.classList.remove('animate-spin'); }
+        }
+
+        function resetRak() {
+            const bc = document.getElementById('activeBc').value;
+            const d = JSON.parse(localStorage.getItem('stok_' + bc));
+            d.rak = 0;
+            localStorage.setItem('stok_' + bc, JSON.stringify(d));
+            document.getElementById('mRakNow').innerText = "0";
+            showToast("Rak Direset ke 0");
+            renderItems();
+        }
+
+        function saveLocal() {
+            const bc = document.getElementById('activeBc').value;
+            const d = JSON.parse(localStorage.getItem('stok_' + bc));
+            d.g_toko = Number(document.getElementById('mG_toko').value);
+            d.rak = (Number(d.rak)||0) + Number(document.getElementById('mAddRak').value);
+            localStorage.setItem('stok_' + bc, JSON.stringify(d));
+            closeModal(); renderItems();
+        }
+        renderItems();
+    </script>
+</body>
+</html>
