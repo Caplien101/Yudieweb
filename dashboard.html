@@ -1,1942 +1,1780 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard PSM - Monitoring Produk</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Konfigurasi Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2c3e50',
+                        secondary: '#3498db',
+                        success: '#27ae60',
+                        warning: '#f39c12',
+                        danger: '#e74c3c',
+                        'light-bg': '#f8f9fa',
+                        'whatsapp-green': '#25d366',
+                        'whatsapp-dark': '#128c7e',
+                    },
+                    animation: {
+                        'fadeIn': 'fadeIn 0.3s ease-in-out',
+                        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-bg: #f8f9fa;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            color: white !important;
-        }
-        
-        .sidebar {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            height: calc(100vh - 80px);
-            position: sticky;
-            top: 20px;
-            overflow-y: auto;
-        }
-        
-        .main-content {
-            padding: 20px;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid #eee;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        
-        .stat-card {
-            text-align: center;
-            padding: 20px 15px;
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        
-        .progress {
-            height: 8px;
-            margin-top: 5px;
-        }
-        
-        .table {
-            font-size: 0.9rem;
-        }
-        
-        .badge-shift {
-            width: 30px;
-            height: 30px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: 600;
-        }
-        
-        .shift-1 {
-            background-color: #e3f2fd;
-            color: #1565c0;
-        }
-        
-        .shift-2 {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .shift-3 {
-            background-color: #fff3e0;
-            color: #ef6c00;
-        }
-        
-        .filter-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        
-        .last-update {
-            font-size: 0.8rem;
-            color: #6c757d;
-            font-style: italic;
-        }
-        
-        .nav-link.active {
-            font-weight: 600;
-            background-color: rgba(52, 152, 219, 0.1) !important;
-            color: var(--secondary-color) !important;
-            border-left: 4px solid var(--secondary-color);
-        }
-        
-        .nav-link {
-            color: #495057;
-            padding: 10px 15px;
-            border-left: 4px solid transparent;
-        }
-        
-        .nav-link:hover {
-            background-color: rgba(0, 0, 0, 0.03);
-        }
-        
-        .loading-spinner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 300px;
-        }
-        
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
-        
-        .total-card {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-        }
-        
-        .achievement-card {
-            border-left: 4px solid;
-        }
-        
-        .achievement-good {
-            border-left-color: var(--success-color);
-        }
-        
-        .achievement-warning {
-            border-left-color: var(--warning-color);
-        }
-        
-        .achievement-danger {
-            border-left-color: var(--danger-color);
-        }
-        
-        .achievement-percentage {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .achievement-good .achievement-percentage {
-            color: var(--success-color);
-        }
-        
-        .achievement-warning .achievement-percentage {
-            color: var(--warning-color);
-        }
-        
-        .achievement-danger .achievement-percentage {
-            color: var(--danger-color);
-        }
-        
-        .progress-thin {
-            height: 6px;
-            margin-top: 2px;
-        }
-        
-        .parameter-card {
-            height: 100%;
-        }
-        
-        .parameter-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .parameter-target {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        
-        .gap-positive {
-            color: var(--success-color);
-            font-weight: 600;
-        }
-        
-        .gap-negative {
-            color: var(--danger-color);
-            font-weight: 600;
-        }
-        
-        .gap-neutral {
-            color: var(--warning-color);
-            font-weight: 600;
-        }
-        
-        .summary-row {
-            background-color: #f8f9fa;
-            font-weight: 600;
-        }
-        
-        .table-hover tbody tr:hover {
-            background-color: rgba(52, 152, 219, 0.05);
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                height: auto;
-                margin-bottom: 20px;
-            }
-            
-            .stat-value {
-                font-size: 1.5rem;
-            }
-            
-            .table-responsive {
-                font-size: 0.8rem;
-            }
-        }
-        
+        /* Custom styles untuk beberapa elemen yang tidak bisa di-handle oleh Tailwind */
         .tab-content {
-            animation: fadeIn 0.3s ease;
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        #loadingSpinner {
+            display: none;
+        }
+        .sidebar {
+            scrollbar-width: thin;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .data-period {
-            font-size: 0.9rem;
-            color: #6c757d;
-            font-style: italic;
-        }
-        
-        .psm-toko-filter {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .product-badge {
-            font-size: 0.8rem;
-            padding: 3px 8px;
-        }
-        
-        .progress-sm {
-            height: 6px;
-        }
-        
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 3px 8px;
-        }
-        
-        /* WhatsApp Modal Styles */
-        .modal-header.bg-success {
-            background: linear-gradient(135deg, #25d366, #128c7e);
-        }
-        
-        .font-monospace {
-            font-family: 'Courier New', Courier, monospace;
-        }
-        
-        #whatsAppTemplate {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        
-        .btn-whatsapp {
-            background-color: #25d366;
-            border-color: #25d366;
-            color: white;
-        }
-        
-        .btn-whatsapp:hover {
-            background-color: #128c7e;
-            border-color: #128c7e;
-            color: white;
-        }
-        
-        .nik-selection-section {
-            background-color: #e8f5e9;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #25d366;
-        }
-        
-        .beanspot-section {
-            background-color: #fff3e0;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            border-left: 4px solid #f39c12;
+        /* Menyembunyikan spinner saat tidak digunakan */
+        #loadingSpinner:not(.loading) {
+            display: none;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 font-sans">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard Toko</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <span class="nav-link last-update">Last Update: <span id="lastUpdateTime">Loading...</span></span>
-                    </li>
-                </ul>
+    <nav class="bg-primary text-white shadow-md">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="bi bi-speedometer2 text-xl"></i>
+                    <span class="text-xl font-bold">Dashboard Toko</span>
+                </div>
+                <div class="hidden md:block">
+                    <span class="text-sm text-gray-200">Last Update: <span id="lastUpdateTime" class="font-medium">Loading...</span></span>
+                </div>
+                <button class="md:hidden text-white" id="mobileMenuButton">
+                    <i class="bi bi-list text-2xl"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid">
-        <div class="row mt-4">
+    <!-- Mobile Menu (hidden on desktop) -->
+    <div id="mobileMenu" class="bg-white shadow-md md:hidden hidden">
+        <div class="container mx-auto px-4 py-3">
+            <span class="text-sm text-gray-600">Last Update: <span id="lastUpdateTimeMobile" class="font-medium">Loading...</span></span>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
             <!-- Sidebar -->
-            <div class="col-lg-3">
-                <div class="sidebar p-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#" data-tab="dashboard">
-                                <i class="bi bi-house-door me-2"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" data-tab="daily">
-                                <i class="bi bi-calendar-day me-2"></i>Data Harian
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="psm_nik.html">
-                                <i class="bi bi-people me-2"></i>PSM per NIK
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" data-tab="target">
-                                <i class="bi bi-bullseye me-2"></i>Target
-                            </a>
-                        </li>
-                        <li class="nav-item mt-4">
-                            <div class="filter-container">
-                                <h6 class="mb-3"><i class="bi bi-funnel me-2"></i>Filter Data</h6>
-                                <div class="mb-3">
-                                    <label for="startDateFilter" class="form-label">Tanggal Awal</label>
-                                    <input type="date" class="form-control" id="startDateFilter">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="endDateFilter" class="form-label">Tanggal Akhir</label>
-                                    <input type="date" class="form-control" id="endDateFilter">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="shiftFilter" class="form-label">Shift</label>
-                                    <select class="form-select" id="shiftFilter">
-                                        <option value="all">Semua Shift</option>
-                                        <option value="1">Shift 1</option>
-                                        <option value="2">Shift 2</option>
-                                        <option value="3">Shift 3</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="productFilter" class="form-label">Produk</label>
-                                    <select class="form-select" id="productFilter">
-                                        <option value="all">Semua Produk</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="nikFilter" class="form-label">NIK</label>
-                                    <select class="form-select" id="nikFilter">
-                                        <option value="all">Semua NIK</option>
-                                    </select>
-                                </div>
-                                <button class="btn btn-primary w-100" id="applyFilter">
-                                    <i class="bi bi-filter-circle me-2"></i>Terapkan Filter
+            <div class="lg:w-1/4">
+                <div class="bg-white rounded-xl shadow-sm p-4 lg:sticky lg:top-6 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto sidebar">
+                    <!-- Navigation Menu -->
+                    <div class="mb-6">
+                        <ul class="space-y-1">
+                            <li>
+                                <a href="#" class="nav-link active flex items-center space-x-2 p-3 rounded-lg text-secondary bg-blue-50 border-l-4 border-secondary font-medium" data-tab="dashboard">
+                                    <i class="bi bi-house-door"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="nav-link flex items-center space-x-2 p-3 rounded-lg text-gray-700 hover:bg-gray-50 border-l-4 border-transparent" data-tab="daily">
+                                    <i class="bi bi-calendar-day"></i>
+                                    <span>Data Harian</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="psm_nik.html" class="nav-link flex items-center space-x-2 p-3 rounded-lg text-gray-700 hover:bg-gray-50 border-l-4 border-transparent">
+                                    <i class="bi bi-people"></i>
+                                    <span>PSM per NIK</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="nav-link flex items-center space-x-2 p-3 rounded-lg text-gray-700 hover:bg-gray-50 border-l-4 border-transparent" data-tab="target">
+                                    <i class="bi bi-bullseye"></i>
+                                    <span>Target</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Filter Section -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                        <h5 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="bi bi-funnel mr-2"></i> Filter Data
+                        </h5>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="startDateFilter" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Awal</label>
+                                <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="startDateFilter">
+                            </div>
+                            
+                            <div>
+                                <label for="endDateFilter" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                                <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="endDateFilter">
+                            </div>
+                            
+                            <div>
+                                <label for="shiftFilter" class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="shiftFilter">
+                                    <option value="all">Semua Shift</option>
+                                    <option value="1">Shift 1</option>
+                                    <option value="2">Shift 2</option>
+                                    <option value="3">Shift 3</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="productFilter" class="block text-sm font-medium text-gray-700 mb-1">Produk</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="productFilter">
+                                    <option value="all">Semua Produk</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="nikFilter" class="block text-sm font-medium text-gray-700 mb-1">NIK</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="nikFilter">
+                                    <option value="all">Semua NIK</option>
+                                </select>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center" id="applyFilter">
+                                    <i class="bi bi-filter-circle mr-2"></i> Terapkan Filter
                                 </button>
-                                <button class="btn btn-outline-secondary w-100 mt-2" id="resetFilter">
-                                    <i class="bi bi-arrow-clockwise me-2"></i>Reset Filter
+                                <button class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center" id="resetFilter">
+                                    <i class="bi bi-arrow-clockwise mr-2"></i> Reset Filter
                                 </button>
                             </div>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Main Content -->
-            <div class="col-lg-9">
-                <div class="main-content">
-                    <!-- Dashboard Tab -->
-                    <div id="dashboardTab" class="tab-content">
-                        <!-- Header dengan Periode -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Ringkasan Pencapaian</h5>
-                                        <p class="data-period mb-0" id="dataPeriod">Periode: Loading...</p>
-                                    </div>
+            <div class="lg:w-3/4">
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+                    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div id="dashboardTab" class="tab-content active">
+                    <!-- Header dengan Periode -->
+                    <div class="mb-6">
+                        <div class="bg-white rounded-xl shadow-sm p-5">
+                            <h2 class="text-xl font-bold text-gray-800 mb-1">Ringkasan Pencapaian</h2>
+                            <p class="text-gray-600 text-sm" id="dataPeriod">Periode: Loading...</p>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- Total SPD Card -->
+                        <div class="bg-gradient-to-br from-primary to-secondary text-white rounded-xl shadow-md overflow-hidden">
+                            <div class="p-5 text-center">
+                                <div class="text-3xl font-bold mb-1" id="totalSPD">0</div>
+                                <div class="text-gray-200 text-sm mb-4">Total SPD Toko</div>
+                                <div class="w-full bg-white bg-opacity-20 rounded-full h-2 mb-2">
+                                    <div class="bg-green-400 h-2 rounded-full" id="spdProgress" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-white opacity-80">
+                                    Target: <span id="spdTarget">0</span> | Pencapaian: <span id="spdAchievement">0%</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Summary Cards -->
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <div class="card total-card">
-                                    <div class="card-body stat-card">
-                                        <div class="stat-value" id="totalSPD">0</div>
-                                        <div class="stat-label">Total SPD Toko</div>
-                                        <div class="progress">
-                                            <div class="progress-bar bg-success" id="spdProgress" style="width: 0%"></div>
-                                        </div>
-                                        <small class="text-white-50">Target: <span id="spdTarget">0</span> | Pencapaian: <span id="spdAchievement">0%</span></small>
-                                    </div>
+                        <!-- Total STD Card -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                            <div class="p-5 text-center">
+                                <div class="text-3xl font-bold text-gray-800 mb-1" id="totalSTD">0</div>
+                                <div class="text-gray-600 text-sm mb-4">Total STD Toko</div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                    <div class="bg-blue-500 h-2 rounded-full" id="stdProgress" style="width: 0%"></div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card">
-                                    <div class="card-body stat-card">
-                                        <div class="stat-value" id="totalSTD">0</div>
-                                        <div class="stat-label">Total STD Toko</div>
-                                        <div class="progress">
-                                            <div class="progress-bar bg-info" id="stdProgress" style="width: 0%"></div>
-                                        </div>
-                                        <small class="text-muted">Target: <span id="stdTarget">0</span> | Pencapaian: <span id="stdAchievement">0%</span></small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card">
-                                    <div class="card-body stat-card">
-                                        <div class="stat-value" id="totalMember">0</div>
-                                        <div class="stat-label">Total Member Toko</div>
-                                        <div class="progress">
-                                            <div class="progress-bar bg-warning" id="memberProgress" style="width: 0%"></div>
-                                        </div>
-                                        <small class="text-muted">Target: <span id="memberTarget">0</span> | Pencapaian: <span id="memberAchievement">0%</span></small>
-                                    </div>
+                                <div class="text-xs text-gray-500">
+                                    Target: <span id="stdTarget">0</span> | Pencapaian: <span id="stdAchievement">0%</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Pencapaian Parameter Harian -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <i class="bi bi-graph-up me-2"></i>Pencapaian Focus Marketing
-                                        </div>
-                                        <div>
-                                            <button class="btn btn-sm btn-whatsapp" id="exportWhatsApp">
-                                                <i class="bi bi-whatsapp me-1"></i>Export WhatsApp
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row" id="dailyParameters">
-                                            <!-- Parameter cards will be populated by JavaScript -->
-                                        </div>
-                                    </div>
+                        <!-- Total Member Card -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                            <div class="p-5 text-center">
+                                <div class="text-3xl font-bold text-gray-800 mb-1" id="totalMember">0</div>
+                                <div class="text-gray-600 text-sm mb-4">Total Member Toko</div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                    <div class="bg-yellow-500 h-2 rounded-full" id="memberProgress" style="width: 0%"></div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- PSM Toko dengan Filter Terpisah -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <i class="bi bi-shop me-2"></i>Pencapaian Produk PSM - Toko
-                                    </div>
-                                    <div class="card-body">
-                                        <!-- Filter khusus untuk PSM Toko -->
-                                        <div class="psm-toko-filter mb-4">
-                                            <h6 class="mb-3">Filter Periode PSM Toko</h6>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <label for="psmTokoStartDate" class="form-label">Tanggal Awal</label>
-                                                    <input type="date" class="form-control" id="psmTokoStartDate">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="psmTokoEndDate" class="form-label">Tanggal Akhir</label>
-                                                    <input type="date" class="form-control" id="psmTokoEndDate">
-                                                </div>
-                                                <div class="col-md-4 d-flex align-items-end">
-                                                    <button class="btn btn-primary w-100" id="applyPsmTokoFilter">
-                                                        <i class="bi bi-filter-circle me-2"></i>Terapkan Filter
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <p class="data-period mt-2 mb-0" id="psmTokoPeriod">Periode: Loading...</p>
-                                        </div>
-                                        
-                                        <div class="table-responsive">
-                                            <table class="table table-hover" id="psmTokoTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Produk</th>
-                                                        <th>Target</th>
-                                                        <th>Actual</th>
-                                                        <th>Pencapaian</th>
-                                                        <th>Gap</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Data will be populated by JavaScript -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                                <div class="text-xs text-gray-500">
+                                    Target: <span id="memberTarget">0</span> | Pencapaian: <span id="memberAchievement">0%</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Daily Data Tab -->
-                    <div id="dailyTab" class="tab-content" style="display: none;">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="bi bi-calendar-day me-2"></i>Data Harian per NIK
-                                </div>
-                                <div>
-                                    <span class="data-period me-3" id="dailyDataPeriod"></span>
+                    <!-- Pencapaian Parameter Harian -->
+                    <div class="mb-8">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="font-semibold text-gray-800 flex items-center">
+                                    <i class="bi bi-graph-up mr-2"></i> Pencapaian Focus Marketing
+                                </h3>
+                                <button class="bg-whatsapp-green hover:bg-whatsapp-dark text-white font-medium py-2 px-4 rounded-lg flex items-center transition duration-200" id="exportWhatsApp">
+                                    <i class="bi bi-whatsapp mr-2"></i> Export WhatsApp
+                                </button>
+                            </div>
+                            <div class="p-5">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dailyParameters">
+                                    <!-- Parameter cards akan diisi oleh JavaScript -->
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover" id="dailyTable">
-                                        <thead>
+                        </div>
+                    </div>
+
+                    <!-- PSM Toko dengan Filter Terpisah -->
+                    <div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-5 py-4 border-b border-gray-200">
+                                <h3 class="font-semibold text-gray-800 flex items-center">
+                                    <i class="bi bi-shop mr-2"></i> Pencapaian Produk PSM - Toko
+                                </h3>
+                            </div>
+                            <div class="p-5">
+                                <!-- Filter khusus untuk PSM Toko -->
+                                <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-6">
+                                    <h4 class="font-medium text-gray-800 mb-3">Filter Periode PSM Toko</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                                        <div>
+                                            <label for="psmTokoStartDate" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Awal</label>
+                                            <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="psmTokoStartDate">
+                                        </div>
+                                        <div>
+                                            <label for="psmTokoEndDate" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                                            <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="psmTokoEndDate">
+                                        </div>
+                                        <div class="flex items-end">
+                                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center" id="applyPsmTokoFilter">
+                                                <i class="bi bi-filter-circle mr-2"></i> Terapkan Filter
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600 text-sm" id="psmTokoPeriod">Periode: Loading...</p>
+                                </div>
+                                
+                                <!-- Table PSM Toko -->
+                                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                    <table class="min-w-full divide-y divide-gray-200" id="psmTokoTable">
+                                        <thead class="bg-gray-50">
                                             <tr>
-                                                <th>Tanggal</th>
-                                                <th>Shift</th>
-                                                <th>NIK</th>
-                                                <th>SPD</th>
-                                                <th>STD</th>
-                                                <th>Member</th>
-                                                <th>New Member</th>
-                                                <th>PWP</th>
-                                                <th>Sertis</th>
-                                                <th>Sueger</th>
-                                                <th>Ceban</th>
-                                                <th>Sejagad</th>
-                                                <th>RTE</th>
-                                                <th>RTD</th>
-                                                <th>Timestamp</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pencapaian</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gap</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <!-- Data will be populated by JavaScript -->
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <!-- Data akan diisi oleh JavaScript -->
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Target Tab -->
-                    <div id="targetTab" class="tab-content" style="display: none;">
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <i class="bi bi-bullseye me-2"></i>Target Harian
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover" id="targetDailyTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Tanggal</th>
-                                                        <th>SPD</th>
-                                                        <th>STD</th>
-                                                        <th>Member</th>
-                                                        <th>New Member</th>
-                                                        <th>PWP</th>
-                                                        <th>Sertis</th>
-                                                        <th>Sueger</th>
-                                                        <th>Ceban</th>
-                                                        <th>Sejagad</th>
-                                                        <th>RTE</th>
-                                                        <th>RTD</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Data will be populated by JavaScript -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                <!-- Daily Data Tab -->
+                <div id="dailyTab" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800 flex items-center">
+                                <i class="bi bi-calendar-day mr-2"></i> Data Harian per NIK
+                            </h3>
+                            <span class="text-gray-600 text-sm" id="dailyDataPeriod"></span>
+                        </div>
+                        <div class="p-5">
+                            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                <table class="min-w-full divide-y divide-gray-200" id="dailyTable">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shift</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIK</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SPD</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STD</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Member</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PWP</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sertis</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sueger</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ceban</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sejagad</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RTE</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RTD</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <!-- Data akan diisi oleh JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Tab -->
+                <div id="targetTab" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Target Harian -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-5 py-4 border-b border-gray-200">
+                                <h3 class="font-semibold text-gray-800 flex items-center">
+                                    <i class="bi bi-bullseye mr-2"></i> Target Harian
+                                </h3>
+                            </div>
+                            <div class="p-5">
+                                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                    <table class="min-w-full divide-y divide-gray-200" id="targetDailyTable">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SPD</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STD</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Member</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PWP</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sertis</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sueger</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ceban</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sejagad</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RTE</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RTD</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <!-- Data akan diisi oleh JavaScript -->
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <i class="bi bi-box-seam me-2"></i>Target PSM (Mingguan)
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover" id="targetPSMTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Produk</th>
-                                                        <th>Target per NIK</th>
-                                                        <th>Target Toko</th>
-                                                        <th>Periode</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Data will be populated by JavaScript -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                        </div>
+
+                        <!-- Target PSM (Mingguan) -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-5 py-4 border-b border-gray-200">
+                                <h3 class="font-semibold text-gray-800 flex items-center">
+                                    <i class="bi bi-box-seam mr-2"></i> Target PSM (Mingguan)
+                                </h3>
+                            </div>
+                            <div class="p-5">
+                                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                    <table class="min-w-full divide-y divide-gray-200" id="targetPSMTable">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target per NIK</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target Toko</th>
+                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <!-- Data akan diisi oleh JavaScript -->
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Loading Spinner -->
-    <div id="loadingSpinner" class="loading-spinner">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 
     <!-- Modal Export WhatsApp -->
-    <div class="modal fade" id="whatsAppModal" tabindex="-1" aria-labelledby="whatsAppModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="whatsAppModalLabel">
-                        <i class="bi bi-whatsapp me-2"></i>Export WhatsApp Report
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden" id="whatsAppModal">
+        <div class="relative top-10 mx-auto p-4 w-full max-w-4xl">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-whatsapp-green to-whatsapp-dark text-white p-5">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold flex items-center">
+                            <i class="bi bi-whatsapp mr-3"></i> Export WhatsApp Report
+                        </h3>
+                        <button class="text-white text-2xl" id="closeModal">&times;</button>
+                    </div>
                 </div>
-                <div class="modal-body">
+                
+                <!-- Modal Body -->
+                <div class="p-6">
                     <!-- Alert info -->
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Salin teks di bawah ini dan kirim melalui WhatsApp.
+                    <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-4 mb-4">
+                        <div class="flex items-center">
+                            <i class="bi bi-info-circle mr-2"></i>
+                            <span>Salin teks di bawah ini dan kirim melalui WhatsApp.</span>
+                        </div>
                     </div>
 
-                    <!-- Section untuk pilih NIK (hanya tampil jika filter NIK = all) -->
-                    <div id="nikSelectionSection" class="nik-selection-section" style="display: none;">
-                        <h6><i class="bi bi-people me-2"></i>Pilih Nama Crew untuk Laporan</h6>
-                        <p class="mb-2">Anda memfilter "Semua NIK". Pilih satu NIK untuk dicantumkan sebagai nama crew pada laporan.</p>
+                    <!-- Section untuk pilih NIK -->
+                    <div id="nikSelectionSection" class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4 hidden">
+                        <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="bi bi-people mr-2"></i> Pilih Nama Crew untuk Laporan
+                        </h4>
+                        <p class="text-gray-700 mb-3 text-sm">Anda memfilter "Semua NIK". Pilih satu NIK untuk dicantumkan sebagai nama crew pada laporan.</p>
+                        
                         <div class="mb-3">
-                            <label for="modalNikSelect" class="form-label">Nama Crew:</label>
-                            <select class="form-select" id="modalNikSelect">
+                            <label for="modalNikSelect" class="block text-sm font-medium text-gray-700 mb-1">Nama Crew:</label>
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="modalNikSelect">
                                 <!-- Opsi akan diisi oleh JavaScript -->
                             </select>
                         </div>
-                        <div class="alert alert-warning mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <small>Data actual tetap berdasarkan filter yang diterapkan. Pilihan ini hanya mempengaruhi nama yang dicantumkan.</small>
+                        
+                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-3 text-sm">
+                            <div class="flex items-start">
+                                <i class="bi bi-info-circle mr-2 mt-0.5"></i>
+                                <span>Data actual tetap berdasarkan filter yang diterapkan. Pilihan ini hanya mempengaruhi nama yang dicantumkan.</span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Template textarea -->
-                    <div class="mb-3">
-                        <label for="whatsAppTemplate" class="form-label">Template Laporan Kasir:</label>
-                        <textarea class="form-control font-monospace" id="whatsAppTemplate" rows="25" readonly style="font-size: 0.9rem;"></textarea>
+                    <div class="mb-4">
+                        <label for="whatsAppTemplate" class="block text-sm font-medium text-gray-700 mb-2">Template Laporan Kasir:</label>
+                        <textarea class="w-full border border-gray-300 rounded-lg px-3 py-3 font-mono text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                  id="whatsAppTemplate" rows="18" readonly></textarea>
                     </div>
                     
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Pastikan:</strong> Filter shift sudah dipilih (bukan "Semua Shift").
+                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="bi bi-exclamation-triangle mr-2 mt-0.5"></i>
+                            <div>
+                                <strong class="font-semibold">Pastikan:</strong> Filter shift sudah dipilih (bukan "Semua Shift").
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>Tutup
+                
+                <!-- Modal Footer -->
+                <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+                    <button class="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition duration-200" id="cancelModal">
+                        <i class="bi bi-x-circle mr-2"></i> Tutup
                     </button>
-                    <button type="button" class="btn btn-success" id="copyWhatsAppButton">
-                        <i class="bi bi-clipboard me-1"></i>Salin ke Clipboard
+                    <button class="px-5 py-2.5 bg-whatsapp-green hover:bg-whatsapp-dark text-white font-medium rounded-lg transition duration-200 flex items-center" id="copyWhatsAppButton">
+                        <i class="bi bi-clipboard mr-2"></i> Salin ke Clipboard
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // API URL
-    const API_URL = 'https://script.google.com/macros/s/AKfycby_L_vmTHUtl7NUr3qHI-upGlPNUWKJ1uRgPFOPWgWofMDU8siS1Ex_YHR-y0P69E-cGA/exec';
-    
-    // Global variables
-    let allData = {};
-    let filteredData = {};
-    let currentStartDate, currentEndDate;
-    let psmTokoStartDate, psmTokoEndDate;
-    
-    // WhatsApp Modal Data
-    let modalData = {
-        tanggal: '',
-        shift: '',
-        nikFilter: '',
-        actualData: {},
-        targetData: {},
-        selectedNikForName: null,
-        selectedNamaKasir: '',
-        showNikSelection: false,
-        nikOptions: []
-    };
-    
-    // Initialize dashboard when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM Content Loaded');
+    <!-- JavaScript (dipertahankan dari file asli dengan sedikit penyesuaian) -->
+    <script>
+        // API URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycby_L_vmTHUtl7NUr3qHI-upGlPNUWKJ1uRgPFOPWgWofMDU8siS1Ex_YHR-y0P69E-cGA/exec';
         
-        // Set default date range to TODAY (single date)
-        const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
+        // Global variables
+        let allData = {};
+        let filteredData = {};
+        let currentStartDate, currentEndDate;
+        let psmTokoStartDate, psmTokoEndDate;
         
-        // Set default dates for main filter (today only)
-        document.getElementById('startDateFilter').value = todayStr;
-        document.getElementById('endDateFilter').value = todayStr;
+        // WhatsApp Modal Data
+        let modalData = {
+            tanggal: '',
+            shift: '',
+            nikFilter: '',
+            actualData: {},
+            targetData: {},
+            selectedNikForName: null,
+            selectedNamaKasir: '',
+            showNikSelection: false,
+            nikOptions: []
+        };
         
-        currentStartDate = todayStr;
-        currentEndDate = todayStr;
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            
+            // Set default date range to TODAY (single date)
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // Set default dates for main filter (today only)
+            document.getElementById('startDateFilter').value = todayStr;
+            document.getElementById('endDateFilter').value = todayStr;
+            
+            currentStartDate = todayStr;
+            currentEndDate = todayStr;
+            
+            // Set default dates for PSM Toko filter (today only)
+            document.getElementById('psmTokoStartDate').value = todayStr;
+            document.getElementById('psmTokoEndDate').value = todayStr;
+            
+            psmTokoStartDate = todayStr;
+            psmTokoEndDate = todayStr;
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load data from API
+            loadData();
+            
+            // Setup mobile menu toggle
+            document.getElementById('mobileMenuButton').addEventListener('click', function() {
+                const mobileMenu = document.getElementById('mobileMenu');
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Setup modal close buttons
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelModal').addEventListener('click', closeModal);
+            
+            // Close modal when clicking outside
+            document.getElementById('whatsAppModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        });
         
-        // Set default dates for PSM Toko filter (today only)
-        document.getElementById('psmTokoStartDate').value = todayStr;
-        document.getElementById('psmTokoEndDate').value = todayStr;
+        // ==================== UTILITY FUNCTIONS ====================
         
-        psmTokoStartDate = todayStr;
-        psmTokoEndDate = todayStr;
-        
-        // Load data from API
-        loadData();
-        
-        // Setup event listeners
-        setupEventListeners();
-    });
-    
-    // ==================== UTILITY FUNCTIONS ====================
-    
-    // Function to parse date string with automatic format detection
-    function parseDateString(dateString) {
-        if (!dateString) return new Date();
-        
-        // If already a Date object, return it
-        if (dateString instanceof Date) {
-            return dateString;
+        // Function to parse date string with automatic format detection
+        function parseDateString(dateString) {
+            if (!dateString) return new Date();
+            
+            // If already a Date object, return it
+            if (dateString instanceof Date) {
+                return dateString;
+            }
+            
+            let date;
+            
+            // 1. Try format dd/mm/yyyy (from target data)
+            if (typeof dateString === 'string' && dateString.includes('/')) {
+                const parts = dateString.split('/');
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+                    const year = parseInt(parts[2], 10);
+                    
+                    // Create Date object in local time
+                    date = new Date(year, month, day);
+                    
+                    // Validate: check if parsing was successful and year matches
+                    if (!isNaN(date.getTime()) && date.getFullYear() === year) {
+                        // Reset time to 00:00:00 for consistent comparison
+                        date.setHours(0, 0, 0, 0);
+                        return date;
+                    }
+                }
+            }
+            
+            // 2. Try format yyyy-mm-dd (from form data)
+            if (typeof dateString === 'string' && dateString.includes('-')) {
+                const parts = dateString.split('-');
+                
+                // Check if it's yyyy-mm-dd format (year first)
+                if (parts.length === 3 && parts[0].length === 4) {
+                    const year = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1;
+                    const day = parseInt(parts[2], 10);
+                    
+                    // Create Date object in local time (NOT using new Date() directly)
+                    date = new Date(year, month, day);
+                    
+                    // Validate
+                    if (!isNaN(date.getTime()) && date.getFullYear() === year) {
+                        // Reset time to 00:00:00 for consistent comparison
+                        date.setHours(0, 0, 0, 0);
+                        return date;
+                    }
+                }
+            }
+            
+            // 3. Fallback: try standard Date parsing
+            date = new Date(dateString);
+            
+            // If still invalid, return current date
+            if (isNaN(date.getTime())) {
+                console.warn('Invalid date:', dateString, 'Using current date.');
+                date = new Date();
+            }
+            
+            // Reset time to 00:00:00 for consistency
+            date.setHours(0, 0, 0, 0);
+            return date;
         }
         
-        let date;
+        // Function to format date to dd/mm/yyyy
+        function formatDateToDMY(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
         
-        // 1. Try format dd/mm/yyyy (from target data)
-        if (typeof dateString === 'string' && dateString.includes('/')) {
-            const parts = dateString.split('/');
-            if (parts.length === 3) {
-                const day = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
-                const year = parseInt(parts[2], 10);
-                
-                // Create Date object in local time
-                date = new Date(year, month, day);
-                
-                // Validate: check if parsing was successful and year matches
-                if (!isNaN(date.getTime()) && date.getFullYear() === year) {
-                    // Reset time to 00:00:00 for consistent comparison
-                    date.setHours(0, 0, 0, 0);
-                    return date;
-                }
+        // Function to format numbers with thousands separator
+        function formatNumber(num) {
+            if (num === undefined || num === null || num === '') return '0';
+            if (typeof num === 'string') {
+                // Remove any non-numeric characters except decimal point
+                num = num.replace(/[^\d.-]/g, '');
+                num = parseFloat(num) || 0;
+            }
+            return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        // Function to get gap class based on value
+        function getGapClass(gap) {
+            if (gap > 0) return 'text-green-600 font-semibold';
+            if (gap < 0) return 'text-red-600 font-semibold';
+            return 'text-yellow-600 font-semibold';
+        }
+        
+        // Function to show/hide loading spinner
+        function showLoading(show) {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            if (show) {
+                loadingSpinner.classList.remove('hidden');
+                loadingSpinner.classList.add('flex');
+            } else {
+                loadingSpinner.classList.add('hidden');
+                loadingSpinner.classList.remove('flex');
             }
         }
         
-        // 2. Try format yyyy-mm-dd (from form data)
-        if (typeof dateString === 'string' && dateString.includes('-')) {
-            const parts = dateString.split('-');
-            
-            // Check if it's yyyy-mm-dd format (year first)
-            if (parts.length === 3 && parts[0].length === 4) {
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1;
-                const day = parseInt(parts[2], 10);
+        // Function to close modal
+        function closeModal() {
+            document.getElementById('whatsAppModal').classList.add('hidden');
+        }
+        
+        // Function to open modal
+        function openModal() {
+            document.getElementById('whatsAppModal').classList.remove('hidden');
+        }
+        
+        // ==================== MAIN FUNCTIONS ====================
+        
+        // Function to load data from API
+        async function loadData() {
+            try {
+                console.log('Loading data from API...');
+                showLoading(true);
                 
-                // Create Date object in local time (NOT using new Date() directly)
-                date = new Date(year, month, day);
+                const response = await fetch(API_URL);
+                allData = await response.json();
                 
-                // Validate
-                if (!isNaN(date.getTime()) && date.getFullYear() === year) {
-                    // Reset time to 00:00:00 for consistent comparison
-                    date.setHours(0, 0, 0, 0);
-                    return date;
-                }
+                console.log('Data loaded successfully:', allData);
+                
+                // Populate filter options
+                populateFilters();
+                
+                // Apply initial filters
+                applyFilters();
+                
+                // Update PSM Toko table
+                updatePsmTokoTable();
+                
+                showLoading(false);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showLoading(false);
+                alert('Gagal memuat data dari server. Silakan coba lagi.');
             }
         }
         
-        // 3. Fallback: try standard Date parsing
-        date = new Date(dateString);
-        
-        // If still invalid, return current date
-        if (isNaN(date.getTime())) {
-            console.warn('Invalid date:', dateString, 'Using current date.');
-            date = new Date();
+        // Function to apply filters (for main dashboard)
+        function applyFilters() {
+            console.log('Applying filters...');
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
+            const shiftFilter = document.getElementById('shiftFilter').value;
+            const productFilter = document.getElementById('productFilter').value;
+            const nikFilter = document.getElementById('nikFilter').value;
+            
+            console.log('Filter values:', { startDate, endDate, shiftFilter, productFilter, nikFilter });
+            
+            // Store current date range
+            currentStartDate = startDate;
+            currentEndDate = endDate;
+            
+            // Start with all data
+            filteredData = JSON.parse(JSON.stringify(allData));
+            
+            // Apply date range filter
+            if (startDate && endDate) {
+                const startDateObj = parseDateString(startDate);
+                const endDateObj = parseDateString(endDate);
+                endDateObj.setHours(23, 59, 59, 999); // Set to end of day
+                
+                // Filter data_psm
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => {
+                        const itemDate = parseDateString(item.tanggal);
+                        return itemDate >= startDateObj && itemDate <= endDateObj;
+                    });
+                }
+                
+                // Filter data_daily
+                if (filteredData.data_daily) {
+                    filteredData.data_daily = filteredData.data_daily.filter(item => {
+                        const itemDate = parseDateString(item.tanggal);
+                        return itemDate >= startDateObj && itemDate <= endDateObj;
+                    });
+                }
+            }
+            
+            // Apply shift filter
+            if (shiftFilter !== 'all') {
+                const shift = parseInt(shiftFilter);
+                
+                // Filter data_psm
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => item.shift === shift);
+                }
+                
+                // Filter data_daily
+                if (filteredData.data_daily) {
+                    filteredData.data_daily = filteredData.data_daily.filter(item => item.shift === shift);
+                }
+            }
+            
+            // Apply product filter
+            if (productFilter !== 'all') {
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => item.nama_produk === productFilter);
+                }
+            }
+            
+            // Apply NIK filter
+            if (nikFilter !== 'all') {
+                const nik = parseInt(nikFilter);
+                
+                // Filter data_psm
+                if (filteredData.data_psm) {
+                    filteredData.data_psm = filteredData.data_psm.filter(item => item.nik === nik);
+                }
+                
+                // Filter data_daily
+                if (filteredData.data_daily) {
+                    filteredData.data_daily = filteredData.data_daily.filter(item => item.nik === nik);
+                }
+            }
+            
+            // Update UI with filtered data
+            updateDashboard();
+            updatePeriodText();
         }
         
-        // Reset time to 00:00:00 for consistency
-        date.setHours(0, 0, 0, 0);
-        return date;
-    }
-    
-    // Function to format date to dd/mm/yyyy
-    function formatDateToDMY(date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    }
-    
-    // Function to format numbers with thousands separator
-    function formatNumber(num) {
-        if (num === undefined || num === null || num === '') return '0';
-        if (typeof num === 'string') {
-            // Remove any non-numeric characters except decimal point
-            num = num.replace(/[^\d.-]/g, '');
-            num = parseFloat(num) || 0;
-        }
-        return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-    
-    // Function to get gap class based on value
-    function getGapClass(gap) {
-        if (gap > 0) return 'gap-positive';
-        if (gap < 0) return 'gap-negative';
-        return 'gap-neutral';
-    }
-    
-    // Function to show/hide loading spinner
-    function showLoading(show) {
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const mainContent = document.querySelector('.main-content');
-        
-        if (loadingSpinner) {
-            loadingSpinner.style.display = show ? 'flex' : 'none';
-        }
-        
-        if (mainContent) {
-            mainContent.style.display = show ? 'none' : 'block';
-        }
-    }
-    
-    // ==================== MAIN FUNCTIONS ====================
-    
-    // Function to load data from API
-    async function loadData() {
-        try {
-            console.log('Loading data from API...');
-            showLoading(true);
+        // Function to apply PSM Toko filter
+        function applyPsmTokoFilter() {
+            console.log('Applying PSM Toko filter...');
+            const startDate = document.getElementById('psmTokoStartDate').value;
+            const endDate = document.getElementById('psmTokoEndDate').value;
             
-            const response = await fetch(API_URL);
-            allData = await response.json();
+            console.log('PSM Toko filter dates:', { startDate, endDate });
             
-            console.log('Data loaded successfully:', allData);
-            
-            // Populate filter options
-            populateFilters();
-            
-            // Apply initial filters
-            applyFilters();
+            // Store current date range for PSM Toko
+            psmTokoStartDate = startDate;
+            psmTokoEndDate = endDate;
             
             // Update PSM Toko table
             updatePsmTokoTable();
-            
-            showLoading(false);
-        } catch (error) {
-            console.error('Error loading data:', error);
-            showLoading(false);
-            alert('Gagal memuat data dari server. Silakan coba lagi.');
         }
-    }
-    
-    // Function to apply filters (for main dashboard)
-    function applyFilters() {
-        console.log('Applying filters...');
-        const startDate = document.getElementById('startDateFilter').value;
-        const endDate = document.getElementById('endDateFilter').value;
-        const shiftFilter = document.getElementById('shiftFilter').value;
-        const productFilter = document.getElementById('productFilter').value;
-        const nikFilter = document.getElementById('nikFilter').value;
         
-        console.log('Filter values:', { startDate, endDate, shiftFilter, productFilter, nikFilter });
-        
-        // Store current date range
-        currentStartDate = startDate;
-        currentEndDate = endDate;
-        
-        // Start with all data
-        filteredData = JSON.parse(JSON.stringify(allData));
-        
-        // Apply date range filter
-        if (startDate && endDate) {
-            const startDateObj = parseDateString(startDate);
-            const endDateObj = parseDateString(endDate);
-            endDateObj.setHours(23, 59, 59, 999); // Set to end of day
+        // Function to update dashboard with data
+        function updateDashboard() {
+            console.log('Updating dashboard...');
+            // Update summary cards dengan perhitungan yang benar
+            updateSummaryCards();
             
-            // Filter data_psm
-            if (filteredData.data_psm) {
-                filteredData.data_psm = filteredData.data_psm.filter(item => {
-                    const itemDate = parseDateString(item.tanggal);
-                    return itemDate >= startDateObj && itemDate <= endDateObj;
+            // Update parameter cards
+            updateParameterCards();
+            
+            // Update tables
+            updateTables();
+        }
+        
+        // Function to update summary cards
+        function updateSummaryCards() {
+            console.log('Updating summary cards...');
+            const dailyData = filteredData.data_daily || [];
+            const targetDaily = allData.target_daily || [];
+            
+            console.log('Daily data count:', dailyData.length);
+            console.log('Target daily count:', targetDaily.length);
+            
+            // Calculate totals untuk periode yang difilter
+            const totalSPD = dailyData.reduce((sum, item) => sum + (parseFloat(item.spd) || 0), 0);
+            const totalSTD = dailyData.reduce((sum, item) => sum + (parseFloat(item.std) || 0), 0);
+            const totalMember = dailyData.reduce((sum, item) => sum + (parseFloat(item.member) || 0), 0);
+            const totalNewMember = dailyData.reduce((sum, item) => sum + (parseFloat(item.new_member) || 0), 0);
+            const totalPWP = dailyData.reduce((sum, item) => sum + (parseFloat(item.pwp) || 0), 0);
+            const totalSertis = dailyData.reduce((sum, item) => sum + (parseFloat(item.sertis) || 0), 0);
+            const totalSueger = dailyData.reduce((sum, item) => sum + (parseFloat(item.sueger) || 0), 0);
+            const totalCeban = dailyData.reduce((sum, item) => sum + (parseFloat(item.ceban) || 0), 0);
+            const totalSejagad = dailyData.reduce((sum, item) => sum + (parseFloat(item.sejagad) || 0), 0);
+            const totalRTE = dailyData.reduce((sum, item) => sum + (parseFloat(item.rte) || 0), 0);
+            const totalRTD = dailyData.reduce((sum, item) => sum + (parseFloat(item.rtd) || 0), 0);
+            
+            // Calculate target totals for the filtered period
+            const startDate = parseDateString(currentStartDate);
+            const endDate = parseDateString(currentEndDate);
+            
+            let spdTarget = 0;
+            let stdTarget = 0;
+            let memberTarget = 0;
+            let newMemberTarget = 0;
+            let pwpTarget = 0;
+            let sertisTarget = 0;
+            let suegerTarget = 0;
+            let cebanTarget = 0;
+            let sejagadTarget = 0;
+            let rteTarget = 0;
+            let rtdTarget = 0;
+            
+            // Loop through each day in the filter range to get targets
+            const currentDate = new Date(startDate);
+            const endDateLoop = new Date(endDate);
+            
+            while (currentDate <= endDateLoop) {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                
+                // Find target for this specific date
+                const targetForDate = targetDaily.find(item => {
+                    try {
+                        const itemDate = parseDateString(item.Tanggal);
+                        const itemDateStr = itemDate.toISOString().split('T')[0];
+                        return itemDateStr === dateStr;
+                    } catch (e) {
+                        console.error('Error parsing target date:', item.Tanggal, e);
+                        return false;
+                    }
                 });
-            }
-            
-            // Filter data_daily
-            if (filteredData.data_daily) {
-                filteredData.data_daily = filteredData.data_daily.filter(item => {
-                    const itemDate = parseDateString(item.tanggal);
-                    return itemDate >= startDateObj && itemDate <= endDateObj;
-                });
-            }
-        }
-        
-        // Apply shift filter
-        if (shiftFilter !== 'all') {
-            const shift = parseInt(shiftFilter);
-            
-            // Filter data_psm
-            if (filteredData.data_psm) {
-                filteredData.data_psm = filteredData.data_psm.filter(item => item.shift === shift);
-            }
-            
-            // Filter data_daily
-            if (filteredData.data_daily) {
-                filteredData.data_daily = filteredData.data_daily.filter(item => item.shift === shift);
-            }
-        }
-        
-        // Apply product filter
-        if (productFilter !== 'all') {
-            if (filteredData.data_psm) {
-                filteredData.data_psm = filteredData.data_psm.filter(item => item.nama_produk === productFilter);
-            }
-        }
-        
-        // Apply NIK filter
-        if (nikFilter !== 'all') {
-            const nik = parseInt(nikFilter);
-            
-            // Filter data_psm
-            if (filteredData.data_psm) {
-                filteredData.data_psm = filteredData.data_psm.filter(item => item.nik === nik);
-            }
-            
-            // Filter data_daily
-            if (filteredData.data_daily) {
-                filteredData.data_daily = filteredData.data_daily.filter(item => item.nik === nik);
-            }
-        }
-        
-        // Update UI with filtered data
-        updateDashboard();
-        updatePeriodText();
-    }
-    
-    // Function to apply PSM Toko filter
-    function applyPsmTokoFilter() {
-        console.log('Applying PSM Toko filter...');
-        const startDate = document.getElementById('psmTokoStartDate').value;
-        const endDate = document.getElementById('psmTokoEndDate').value;
-        
-        console.log('PSM Toko filter dates:', { startDate, endDate });
-        
-        // Store current date range for PSM Toko
-        psmTokoStartDate = startDate;
-        psmTokoEndDate = endDate;
-        
-        // Update PSM Toko table
-        updatePsmTokoTable();
-    }
-    
-    // Function to update dashboard with data
-    function updateDashboard() {
-        console.log('Updating dashboard...');
-        // Update summary cards dengan perhitungan yang benar
-        updateSummaryCards();
-        
-        // Update parameter cards
-        updateParameterCards();
-        
-        // Update tables
-        updateTables();
-    }
-    
-    // Function to update summary cards
-    function updateSummaryCards() {
-        console.log('Updating summary cards...');
-        const dailyData = filteredData.data_daily || [];
-        const targetDaily = allData.target_daily || [];
-        
-        console.log('Daily data count:', dailyData.length);
-        console.log('Target daily count:', targetDaily.length);
-        
-        // Calculate totals untuk periode yang difilter
-        const totalSPD = dailyData.reduce((sum, item) => sum + (parseFloat(item.spd) || 0), 0);
-        const totalSTD = dailyData.reduce((sum, item) => sum + (parseFloat(item.std) || 0), 0);
-        const totalMember = dailyData.reduce((sum, item) => sum + (parseFloat(item.member) || 0), 0);
-        const totalNewMember = dailyData.reduce((sum, item) => sum + (parseFloat(item.new_member) || 0), 0);
-        const totalPWP = dailyData.reduce((sum, item) => sum + (parseFloat(item.pwp) || 0), 0);
-        const totalSertis = dailyData.reduce((sum, item) => sum + (parseFloat(item.sertis) || 0), 0);
-        const totalSueger = dailyData.reduce((sum, item) => sum + (parseFloat(item.sueger) || 0), 0);
-        const totalCeban = dailyData.reduce((sum, item) => sum + (parseFloat(item.ceban) || 0), 0);
-        const totalSejagad = dailyData.reduce((sum, item) => sum + (parseFloat(item.sejagad) || 0), 0);
-        const totalRTE = dailyData.reduce((sum, item) => sum + (parseFloat(item.rte) || 0), 0);
-        const totalRTD = dailyData.reduce((sum, item) => sum + (parseFloat(item.rtd) || 0), 0);
-        
-        // Calculate target totals for the filtered period
-        const startDate = parseDateString(currentStartDate);
-        const endDate = parseDateString(currentEndDate);
-        
-        let spdTarget = 0;
-        let stdTarget = 0;
-        let memberTarget = 0;
-        let newMemberTarget = 0;
-        let pwpTarget = 0;
-        let sertisTarget = 0;
-        let suegerTarget = 0;
-        let cebanTarget = 0;
-        let sejagadTarget = 0;
-        let rteTarget = 0;
-        let rtdTarget = 0;
-        
-        // Loop through each day in the filter range to get targets
-        const currentDate = new Date(startDate);
-        const endDateLoop = new Date(endDate);
-        
-        while (currentDate <= endDateLoop) {
-            const dateStr = currentDate.toISOString().split('T')[0];
-            
-            // Find target for this specific date
-            const targetForDate = targetDaily.find(item => {
-                try {
-                    const itemDate = parseDateString(item.Tanggal);
-                    const itemDateStr = itemDate.toISOString().split('T')[0];
-                    return itemDateStr === dateStr;
-                } catch (e) {
-                    console.error('Error parsing target date:', item.Tanggal, e);
-                    return false;
+                
+                if (targetForDate) {
+                    spdTarget += parseFloat(targetForDate.spd) || 0;
+                    stdTarget += parseFloat(targetForDate.std) || 0;
+                    memberTarget += parseFloat(targetForDate.member) || 0;
+                    newMemberTarget += parseFloat(targetForDate.new_member) || 0;
+                    pwpTarget += parseFloat(targetForDate.pwp) || 0;
+                    sertisTarget += parseFloat(targetForDate.sertis) || 0;
+                    suegerTarget += parseFloat(targetForDate.sueger) || 0;
+                    cebanTarget += parseFloat(targetForDate.ceban) || 0;
+                    sejagadTarget += parseFloat(targetForDate.sejagad) || 0;
+                    rteTarget += parseFloat(targetForDate.rte) || 0;
+                    rtdTarget += parseFloat(targetForDate.rtd) || 0;
                 }
+                
+                // Move to next day
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            console.log('Targets calculated for date range:', {
+                spdTarget, stdTarget, memberTarget,
+                newMemberTarget, pwpTarget, sertisTarget,
+                suegerTarget, cebanTarget, sejagadTarget,
+                rteTarget, rtdTarget
             });
             
-            if (targetForDate) {
-                spdTarget += parseFloat(targetForDate.spd) || 0;
-                stdTarget += parseFloat(targetForDate.std) || 0;
-                memberTarget += parseFloat(targetForDate.member) || 0;
-                newMemberTarget += parseFloat(targetForDate.new_member) || 0;
-                pwpTarget += parseFloat(targetForDate.pwp) || 0;
-                sertisTarget += parseFloat(targetForDate.sertis) || 0;
-                suegerTarget += parseFloat(targetForDate.sueger) || 0;
-                cebanTarget += parseFloat(targetForDate.ceban) || 0;
-                sejagadTarget += parseFloat(targetForDate.sejagad) || 0;
-                rteTarget += parseFloat(targetForDate.rte) || 0;
-                rtdTarget += parseFloat(targetForDate.rtd) || 0;
+            // Calculate achievement percentages
+            const spdPercentage = spdTarget > 0 ? Math.min(100, Math.round((totalSPD / spdTarget) * 100)) : 0;
+            const stdPercentage = stdTarget > 0 ? Math.min(100, Math.round((totalSTD / stdTarget) * 100)) : 0;
+            const memberPercentage = memberTarget > 0 ? Math.min(100, Math.round((totalMember / memberTarget) * 100)) : 0;
+            const newMemberPercentage = newMemberTarget > 0 ? Math.min(100, Math.round((totalNewMember / newMemberTarget) * 100)) : 0;
+            const pwpPercentage = pwpTarget > 0 ? Math.min(100, Math.round((totalPWP / pwpTarget) * 100)) : 0;
+            const sertisPercentage = sertisTarget > 0 ? Math.min(100, Math.round((totalSertis / sertisTarget) * 100)) : 0;
+            const suegerPercentage = suegerTarget > 0 ? Math.min(100, Math.round((totalSueger / suegerTarget) * 100)) : 0;
+            const cebanPercentage = cebanTarget > 0 ? Math.min(100, Math.round((totalCeban / cebanTarget) * 100)) : 0;
+            const sejagadPercentage = sejagadTarget > 0 ? Math.min(100, Math.round((totalSejagad / sejagadTarget) * 100)) : 0;
+            const rtePercentage = rteTarget > 0 ? Math.min(100, Math.round((totalRTE / rteTarget) * 100)) : 0;
+            const rtdPercentage = rtdTarget > 0 ? Math.min(100, Math.round((totalRTD / rtdTarget) * 100)) : 0;
+            
+            console.log('Calculated totals:', {
+                totalSPD, totalSTD, totalMember,
+                spdTarget, stdTarget, memberTarget,
+                spdPercentage, stdPercentage, memberPercentage
+            });
+            
+            // Update DOM elements
+            document.getElementById('totalSPD').textContent = formatNumber(totalSPD);
+            document.getElementById('totalSTD').textContent = formatNumber(totalSTD);
+            document.getElementById('totalMember').textContent = formatNumber(totalMember);
+            
+            document.getElementById('spdTarget').textContent = formatNumber(spdTarget);
+            document.getElementById('stdTarget').textContent = formatNumber(stdTarget);
+            document.getElementById('memberTarget').textContent = formatNumber(memberTarget);
+            
+            document.getElementById('spdAchievement').textContent = `${spdPercentage}%`;
+            document.getElementById('stdAchievement').textContent = `${stdPercentage}%`;
+            document.getElementById('memberAchievement').textContent = `${memberPercentage}%`;
+            
+            // Update progress bars
+            document.getElementById('spdProgress').style.width = `${spdPercentage}%`;
+            document.getElementById('stdProgress').style.width = `${stdPercentage}%`;
+            document.getElementById('memberProgress').style.width = `${memberPercentage}%`;
+            
+            // Store calculated data for later use
+            window.dailyTotals = {
+                totalSPD, totalSTD, totalMember, totalNewMember,
+                totalPWP, totalSertis, totalSueger, totalCeban,
+                totalSejagad, totalRTE, totalRTD,
+                spdTarget, stdTarget, memberTarget, newMemberTarget,
+                pwpTarget, sertisTarget, suegerTarget, cebanTarget,
+                sejagadTarget, rteTarget, rtdTarget,
+                spdPercentage, stdPercentage, memberPercentage,
+                newMemberPercentage, pwpPercentage, sertisPercentage,
+                suegerPercentage, cebanPercentage, sejagadPercentage,
+                rtePercentage, rtdPercentage
+            };
+        }
+        
+        // Function to update parameter cards
+        function updateParameterCards() {
+            console.log('Updating parameter cards...');
+            const totals = window.dailyTotals || {};
+            const container = document.getElementById('dailyParameters');
+            
+            if (!container) {
+                console.error('Parameter cards container not found!');
+                return;
             }
             
-            // Move to next day
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-        
-        console.log('Targets calculated for date range:', {
-            spdTarget, stdTarget, memberTarget,
-            newMemberTarget, pwpTarget, sertisTarget,
-            suegerTarget, cebanTarget, sejagadTarget,
-            rteTarget, rtdTarget
-        });
-        
-        // Calculate achievement percentages
-        const spdPercentage = spdTarget > 0 ? Math.min(100, Math.round((totalSPD / spdTarget) * 100)) : 0;
-        const stdPercentage = stdTarget > 0 ? Math.min(100, Math.round((totalSTD / stdTarget) * 100)) : 0;
-        const memberPercentage = memberTarget > 0 ? Math.min(100, Math.round((totalMember / memberTarget) * 100)) : 0;
-        const newMemberPercentage = newMemberTarget > 0 ? Math.min(100, Math.round((totalNewMember / newMemberTarget) * 100)) : 0;
-        const pwpPercentage = pwpTarget > 0 ? Math.min(100, Math.round((totalPWP / pwpTarget) * 100)) : 0;
-        const sertisPercentage = sertisTarget > 0 ? Math.min(100, Math.round((totalSertis / sertisTarget) * 100)) : 0;
-        const suegerPercentage = suegerTarget > 0 ? Math.min(100, Math.round((totalSueger / suegerTarget) * 100)) : 0;
-        const cebanPercentage = cebanTarget > 0 ? Math.min(100, Math.round((totalCeban / cebanTarget) * 100)) : 0;
-        const sejagadPercentage = sejagadTarget > 0 ? Math.min(100, Math.round((totalSejagad / sejagadTarget) * 100)) : 0;
-        const rtePercentage = rteTarget > 0 ? Math.min(100, Math.round((totalRTE / rteTarget) * 100)) : 0;
-        const rtdPercentage = rtdTarget > 0 ? Math.min(100, Math.round((totalRTD / rtdTarget) * 100)) : 0;
-        
-        console.log('Calculated totals:', {
-            totalSPD, totalSTD, totalMember,
-            spdTarget, stdTarget, memberTarget,
-            spdPercentage, stdPercentage, memberPercentage
-        });
-        
-        // Update DOM elements
-        document.getElementById('totalSPD').textContent = formatNumber(totalSPD);
-        document.getElementById('totalSTD').textContent = formatNumber(totalSTD);
-        document.getElementById('totalMember').textContent = formatNumber(totalMember);
-        
-        document.getElementById('spdTarget').textContent = formatNumber(spdTarget);
-        document.getElementById('stdTarget').textContent = formatNumber(stdTarget);
-        document.getElementById('memberTarget').textContent = formatNumber(memberTarget);
-        
-        document.getElementById('spdAchievement').textContent = `${spdPercentage}%`;
-        document.getElementById('stdAchievement').textContent = `${stdPercentage}%`;
-        document.getElementById('memberAchievement').textContent = `${memberPercentage}%`;
-        
-        // Update progress bars
-        document.getElementById('spdProgress').style.width = `${spdPercentage}%`;
-        document.getElementById('stdProgress').style.width = `${stdPercentage}%`;
-        document.getElementById('memberProgress').style.width = `${memberPercentage}%`;
-        
-        // Store calculated data for later use
-        window.dailyTotals = {
-            totalSPD, totalSTD, totalMember, totalNewMember,
-            totalPWP, totalSertis, totalSueger, totalCeban,
-            totalSejagad, totalRTE, totalRTD,
-            spdTarget, stdTarget, memberTarget, newMemberTarget,
-            pwpTarget, sertisTarget, suegerTarget, cebanTarget,
-            sejagadTarget, rteTarget, rtdTarget,
-            spdPercentage, stdPercentage, memberPercentage,
-            newMemberPercentage, pwpPercentage, sertisPercentage,
-            suegerPercentage, cebanPercentage, sejagadPercentage,
-            rtePercentage, rtdPercentage
-        };
-    }
-    
-    // Function to update parameter cards
-    function updateParameterCards() {
-        console.log('Updating parameter cards...');
-        const totals = window.dailyTotals || {};
-        const container = document.getElementById('dailyParameters');
-        
-        if (!container) {
-            console.error('Parameter cards container not found!');
-            return;
-        }
-        
-        // Semua parameter termasuk yang baru
-        const parameters = [
-            { key: 'new_member', label: 'New Member', value: totals.totalNewMember || 0, target: totals.newMemberTarget || 0, percentage: totals.newMemberPercentage || 0 },
-            { key: 'pwp', label: 'PWP', value: totals.totalPWP || 0, target: totals.pwpTarget || 0, percentage: totals.pwpPercentage || 0 },
-            { key: 'sertis', label: 'Sertis', value: totals.totalSertis || 0, target: totals.sertisTarget || 0, percentage: totals.sertisPercentage || 0 },
-            { key: 'sueger', label: 'Sueger', value: totals.totalSueger || 0, target: totals.suegerTarget || 0, percentage: totals.suegerPercentage || 0 },
-            { key: 'ceban', label: 'Ceban', value: totals.totalCeban || 0, target: totals.cebanTarget || 0, percentage: totals.cebanPercentage || 0 },
-            { key: 'sejagad', label: 'Murah Sejagad', value: totals.totalSejagad || 0, target: totals.sejagadTarget || 0, percentage: totals.sejagadPercentage || 0 },
-            { key: 'rte', label: 'RTE', value: totals.totalRTE || 0, target: totals.rteTarget || 0, percentage: totals.rtePercentage || 0 },
-            { key: 'rtd', label: 'RTD', value: totals.totalRTD || 0, target: totals.rtdTarget || 0, percentage: totals.rtdPercentage || 0 }
-        ];
-        
-        console.log('Parameters for cards:', parameters);
-        
-        container.innerHTML = '';
-        
-        parameters.forEach(param => {
-            const percentage = param.target > 0 ? Math.min(100, Math.round((param.value / param.target) * 100)) : 0;
-            const cardClass = percentage >= 100 ? 'achievement-good' : 
-                            percentage >= 70 ? 'achievement-warning' : 'achievement-danger';
+            // Semua parameter termasuk yang baru
+            const parameters = [
+                { key: 'new_member', label: 'New Member', value: totals.totalNewMember || 0, target: totals.newMemberTarget || 0, percentage: totals.newMemberPercentage || 0 },
+                { key: 'pwp', label: 'PWP', value: totals.totalPWP || 0, target: totals.pwpTarget || 0, percentage: totals.pwpPercentage || 0 },
+                { key: 'sertis', label: 'Sertis', value: totals.totalSertis || 0, target: totals.sertisTarget || 0, percentage: totals.sertisPercentage || 0 },
+                { key: 'sueger', label: 'Sueger', value: totals.totalSueger || 0, target: totals.suegerTarget || 0, percentage: totals.suegerPercentage || 0 },
+                { key: 'ceban', label: 'Ceban', value: totals.totalCeban || 0, target: totals.cebanTarget || 0, percentage: totals.cebanPercentage || 0 },
+                { key: 'sejagad', label: 'Murah Sejagad', value: totals.totalSejagad || 0, target: totals.sejagadTarget || 0, percentage: totals.sejagadPercentage || 0 },
+                { key: 'rte', label: 'RTE', value: totals.totalRTE || 0, target: totals.rteTarget || 0, percentage: totals.rtePercentage || 0 },
+                { key: 'rtd', label: 'RTD', value: totals.totalRTD || 0, target: totals.rtdTarget || 0, percentage: totals.rtdPercentage || 0 }
+            ];
             
-            const cardHtml = `
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="card ${cardClass} parameter-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
+            console.log('Parameters for cards:', parameters);
+            
+            container.innerHTML = '';
+            
+            parameters.forEach(param => {
+                const percentage = param.target > 0 ? Math.min(100, Math.round((param.value / param.target) * 100)) : 0;
+                let borderColor = '';
+                let textColor = '';
+                
+                if (percentage >= 100) {
+                    borderColor = 'border-l-green-500';
+                    textColor = 'text-green-600';
+                } else if (percentage >= 70) {
+                    borderColor = 'border-l-yellow-500';
+                    textColor = 'text-yellow-600';
+                } else {
+                    borderColor = 'border-l-red-500';
+                    textColor = 'text-red-600';
+                }
+                
+                const cardHtml = `
+                    <div class="bg-white rounded-lg border border-gray-200 ${borderColor} overflow-hidden">
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <div class="stat-label">${param.label}</div>
-                                    <div class="parameter-value">${formatNumber(param.value)}</div>
-                                    <div class="parameter-target">Target: ${formatNumber(param.target)}</div>
+                                    <div class="text-gray-600 text-sm">${param.label}</div>
+                                    <div class="text-2xl font-bold text-gray-800">${formatNumber(param.value)}</div>
+                                    <div class="text-gray-500 text-xs mt-1">Target: ${formatNumber(param.target)}</div>
                                 </div>
-                                <div class="achievement-percentage">
+                                <div class="${textColor} font-bold text-lg">
                                     ${percentage}%
                                 </div>
                             </div>
-                            <div class="progress progress-thin mt-2">
-                                <div class="progress-bar" style="width: ${percentage}%"></div>
+                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full ${percentage >= 100 ? 'bg-green-500' : percentage >= 70 ? 'bg-yellow-500' : 'bg-red-500'}" style="width: ${percentage}%"></div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-            
-            container.innerHTML += cardHtml;
-        });
-    }
-    
-    // Function to update tables
-    function updateTables() {
-        console.log('Updating tables...');
-        updateDailyTable();
-        updateTargetTables();
-        updateLastUpdateTime();
-    }
-    
-    // Function to update daily data table
-    function updateDailyTable() {
-        const dailyData = filteredData.data_daily || [];
-        const tableBody = document.querySelector('#dailyTable tbody');
-        
-        if (!tableBody) return;
-        
-        // Clear existing rows
-        tableBody.innerHTML = '';
-        
-        // Add rows
-        dailyData.forEach(item => {
-            const row = document.createElement('tr');
-            
-            // Format date
-            const date = parseDateString(item.tanggal);
-            const formattedDate = date.toLocaleDateString('id-ID');
-            
-            // Format timestamp
-            const time = parseDateString(item.timestamp);
-            const formattedTime = time.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
+                `;
+                
+                container.innerHTML += cardHtml;
             });
-            
-            row.innerHTML = `
-                <td>${formattedDate}</td>
-                <td><span class="badge-shift shift-${item.shift}">${item.shift}</span></td>
-                <td>${item.nik}</td>
-                <td>${formatNumber(item.spd)}</td>
-                <td>${item.std}</td>
-                <td>${item.member}</td>
-                <td>${item.new_member}</td>
-                <td>${item.pwp}</td>
-                <td>${item.sertis}</td>
-                <td>${item.sueger}</td>
-                <td>${item.ceban}</td>
-                <td>${item.sejagad || 0}</td>
-                <td>${item.rte || 0}</td>
-                <td>${item.rtd || 0}</td>
-                <td>${formattedTime}</td>
-            `;
-            
-            tableBody.appendChild(row);
-        });
-    }
-    
-    // Function to update PSM Toko table
-    function updatePsmTokoTable() {
-        console.log('Updating PSM Toko table...');
-        const psmData = allData.data_psm || [];
-        const targetPSM = allData.target_psm || [];
-        const tableBody = document.querySelector('#psmTokoTable tbody');
-        
-        if (!tableBody) {
-            console.error('PSM Toko table body not found!');
-            return;
         }
         
-        // Clear existing rows
-        tableBody.innerHTML = '';
+        // Function to update tables
+        function updateTables() {
+            console.log('Updating tables...');
+            updateDailyTable();
+            updateTargetTables();
+            updateLastUpdateTime();
+        }
         
-        // Apply PSM Toko date filter
-        const startDate = parseDateString(psmTokoStartDate);
-        const endDate = parseDateString(psmTokoEndDate);
-        endDate.setHours(23, 59, 59, 999);
-        
-        console.log('PSM Toko filter dates:', { 
-            startDate: startDate.toISOString(), 
-            endDate: endDate.toISOString() 
-        });
-        
-        // Filter PSM data based on PSM Toko date range
-        const filteredPsmData = psmData.filter(item => {
-            const itemDate = parseDateString(item.tanggal);
-            return itemDate >= startDate && itemDate <= endDate;
-        });
-        
-        console.log('Filtered PSM data:', filteredPsmData.length);
-        
-        // Group actual data by product
-        const productActuals = {};
-        
-        filteredPsmData.forEach(item => {
-            const product = item.nama_produk;
-            if (!productActuals[product]) {
-                productActuals[product] = 0;
-            }
-            productActuals[product] += (parseInt(item.qty) || 0);
-        });
-        
-        console.log('Product actuals:', productActuals);
-        
-        // Hitung target berdasarkan apakah ada filter NIK atau tidak
-        const nikFilter = document.getElementById('nikFilter').value;
-        const productTargets = calculateProductTargets(targetPSM, startDate, endDate, nikFilter);
-        
-        console.log('Product targets:', productTargets);
-        
-        // Calculate total row values
-        let totalActual = 0;
-        let totalTarget = 0;
-        
-        // Get all unique products
-        const allProducts = [...new Set([...Object.keys(productActuals), ...Object.keys(productTargets)])].sort();
-        
-        console.log('All products:', allProducts);
-        
-        // Create table rows
-        allProducts.forEach(product => {
-            const actual = productActuals[product] || 0;
-            const target = productTargets[product] || 0;
-            const achievement = target > 0 ? Math.round((actual / target) * 100) : (actual > 0 ? 100 : 0);
-            const gap = actual - target;
+        // Function to update daily data table
+        function updateDailyTable() {
+            const dailyData = filteredData.data_daily || [];
+            const tableBody = document.querySelector('#dailyTable tbody');
             
-            totalActual += actual;
-            totalTarget += target;
+            if (!tableBody) return;
             
-            const row = document.createElement('tr');
-            const gapClass = getGapClass(gap);
+            // Clear existing rows
+            tableBody.innerHTML = '';
             
-            row.innerHTML = `
-                <td><strong>${product}</strong></td>
-                <td>${formatNumber(target)}</td>
-                <td>${formatNumber(actual)}</td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="progress flex-grow-1 me-2 progress-sm">
-                            <div class="progress-bar ${achievement >= 100 ? 'bg-success' : achievement >= 70 ? 'bg-warning' : 'bg-danger'}" 
-                                 style="width: ${Math.min(achievement, 100)}%"></div>
-                        </div>
-                        <span>${achievement}%</span>
-                    </div>
-                </td>
-                <td class="${gapClass}">${formatNumber(gap)}</td>
-            `;
-            
-            tableBody.appendChild(row);
-        });
-        
-        // Add total row
-        const totalAchievement = totalTarget > 0 ? Math.round((totalActual / totalTarget) * 100) : 0;
-        const totalGap = totalActual - totalTarget;
-        const totalGapClass = getGapClass(totalGap);
-        
-        const totalRow = document.createElement('tr');
-        totalRow.className = 'summary-row';
-        totalRow.innerHTML = `
-            <td><strong>TOTAL</strong></td>
-            <td><strong>${formatNumber(totalTarget)}</strong></td>
-            <td><strong>${formatNumber(totalActual)}</strong></td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <div class="progress flex-grow-1 me-2" style="height: 10px;">
-                        <div class="progress-bar ${totalAchievement >= 100 ? 'bg-success' : totalAchievement >= 70 ? 'bg-warning' : 'bg-danger'}" 
-                             style="width: ${Math.min(totalAchievement, 100)}%"></div>
-                    </div>
-                    <span><strong>${totalAchievement}%</strong></span>
-                </div>
-            </td>
-            <td class="${totalGapClass}"><strong>${formatNumber(totalGap)}</strong></td>
-        `;
-        
-        tableBody.appendChild(totalRow);
-        
-        // Update PSM Toko period text
-        updatePsmTokoPeriodText();
-    }
-    
-    // Fungsi untuk menghitung target produk berdasarkan filter NIK
-    function calculateProductTargets(targetPSM, startDate, endDate, nikFilter) {
-        const productTargets = {};
-        
-        // Hitung total hari dalam rentang filter
-        const totalDaysInFilter = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-        
-        console.log('Total days in filter:', totalDaysInFilter);
-        console.log('Using target type:', nikFilter === 'all' ? 'target_toko (semua NIK)' : 'target_pernik (NIK spesifik)');
-        
-        targetPSM.forEach(target => {
-            try {
-                const targetStart = parseDateString(target.start_date);
-                const targetEnd = parseDateString(target.end_date);
-                
-                // Set time to end of day for end date
-                targetEnd.setHours(23, 59, 59, 999);
-                
-                // Check if date ranges overlap
-                if (startDate <= targetEnd && endDate >= targetStart) {
-                    // Calculate overlapping days
-                    const overlapStart = new Date(Math.max(startDate.getTime(), targetStart.getTime()));
-                    const overlapEnd = new Date(Math.min(endDate.getTime(), targetEnd.getTime()));
-                    
-                    // Calculate number of days in overlap
-                    const overlapDays = Math.max(0, Math.floor((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1);
-                    
-                    // Calculate total days in target period
-                    const totalTargetDays = Math.floor((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
-                    
-                    // Calculate proportional target
-                    if (totalTargetDays > 0 && overlapDays > 0) {
-                        const proportion = overlapDays / totalTargetDays;
-                        const product = target.nama_produk;
-                        
-                        // Tentukan target yang akan digunakan
-                        let targetValue;
-                        if (nikFilter === 'all') {
-                            // Jika filter NIK = all, gunakan target_toko
-                            targetValue = parseFloat(target.target_toko) || 0;
-                        } else {
-                            // Jika filter NIK spesifik, gunakan target_pernik
-                            targetValue = parseFloat(target.target_pernik) || 0;
-                        }
-                        
-                        if (!productTargets[product]) {
-                            productTargets[product] = 0;
-                        }
-                        
-                        // Add proportional target
-                        const proportionalTarget = targetValue * proportion;
-                        productTargets[product] += Math.round(proportionalTarget);
-                    }
-                }
-            } catch (e) {
-                console.error(`Error processing target for ${target.nama_produk}:`, e);
-            }
-        });
-        
-        return productTargets;
-    }
-    
-    // Function to update target tables
-    function updateTargetTables() {
-        const targetDaily = allData.target_daily || [];
-        const targetPSM = allData.target_psm || [];
-        
-        // Filter target_daily based on date range
-        const startDate = parseDateString(currentStartDate);
-        const endDate = parseDateString(currentEndDate);
-        
-        const filteredTargetDaily = targetDaily.filter(item => {
-            try {
-                const itemDate = parseDateString(item.Tanggal);
-                return itemDate >= startDate && itemDate <= endDate;
-            } catch (e) {
-                console.error('Error parsing date in target_daily:', item.Tanggal, e);
-                return false;
-            }
-        });
-        
-        // Update daily target table
-        const dailyTableBody = document.querySelector('#targetDailyTable tbody');
-        if (dailyTableBody) {
-            dailyTableBody.innerHTML = '';
-            
-            filteredTargetDaily.forEach(item => {
+            // Add rows
+            dailyData.forEach(item => {
                 const row = document.createElement('tr');
                 
                 // Format date
-                const date = parseDateString(item.Tanggal);
+                const date = parseDateString(item.tanggal);
                 const formattedDate = date.toLocaleDateString('id-ID');
                 
+                // Format timestamp
+                const time = parseDateString(item.timestamp);
+                const formattedTime = time.toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                // Determine shift badge color
+                let shiftColor = '';
+                if (item.shift == 1) shiftColor = 'bg-blue-100 text-blue-800';
+                else if (item.shift == 2) shiftColor = 'bg-green-100 text-green-800';
+                else shiftColor = 'bg-orange-100 text-orange-800';
+                
                 row.innerHTML = `
-                    <td>${formattedDate}</td>
-                    <td>${formatNumber(item.spd)}</td>
-                    <td>${item.std}</td>
-                    <td>${item.member}</td>
-                    <td>${item.new_member}</td>
-                    <td>${item.pwp || 0}</td>
-                    <td>${item.sertis || 0}</td>
-                    <td>${item.sueger || 0}</td>
-                    <td>${item.ceban || 0}</td>
-                    <td>${item.sejagad || 0}</td>
-                    <td>${item.rte || 0}</td>
-                    <td>${item.rtd || 0}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formattedDate}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full ${shiftColor} font-semibold">${item.shift}</span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.nik}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formatNumber(item.spd)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.std}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.member}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.new_member}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.pwp}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.sertis}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.sueger}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.ceban}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.sejagad || 0}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.rte || 0}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.rtd || 0}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formattedTime}</td>
                 `;
                 
-                dailyTableBody.appendChild(row);
+                tableBody.appendChild(row);
             });
         }
         
-        // Update PSM target table - show all targets
-        const psmTableBody = document.querySelector('#targetPSMTable tbody');
-        if (psmTableBody) {
-            psmTableBody.innerHTML = '';
+        // Function to update PSM Toko table
+        function updatePsmTokoTable() {
+            console.log('Updating PSM Toko table...');
+            const psmData = allData.data_psm || [];
+            const targetPSM = allData.target_psm || [];
+            const tableBody = document.querySelector('#psmTokoTable tbody');
             
-            targetPSM.forEach(item => {
-                const row = document.createElement('tr');
+            if (!tableBody) {
+                console.error('PSM Toko table body not found!');
+                return;
+            }
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Apply PSM Toko date filter
+            const startDate = parseDateString(psmTokoStartDate);
+            const endDate = parseDateString(psmTokoEndDate);
+            endDate.setHours(23, 59, 59, 999);
+            
+            console.log('PSM Toko filter dates:', { 
+                startDate: startDate.toISOString(), 
+                endDate: endDate.toISOString() 
+            });
+            
+            // Filter PSM data based on PSM Toko date range
+            const filteredPsmData = psmData.filter(item => {
+                const itemDate = parseDateString(item.tanggal);
+                return itemDate >= startDate && itemDate <= endDate;
+            });
+            
+            console.log('Filtered PSM data:', filteredPsmData.length);
+            
+            // Group actual data by product
+            const productActuals = {};
+            
+            filteredPsmData.forEach(item => {
+                const product = item.nama_produk;
+                if (!productActuals[product]) {
+                    productActuals[product] = 0;
+                }
+                productActuals[product] += (parseInt(item.qty) || 0);
+            });
+            
+            console.log('Product actuals:', productActuals);
+            
+            // Hitung target berdasarkan apakah ada filter NIK atau tidak
+            const nikFilter = document.getElementById('nikFilter').value;
+            const productTargets = calculateProductTargets(targetPSM, startDate, endDate, nikFilter);
+            
+            console.log('Product targets:', productTargets);
+            
+            // Calculate total row values
+            let totalActual = 0;
+            let totalTarget = 0;
+            
+            // Get all unique products
+            const allProducts = [...new Set([...Object.keys(productActuals), ...Object.keys(productTargets)])].sort();
+            
+            console.log('All products:', allProducts);
+            
+            // Create table rows
+            allProducts.forEach(product => {
+                const actual = productActuals[product] || 0;
+                const target = productTargets[product] || 0;
+                const achievement = target > 0 ? Math.round((actual / target) * 100) : (actual > 0 ? 100 : 0);
+                const gap = actual - target;
                 
+                totalActual += actual;
+                totalTarget += target;
+                
+                const row = document.createElement('tr');
+                const gapClass = getGapClass(gap);
+                
+                let progressColor = '';
+                if (achievement >= 100) progressColor = 'bg-green-500';
+                else if (achievement >= 70) progressColor = 'bg-yellow-500';
+                else progressColor = 'bg-red-500';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="font-medium text-gray-900">${product}</span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formatNumber(target)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formatNumber(actual)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                <div class="h-2 rounded-full ${progressColor}" style="width: ${Math.min(achievement, 100)}%"></div>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">${achievement}%</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm ${gapClass}">${formatNumber(gap)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add total row
+            const totalAchievement = totalTarget > 0 ? Math.round((totalActual / totalTarget) * 100) : 0;
+            const totalGap = totalActual - totalTarget;
+            const totalGapClass = getGapClass(totalGap);
+            
+            let totalProgressColor = '';
+            if (totalAchievement >= 100) totalProgressColor = 'bg-green-600';
+            else if (totalAchievement >= 70) totalProgressColor = 'bg-yellow-500';
+            else totalProgressColor = 'bg-red-500';
+            
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-gray-50 font-semibold';
+            totalRow.innerHTML = `
+                <td class="px-4 py-3 whitespace-nowrap">
+                    <span class="font-bold text-gray-900">TOTAL</span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-gray-900">${formatNumber(totalTarget)}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-gray-900">${formatNumber(totalActual)}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="w-full bg-gray-300 rounded-full h-2.5 mr-2">
+                            <div class="h-2.5 rounded-full ${totalProgressColor}" style="width: ${Math.min(totalAchievement, 100)}%"></div>
+                        </div>
+                        <span class="font-bold text-gray-900">${totalAchievement}%</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap ${totalGapClass}">${formatNumber(totalGap)}</td>
+            `;
+            
+            tableBody.appendChild(totalRow);
+            
+            // Update PSM Toko period text
+            updatePsmTokoPeriodText();
+        }
+        
+        // Fungsi untuk menghitung target produk berdasarkan filter NIK
+        function calculateProductTargets(targetPSM, startDate, endDate, nikFilter) {
+            const productTargets = {};
+            
+            // Hitung total hari dalam rentang filter
+            const totalDaysInFilter = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            console.log('Total days in filter:', totalDaysInFilter);
+            console.log('Using target type:', nikFilter === 'all' ? 'target_toko (semua NIK)' : 'target_pernik (NIK spesifik)');
+            
+            targetPSM.forEach(target => {
                 try {
-                    // Format dates
-                    const startDate = parseDateString(item.start_date);
-                    const endDate = parseDateString(item.end_date);
-                    const formattedStartDate = startDate.toLocaleDateString('id-ID');
-                    const formattedEndDate = endDate.toLocaleDateString('id-ID');
+                    const targetStart = parseDateString(target.start_date);
+                    const targetEnd = parseDateString(target.end_date);
                     
-                    row.innerHTML = `
-                        <td>${item.nama_produk}</td>
-                        <td>${formatNumber(item.target_pernik)}</td>
-                        <td>${formatNumber(item.target_toko)}</td>
-                        <td>${formattedStartDate} - ${formattedEndDate}</td>
-                    `;
+                    // Set time to end of day for end date
+                    targetEnd.setHours(23, 59, 59, 999);
                     
-                    psmTableBody.appendChild(row);
+                    // Check if date ranges overlap
+                    if (startDate <= targetEnd && endDate >= targetStart) {
+                        // Calculate overlapping days
+                        const overlapStart = new Date(Math.max(startDate.getTime(), targetStart.getTime()));
+                        const overlapEnd = new Date(Math.min(endDate.getTime(), targetEnd.getTime()));
+                        
+                        // Calculate number of days in overlap
+                        const overlapDays = Math.max(0, Math.floor((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1);
+                        
+                        // Calculate total days in target period
+                        const totalTargetDays = Math.floor((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
+                        
+                        // Calculate proportional target
+                        if (totalTargetDays > 0 && overlapDays > 0) {
+                            const proportion = overlapDays / totalTargetDays;
+                            const product = target.nama_produk;
+                            
+                            // Tentukan target yang akan digunakan
+                            let targetValue;
+                            if (nikFilter === 'all') {
+                                // Jika filter NIK = all, gunakan target_toko
+                                targetValue = parseFloat(target.target_toko) || 0;
+                            } else {
+                                // Jika filter NIK spesifik, gunakan target_pernik
+                                targetValue = parseFloat(target.target_pernik) || 0;
+                            }
+                            
+                            if (!productTargets[product]) {
+                                productTargets[product] = 0;
+                            }
+                            
+                            // Add proportional target
+                            const proportionalTarget = targetValue * proportion;
+                            productTargets[product] += Math.round(proportionalTarget);
+                        }
+                    }
                 } catch (e) {
-                    console.error('Error formatting PSM target row:', item, e);
+                    console.error(`Error processing target for ${target.nama_produk}:`, e);
                 }
             });
-        }
-    }
-    
-    // Function to update period text
-    function updatePeriodText() {
-        const startDate = parseDateString(currentStartDate);
-        const endDate = parseDateString(currentEndDate);
-        
-        const formattedStartDate = startDate.toLocaleDateString('id-ID');
-        const formattedEndDate = endDate.toLocaleDateString('id-ID');
-        
-        let periodText;
-        if (formattedStartDate === formattedEndDate) {
-            periodText = `Periode: ${formattedStartDate}`;
-        } else {
-            periodText = `Periode: ${formattedStartDate} - ${formattedEndDate}`;
-        }
-        
-        // Update period elements
-        document.getElementById('dataPeriod').textContent = periodText;
-        document.getElementById('dailyDataPeriod').textContent = periodText;
-    }
-    
-    // Function to update PSM Toko period text
-    function updatePsmTokoPeriodText() {
-        const startDate = parseDateString(psmTokoStartDate);
-        const endDate = parseDateString(psmTokoEndDate);
-        
-        const formattedStartDate = startDate.toLocaleDateString('id-ID');
-        const formattedEndDate = endDate.toLocaleDateString('id-ID');
-        
-        let periodText;
-        if (formattedStartDate === formattedEndDate) {
-            periodText = `Periode: ${formattedStartDate}`;
-        } else {
-            periodText = `Periode: ${formattedStartDate} - ${formattedEndDate}`;
-        }
-        
-        document.getElementById('psmTokoPeriod').textContent = periodText;
-    }
-    
-    // Function to populate filter options
-    function populateFilters() {
-        console.log('Populating filters...');
-        const psmData = allData.data_psm || [];
-        const dailyData = allData.data_daily || [];
-        const productFilter = document.getElementById('productFilter');
-        const nikFilter = document.getElementById('nikFilter');
-        
-        // Get unique products
-        const products = [...new Set(psmData.map(item => item.nama_produk))].sort();
-        
-        // Get unique NIKs
-        const nikList = [...new Set([
-            ...psmData.map(item => item.nik),
-            ...dailyData.map(item => item.nik)
-        ])].sort((a, b) => a - b);
-        
-        console.log('Products for filter:', products);
-        console.log('NIKs for filter:', nikList);
-        
-        // Clear existing options (except the first "all" option)
-        while (productFilter.options.length > 1) {
-            productFilter.remove(1);
-        }
-        
-        // Add product options
-        products.forEach(product => {
-            const option = document.createElement('option');
-            option.value = product;
-            option.textContent = product;
-            productFilter.appendChild(option);
-        });
-        
-        while (nikFilter.options.length > 1) {
-            nikFilter.remove(1);
-        }
-        
-        // Add NIK options
-        nikList.forEach(nik => {
-            const option = document.createElement('option');
-            option.value = nik;
-            option.textContent = nik;
-            nikFilter.appendChild(option);
-        });
-    }
-    
-    // Function to update last update time
-    function updateLastUpdateTime() {
-        const psmData = allData.data_psm || [];
-        if (psmData.length === 0) return;
-        
-        // Find the latest timestamp
-        const latestTimestamp = psmData.reduce((latest, item) => {
-            const itemTime = parseDateString(item.timestamp);
-            return itemTime > latest ? itemTime : latest;
-        }, new Date(0));
-        
-        // Format the time
-        const formattedTime = latestTimestamp.toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        
-        const formattedDate = latestTimestamp.toLocaleDateString('id-ID');
-        
-        document.getElementById('lastUpdateTime').textContent = `${formattedDate} ${formattedTime}`;
-    }
-    
-    // ==================== WHATSAPP EXPORT FUNCTIONS ====================
-    
-    // Function to get nama kasir from NIK
-    function getNamaKasirFromNik(nikList, dataNik) {
-        console.log('Getting nama kasir for NIK:', nikList);
-        
-        if (!nikList || !dataNik) return '';
-        
-        // If nikList is "all" or empty, return empty
-        if (nikList === 'all' || !nikList) return '';
-        
-        // If nikList is a single NIK (string), convert to array
-        if (!Array.isArray(nikList)) {
-            nikList = [nikList];
-        }
-        
-        const namaList = [];
-        
-        nikList.forEach(nik => {
-            // Convert nik to number for comparison
-            const nikNum = parseInt(nik);
-            const found = dataNik.find(item => parseInt(item.nik) === nikNum);
-            if (found && found.nama) {
-                namaList.push(found.nama);
-            } else {
-                namaList.push(`NIK ${nik}`);
-            }
-        });
-        
-        // Join with "dan" for Indonesian format
-        if (namaList.length === 1) {
-            return namaList[0];
-        } else if (namaList.length === 2) {
-            return namaList.join(' dan ');
-        } else {
-            // For 3 or more: "Budi, Andi, dan Cici"
-            const last = namaList.pop();
-            return namaList.join(', ') + ' dan ' + last;
-        }
-    }
-    
-    // Function to format date to Indonesian format
-    function formatDateToIndonesian(dateString) {
-        if (!dateString) return '';
-        
-        try {
-            const date = parseDateString(dateString);
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            return date.toLocaleDateString('id-ID', options);
-        } catch (e) {
-            console.error('Error formatting date:', dateString, e);
-            return 'Tanggal tidak valid';
-        }
-    }
-    
-    // Function to calculate achievement percentage
-    function calculateAchievement(target, actual) {
-        if (!target || target === 0) return 0;
-        return Math.round((actual / target) * 100);
-    }
-    
-    // Function to get actual data for WhatsApp report
-    function getWhatsAppActualData() {
-        console.log('Getting WhatsApp actual data...');
-        const dailyData = filteredData.data_daily || [];
-        const psmData = filteredData.data_psm || [];
-        
-        // Calculate actuals from daily data
-        const actuals = {
-            sertis: dailyData.reduce((sum, item) => sum + (parseFloat(item.sertis) || 0), 0),
-            pwp: dailyData.reduce((sum, item) => sum + (parseFloat(item.pwp) || 0), 0),
-            sueger: dailyData.reduce((sum, item) => sum + (parseFloat(item.sueger) || 0), 0),
-            ceban: dailyData.reduce((sum, item) => sum + (parseFloat(item.ceban) || 0), 0),
-            new_member: dailyData.reduce((sum, item) => sum + (parseFloat(item.new_member) || 0), 0),
-            sejagad: dailyData.reduce((sum, item) => sum + (parseFloat(item.sejagad) || 0), 0),
-            rte: dailyData.reduce((sum, item) => sum + (parseFloat(item.rte) || 0), 0),
-            rtd: dailyData.reduce((sum, item) => sum + (parseFloat(item.rtd) || 0), 0)
-        };
-        
-        // Calculate PSM actual (total qty from all PSM products)
-        actuals.psm = psmData.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0);
-        
-        console.log('WhatsApp actuals calculated:', actuals);
-        return actuals;
-    }
-    
-    // Function to get target data for WhatsApp report
-    function getWhatsAppTargetData(tanggal) {
-        console.log('Getting WhatsApp target data for date:', tanggal);
-        const targetDaily = allData.target_daily || [];
-        const targetPSM = allData.target_psm || [];
-        
-        // Gunakan rentang tanggal filter, bukan hanya tanggal awal
-        const startDate = parseDateString(currentStartDate);
-        const endDate = parseDateString(currentEndDate);
-        
-        // Initialize targets
-        const targets = {
-            sertis: 0,
-            pwp: 0,
-            sueger: 0,
-            ceban: 0,
-            new_member: 0,
-            sejagad: 0,
-            rte: 0,
-            rtd: 0
-        };
-        
-        // Sum targets for the entire date range
-        const currentDate = new Date(startDate);
-        const endDateLoop = new Date(endDate);
-        
-        while (currentDate <= endDateLoop) {
-            const dateStr = currentDate.toISOString().split('T')[0];
             
-            // Find target for this specific date
-            const targetForDate = targetDaily.find(item => {
+            return productTargets;
+        }
+        
+        // Function to update target tables
+        function updateTargetTables() {
+            const targetDaily = allData.target_daily || [];
+            const targetPSM = allData.target_psm || [];
+            
+            // Filter target_daily based on date range
+            const startDate = parseDateString(currentStartDate);
+            const endDate = parseDateString(currentEndDate);
+            
+            const filteredTargetDaily = targetDaily.filter(item => {
                 try {
                     const itemDate = parseDateString(item.Tanggal);
-                    const itemDateStr = itemDate.toISOString().split('T')[0];
-                    return itemDateStr === dateStr;
+                    return itemDate >= startDate && itemDate <= endDate;
                 } catch (e) {
-                    console.error('Error parsing target date:', item.Tanggal, e);
+                    console.error('Error parsing date in target_daily:', item.Tanggal, e);
                     return false;
                 }
             });
             
-            if (targetForDate) {
-                targets.sertis += parseFloat(targetForDate.sertis) || 0;
-                targets.pwp += parseFloat(targetForDate.pwp) || 0;
-                targets.sueger += parseFloat(targetForDate.sueger) || 0;
-                targets.ceban += parseFloat(targetForDate.ceban) || 0;
-                targets.new_member += parseFloat(targetForDate.new_member) || 0;
-                targets.sejagad += parseFloat(targetForDate.sejagad) || 0;
-                targets.rte += parseFloat(targetForDate.rte) || 0;
-                targets.rtd += parseFloat(targetForDate.rtd) || 0;
-            }
-            
-            // Move to next day
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-        
-        // Calculate PSM target for the date range
-        const nikFilter = document.getElementById('nikFilter').value;
-        targets.psm = calculatePsmDailyTargetRange(startDate, endDate, targetPSM, nikFilter);
-        
-        console.log('WhatsApp targets calculated for range:', targets);
-        return targets;
-    }
-    
-    // Function to calculate PSM target for date range
-    function calculatePsmDailyTargetRange(startDate, endDate, targetPSM, nikFilter) {
-        let totalTarget = 0;
-        
-        // Calculate days in range
-        const totalDaysInRange = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-        
-        targetPSM.forEach(target => {
-            try {
-                const targetStart = parseDateString(target.start_date);
-                const targetEnd = parseDateString(target.end_date);
+            // Update daily target table
+            const dailyTableBody = document.querySelector('#targetDailyTable tbody');
+            if (dailyTableBody) {
+                dailyTableBody.innerHTML = '';
                 
-                // Check if date ranges overlap
-                if (startDate <= targetEnd && endDate >= targetStart) {
-                    // Calculate overlapping days
-                    const overlapStart = new Date(Math.max(startDate.getTime(), targetStart.getTime()));
-                    const overlapEnd = new Date(Math.min(endDate.getTime(), targetEnd.getTime()));
+                filteredTargetDaily.forEach(item => {
+                    const row = document.createElement('tr');
                     
-                    // Calculate number of days in overlap
-                    const overlapDays = Math.max(0, Math.floor((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1);
+                    // Format date
+                    const date = parseDateString(item.Tanggal);
+                    const formattedDate = date.toLocaleDateString('id-ID');
                     
-                    // Calculate total days in target period
-                    const totalTargetDays = Math.floor((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
+                    row.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formattedDate}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formatNumber(item.spd)}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.std}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.member}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.new_member}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.pwp || 0}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.sertis || 0}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.sueger || 0}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.ceban || 0}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.sejagad || 0}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.rte || 0}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.rtd || 0}</td>
+                    `;
                     
-                    // Calculate proportional target
-                    if (totalTargetDays > 0 && overlapDays > 0) {
-                        const proportion = overlapDays / totalTargetDays;
-                        
-                        // Tentukan target yang akan digunakan
-                        let targetValue;
-                        if (nikFilter === 'all') {
-                            targetValue = parseFloat(target.target_toko) || 0;
-                        } else {
-                            targetValue = parseFloat(target.target_pernik) || 0;
-                        }
-                        
-                        // Add proportional target
-                        totalTarget += Math.round(targetValue * proportion);
-                    }
-                }
-            } catch (e) {
-                console.error('Error processing PSM target:', target, e);
+                    dailyTableBody.appendChild(row);
+                });
             }
-        });
-        
-        console.log('PSM target for date range:', totalTarget);
-        return totalTarget;
-    }
-    
-    // Function to get available NIKs for the current filter
-    function getAvailableNiksForCurrentFilter() {
-        const dailyData = filteredData.data_daily || [];
-        const dataNik = allData.data_nik || [];
-        
-        // Get unique NIKs from filtered data
-        const nikSet = new Set(dailyData.map(item => item.nik));
-        
-        // Create array of objects with nik and name
-        const availableNiks = Array.from(nikSet).map(nik => {
-            const found = dataNik.find(item => parseInt(item.nik) === parseInt(nik));
-            return {
-                nik: nik,
-                nama: found ? found.nama : `NIK ${nik}`
-            };
-        });
-        
-        console.log('Available NIKs for modal:', availableNiks);
-        return availableNiks;
-    }
-    
-    // Function to populate NIK dropdown in modal
-    function populateNikDropdown(nikOptions) {
-        const dropdown = document.getElementById('modalNikSelect');
-        if (!dropdown) {
-            console.error('Modal NIK select element not found!');
-            return;
-        }
-        
-        dropdown.innerHTML = '';
-        
-        nikOptions.forEach(nikInfo => {
-            const option = document.createElement('option');
-            option.value = nikInfo.nik;
-            option.textContent = `${nikInfo.nik} - ${nikInfo.nama}`;
-            dropdown.appendChild(option);
-        });
-        
-        // Set default selection
-        if (nikOptions.length > 0) {
-            dropdown.value = nikOptions[0].nik;
-        }
-        
-        // Remove existing event listeners and add new one
-        const newDropdown = dropdown.cloneNode(true);
-        dropdown.parentNode.replaceChild(newDropdown, dropdown);
-        
-        newDropdown.addEventListener('change', function() {
-            updateWhatsAppTemplate();
-        });
-    }
-    
-    // Function to update WhatsApp template when NIK selection changes
-    function updateWhatsAppTemplate() {
-        const selectedNik = document.getElementById('modalNikSelect').value;
-        
-        // Find selected NIK info
-        const selectedNikInfo = modalData.nikOptions.find(item => item.nik == selectedNik);
-        
-        if (selectedNikInfo) {
-            modalData.selectedNikForName = selectedNik;
-            modalData.selectedNamaKasir = selectedNikInfo.nama;
             
-            // Regenerate template
-            const template = generateWhatsAppTemplate();
-            document.getElementById('whatsAppTemplate').value = template;
+            // Update PSM target table - show all targets
+            const psmTableBody = document.querySelector('#targetPSMTable tbody');
+            if (psmTableBody) {
+                psmTableBody.innerHTML = '';
+                
+                targetPSM.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    try {
+                        // Format dates
+                        const startDate = parseDateString(item.start_date);
+                        const endDate = parseDateString(item.end_date);
+                        const formattedStartDate = startDate.toLocaleDateString('id-ID');
+                        const formattedEndDate = endDate.toLocaleDateString('id-ID');
+                        
+                        row.innerHTML = `
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${item.nama_produk}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formatNumber(item.target_pernik)}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formatNumber(item.target_toko)}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${formattedStartDate} - ${formattedEndDate}</td>
+                        `;
+                        
+                        psmTableBody.appendChild(row);
+                    } catch (e) {
+                        console.error('Error formatting PSM target row:', item, e);
+                    }
+                });
+            }
         }
-    }
-    
-    // Function to generate WhatsApp template
-    function generateWhatsAppTemplate() {
-        console.log('Generating WhatsApp template with data:', modalData);
         
-        const { tanggal, shift, actualData, targetData, selectedNamaKasir } = modalData;
+        // Function to update period text
+        function updatePeriodText() {
+            const startDate = parseDateString(currentStartDate);
+            const endDate = parseDateString(currentEndDate);
+            
+            const formattedStartDate = startDate.toLocaleDateString('id-ID');
+            const formattedEndDate = endDate.toLocaleDateString('id-ID');
+            
+            let periodText;
+            if (formattedStartDate === formattedEndDate) {
+                periodText = `Periode: ${formattedStartDate}`;
+            } else {
+                periodText = `Periode: ${formattedStartDate} - ${formattedEndDate}`;
+            }
+            
+            // Update period elements
+            document.getElementById('dataPeriod').textContent = periodText;
+            document.getElementById('dailyDataPeriod').textContent = periodText;
+        }
         
-        // Calculate achievements untuk semua parameter
-        const achievements = {
-            sertis: calculateAchievement(targetData.sertis, actualData.sertis),
-            pwp: calculateAchievement(targetData.pwp, actualData.pwp),
-            psm: calculateAchievement(targetData.psm, actualData.psm),
-            sueger: calculateAchievement(targetData.sueger, actualData.sueger),
-            ceban: calculateAchievement(targetData.ceban, actualData.ceban),
-            new_member: calculateAchievement(targetData.new_member, actualData.new_member),
-            sejagad: calculateAchievement(targetData.sejagad, actualData.sejagad),
-            rte: calculateAchievement(targetData.rte, actualData.rte || 0),
-            rtd: calculateAchievement(targetData.rtd, actualData.rtd || 0)
-        };
+        // Function to update PSM Toko period text
+        function updatePsmTokoPeriodText() {
+            const startDate = parseDateString(psmTokoStartDate);
+            const endDate = parseDateString(psmTokoEndDate);
+            
+            const formattedStartDate = startDate.toLocaleDateString('id-ID');
+            const formattedEndDate = endDate.toLocaleDateString('id-ID');
+            
+            let periodText;
+            if (formattedStartDate === formattedEndDate) {
+                periodText = `Periode: ${formattedStartDate}`;
+            } else {
+                periodText = `Periode: ${formattedStartDate} - ${formattedEndDate}`;
+            }
+            
+            document.getElementById('psmTokoPeriod').textContent = periodText;
+        }
         
-        console.log('Achievements calculated:', achievements);
+        // Function to populate filter options
+        function populateFilters() {
+            console.log('Populating filters...');
+            const psmData = allData.data_psm || [];
+            const dailyData = allData.data_daily || [];
+            const productFilter = document.getElementById('productFilter');
+            const nikFilter = document.getElementById('nikFilter');
+            
+            // Get unique products
+            const products = [...new Set(psmData.map(item => item.nama_produk))].sort();
+            
+            // Get unique NIKs
+            const nikList = [...new Set([
+                ...psmData.map(item => item.nik),
+                ...dailyData.map(item => item.nik)
+            ])].sort((a, b) => a - b);
+            
+            console.log('Products for filter:', products);
+            console.log('NIKs for filter:', nikList);
+            
+            // Clear existing options (except the first "all" option)
+            while (productFilter.options.length > 1) {
+                productFilter.remove(1);
+            }
+            
+            // Add product options
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product;
+                option.textContent = product;
+                productFilter.appendChild(option);
+            });
+            
+            while (nikFilter.options.length > 1) {
+                nikFilter.remove(1);
+            }
+            
+            // Add NIK options
+            nikList.forEach(nik => {
+                const option = document.createElement('option');
+                option.value = nik;
+                option.textContent = nik;
+                nikFilter.appendChild(option);
+            });
+        }
         
-        // Format template dengan semua data baru
-        const template = `*LAPORAN KASIR*
+        // Function to update last update time
+        function updateLastUpdateTime() {
+            const psmData = allData.data_psm || [];
+            if (psmData.length === 0) return;
+            
+            // Find the latest timestamp
+            const latestTimestamp = psmData.reduce((latest, item) => {
+                const itemTime = parseDateString(item.timestamp);
+                return itemTime > latest ? itemTime : latest;
+            }, new Date(0));
+            
+            // Format the time
+            const formattedTime = latestTimestamp.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const formattedDate = latestTimestamp.toLocaleDateString('id-ID');
+            
+            const lastUpdateText = `${formattedDate} ${formattedTime}`;
+            document.getElementById('lastUpdateTime').textContent = lastUpdateText;
+            document.getElementById('lastUpdateTimeMobile').textContent = lastUpdateText;
+        }
+        
+        // ==================== WHATSAPP EXPORT FUNCTIONS ====================
+        
+        // Function to get nama kasir from NIK
+        function getNamaKasirFromNik(nikList, dataNik) {
+            console.log('Getting nama kasir for NIK:', nikList);
+            
+            if (!nikList || !dataNik) return '';
+            
+            // If nikList is "all" or empty, return empty
+            if (nikList === 'all' || !nikList) return '';
+            
+            // If nikList is a single NIK (string), convert to array
+            if (!Array.isArray(nikList)) {
+                nikList = [nikList];
+            }
+            
+            const namaList = [];
+            
+            nikList.forEach(nik => {
+                // Convert nik to number for comparison
+                const nikNum = parseInt(nik);
+                const found = dataNik.find(item => parseInt(item.nik) === nikNum);
+                if (found && found.nama) {
+                    namaList.push(found.nama);
+                } else {
+                    namaList.push(`NIK ${nik}`);
+                }
+            });
+            
+            // Join with "dan" for Indonesian format
+            if (namaList.length === 1) {
+                return namaList[0];
+            } else if (namaList.length === 2) {
+                return namaList.join(' dan ');
+            } else {
+                // For 3 or more: "Budi, Andi, dan Cici"
+                const last = namaList.pop();
+                return namaList.join(', ') + ' dan ' + last;
+            }
+        }
+        
+        // Function to format date to Indonesian format
+        function formatDateToIndonesian(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                const date = parseDateString(dateString);
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                return date.toLocaleDateString('id-ID', options);
+            } catch (e) {
+                console.error('Error formatting date:', dateString, e);
+                return 'Tanggal tidak valid';
+            }
+        }
+        
+        // Function to calculate achievement percentage
+        function calculateAchievement(target, actual) {
+            if (!target || target === 0) return 0;
+            return Math.round((actual / target) * 100);
+        }
+        
+        // Function to get actual data for WhatsApp report
+        function getWhatsAppActualData() {
+            console.log('Getting WhatsApp actual data...');
+            const dailyData = filteredData.data_daily || [];
+            const psmData = filteredData.data_psm || [];
+            
+            // Calculate actuals from daily data
+            const actuals = {
+                sertis: dailyData.reduce((sum, item) => sum + (parseFloat(item.sertis) || 0), 0),
+                pwp: dailyData.reduce((sum, item) => sum + (parseFloat(item.pwp) || 0), 0),
+                sueger: dailyData.reduce((sum, item) => sum + (parseFloat(item.sueger) || 0), 0),
+                ceban: dailyData.reduce((sum, item) => sum + (parseFloat(item.ceban) || 0), 0),
+                new_member: dailyData.reduce((sum, item) => sum + (parseFloat(item.new_member) || 0), 0),
+                sejagad: dailyData.reduce((sum, item) => sum + (parseFloat(item.sejagad) || 0), 0),
+                rte: dailyData.reduce((sum, item) => sum + (parseFloat(item.rte) || 0), 0),
+                rtd: dailyData.reduce((sum, item) => sum + (parseFloat(item.rtd) || 0), 0)
+            };
+            
+            // Calculate PSM actual (total qty from all PSM products)
+            actuals.psm = psmData.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0);
+            
+            console.log('WhatsApp actuals calculated:', actuals);
+            return actuals;
+        }
+        
+        // Function to get target data for WhatsApp report
+        function getWhatsAppTargetData(tanggal) {
+            console.log('Getting WhatsApp target data for date:', tanggal);
+            const targetDaily = allData.target_daily || [];
+            const targetPSM = allData.target_psm || [];
+            
+            // Gunakan rentang tanggal filter, bukan hanya tanggal awal
+            const startDate = parseDateString(currentStartDate);
+            const endDate = parseDateString(currentEndDate);
+            
+            // Initialize targets
+            const targets = {
+                sertis: 0,
+                pwp: 0,
+                sueger: 0,
+                ceban: 0,
+                new_member: 0,
+                sejagad: 0,
+                rte: 0,
+                rtd: 0
+            };
+            
+            // Sum targets for the entire date range
+            const currentDate = new Date(startDate);
+            const endDateLoop = new Date(endDate);
+            
+            while (currentDate <= endDateLoop) {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                
+                // Find target for this specific date
+                const targetForDate = targetDaily.find(item => {
+                    try {
+                        const itemDate = parseDateString(item.Tanggal);
+                        const itemDateStr = itemDate.toISOString().split('T')[0];
+                        return itemDateStr === dateStr;
+                    } catch (e) {
+                        console.error('Error parsing target date:', item.Tanggal, e);
+                        return false;
+                    }
+                });
+                
+                if (targetForDate) {
+                    targets.sertis += parseFloat(targetForDate.sertis) || 0;
+                    targets.pwp += parseFloat(targetForDate.pwp) || 0;
+                    targets.sueger += parseFloat(targetForDate.sueger) || 0;
+                    targets.ceban += parseFloat(targetForDate.ceban) || 0;
+                    targets.new_member += parseFloat(targetForDate.new_member) || 0;
+                    targets.sejagad += parseFloat(targetForDate.sejagad) || 0;
+                    targets.rte += parseFloat(targetForDate.rte) || 0;
+                    targets.rtd += parseFloat(targetForDate.rtd) || 0;
+                }
+                
+                // Move to next day
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Calculate PSM target for the date range
+            const nikFilter = document.getElementById('nikFilter').value;
+            targets.psm = calculatePsmDailyTargetRange(startDate, endDate, targetPSM, nikFilter);
+            
+            console.log('WhatsApp targets calculated for range:', targets);
+            return targets;
+        }
+        
+        // Function to calculate PSM target for date range
+        function calculatePsmDailyTargetRange(startDate, endDate, targetPSM, nikFilter) {
+            let totalTarget = 0;
+            
+            // Calculate days in range
+            const totalDaysInRange = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            targetPSM.forEach(target => {
+                try {
+                    const targetStart = parseDateString(target.start_date);
+                    const targetEnd = parseDateString(target.end_date);
+                    
+                    // Check if date ranges overlap
+                    if (startDate <= targetEnd && endDate >= targetStart) {
+                        // Calculate overlapping days
+                        const overlapStart = new Date(Math.max(startDate.getTime(), targetStart.getTime()));
+                        const overlapEnd = new Date(Math.min(endDate.getTime(), targetEnd.getTime()));
+                        
+                        // Calculate number of days in overlap
+                        const overlapDays = Math.max(0, Math.floor((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1);
+                        
+                        // Calculate total days in target period
+                        const totalTargetDays = Math.floor((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
+                        
+                        // Calculate proportional target
+                        if (totalTargetDays > 0 && overlapDays > 0) {
+                            const proportion = overlapDays / totalTargetDays;
+                            
+                            // Tentukan target yang akan digunakan
+                            let targetValue;
+                            if (nikFilter === 'all') {
+                                targetValue = parseFloat(target.target_toko) || 0;
+                            } else {
+                                targetValue = parseFloat(target.target_pernik) || 0;
+                            }
+                            
+                            // Add proportional target
+                            totalTarget += Math.round(targetValue * proportion);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error processing PSM target:', target, e);
+                }
+            });
+            
+            console.log('PSM target for date range:', totalTarget);
+            return totalTarget;
+        }
+        
+        // Function to get available NIKs for the current filter
+        function getAvailableNiksForCurrentFilter() {
+            const dailyData = filteredData.data_daily || [];
+            const dataNik = allData.data_nik || [];
+            
+            // Get unique NIKs from filtered data
+            const nikSet = new Set(dailyData.map(item => item.nik));
+            
+            // Create array of objects with nik and name
+            const availableNiks = Array.from(nikSet).map(nik => {
+                const found = dataNik.find(item => parseInt(item.nik) === parseInt(nik));
+                return {
+                    nik: nik,
+                    nama: found ? found.nama : `NIK ${nik}`
+                };
+            });
+            
+            console.log('Available NIKs for modal:', availableNiks);
+            return availableNiks;
+        }
+        
+        // Function to populate NIK dropdown in modal
+        function populateNikDropdown(nikOptions) {
+            const dropdown = document.getElementById('modalNikSelect');
+            if (!dropdown) {
+                console.error('Modal NIK select element not found!');
+                return;
+            }
+            
+            dropdown.innerHTML = '';
+            
+            nikOptions.forEach(nikInfo => {
+                const option = document.createElement('option');
+                option.value = nikInfo.nik;
+                option.textContent = `${nikInfo.nik} - ${nikInfo.nama}`;
+                dropdown.appendChild(option);
+            });
+            
+            // Set default selection
+            if (nikOptions.length > 0) {
+                dropdown.value = nikOptions[0].nik;
+            }
+            
+            // Remove existing event listeners and add new one
+            const newDropdown = dropdown.cloneNode(true);
+            dropdown.parentNode.replaceChild(newDropdown, dropdown);
+            
+            newDropdown.addEventListener('change', function() {
+                updateWhatsAppTemplate();
+            });
+        }
+        
+        // Function to update WhatsApp template when NIK selection changes
+        function updateWhatsAppTemplate() {
+            const selectedNik = document.getElementById('modalNikSelect').value;
+            
+            // Find selected NIK info
+            const selectedNikInfo = modalData.nikOptions.find(item => item.nik == selectedNik);
+            
+            if (selectedNikInfo) {
+                modalData.selectedNikForName = selectedNik;
+                modalData.selectedNamaKasir = selectedNikInfo.nama;
+                
+                // Regenerate template
+                const template = generateWhatsAppTemplate();
+                document.getElementById('whatsAppTemplate').value = template;
+            }
+        }
+        
+        // Function to generate WhatsApp template
+        function generateWhatsAppTemplate() {
+            console.log('Generating WhatsApp template with data:', modalData);
+            
+            const { tanggal, shift, actualData, targetData, selectedNamaKasir } = modalData;
+            
+            // Calculate achievements untuk semua parameter
+            const achievements = {
+                sertis: calculateAchievement(targetData.sertis, actualData.sertis),
+                pwp: calculateAchievement(targetData.pwp, actualData.pwp),
+                psm: calculateAchievement(targetData.psm, actualData.psm),
+                sueger: calculateAchievement(targetData.sueger, actualData.sueger),
+                ceban: calculateAchievement(targetData.ceban, actualData.ceban),
+                new_member: calculateAchievement(targetData.new_member, actualData.new_member),
+                sejagad: calculateAchievement(targetData.sejagad, actualData.sejagad),
+                rte: calculateAchievement(targetData.rte, actualData.rte || 0),
+                rtd: calculateAchievement(targetData.rtd, actualData.rtd || 0)
+            };
+            
+            console.log('Achievements calculated:', achievements);
+            
+            // Format template dengan semua data baru
+            const template = `*LAPORAN KASIR*
 Tanggal = ${formatDateToIndonesian(tanggal)}
 Toko     = C940
 Nama kasir = ${selectedNamaKasir}
@@ -1959,243 +1797,238 @@ RTE = ${actualData.rte || 0}
 RTD = ${actualData.rtd || 0}
 
 Terima Kasih.`;
-        
-        console.log('Template generated:', template);
-        return template;
-    }
-    
-    // Function to show WhatsApp modal
-    function showWhatsAppModal() {
-        console.log('showWhatsAppModal called');
-        
-        try {
-            const startDate = document.getElementById('startDateFilter').value;
-            const endDate = document.getElementById('endDateFilter').value;
-            const shift = document.getElementById('shiftFilter').value;
-            const nikFilter = document.getElementById('nikFilter').value;
             
-            console.log('Modal inputs:', { startDate, endDate, shift, nikFilter });
-            
-            // Validation - Shift wajib dipilih
-            if (shift === 'all') {
-                alert('Harap pilih shift terlebih dahulu sebelum export WhatsApp.');
-                return;
-            }
-            
-            // Validate date
-            if (!startDate || !endDate) {
-                alert('Tanggal tidak valid. Harap pilih tanggal yang benar.');
-                return;
-            }
-            
-            // Prepare modal data
-            modalData.tanggal = startDate; // Use start date for display
-            modalData.shift = shift;
-            modalData.nikFilter = nikFilter;
-            modalData.actualData = getWhatsAppActualData();
-            modalData.targetData = getWhatsAppTargetData(startDate);
-            modalData.nikOptions = getAvailableNiksForCurrentFilter();
-            
-            console.log('Modal data prepared:', modalData);
-            
-            // Determine if we need to show NIK selection
-            const showNikSelection = (nikFilter === 'all' && modalData.nikOptions.length > 0);
-            modalData.showNikSelection = showNikSelection;
-            
-            // Show/hide NIK selection section
-            const nikSelectionSection = document.getElementById('nikSelectionSection');
-            if (nikSelectionSection) {
-                if (showNikSelection) {
-                    nikSelectionSection.style.display = 'block';
-                    populateNikDropdown(modalData.nikOptions);
-                    
-                    // Set default selection
-                    modalData.selectedNikForName = modalData.nikOptions[0].nik;
-                    modalData.selectedNamaKasir = modalData.nikOptions[0].nama;
-                } else {
-                    nikSelectionSection.style.display = 'none';
-                    
-                    // If specific NIK is selected, get the name
-                    if (nikFilter !== 'all') {
-                        const namaKasir = getNamaKasirFromNik(nikFilter, allData.data_nik);
-                        modalData.selectedNikForName = nikFilter;
-                        modalData.selectedNamaKasir = namaKasir || 'Nama tidak ditemukan';
-                    } else {
-                        // Fallback if no NIKs available
-                        modalData.selectedNamaKasir = 'Semua Crew';
-                    }
-                }
-            } else {
-                console.error('NIK selection section not found!');
-            }
-            
-            // Generate and display template
-            const template = generateWhatsAppTemplate();
-            const templateTextarea = document.getElementById('whatsAppTemplate');
-            if (templateTextarea) {
-                templateTextarea.value = template;
-            } else {
-                console.error('WhatsApp template textarea not found!');
-            }
-            
-            // Show modal
-            const modalElement = document.getElementById('whatsAppModal');
-            if (modalElement) {
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-                console.log('Modal shown successfully');
-            } else {
-                console.error('WhatsApp modal element not found!');
-                alert('Modal tidak dapat ditampilkan. Silakan refresh halaman.');
-            }
-        } catch (error) {
-            console.error('Error showing WhatsApp modal:', error);
-            alert('Terjadi kesalahan saat mempersiapkan laporan WhatsApp. Silakan coba lagi atau periksa data tanggal.');
-        }
-    }
-    
-    // Function to copy template to clipboard
-    function copyToClipboard() {
-        const textarea = document.getElementById('whatsAppTemplate');
-        
-        if (!textarea || !textarea.value) {
-            alert('Tidak ada template untuk disalin.');
-            return;
+            console.log('Template generated:', template);
+            return template;
         }
         
-        // Select the text
-        textarea.select();
-        textarea.setSelectionRange(0, 99999); // For mobile devices
-        
-        // Copy to clipboard
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                // Change button text temporarily
-                const copyButton = document.getElementById('copyWhatsAppButton');
-                const originalText = copyButton.innerHTML;
-                copyButton.innerHTML = '<i class="bi bi-check2 me-1"></i>Tersalin!';
-                copyButton.classList.remove('btn-success');
-                copyButton.classList.add('btn-primary');
+        // Function to show WhatsApp modal
+        function showWhatsAppModal() {
+            console.log('showWhatsAppModal called');
+            
+            try {
+                const startDate = document.getElementById('startDateFilter').value;
+                const endDate = document.getElementById('endDateFilter').value;
+                const shift = document.getElementById('shiftFilter').value;
+                const nikFilter = document.getElementById('nikFilter').value;
                 
-                setTimeout(() => {
-                    copyButton.innerHTML = originalText;
-                    copyButton.classList.remove('btn-primary');
-                    copyButton.classList.add('btn-success');
-                }, 2000);
-            } else {
+                console.log('Modal inputs:', { startDate, endDate, shift, nikFilter });
+                
+                // Validation - Shift wajib dipilih
+                if (shift === 'all') {
+                    alert('Harap pilih shift terlebih dahulu sebelum export WhatsApp.');
+                    return;
+                }
+                
+                // Validate date
+                if (!startDate || !endDate) {
+                    alert('Tanggal tidak valid. Harap pilih tanggal yang benar.');
+                    return;
+                }
+                
+                // Prepare modal data
+                modalData.tanggal = startDate; // Use start date for display
+                modalData.shift = shift;
+                modalData.nikFilter = nikFilter;
+                modalData.actualData = getWhatsAppActualData();
+                modalData.targetData = getWhatsAppTargetData(startDate);
+                modalData.nikOptions = getAvailableNiksForCurrentFilter();
+                
+                console.log('Modal data prepared:', modalData);
+                
+                // Determine if we need to show NIK selection
+                const showNikSelection = (nikFilter === 'all' && modalData.nikOptions.length > 0);
+                modalData.showNikSelection = showNikSelection;
+                
+                // Show/hide NIK selection section
+                const nikSelectionSection = document.getElementById('nikSelectionSection');
+                if (nikSelectionSection) {
+                    if (showNikSelection) {
+                        nikSelectionSection.classList.remove('hidden');
+                        populateNikDropdown(modalData.nikOptions);
+                        
+                        // Set default selection
+                        modalData.selectedNikForName = modalData.nikOptions[0].nik;
+                        modalData.selectedNamaKasir = modalData.nikOptions[0].nama;
+                    } else {
+                        nikSelectionSection.classList.add('hidden');
+                        
+                        // If specific NIK is selected, get the name
+                        if (nikFilter !== 'all') {
+                            const namaKasir = getNamaKasirFromNik(nikFilter, allData.data_nik);
+                            modalData.selectedNikForName = nikFilter;
+                            modalData.selectedNamaKasir = namaKasir || 'Nama tidak ditemukan';
+                        } else {
+                            // Fallback if no NIKs available
+                            modalData.selectedNamaKasir = 'Semua Crew';
+                        }
+                    }
+                } else {
+                    console.error('NIK selection section not found!');
+                }
+                
+                // Generate and display template
+                const template = generateWhatsAppTemplate();
+                const templateTextarea = document.getElementById('whatsAppTemplate');
+                if (templateTextarea) {
+                    templateTextarea.value = template;
+                } else {
+                    console.error('WhatsApp template textarea not found!');
+                }
+                
+                // Show modal
+                openModal();
+                console.log('Modal shown successfully');
+            } catch (error) {
+                console.error('Error showing WhatsApp modal:', error);
+                alert('Terjadi kesalahan saat mempersiapkan laporan WhatsApp. Silakan coba lagi atau periksa data tanggal.');
+            }
+        }
+        
+        // Function to copy template to clipboard
+        function copyToClipboard() {
+            const textarea = document.getElementById('whatsAppTemplate');
+            
+            if (!textarea || !textarea.value) {
+                alert('Tidak ada template untuk disalin.');
+                return;
+            }
+            
+            // Select the text
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+            
+            // Copy to clipboard
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    // Change button text temporarily
+                    const copyButton = document.getElementById('copyWhatsAppButton');
+                    const originalText = copyButton.innerHTML;
+                    copyButton.innerHTML = '<i class="bi bi-check2 mr-2"></i>Tersalin!';
+                    copyButton.classList.remove('bg-whatsapp-green', 'hover:bg-whatsapp-dark');
+                    copyButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalText;
+                        copyButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        copyButton.classList.add('bg-whatsapp-green', 'hover:bg-whatsapp-dark');
+                    }, 2000);
+                } else {
+                    alert('Gagal menyalin ke clipboard. Silakan coba manual.');
+                }
+            } catch (err) {
+                console.error('Copy failed:', err);
                 alert('Gagal menyalin ke clipboard. Silakan coba manual.');
             }
-        } catch (err) {
-            console.error('Copy failed:', err);
-            alert('Gagal menyalin ke clipboard. Silakan coba manual.');
         }
-    }
-    
-    // ==================== SETUP EVENT LISTENERS ====================
-    
-    // Function to setup event listeners
-    function setupEventListeners() {
-        console.log('Setting up event listeners...');
         
-        // Tab navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Jika link memiliki href (seperti link ke psm_nik.html), biarkan default behavior
-                if (this.hasAttribute('href') && this.getAttribute('href') !== '#') {
-                    return; // Biarkan browser menangani navigasi
-                }
-                
-                e.preventDefault();
-                
-                console.log('Tab clicked:', this.getAttribute('data-tab'));
-                
-                // Remove active class from all tabs
-                document.querySelectorAll('.nav-link').forEach(item => {
-                    item.classList.remove('active');
-                });
-                
-                // Add active class to clicked tab
-                this.classList.add('active');
-                
-                // Hide all tab content
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                
-                // Show selected tab content
-                const tabId = this.getAttribute('data-tab') + 'Tab';
-                const tabElement = document.getElementById(tabId);
-                if (tabElement) {
-                    tabElement.style.display = 'block';
-                    console.log('Showing tab:', tabId);
-                    
-                    // Update tables for the active tab
-                    switch(tabId) {
-                        case 'dailyTab':
-                            console.log('Updating daily table...');
-                            updateDailyTable();
-                            break;
-                        case 'targetTab':
-                            console.log('Updating target tables...');
-                            updateTargetTables();
-                            break;
+        // ==================== SETUP EVENT LISTENERS ====================
+        
+        // Function to setup event listeners
+        function setupEventListeners() {
+            console.log('Setting up event listeners...');
+            
+            // Tab navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Jika link memiliki href (seperti link ke psm_nik.html), biarkan default behavior
+                    if (this.hasAttribute('href') && this.getAttribute('href') !== '#') {
+                        return; // Biarkan browser menangani navigasi
                     }
-                }
+                    
+                    e.preventDefault();
+                    
+                    console.log('Tab clicked:', this.getAttribute('data-tab'));
+                    
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.nav-link').forEach(item => {
+                        item.classList.remove('active', 'text-secondary', 'bg-blue-50', 'border-secondary');
+                        item.classList.add('text-gray-700', 'hover:bg-gray-50', 'border-transparent');
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active', 'text-secondary', 'bg-blue-50', 'border-secondary');
+                    this.classList.remove('text-gray-700', 'hover:bg-gray-50', 'border-transparent');
+                    
+                    // Hide all tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Show selected tab content
+                    const tabId = this.getAttribute('data-tab') + 'Tab';
+                    const tabElement = document.getElementById(tabId);
+                    if (tabElement) {
+                        tabElement.classList.add('active');
+                        console.log('Showing tab:', tabId);
+                        
+                        // Update tables for the active tab
+                        switch(tabId) {
+                            case 'dailyTab':
+                                console.log('Updating daily table...');
+                                updateDailyTable();
+                                break;
+                            case 'targetTab':
+                                console.log('Updating target tables...');
+                                updateTargetTables();
+                                break;
+                        }
+                    }
+                });
             });
-        });
-        
-        // Main filter button
-        document.getElementById('applyFilter').addEventListener('click', function() {
-            console.log('Apply filter clicked');
-            applyFilters();
-        });
-        
-        // PSM Toko filter button
-        document.getElementById('applyPsmTokoFilter').addEventListener('click', function() {
-            console.log('PSM Toko filter clicked');
-            applyPsmTokoFilter();
-        });
-        
-        // Reset filter button
-        document.getElementById('resetFilter').addEventListener('click', function() {
-            // Reset to today's date
-            const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
             
-            document.getElementById('startDateFilter').value = todayStr;
-            document.getElementById('endDateFilter').value = todayStr;
-            document.getElementById('shiftFilter').value = 'all';
-            document.getElementById('productFilter').value = 'all';
-            document.getElementById('nikFilter').value = 'all';
+            // Main filter button
+            document.getElementById('applyFilter').addEventListener('click', function() {
+                console.log('Apply filter clicked');
+                applyFilters();
+            });
             
-            // Reset filtered data to all data with default date range
-            applyFilters();
-        });
-        
-        // WhatsApp export button
-        const exportWhatsAppButton = document.getElementById('exportWhatsApp');
-        if (exportWhatsAppButton) {
-            exportWhatsAppButton.addEventListener('click', function() {
-                console.log('Export WhatsApp button clicked');
-                showWhatsAppModal();
+            // PSM Toko filter button
+            document.getElementById('applyPsmTokoFilter').addEventListener('click', function() {
+                console.log('PSM Toko filter clicked');
+                applyPsmTokoFilter();
             });
-            console.log('WhatsApp export button event listener added');
-        } else {
-            console.error('Export WhatsApp button not found!');
-        }
-        
-        // Copy to clipboard button
-        const copyButton = document.getElementById('copyWhatsAppButton');
-        if (copyButton) {
-            copyButton.addEventListener('click', function() {
-                console.log('Copy to clipboard button clicked');
-                copyToClipboard();
+            
+            // Reset filter button
+            document.getElementById('resetFilter').addEventListener('click', function() {
+                // Reset to today's date
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0];
+                
+                document.getElementById('startDateFilter').value = todayStr;
+                document.getElementById('endDateFilter').value = todayStr;
+                document.getElementById('shiftFilter').value = 'all';
+                document.getElementById('productFilter').value = 'all';
+                document.getElementById('nikFilter').value = 'all';
+                
+                // Reset filtered data to all data with default date range
+                applyFilters();
             });
+            
+            // WhatsApp export button
+            const exportWhatsAppButton = document.getElementById('exportWhatsApp');
+            if (exportWhatsAppButton) {
+                exportWhatsAppButton.addEventListener('click', function() {
+                    console.log('Export WhatsApp button clicked');
+                    showWhatsAppModal();
+                });
+                console.log('WhatsApp export button event listener added');
+            } else {
+                console.error('Export WhatsApp button not found!');
+            }
+            
+            // Copy to clipboard button
+            const copyButton = document.getElementById('copyWhatsAppButton');
+            if (copyButton) {
+                copyButton.addEventListener('click', function() {
+                    console.log('Copy to clipboard button clicked');
+                    copyToClipboard();
+                });
+            }
+            
+            console.log('Event listeners setup complete');
         }
-        
-        console.log('Event listeners setup complete');
-    }
-</script>
+    </script>
 </body>
 </html>
