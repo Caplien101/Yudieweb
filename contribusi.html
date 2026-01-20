@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabel Performa per NIK - Dashboard PSM</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            padding: 15px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background-color: rgba(255,255,255,0.15);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .back-button:hover {
+            background-color: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+        
+        .filter-section {
+            padding: 20px 25px;
+            border-bottom: 1px solid #eaeaea;
+            background: #f8f9fa;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 13px;
+        }
+        
+        .filter-group input, 
+        .filter-group select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.2s;
+        }
+        
+        .filter-group input:focus, 
+        .filter-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .btn-apply {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            height: 42px;
+        }
+        
+        .btn-apply:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn-apply:active {
+            transform: translateY(0);
+        }
+        
+        .content-section {
+            padding: 25px;
+            background: white;
+        }
+        
+        .content-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
+        /* Chart Card Styles */
+        .chart-card {
+            background: white;
+            border: 1px solid #eaeaea;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        
+        .chart-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .chart-header h2 {
+            font-size: 16px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .chart-header p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .chart-placeholder {
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        /* Table Card Styles */
+        .table-card {
+            background: white;
+            border: 1px solid #eaeaea;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .table-header h2 {
+            font-size: 16px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .table-header p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #eaeaea;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+        
+        .data-table th {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #444;
+            font-size: 13px;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eaeaea;
+            font-size: 13px;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .data-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-bold {
+            font-weight: 600;
+        }
+        
+        .positive {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .negative {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .neutral {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+            padding: 12px 16px;
+            margin: 15px 25px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1565c0;
+            padding: 12px 16px;
+            margin: 0 25px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .summary-section {
+            padding: 20px 25px;
+            background: white;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .summary-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .summary-card h3 {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .summary-card p {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 8px;
+            }
+            
+            .header, .filter-section, .summary-section, .content-section {
+                padding: 15px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .chart-card, .table-card {
+                padding: 15px;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .chart-placeholder {
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .chart-placeholder {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+                Tabel Performa per NIK
+            </h1>
+            <p>Analisis performa karyawan dalam format tabel dengan komparasi target dan STD</p>
+            <a href="dashboard_rev1.html" class="back-button">
+                ← Kembali ke Dashboard
+            </a>
+        </div>
+        
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage">
+            <div id="errorText"></div>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>Informasi:</strong> Halaman ini menampilkan grafik total actual per NIK dan tabel detail dengan perbandingan target dan STD.
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="startDate">Tanggal Awal</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="filter-group">
+                    <label for="endDate">Tanggal Akhir</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="filter-group">
+                    <label for="category">Kategori</label>
+                    <select id="category">
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="spd">SPD</option>
+                        <option value="std">STD</option>
+                        <option value="member">Member</option>
+                        <option value="new_member">New Member</option>
+                        <option value="pwp">PWP</option>
+                        <option value="sertis">Sertis</option>
+                        <option value="sueger">Sueger</option>
+                        <option value="ceban">Ceban</option>
+                        <option value="sejagad">Murah Sejagad</option>
+                        <option value="rte">RTE</option>
+                        <option value="rtd">RTD</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-apply" id="applyFilter">
+                        Tampilkan Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Summary Section -->
+        <div class="summary-section" id="summarySection" style="display: none;">
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Target Toko (Rentang)</h3>
+                    <p id="totalTarget">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Actual (Rentang)</h3>
+                    <p id="totalActual">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total STD (Rentang)</h3>
+                    <p id="totalStd">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Jumlah Karyawan</h3>
+                    <p id="nikCount">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content Section -->
+        <div class="content-section">
+            <div class="content-container">
+                <!-- Grafik 1: Total Actual per NIK -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2>Grafik 1: Total Actual per Karyawan</h2>
+                        <p>Total penjualan kategori per karyawan dalam rentang tanggal yang dipilih</p>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-placeholder" id="chartPlaceholder">
+                            <i>📊</i>
+                            <p>Data akan muncul setelah memilih filter</p>
+                            <small>Grafik menunjukkan total actual per karyawan</small>
+                        </div>
+                        <canvas id="chart1"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Tabel Detail per NIK -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h2>Tabel Detail Performa per Karyawan</h2>
+                        <p>Perbandingan actual vs target dan STD untuk setiap karyawan</p>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="data-table" id="performanceTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>NIK</th>
+                                    <th>Nama</th>
+                                    <th>Target Toko</th>
+                                    <th>Actual</th>
+                                    <th>% </th>
+                                    <th>STD</th>
+                                    <th>Rasio to STD</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data akan diisi oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading" id="loadingOverlay" style="display: none;">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; font-weight: 600; color: #2c3e50;">Memproses data...</p>
+    </div>
+
+    <script>
+        // API URL (sama dengan dashboard utama)
+        const API_URL = 'https://script.google.com/macros/s/AKfycby_L_vmTHUtl7NUr3qHI-upGlPNUWKJ1uRgPFOPWgWofMDU8siS1Ex_YHR-y0P69E-cGA/exec';
+        
+        // Global variables
+        let allData = {};
+        let chart1 = null;
+        let nikToNameMap = {};
+        let currentData = [];
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Tabel Performa per NIK page initialized');
+            
+            // Set default dates (today and 7 days ago)
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            
+            const todayStr = today.toISOString().split('T')[0];
+            const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+            
+            document.getElementById('startDate').value = sevenDaysAgoStr;
+            document.getElementById('endDate').value = todayStr;
+            
+            // Auto-select first category
+            document.getElementById('category').value = 'pwp';
+            
+            // Setup event listener
+            document.getElementById('applyFilter').addEventListener('click', applyFilters);
+            
+            // Load data from API
+            loadData();
+        });
+        
+        // Function to show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.innerHTML = `<strong>Error:</strong> ${message}`;
+            errorDiv.style.display = 'block';
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 10000);
+        }
+        
+        // Function to hide error message
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // Function to load data from API
+        async function loadData() {
+            try {
+                console.log('Loading data from API...');
+                showLoading(true);
+                
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                
+                const text = await response.text();
+                if (!text) {
+                    throw new Error('Empty response from server');
+                }
+                
+                allData = JSON.parse(text);
+                
+                // Build NIK to Name mapping
+                if (allData.data_nik && Array.isArray(allData.data_nik)) {
+                    allData.data_nik.forEach(item => {
+                        if (item.nik && item.nama) {
+                            nikToNameMap[item.nik] = item.nama;
+                        }
+                    });
+                    console.log('NIK to Name mapping created:', Object.keys(nikToNameMap).length, 'entries');
+                }
+                
+                console.log('Data loaded successfully');
+                showLoading(false);
+                
+                // Auto-apply filter
+                setTimeout(() => {
+                    applyFilters();
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showLoading(false);
+                showError('Gagal memuat data dari server. Silakan refresh halaman atau coba lagi nanti.');
+            }
+        }
+        
+        // Function to show/hide loading
+        function showLoading(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+        
+        // Function to parse date string
+        function parseDateString(dateString) {
+            if (!dateString) return null;
+            
+            try {
+                // Try different formats
+                if (typeof dateString === 'string') {
+                    // Try yyyy-mm-dd format
+                    if (dateString.includes('-')) {
+                        const parts = dateString.split('-');
+                        if (parts.length === 3 && parts[0].length === 4) {
+                            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                            if (!isNaN(date.getTime())) {
+                                return date;
+                            }
+                        }
+                    }
+                    
+                    // Try dd/mm/yyyy format
+                    if (dateString.includes('/')) {
+                        const parts = dateString.split('/');
+                        if (parts.length === 3) {
+                            const date = new Date(parts[2], parts[1] - 1, parts[0]);
+                            if (!isNaN(date.getTime())) {
+                                return date;
+                            }
+                        }
+                    }
+                }
+                
+                // Try standard parsing
+                const date = new Date(dateString);
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+                
+                return null;
+            } catch (e) {
+                console.warn('Error parsing date:', dateString, e);
+                return null;
+            }
+        }
+        
+        // Function to apply filters and display data
+        function applyFilters() {
+            hideError();
+            
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const category = document.getElementById('category').value;
+            
+            // Validation
+            if (!startDate || !endDate) {
+                showError('Harap pilih rentang tanggal');
+                return;
+            }
+            
+            if (!category) {
+                showError('Harap pilih kategori');
+                return;
+            }
+            
+            const startDateObj = parseDateString(startDate);
+            const endDateObj = parseDateString(endDate);
+            
+            if (!startDateObj || !endDateObj) {
+                showError('Format tanggal tidak valid');
+                return;
+            }
+            
+            if (startDateObj > endDateObj) {
+                showError('Tanggal awal tidak boleh lebih besar dari tanggal akhir');
+                return;
+            }
+            
+            // Process data and create visualizations
+            processDataAndCreateVisualizations(startDate, endDate, category);
+        }
+        
+        // Function to process data and create visualizations
+        async function processDataAndCreateVisualizations(startDate, endDate, category) {
+            showLoading(true);
+            
+            try {
+                // Parse dates
+                const startDateObj = parseDateString(startDate);
+                const endDateObj = parseDateString(endDate);
+                endDateObj.setHours(23, 59, 59, 999); // Set to end of day
+                
+                // Get data
+                const dailyData = allData.data_daily || [];
+                const targetDaily = allData.target_daily || [];
+                
+                console.log('Processing data for date range:', startDateObj.toISOString().split('T')[0], 'to', endDateObj.toISOString().split('T')[0]);
+                console.log('Category:', category);
+                
+                // Filter daily data by date range
+                const filteredDailyData = dailyData.filter(item => {
+                    try {
+                        const itemDate = parseDateString(item.tanggal);
+                        return itemDate && itemDate >= startDateObj && itemDate <= endDateObj;
+                    } catch (e) {
+                        return false;
+                    }
+                });
+                
+                console.log('Filtered daily data count:', filteredDailyData.length);
+                
+                if (filteredDailyData.length === 0) {
+                    throw new Error('Tidak ada data untuk rentang tanggal yang dipilih');
+                }
+                
+                // Calculate TOTAL target toko for the date range (PERIODE)
+                let totalTargetToko = 0;
+                let currentDate = new Date(startDateObj);
+                
+                while (currentDate <= endDateObj) {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    
+                    // Find target for this specific date
+                    const targetForDate = targetDaily.find(item => {
+                        try {
+                            const itemDate = parseDateString(item.Tanggal);
+                            return itemDate && itemDate.toISOString().split('T')[0] === dateStr;
+                        } catch (e) {
+                            return false;
+                        }
+                    });
+                    
+                    if (targetForDate && targetForDate[category] !== undefined) {
+                        const targetValue = parseFloat(targetForDate[category]) || 0;
+                        totalTargetToko += targetValue;
+                    }
+                    
+                    // Move to next day
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                console.log('Total target toko for date range:', totalTargetToko);
+                
+                // Get ALL unique NIKs from filtered data
+                const allNiks = [...new Set(filteredDailyData.map(item => item.nik))];
+                
+                // Group data by NIK
+                const nikData = {};
+                let totalActualAllNik = 0;
+                let totalStdAllNik = 0;
+                
+                allNiks.forEach(nik => {
+                    nikData[nik] = {
+                        nik: nik,
+                        actualCategory: 0,
+                        actualSTD: 0
+                    };
+                });
+                
+                filteredDailyData.forEach(item => {
+                    const nik = item.nik;
+                    if (!nik || !nikData[nik]) return;
+                    
+                    // Get actual value for selected category
+                    const actualCategoryValue = parseFloat(item[category]) || 0;
+                    nikData[nik].actualCategory += actualCategoryValue;
+                    
+                    // Get actual STD value
+                    const actualSTDValue = parseFloat(item.std) || 0;
+                    nikData[nik].actualSTD += actualSTDValue;
+                });
+                
+                // Calculate totals
+                Object.values(nikData).forEach(item => {
+                    totalActualAllNik += item.actualCategory;
+                    totalStdAllNik += item.actualSTD;
+                });
+                
+                // Convert to array and calculate additional metrics
+                currentData = Object.values(nikData).map(item => {
+                    // Calculate achievement percentage
+                    const achievementPercentage = totalTargetToko > 0 ? (item.actualCategory / totalTargetToko) * 100 : 0;
+                    
+                    // Calculate ratio (kategori/STD)
+                    const ratio = item.actualSTD > 0 ? (item.actualCategory / item.actualSTD) * 100 : 0;
+                    
+                    return {
+                        nik: item.nik,
+                        name: nikToNameMap[item.nik] || '-',
+                        targetToko: totalTargetToko,
+                        actualCategory: item.actualCategory,
+                        actualSTD: item.actualSTD,
+                        achievementPercentage: achievementPercentage,
+                        ratio: ratio
+                    };
+                });
+                
+                // Sort by actual category (descending)
+                currentData.sort((a, b) => b.actualCategory - a.actualCategory);
+                
+                // Update summary
+                document.getElementById('summarySection').style.display = 'block';
+                document.getElementById('totalTarget').textContent = formatNumber(totalTargetToko);
+                document.getElementById('totalActual').textContent = formatNumber(totalActualAllNik);
+                document.getElementById('totalStd').textContent = formatNumber(totalStdAllNik);
+                document.getElementById('nikCount').textContent = currentData.length;
+                
+                // Create chart
+                createChart(currentData, category);
+                
+                // Populate table
+                populateTable(currentData, category);
+                
+                showLoading(false);
+                
+            } catch (error) {
+                console.error('Error processing data:', error);
+                showLoading(false);
+                showError(error.message);
+                
+                // Reset UI
+                document.getElementById('summarySection').style.display = 'none';
+                document.getElementById('chartPlaceholder').style.display = 'flex';
+                
+                if (chart1) {
+                    chart1.destroy();
+                    chart1 = null;
+                }
+                
+                // Clear table
+                const tableBody = document.querySelector('#performanceTable tbody');
+                if (tableBody) {
+                    tableBody.innerHTML = '';
+                }
+            }
+        }
+        
+        // Function to format numbers
+        function formatNumber(num) {
+            if (num === undefined || num === null || num === '') return '0';
+            if (typeof num === 'string') {
+                num = parseFloat(num.replace(/[^\d.-]/g, '')) || 0;
+            }
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'Jt';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'rb';
+            }
+            return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        // Function to get category label
+        function getCategoryLabel(category) {
+            const labels = {
+                'spd': 'SPD',
+                'std': 'STD',
+                'member': 'Member',
+                'new_member': 'New Member',
+                'pwp': 'PWP',
+                'sertis': 'Sertis',
+                'sueger': 'Sueger',
+                'ceban': 'Ceban',
+                'sejagad': 'Sejagad',
+                'rte': 'RTE',
+                'rtd': 'RTD'
+            };
+            return labels[category] || category;
+        }
+        
+        // Function to create Chart (Total Actual per NIK)
+        function createChart(nikArray, category) {
+            const ctx = document.getElementById('chart1');
+            
+            // Destroy previous chart if exists
+            if (chart1) {
+                chart1.destroy();
+            }
+            
+            // Show chart, hide placeholder
+            document.getElementById('chartPlaceholder').style.display = 'none';
+            
+            // Prepare data
+            const labels = nikArray.map(item => item.name || `NIK ${item.nik}`);
+            const actualData = nikArray.map(item => item.actualCategory);
+            
+            // Create gradient for bars
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(52, 152, 219, 0.8)');
+            gradient.addColorStop(1, 'rgba(41, 128, 185, 0.8)');
+            
+            chart1 = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Total ${getCategoryLabel(category)}`,
+                        data: actualData,
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    const nikItem = nikArray[index];
+                                    const actual = nikItem.actualCategory;
+                                    
+                                    return [
+                                        `Total ${getCategoryLabel(category)}: ${formatNumber(actual)}`,
+                                        `NIK: ${nikItem.nik}`,
+                                        `Nama: ${nikItem.name || '-'}`
+                                    ];
+                                }
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 12,
+                            cornerRadius: 6
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: `Total ${getCategoryLabel(category)}`,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatNumber(value);
+                                },
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        // Function to populate table
+        function populateTable(nikArray, category) {
+            const tableBody = document.querySelector('#performanceTable tbody');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            nikArray.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                // Determine achievement color
+                let achievementColor = '';
+                if (item.achievementPercentage >= 100) {
+                    achievementColor = 'positive';
+                } else if (item.achievementPercentage >= 70) {
+                    achievementColor = 'neutral';
+                } else {
+                    achievementColor = 'negative';
+                }
+                
+                // Determine ratio color
+                let ratioColor = '';
+                if (item.ratio >= 100) {
+                    ratioColor = 'positive';
+                } else if (item.ratio >= 70) {
+                    ratioColor = 'neutral';
+                } else {
+                    ratioColor = 'negative';
+                }
+                
+                row.innerHTML = `
+                    <td class="text-center">${index + 1}</td>
+                    <td class="text-bold">${item.nik}</td>
+                    <td>${item.name || '-'}</td>
+                    <td class="text-right">${formatNumber(item.targetToko)}</td>
+                    <td class="text-right">${formatNumber(item.actualCategory)}</td>
+                    <td class="${achievementColor} text-right">${item.achievementPercentage.toFixed(1)}%</td>
+                    <td class="text-right">${formatNumber(item.actualSTD)}</td>
+                    <td class="${ratioColor} text-right">${item.ratio.toFixed(1)}%</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
