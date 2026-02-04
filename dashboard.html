@@ -72,6 +72,30 @@
         #loadingSpinner:not(.loading) {
             display: none;
         }
+        
+        /* Style untuk card agar tidak overlay */
+        .summary-card {
+            min-height: 180px;
+            transition: all 0.3s ease;
+        }
+        
+        .parameter-card {
+            min-height: 140px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Style untuk nilai gap */
+        .gap-positive {
+            color: #10b981;
+        }
+        
+        .gap-negative {
+            color: #ef4444;
+        }
+        
+        .gap-neutral {
+            color: #6b7280;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -124,6 +148,12 @@
                                 <a href="psm_nik.html" class="nav-link flex items-center space-x-2 p-3 rounded-lg text-gray-700 hover:bg-gray-50 border-l-4 border-transparent">
                                     <i class="bi bi-people"></i>
                                     <span>PSM per NIK</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="contribusi.html" class="nav-link flex items-center space-x-2 p-3 rounded-lg text-gray-700 hover:bg-gray-50 border-l-4 border-transparent">
+                                    <i class="bi bi-pie-chart"></i>
+                                    <span>Kontribusi</span>
                                 </a>
                             </li>
                             <li>
@@ -209,43 +239,76 @@
                     <!-- Summary Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <!-- Total SPD Card -->
-                        <div class="bg-gradient-to-br from-primary to-secondary text-white rounded-xl shadow-md overflow-hidden">
-                            <div class="p-5 text-center">
-                                <div class="text-3xl font-bold mb-1" id="totalSPD">0</div>
-                                <div class="text-gray-200 text-sm mb-4">Total SPD Toko</div>
-                                <div class="w-full bg-white bg-opacity-20 rounded-full h-2 mb-2">
-                                    <div class="bg-green-400 h-2 rounded-full" id="spdProgress" style="width: 0%"></div>
+                        <div class="summary-card bg-white rounded-xl shadow-sm border border-gray-200">
+                            <div class="p-5 text-center h-full flex flex-col justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-800 mb-1" id="totalSPD">0</div>
+                                    <div class="text-gray-600 text-sm mb-2">Total SPD Toko</div>
                                 </div>
-                                <div class="text-xs text-white opacity-80">
-                                    Target: <span id="spdTarget">0</span> | Pencapaian: <span id="spdAchievement">0%</span>
+                                
+                                <div class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" id="spdProgress" style="width: 0%"></div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <div class="text-gray-500">
+                                            Target: <span id="spdTarget">0</span>
+                                        </div>
+                                        <div id="spdAchievement" class="font-semibold text-blue-600">0%</div>
+                                    </div>
+                                    <div class="text-xs mt-1" id="spdGapContainer">
+                                        Gap: <span id="spdGap" class="font-medium">0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Total STD Card -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-                            <div class="p-5 text-center">
-                                <div class="text-3xl font-bold text-gray-800 mb-1" id="totalSTD">0</div>
-                                <div class="text-gray-600 text-sm mb-4">Total STD Toko</div>
-                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                                    <div class="bg-blue-500 h-2 rounded-full" id="stdProgress" style="width: 0%"></div>
+                        <div class="summary-card bg-white rounded-xl shadow-sm border border-gray-200">
+                            <div class="p-5 text-center h-full flex flex-col justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-800 mb-1" id="totalSTD">0</div>
+                                    <div class="text-gray-600 text-sm mb-2">Total STD Toko</div>
                                 </div>
-                                <div class="text-xs text-gray-500">
-                                    Target: <span id="stdTarget">0</span> | Pencapaian: <span id="stdAchievement">0%</span>
+                                
+                                <div class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" id="stdProgress" style="width: 0%"></div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <div class="text-gray-500">
+                                            Target: <span id="stdTarget">0</span>
+                                        </div>
+                                        <div id="stdAchievement" class="font-semibold text-blue-600">0%</div>
+                                    </div>
+                                    <div class="text-xs mt-1" id="stdGapContainer">
+                                        Gap: <span id="stdGap" class="font-medium">0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Total Member Card -->
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-                            <div class="p-5 text-center">
-                                <div class="text-3xl font-bold text-gray-800 mb-1" id="totalMember">0</div>
-                                <div class="text-gray-600 text-sm mb-4">Total Member Toko</div>
-                                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                                    <div class="bg-yellow-500 h-2 rounded-full" id="memberProgress" style="width: 0%"></div>
+                        <div class="summary-card bg-white rounded-xl shadow-sm border border-gray-200">
+                            <div class="p-5 text-center h-full flex flex-col justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-800 mb-1" id="totalMember">0</div>
+                                    <div class="text-gray-600 text-sm mb-2">Total Member Toko</div>
                                 </div>
-                                <div class="text-xs text-gray-500">
-                                    Target: <span id="memberTarget">0</span> | Pencapaian: <span id="memberAchievement">0%</span>
+                                
+                                <div class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" id="memberProgress" style="width: 0%"></div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <div class="text-gray-500">
+                                            Target: <span id="memberTarget">0</span>
+                                        </div>
+                                        <div id="memberAchievement" class="font-semibold text-blue-600">0%</div>
+                                    </div>
+                                    <div class="text-xs mt-1" id="memberGapContainer">
+                                        Gap: <span id="memberGap" class="font-medium">0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -506,7 +569,7 @@
         </div>
     </div>
 
-    <!-- JavaScript (dipertahankan dari file asli dengan sedikit penyesuaian) -->
+    <!-- JavaScript (dipertahankan dari file asli dengan penambahan fitur) -->
     <script>
         // API URL
         const API_URL = 'https://script.google.com/macros/s/AKfycby_L_vmTHUtl7NUr3qHI-upGlPNUWKJ1uRgPFOPWgWofMDU8siS1Ex_YHR-y0P69E-cGA/exec';
@@ -666,9 +729,16 @@
         
         // Function to get gap class based on value
         function getGapClass(gap) {
-            if (gap > 0) return 'text-green-600 font-semibold';
-            if (gap < 0) return 'text-red-600 font-semibold';
-            return 'text-yellow-600 font-semibold';
+            if (gap > 0) return 'gap-positive';
+            if (gap < 0) return 'gap-negative';
+            return 'gap-neutral';
+        }
+        
+        // Function to format gap value with + or - sign
+        function formatGap(gap) {
+            if (gap > 0) return `+${formatNumber(gap)}`;
+            if (gap < 0) return `${formatNumber(gap)}`;
+            return formatNumber(gap);
         }
         
         // Function to show/hide loading spinner
@@ -930,10 +1000,24 @@
             const rtePercentage = rteTarget > 0 ? Math.min(100, Math.round((totalRTE / rteTarget) * 100)) : 0;
             const rtdPercentage = rtdTarget > 0 ? Math.min(100, Math.round((totalRTD / rtdTarget) * 100)) : 0;
             
-            console.log('Calculated totals:', {
+            // Calculate gaps
+            const spdGap = totalSPD - spdTarget;
+            const stdGap = totalSTD - stdTarget;
+            const memberGap = totalMember - memberTarget;
+            const newMemberGap = totalNewMember - newMemberTarget;
+            const pwpGap = totalPWP - pwpTarget;
+            const sertisGap = totalSertis - sertisTarget;
+            const suegerGap = totalSueger - suegerTarget;
+            const cebanGap = totalCeban - cebanTarget;
+            const sejagadGap = totalSejagad - sejagadTarget;
+            const rteGap = totalRTE - rteTarget;
+            const rtdGap = totalRTD - rtdTarget;
+            
+            console.log('Calculated totals and gaps:', {
                 totalSPD, totalSTD, totalMember,
                 spdTarget, stdTarget, memberTarget,
-                spdPercentage, stdPercentage, memberPercentage
+                spdPercentage, stdPercentage, memberPercentage,
+                spdGap, stdGap, memberGap
             });
             
             // Update DOM elements
@@ -954,6 +1038,20 @@
             document.getElementById('stdProgress').style.width = `${stdPercentage}%`;
             document.getElementById('memberProgress').style.width = `${memberPercentage}%`;
             
+            // Update gap displays
+            const spdGapElement = document.getElementById('spdGap');
+            const stdGapElement = document.getElementById('stdGap');
+            const memberGapElement = document.getElementById('memberGap');
+            
+            spdGapElement.textContent = formatGap(spdGap);
+            stdGapElement.textContent = formatGap(stdGap);
+            memberGapElement.textContent = formatGap(memberGap);
+            
+            // Apply gap classes
+            spdGapElement.className = `font-medium ${getGapClass(spdGap)}`;
+            stdGapElement.className = `font-medium ${getGapClass(stdGap)}`;
+            memberGapElement.className = `font-medium ${getGapClass(memberGap)}`;
+            
             // Store calculated data for later use
             window.dailyTotals = {
                 totalSPD, totalSTD, totalMember, totalNewMember,
@@ -965,7 +1063,10 @@
                 spdPercentage, stdPercentage, memberPercentage,
                 newMemberPercentage, pwpPercentage, sertisPercentage,
                 suegerPercentage, cebanPercentage, sejagadPercentage,
-                rtePercentage, rtdPercentage
+                rtePercentage, rtdPercentage,
+                spdGap, stdGap, memberGap, newMemberGap,
+                pwpGap, sertisGap, suegerGap, cebanGap,
+                sejagadGap, rteGap, rtdGap
             };
         }
         
@@ -982,14 +1083,46 @@
             
             // Semua parameter termasuk yang baru
             const parameters = [
-                { key: 'new_member', label: 'New Member', value: totals.totalNewMember || 0, target: totals.newMemberTarget || 0, percentage: totals.newMemberPercentage || 0 },
-                { key: 'pwp', label: 'PWP', value: totals.totalPWP || 0, target: totals.pwpTarget || 0, percentage: totals.pwpPercentage || 0 },
-                { key: 'sertis', label: 'Sertis', value: totals.totalSertis || 0, target: totals.sertisTarget || 0, percentage: totals.sertisPercentage || 0 },
-                { key: 'sueger', label: 'Sueger', value: totals.totalSueger || 0, target: totals.suegerTarget || 0, percentage: totals.suegerPercentage || 0 },
-                { key: 'ceban', label: 'Ceban', value: totals.totalCeban || 0, target: totals.cebanTarget || 0, percentage: totals.cebanPercentage || 0 },
-                { key: 'sejagad', label: 'Murah Sejagad', value: totals.totalSejagad || 0, target: totals.sejagadTarget || 0, percentage: totals.sejagadPercentage || 0 },
-                { key: 'rte', label: 'RTE', value: totals.totalRTE || 0, target: totals.rteTarget || 0, percentage: totals.rtePercentage || 0 },
-                { key: 'rtd', label: 'RTD', value: totals.totalRTD || 0, target: totals.rtdTarget || 0, percentage: totals.rtdPercentage || 0 }
+                { key: 'new_member', label: 'New Member', 
+                  value: totals.totalNewMember || 0, 
+                  target: totals.newMemberTarget || 0, 
+                  percentage: totals.newMemberPercentage || 0,
+                  gap: totals.newMemberGap || 0 },
+                { key: 'pwp', label: 'PWP', 
+                  value: totals.totalPWP || 0, 
+                  target: totals.pwpTarget || 0, 
+                  percentage: totals.pwpPercentage || 0,
+                  gap: totals.pwpGap || 0 },
+                { key: 'sertis', label: 'Sertis', 
+                  value: totals.totalSertis || 0, 
+                  target: totals.sertisTarget || 0, 
+                  percentage: totals.sertisPercentage || 0,
+                  gap: totals.sertisGap || 0 },
+                { key: 'sueger', label: 'Sueger', 
+                  value: totals.totalSueger || 0, 
+                  target: totals.suegerTarget || 0, 
+                  percentage: totals.suegerPercentage || 0,
+                  gap: totals.suegerGap || 0 },
+                { key: 'ceban', label: 'Ceban', 
+                  value: totals.totalCeban || 0, 
+                  target: totals.cebanTarget || 0, 
+                  percentage: totals.cebanPercentage || 0,
+                  gap: totals.cebanGap || 0 },
+                { key: 'sejagad', label: 'Murah Sejagad', 
+                  value: totals.totalSejagad || 0, 
+                  target: totals.sejagadTarget || 0, 
+                  percentage: totals.sejagadPercentage || 0,
+                  gap: totals.sejagadGap || 0 },
+                { key: 'rte', label: 'RTE', 
+                  value: totals.totalRTE || 0, 
+                  target: totals.rteTarget || 0, 
+                  percentage: totals.rtePercentage || 0,
+                  gap: totals.rteGap || 0 },
+                { key: 'rtd', label: 'RTD', 
+                  value: totals.totalRTD || 0, 
+                  target: totals.rtdTarget || 0, 
+                  percentage: totals.rtdPercentage || 0,
+                  gap: totals.rtdGap || 0 }
             ];
             
             console.log('Parameters for cards:', parameters);
@@ -1000,33 +1133,54 @@
                 const percentage = param.target > 0 ? Math.min(100, Math.round((param.value / param.target) * 100)) : 0;
                 let borderColor = '';
                 let textColor = '';
+                let progressColor = '';
                 
                 if (percentage >= 100) {
                     borderColor = 'border-l-green-500';
                     textColor = 'text-green-600';
+                    progressColor = 'bg-green-500';
                 } else if (percentage >= 70) {
                     borderColor = 'border-l-yellow-500';
                     textColor = 'text-yellow-600';
+                    progressColor = 'bg-yellow-500';
                 } else {
                     borderColor = 'border-l-red-500';
                     textColor = 'text-red-600';
+                    progressColor = 'bg-red-500';
                 }
                 
+                // Determine gap color
+                const gapColor = getGapClass(param.gap);
+                const formattedGap = formatGap(param.gap);
+                
                 const cardHtml = `
-                    <div class="bg-white rounded-lg border border-gray-200 ${borderColor} overflow-hidden">
-                        <div class="p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <div class="text-gray-600 text-sm">${param.label}</div>
-                                    <div class="text-2xl font-bold text-gray-800">${formatNumber(param.value)}</div>
-                                    <div class="text-gray-500 text-xs mt-1">Target: ${formatNumber(param.target)}</div>
-                                </div>
-                                <div class="${textColor} font-bold text-lg">
-                                    ${percentage}%
+                    <div class="parameter-card bg-white rounded-lg border border-gray-200 ${borderColor} overflow-hidden">
+                        <div class="p-4 h-full flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="text-gray-600 text-sm">${param.label}</div>
+                                        <div class="text-2xl font-bold text-gray-800">${formatNumber(param.value)}</div>
+                                        <div class="text-gray-500 text-xs mt-1">Target: ${formatNumber(param.target)}</div>
+                                    </div>
+                                    <div class="${textColor} font-bold text-lg">
+                                        ${percentage}%
+                                    </div>
                                 </div>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-1.5">
-                                <div class="h-1.5 rounded-full ${percentage >= 100 ? 'bg-green-500' : percentage >= 70 ? 'bg-yellow-500' : 'bg-red-500'}" style="width: ${percentage}%"></div>
+                            
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                                    <div class="h-1.5 rounded-full ${progressColor}" style="width: ${percentage}%"></div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="text-xs ${gapColor}">
+                                        Gap: <span class="font-medium">${formattedGap}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        ${formatNumber(param.value)}/${formatNumber(param.target)}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1172,6 +1326,7 @@
                 
                 const row = document.createElement('tr');
                 const gapClass = getGapClass(gap);
+                const formattedGap = formatGap(gap);
                 
                 let progressColor = '';
                 if (achievement >= 100) progressColor = 'bg-green-500';
@@ -1192,7 +1347,7 @@
                             <span class="text-sm font-medium text-gray-700">${achievement}%</span>
                         </div>
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm ${gapClass}">${formatNumber(gap)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm ${gapClass} font-medium">${formattedGap}</td>
                 `;
                 
                 tableBody.appendChild(row);
@@ -1202,6 +1357,7 @@
             const totalAchievement = totalTarget > 0 ? Math.round((totalActual / totalTarget) * 100) : 0;
             const totalGap = totalActual - totalTarget;
             const totalGapClass = getGapClass(totalGap);
+            const formattedTotalGap = formatGap(totalGap);
             
             let totalProgressColor = '';
             if (totalAchievement >= 100) totalProgressColor = 'bg-green-600';
@@ -1224,7 +1380,7 @@
                         <span class="font-bold text-gray-900">${totalAchievement}%</span>
                     </div>
                 </td>
-                <td class="px-4 py-3 whitespace-nowrap ${totalGapClass}">${formatNumber(totalGap)}</td>
+                <td class="px-4 py-3 whitespace-nowrap ${totalGapClass} font-bold">${formattedTotalGap}</td>
             `;
             
             tableBody.appendChild(totalRow);
@@ -1932,7 +2088,7 @@ Terima Kasih.`;
             // Tab navigation
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', function(e) {
-                    // Jika link memiliki href (seperti link ke psm_nik.html), biarkan default behavior
+                    // Jika link memiliki href (seperti link ke psm_nik.html atau kontribusi.html), biarkan default behavior
                     if (this.hasAttribute('href') && this.getAttribute('href') !== '#') {
                         return; // Biarkan browser menangani navigasi
                     }
