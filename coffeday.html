@@ -1,2064 +1,278 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Rekap Penjualan Coffee</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      font-family: 'Inter', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
-    
-    .mobile-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(139, 69, 19, 0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .mobile-card:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 6px rgba(139, 69, 19, 0.08);
-    }
-    
-    .coffee-gradient {
-      background: linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #F4A460 100%);
-    }
-    
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.08);
-      z-index: 40;
-    }
-    
-    .nav-item {
-      padding: 12px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      cursor: pointer;
-    }
-    
-    .nav-item.active {
-      color: #8B4513;
-    }
-    
-    /* Mobile table styling */
-    .mobile-table-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-      border-bottom: 1px solid #f3f4f6;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .mobile-table-row:active {
-      background-color: #fef3c7;
-    }
-    
-    .mobile-table-row:last-child {
-      border-bottom: none;
-    }
-    
-    /* Modal khusus mobile */
-    .mobile-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: white;
-      z-index: 50;
-      transform: translateY(100%);
-      transition: transform 0.3s ease-out;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-top: env(safe-area-inset-top);
-    }
-    
-    .mobile-modal.open {
-      transform: translateY(0);
-    }
-    
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 40;
-      opacity: 0;
-      transition: opacity 0.3s;
-      display: none;
-    }
-    
-    .modal-backdrop.show {
-      display: block;
-      opacity: 1;
-    }
-    
-    .modal-header {
-      padding: 16px;
-      border-bottom: 1px solid #e5e7eb;
-      flex-shrink: 0;
-    }
-    
-    .modal-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    }
-    
-    .modal-drag-handle {
-      width: 40px;
-      height: 4px;
-      background: #d1d5db;
-      border-radius: 2px;
-      margin: 12px auto;
-    }
-    
-    /* Touch-friendly buttons */
-    .touch-button {
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 500;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border: none;
-      outline: none;
-    }
-    
-    .touch-button:active {
-      transform: scale(0.98);
-    }
-    
-    /* Quick input grid untuk mobile */
-    .quick-input-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    
-    /* Comparison badge styling */
-    .comparison-badge {
-      display: inline-flex;
-      align-items: center;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      margin-left: 8px;
-      font-weight: 600;
-    }
-    
-    .comparison-up {
-      background-color: #dcfce7;
-      color: #166534;
-    }
-    
-    .comparison-down {
-      background-color: #fee2e2;
-      color: #991b1b;
-    }
-    
-    .comparison-neutral {
-      background-color: #f3f4f6;
-      color: #4b5563;
-    }
-    
-    /* Achievement badge */
-    .achievement-badge {
-      display: inline-flex;
-      align-items: center;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      margin-left: 8px;
-      font-weight: 600;
-    }
-    
-    .achievement-exceed {
-      background-color: #dbeafe;
-      color: #1e40af;
-    }
-    
-    .achievement-met {
-      background-color: #dcfce7;
-      color: #166534;
-    }
-    
-    .achievement-below {
-      background-color: #fef3c7;
-      color: #92400e;
-    }
-    
-    /* Progress bar */
-    .progress-bar {
-      height: 8px;
-      background-color: #e5e7eb;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 4px;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #10b981, #34d399);
-      border-radius: 4px;
-      transition: width 0.5s ease-out;
-    }
-    
-    /* Filter styling */
-    .filter-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: white;
-      z-index: 50;
-      transform: translateY(100%);
-      transition: transform 0.3s ease-out;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .filter-modal.open {
-      transform: translateY(0);
-    }
-    
-    /* Month picker */
-    .month-picker {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    
-    .month-option {
-      padding: 16px 8px;
-      text-align: center;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .month-option:hover {
-      border-color: #8B4513;
-    }
-    
-    .month-option.active {
-      background-color: #8B4513;
-      color: white;
-      border-color: #8B4513;
-    }
-    
-    /* Loading spinner */
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #8B4513;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    /* Untuk tablet dan desktop */
-    @media (min-width: 768px) {
-      .mobile-modal {
-        top: 50%;
-        left: 50%;
-        right: auto;
-        bottom: auto;
-        width: 90%;
-        max-width: 400px;
-        max-height: 80vh;
-        border-radius: 20px;
-        transform: translate(-50%, -50%) scale(0.9);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      }
-      
-      .mobile-modal.open {
-        transform: translate(-50%, -50%) scale(1);
-      }
-      
-      .filter-modal {
-        top: 50%;
-        left: 50%;
-        width: 90%;
-        max-width: 500px;
-        max-height: 80vh;
-        border-radius: 20px;
-        transform: translate(-50%, -50%) scale(0.9);
-      }
-      
-      .filter-modal.open {
-        transform: translate(-50%, -50%) scale(1);
-      }
-      
-      .modal-drag-handle {
-        display: none;
-      }
-    }
-  </style>
-</head>
-
-<body class="min-h-screen bg-gradient-to-b from-amber-50 to-white antialiased pb-20 md:pb-0">
-
-<div class="container mx-auto px-4 py-6 max-w-2xl">
-  <!-- Header Mobile -->
-  <div class="fade-in mb-6">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">☕ Penjualan Coffee</h1>
-        <div class="flex items-center mt-2">
-          <div id="periode" class="text-sm text-gray-600 mr-3"></div>
-          <button onclick="openFilterModal()" class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full flex items-center">
-            <i class="fas fa-filter mr-1"></i> Filter
-          </button>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="syncWithGoogleSheets()" class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center">
-          <i class="fas fa-sync text-amber-700"></i>
-        </button>
-        <div class="relative">
-          <button onclick="toggleStats()" class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center">
-            <i class="fas fa-chart-bar text-amber-700"></i>
-          </button>
-          <span id="notificationBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">3</span>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Stats Cards (Collapsible) -->
-    <div id="statsSection" class="grid grid-cols-2 gap-3 mb-6 hidden">
-      <div class="mobile-card p-4">
-        <div class="text-center">
-          <p class="text-xs text-gray-500 mb-1">Hari Aktif</p>
-          <p class="text-xl font-bold text-gray-800" id="totalDays">0</p>
-        </div>
-      </div>
-      
-      <div class="mobile-card p-4">
-        <div class="text-center">
-          <p class="text-xs text-gray-500 mb-1">Total</p>
-          <p class="text-xl font-bold text-gray-800" id="total">0</p>
-        </div>
-      </div>
-      
-      <div class="mobile-card p-4">
-        <div class="text-center">
-          <p class="text-xs text-gray-500 mb-1">Target</p>
-          <p class="text-lg font-bold text-indigo-700" id="targetDisplay">0</p>
-        </div>
-      </div>
-      
-      <div class="mobile-card p-4">
-        <div class="text-center">
-          <p class="text-xs text-gray-500 mb-1">Pencapaian</p>
-          <p class="text-lg font-bold text-emerald-700" id="achievementPercent">0%</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Target & Achievement Progress -->
-  <div class="mobile-card p-5 mb-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-800">Target & Pencapaian</h3>
-      <button onclick="openTargetModal()" class="text-sm text-amber-600 hover:text-amber-700">
-        <i class="fas fa-edit mr-1"></i> Edit
-      </button>
-    </div>
-    
-    <div class="mb-4">
-      <div class="flex justify-between text-sm text-gray-600 mb-1">
-        <span>Target Bulanan: <span id="targetValue" class="font-semibold">0</span></span>
-        <span>Terpenuhi: <span id="achievedValue" class="font-semibold">0</span></span>
-      </div>
-      <div class="progress-bar">
-        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
-      </div>
-      <div class="flex justify-between text-xs text-gray-500 mt-1">
-        <span>0%</span>
-        <span id="progressPercentage">0%</span>
-        <span>100%</span>
-      </div>
-    </div>
-    
-    <div id="achievementMessage" class="text-sm text-center p-3 rounded-lg bg-blue-50 text-blue-700 hidden">
-      <!-- Achievement message akan ditampilkan di sini -->
-    </div>
-  </div>
-
-  <!-- Info Banner -->
-  <div class="mobile-card p-4 mb-6 bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200">
-    <div class="flex items-start">
-      <div class="mr-3 mt-1">
-        <i class="fas fa-info-circle text-amber-600"></i>
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-800">Hari operasional: Senin, Rabu, Jumat</p>
-        <p class="text-xs text-gray-600 mt-1">Ketuk baris untuk mengedit penjualan harian</p>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <span class="comparison-badge comparison-up"><i class="fas fa-arrow-up text-xs mr-1"></i>Naik</span>
-          <span class="comparison-badge comparison-down"><i class="fas fa-arrow-down text-xs mr-1"></i>Turun</span>
-          <span class="achievement-badge achievement-met"><i class="fas fa-check text-xs mr-1"></i>Target</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mobile Table -->
-  <div class="mb-6">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-semibold text-gray-800">Data Harian</h2>
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-gray-500" id="dataCount">0 data</span>
-        <button onclick="exportToCSV()" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-          <i class="fas fa-download"></i>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Loading State -->
-    <div id="loadingState" class="mobile-card p-8 text-center">
-      <div class="spinner"></div>
-      <p class="text-gray-600 mt-4">Memuat data...</p>
-    </div>
-    
-    <!-- Data Table -->
-    <div id="mobileTable" class="mobile-card overflow-hidden hidden">
-      <!-- Data akan di-generate oleh JavaScript -->
-    </div>
-    
-    <!-- Empty State -->
-    <div id="emptyState" class="mobile-card p-8 text-center hidden">
-      <i class="fas fa-coffee text-amber-300 text-4xl mb-4"></i>
-      <p class="text-gray-600">Tidak ada data untuk bulan ini</p>
-      <p class="text-sm text-gray-500 mt-2">Mulai dengan menambahkan data penjualan</p>
-    </div>
-    
-    <div class="text-center mt-4">
-      <p class="text-xs text-gray-500">
-        <i class="fas fa-arrow-up mr-1"></i> Geser ke atas untuk melihat lebih banyak
-      </p>
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="mobile-card p-5 mb-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
-    <div class="grid grid-cols-2 gap-3">
-      <button onclick="editToday()" 
-              class="touch-button bg-gradient-to-r from-amber-500 to-amber-600 text-white">
-        <i class="fas fa-edit mr-2"></i>
-        Edit Hari Ini
-      </button>
-      <button onclick="showSummary()" 
-              class="touch-button bg-gradient-to-r from-indigo-500 to-indigo-600 text-white">
-        <i class="fas fa-chart-pie mr-2"></i>
-        Ringkasan
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Bottom Navigation -->
-<div class="bottom-nav md:hidden">
-  <div class="flex justify-around items-center">
-    <div class="nav-item active" onclick="switchTab('home')">
-      <i class="fas fa-home text-lg mb-1"></i>
-      <span class="text-xs">Beranda</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('stats')">
-      <i class="fas fa-chart-line text-lg mb-1"></i>
-      <span class="text-xs">Statistik</span>
-    </div>
-    <div class="nav-item" onclick="editToday()">
-      <div class="w-12 h-12 rounded-full coffee-gradient flex items-center justify-center -mt-6 shadow-lg">
-        <i class="fas fa-plus text-white text-xl"></i>
-      </div>
-    </div>
-    <div class="nav-item" onclick="openFilterModal()">
-      <i class="fas fa-filter text-lg mb-1"></i>
-      <span class="text-xs">Filter</span>
-    </div>
-    <div class="nav-item" onclick="syncWithGoogleSheets()">
-      <i class="fas fa-cloud text-lg mb-1"></i>
-      <span class="text-xs">Sync</span>
-    </div>
-  </div>
-</div>
-
-<!-- ================= MODAL EDIT PENJUALAN ================= -->
-<div id="modalBackdrop" class="modal-backdrop" onclick="closeMobileModal()"></div>
-
-<div id="mobileModal" class="mobile-modal">
-  <div class="modal-header">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-xl font-bold text-gray-800">Edit Penjualan</h2>
-        <p class="text-sm text-gray-600 mt-1" id="mobileModalTanggal"></p>
-      </div>
-      <button onclick="closeMobileModal()" class="text-gray-500 hover:text-gray-700">
-        <i class="fas fa-times text-xl"></i>
-      </button>
-    </div>
-  </div>
-  
-  <div class="modal-content">
-    <!-- Input Section -->
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-3">
-        Jumlah Penjualan (cangkir)
-      </label>
-      
-      <div class="relative mb-4">
-        <input id="mobileModalInput" type="number" min="0" inputmode="decimal"
-               class="w-full text-center text-3xl font-bold py-4 px-5 rounded-xl border-2 
-                      border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none
-                      bg-gray-50"
-               placeholder="0"/>
-        <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
-          <i class="fas fa-coffee text-amber-600 text-xl"></i>
-        </div>
-      </div>
-      
-      <!-- Perbandingan dengan sebelumnya -->
-      <div id="comparisonInfo" class="mb-6 p-4 bg-blue-50 rounded-xl hidden">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-700">Perbandingan:</p>
-            <p class="text-sm text-gray-600" id="previousValueText"></p>
-          </div>
-          <div id="comparisonResult" class="text-right">
-            <!-- Hasil perbandingan akan diisi di sini -->
-          </div>
-        </div>
-      </div>
-      
-      <!-- Quick Input Buttons -->
-      <div class="mb-6">
-        <p class="text-sm text-gray-600 mb-3">Pilih cepat:</p>
-        <div class="quick-input-grid">
-          <button onclick="setMobileQuickValue(50)" class="touch-button bg-gray-100 text-gray-800 hover:bg-gray-200">50</button>
-          <button onclick="setMobileQuickValue(100)" class="touch-button bg-gray-100 text-gray-800 hover:bg-gray-200">100</button>
-          <button onclick="setMobileQuickValue(200)" class="touch-button bg-amber-100 text-amber-800 hover:bg-amber-200">200</button>
-          <button onclick="setMobileQuickValue(500)" class="touch-button bg-amber-100 text-amber-800 hover:bg-amber-200">500</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Action Buttons -->
-    <div class="flex gap-3 mt-8">
-      <button onclick="closeMobileModal()" 
-              class="flex-1 touch-button bg-gray-100 text-gray-800 font-medium hover:bg-gray-200">
-        Batal
-      </button>
-      <button onclick="saveMobileModal()" 
-              class="flex-1 touch-button bg-gradient-to-r from-amber-600 to-amber-700 text-white font-medium hover:from-amber-700 hover:to-amber-800">
-        <i class="fas fa-save mr-2"></i>
-        Simpan
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= MODAL FILTER BULAN ================= -->
-<div id="filterBackdrop" class="modal-backdrop" onclick="closeFilterModal()"></div>
-
-<div id="filterModal" class="filter-modal">
-  <div class="modal-header">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-xl font-bold text-gray-800">Filter Berdasarkan Bulan</h2>
-        <p class="text-sm text-gray-600 mt-1">Pilih bulan yang ingin ditampilkan</p>
-      </div>
-      <button onclick="closeFilterModal()" class="text-gray-500 hover:text-gray-700">
-        <i class="fas fa-times text-xl"></i>
-      </button>
-    </div>
-  </div>
-  
-  <div class="modal-content">
-    <!-- Tahun Selection -->
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-3">Pilih Tahun</label>
-      <div class="flex items-center justify-between">
-        <button onclick="changeFilterYear(-1)" class="p-2 rounded-lg hover:bg-gray-100">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <span id="filterYear" class="text-lg font-bold text-gray-800">2024</span>
-        <button onclick="changeFilterYear(1)" class="p-2 rounded-lg hover:bg-gray-100">
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Bulan Selection -->
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-3">Pilih Bulan</label>
-      <div class="month-picker">
-        <div class="month-option" data-month="0" onclick="selectMonth(0)">Jan</div>
-        <div class="month-option" data-month="1" onclick="selectMonth(1)">Feb</div>
-        <div class="month-option" data-month="2" onclick="selectMonth(2)">Mar</div>
-        <div class="month-option" data-month="3" onclick="selectMonth(3)">Apr</div>
-        <div class="month-option" data-month="4" onclick="selectMonth(4)">Mei</div>
-        <div class="month-option" data-month="5" onclick="selectMonth(5)">Jun</div>
-        <div class="month-option" data-month="6" onclick="selectMonth(6)">Jul</div>
-        <div class="month-option" data-month="7" onclick="selectMonth(7)">Agu</div>
-        <div class="month-option" data-month="8" onclick="selectMonth(8)">Sep</div>
-        <div class="month-option" data-month="9" onclick="selectMonth(9)">Okt</div>
-        <div class="month-option" data-month="10" onclick="selectMonth(10)">Nov</div>
-        <div class="month-option" data-month="11" onclick="selectMonth(11)">Des</div>
-      </div>
-    </div>
-    
-    <!-- Range Selection -->
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-3">Atau Pilih Rentang</label>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs text-gray-600 mb-1">Dari Bulan</label>
-          <select id="rangeStartMonth" class="w-full p-3 border border-gray-300 rounded-lg">
-            <option value="0">Januari</option>
-            <option value="1">Februari</option>
-            <option value="2">Maret</option>
-            <option value="3">April</option>
-            <option value="4">Mei</option>
-            <option value="5">Juni</option>
-            <option value="6">Juli</option>
-            <option value="7">Agustus</option>
-            <option value="8">September</option>
-            <option value="9">Oktober</option>
-            <option value="10">November</option>
-            <option value="11">Desember</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs text-gray-600 mb-1">Sampai Bulan</label>
-          <select id="rangeEndMonth" class="w-full p-3 border border-gray-300 rounded-lg">
-            <option value="0">Januari</option>
-            <option value="1">Februari</option>
-            <option value="2">Maret</option>
-            <option value="3">April</option>
-            <option value="4">Mei</option>
-            <option value="5">Juni</option>
-            <option value="6">Juli</option>
-            <option value="7">Agustus</option>
-            <option value="8">September</option>
-            <option value="9">Oktober</option>
-            <option value="10">November</option>
-            <option value="11">Desember</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Action Buttons -->
-    <div class="flex gap-3 mt-8">
-      <button onclick="resetFilter()" 
-              class="flex-1 touch-button bg-gray-100 text-gray-800 font-medium hover:bg-gray-200">
-        Reset
-      </button>
-      <button onclick="applyFilter()" 
-              class="flex-1 touch-button bg-gradient-to-r from-amber-600 to-amber-700 text-white font-medium hover:from-amber-700 hover:to-amber-800">
-        Terapkan Filter
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= MODAL TARGET ================= -->
-<div id="targetBackdrop" class="modal-backdrop" onclick="closeTargetModal()"></div>
-
-<div id="targetModal" class="mobile-modal">
-  <div class="modal-header">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-xl font-bold text-gray-800">Atur Target Bulanan</h2>
-        <p class="text-sm text-gray-600 mt-1" id="targetModalPeriod"></p>
-      </div>
-      <button onclick="closeTargetModal()" class="text-gray-500 hover:text-gray-700">
-        <i class="fas fa-times text-xl"></i>
-      </button>
-    </div>
-  </div>
-  
-  <div class="modal-content">
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-3">
-        Target Penjualan Bulanan (cangkir)
-      </label>
-      
-      <div class="relative mb-4">
-        <input id="targetInput" type="number" min="0" inputmode="decimal"
-               class="w-full text-center text-3xl font-bold py-4 px-5 rounded-xl border-2 
-                      border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none
-                      bg-gray-50"
-               placeholder="0"/>
-        <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
-          <i class="fas fa-bullseye text-indigo-600 text-xl"></i>
-        </div>
-      </div>
-      
-      <!-- Quick Target Buttons -->
-      <div class="mb-6">
-        <p class="text-sm text-gray-600 mb-3">Target umum:</p>
-        <div class="quick-input-grid">
-          <button onclick="setTargetQuickValue(1000)" class="touch-button bg-gray-100 text-gray-800 hover:bg-gray-200">1,000</button>
-          <button onclick="setTargetQuickValue(2000)" class="touch-button bg-gray-100 text-gray-800 hover:bg-gray-200">2,000</button>
-          <button onclick="setTargetQuickValue(5000)" class="touch-button bg-indigo-100 text-indigo-800 hover:bg-indigo-200">5,000</button>
-          <button onclick="setTargetQuickValue(10000)" class="touch-button bg-indigo-100 text-indigo-800 hover:bg-indigo-200">10,000</button>
-        </div>
-      </div>
-      
-      <!-- Target Info -->
-      <div class="p-4 bg-blue-50 rounded-xl mb-6">
-        <p class="text-sm text-gray-700">
-          <i class="fas fa-lightbulb text-amber-500 mr-2"></i>
-          Target membantu Anda memantau progress penjualan bulanan. 
-          Atur target yang realistis berdasarkan rata-rata penjualan sebelumnya.
-        </p>
-      </div>
-    </div>
-    
-    <!-- Action Buttons -->
-    <div class="flex gap-3 mt-8">
-      <button onclick="closeTargetModal()" 
-              class="flex-1 touch-button bg-gray-100 text-gray-800 font-medium hover:bg-gray-200">
-        Batal
-      </button>
-      <button onclick="saveTarget()" 
-              class="flex-1 touch-button bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium hover:from-indigo-700 hover:to-indigo-800">
-        <i class="fas fa-save mr-2"></i>
-        Simpan Target
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Summary Modal -->
-<div id="summaryModal" class="mobile-modal">
-  <div class="modal-header">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-xl font-bold text-gray-800">Ringkasan Bulanan</h2>
-        <p class="text-sm text-gray-600 mt-1" id="summaryPeriode"></p>
-      </div>
-      <button onclick="closeSummaryModal()" class="text-gray-500 hover:text-gray-700">
-        <i class="fas fa-times text-xl"></i>
-      </button>
-    </div>
-  </div>
-  
-  <div class="modal-content">
-    <div id="summaryContent" class="space-y-4">
-      <!-- Summary akan diisi oleh JavaScript -->
-    </div>
-    
-    <button onclick="closeSummaryModal()" 
-            class="w-full touch-button bg-gray-100 text-gray-800 font-medium mt-6 hover:bg-gray-200">
-      Tutup
-    </button>
-  </div>
-</div>
-
-<script>
-// ================= KONFIGURASI UTAMA =================
-const namaHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-const hariOperasional = [1, 3, 5]; // Senin, Rabu, Jumat
-
-// ================= KONFIGURASI GOOGLE SHEETS =================
-// GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSsTCVPCr_AmfDJF22GTRY8_2MunBRIU34dlS0gQAiKxB-qlmkuXHofLu0f6ZMaAf8Uw/exec';
-
-// Cache untuk performa
-let cachedData = null;
-let lastFetchTime = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 menit cache
-
-// ================= VARIABEL GLOBAL =================
-let sekarang = new Date();
-let tahun = sekarang.getFullYear();
-let bulan = sekarang.getMonth();
-let selectedMonth = bulan;
-let selectedYear = tahun;
-let isRangeFilter = false;
-let rangeStart = { month: 0, year: tahun };
-let rangeEnd = { month: 11, year: tahun };
-
-const mobileTable = document.getElementById("mobileTable");
-let dataHarian = [];
-let barisAktif = null;
-let dataCount = 0;
-let monthlyTarget = 0;
-
-// ================= FUNGSI UTILITY =================
-function formatTanggal(tgl, bln, thn) {
-  return `${tgl.toString().padStart(2, '0')}-${(bln + 1).toString().padStart(2, '0')}-${thn}`;
-}
-
-function formatBulanTahun(bln, thn) {
-  const bulanNama = new Date(thn, bln).toLocaleString("id-ID", { month: "long" });
-  return `${bulanNama} ${thn}`;
-}
-
-function updatePeriodeDisplay() {
-  const periodeElement = document.getElementById("periode");
-  
-  if (isRangeFilter) {
-    const startMonth = new Date(rangeStart.year, rangeStart.month).toLocaleString("id-ID", { month: "long" });
-    const endMonth = new Date(rangeEnd.year, rangeEnd.month).toLocaleString("id-ID", { month: "long" });
-    periodeElement.textContent = `${startMonth} ${rangeStart.year} - ${endMonth} ${rangeEnd.year}`;
-  } else {
-    periodeElement.textContent = formatBulanTahun(selectedMonth, selectedYear);
-  }
-}
-
-// ================= GOOGLE SHEETS INTEGRATION =================
-async function initGoogleSheets() {
-  try {
-    await loadDataFromGoogleSheets();
-    showToast('Terhubung dengan Google Sheets');
-  } catch (error) {
-    console.error('Error connecting to Google Sheets:', error);
-    showToast('Menggunakan data lokal. Tidak dapat terhubung ke Google Sheets.');
-    loadDataFromLocalStorage();
-  }
-}
-
-async function loadDataFromGoogleSheets() {
-  showLoading(true);
-  
-  try {
-    // Cek cache
-    if (cachedData && lastFetchTime && 
-      (Date.now() - lastFetchTime) < CACHE_DURATION &&
-      cachedData.month === selectedMonth && 
-      cachedData.year === selectedYear) {
-      processGoogleSheetsData(cachedData.data);
-      showLoading(false);
-      return;
-    }
-    
-    const params = new URLSearchParams({
-      action: 'getData',
-      month: selectedMonth,
-      year: selectedYear,
-      isRange: isRangeFilter,
-      startMonth: rangeStart.month,
-      startYear: rangeStart.year,
-      endMonth: rangeEnd.month,
-      endYear: rangeEnd.year
-    });
-    
-    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to load data');
-    }
-    
-    // Cache data
-    cachedData = {
-      data: result.data,
-      month: selectedMonth,
-      year: selectedYear,
-      timestamp: Date.now()
-    };
-    lastFetchTime = Date.now();
-    
-    // Load target
-    await loadTargetFromGoogleSheets();
-    
-    // Process data
-    processGoogleSheetsData(result.data.data || []);
-    
-    showToast('Data berhasil dimuat dari Google Sheets');
-    
-  } catch (error) {
-    console.error('Error loading from Google Sheets:', error);
-    showToast('Gagal memuat dari Google Sheets. Menggunakan data lokal.');
-    loadDataFromLocalStorage();
-  } finally {
-    showLoading(false);
-  }
-}
-
-async function loadTargetFromGoogleSheets() {
-  try {
-    const params = new URLSearchParams({
-      action: 'getTarget',
-      month: selectedMonth,
-      year: selectedYear
-    });
-    
-    const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
-    
-    if (response.ok) {
-      const result = await response.json();
-      if (result.success) {
-        monthlyTarget = result.data.target || 0;
-        updateTargetDisplay();
-        return;
-      }
-    }
-  } catch (error) {
-    console.error('Error loading target:', error);
-  }
-  
-  // Fallback ke localStorage
-  const currentPeriod = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}`;
-  const savedTarget = localStorage.getItem(`coffee-target-${currentPeriod}`);
-  monthlyTarget = savedTarget ? parseInt(savedTarget) : 0;
-  updateTargetDisplay();
-}
-
-function processGoogleSheetsData(rows) {
-  dataHarian = [];
-  
-  rows.forEach(row => {
-    if (row.length >= 3) {
-      const [tanggal, hari, penjualan, targetHarian, achievement] = row;
-      
-      const [tgl, bln, thn] = tanggal.split('-').map(Number);
-      const dateObj = new Date(thn, bln - 1, tgl);
-      
-      const idx = dateObj.getDay();
-      if (hariOperasional.includes(idx)) {
-        const nilai = parseInt(penjualan) || 0;
-        const isFilled = nilai > 0;
-        
-        dataHarian.push({
-          tanggal: tanggal,
-          hari: hari,
-          nilai: nilai,
-          isFilled: isFilled,
-          dateObj: dateObj,
-          targetHarian: parseInt(targetHarian) || 0,
-          achievement: achievement || ''
-        });
-      }
-    }
-  });
-  
-  dataHarian.sort((a, b) => a.dateObj - b.dateObj);
-  calculateComparisons();
-  generateMobileTable();
-}
-
-async function saveDataToGoogleSheets() {
-  try {
-    const dataToSave = {
-      action: 'saveData',
-      tanggal: dataHarian[barisAktif].tanggal,
-      penjualan: dataHarian[barisAktif].nilai
-    };
-    
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(dataToSave)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to save data');
-    }
-    
-    cachedData = null;
-    lastFetchTime = null;
-    
-    return true;
-    
-  } catch (error) {
-    console.error('Error saving to Google Sheets:', error);
-    return false;
-  }
-}
-
-async function saveTargetToGoogleSheets() {
-  try {
-    const period = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}`;
-    
-    const dataToSave = {
-      action: 'saveTarget',
-      period: period,
-      target: monthlyTarget
-    };
-    
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(dataToSave)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    return result.success;
-    
-  } catch (error) {
-    console.error('Error saving target:', error);
-    return false;
-  }
-}
-
-async function bulkSaveToGoogleSheets() {
-  try {
-    const salesData = [];
-    const allKeys = Object.keys(localStorage);
-    
-    for (const key of allKeys) {
-      if (key.startsWith('coffee-sales-')) {
-        const tanggal = key.replace('coffee-sales-', '');
-        const nilai = localStorage.getItem(key);
-        
-        salesData.push({
-          tanggal: tanggal,
-          penjualan: parseInt(nilai) || 0
-        });
-      }
-    }
-    
-    if (salesData.length === 0) {
-      showToast('Tidak ada data lokal untuk disinkronkan');
-      return false;
-    }
-    
-    const dataToSave = {
-      action: 'bulkSave',
-      data: JSON.stringify(salesData)
-    };
-    
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(dataToSave)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      showToast(`${salesData.length} data berhasil disinkronkan ke Google Sheets`);
-      return true;
-    } else {
-      throw new Error(result.error || 'Bulk save failed');
-    }
-    
-  } catch (error) {
-    console.error('Error in bulk save:', error);
-    showToast('Gagal sinkronisasi data ke Google Sheets');
-    return false;
-  }
-}
-
-async function syncWithGoogleSheets() {
-  showToast('Menyinkronkan dengan Google Sheets...');
-  
-  try {
-    await loadDataFromGoogleSheets();
-    await bulkSaveToGoogleSheets();
-    await loadDataFromGoogleSheets();
-    
-    showToast('Sinkronisasi berhasil');
-    
-  } catch (error) {
-    console.error('Sync error:', error);
-    showToast('Gagal sinkronisasi lengkap. Coba lagi.');
-  }
-}
-
-// ================= LOCALSTORAGE FUNCTIONS =================
-function saveDataToLocalStorage() {
-  try {
-    dataHarian.forEach(item => {
-      if (item.isFilled) {
-        localStorage.setItem(`coffee-sales-${item.tanggal}`, item.nilai);
-      } else {
-        localStorage.removeItem(`coffee-sales-${item.tanggal}`);
-      }
-    });
-    
-    const currentPeriod = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}`;
-    localStorage.setItem(`coffee-target-${currentPeriod}`, monthlyTarget);
-    
-    console.log('Data saved to localStorage');
-    return true;
-    
-  } catch (error) {
-    console.error('Error saving to localStorage:', error);
-    return false;
-  }
-}
-
-function loadDataFromLocalStorage() {
-  dataHarian = [];
-  
-  let startDate, endDate;
-  
-  if (isRangeFilter) {
-    startDate = new Date(rangeStart.year, rangeStart.month, 1);
-    endDate = new Date(rangeEnd.year, rangeEnd.month + 1, 0);
-  } else {
-    startDate = new Date(selectedYear, selectedMonth, 1);
-    endDate = new Date(selectedYear, selectedMonth + 1, 0);
-  }
-  
-  let currentDate = new Date(startDate);
-  while (currentDate <= endDate) {
-    const tgl = currentDate.getDate();
-    const bln = currentDate.getMonth();
-    const thn = currentDate.getFullYear();
-    const idx = currentDate.getDay();
-    
-    if (hariOperasional.includes(idx)) {
-      const tanggalStr = formatTanggal(tgl, bln, thn);
-      const savedData = localStorage.getItem(`coffee-sales-${tanggalStr}`);
-      const nilai = savedData ? parseInt(savedData) : 0;
-      const isFilled = nilai > 0;
-      
-      dataHarian.push({
-        tanggal: tanggalStr,
-        hari: namaHari[idx],
-        nilai: nilai,
-        isFilled: isFilled,
-        dateObj: new Date(thn, bln, tgl),
-        targetHarian: 0,
-        achievement: ''
-      });
-    }
-    
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  
-  const currentPeriod = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}`;
-  const savedTarget = localStorage.getItem(`coffee-target-${currentPeriod}`);
-  monthlyTarget = savedTarget ? parseInt(savedTarget) : 0;
-  
-  calculateComparisons();
-  generateMobileTable();
-}
-
-// ================= DATA PROCESSING =================
-function calculateComparisons() {
-  let previousValue = 0;
-  
-  for (let i = 0; i < dataHarian.length; i++) {
-    const item = dataHarian[i];
-    
-    if (i > 0) {
-      for (let j = i - 1; j >= 0; j--) {
-        if (dataHarian[j].isFilled) {
-          previousValue = dataHarian[j].nilai;
-          break;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grab Style Sales Monitoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Grab Official Palette */
+            --grab-green: #00B14F;      /* Hijau Utama Grab */
+            --grab-dark: #222222;       /* Teks Utama */
+            --grab-light-bg: #F2F4F7;   /* Abu-abu Latar Sangat Muda */
+            --grab-white: #FFFFFF;
+            --grab-blue: #00A1E9;       /* Aksen Info */
+            --grab-red: #EE2737;        /* Aksen Bahaya/Negatif */
         }
-      }
-    }
-    
-    item.previousValue = previousValue;
-    item.comparison = item.isFilled ? item.nilai - previousValue : 0;
-    item.hasPrevious = previousValue > 0;
-    
-    if (item.isFilled) {
-      previousValue = item.nilai;
-    }
-  }
-}
 
-function generateMobileTable() {
-  mobileTable.innerHTML = '';
-  dataCount = dataHarian.length;
-  
-  if (dataCount === 0) {
-    document.getElementById('emptyState').classList.remove('hidden');
-    document.getElementById('mobileTable').classList.add('hidden');
-    document.getElementById('dataCount').textContent = '0 data';
-    document.getElementById('totalDays').textContent = '0';
-    document.getElementById('total').textContent = '0';
-    updateTargetDisplay();
-    return;
-  }
-  
-  document.getElementById('emptyState').classList.add('hidden');
-  document.getElementById('mobileTable').classList.remove('hidden');
-  
-  document.getElementById("dataCount").textContent = `${dataCount} hari`;
-  document.getElementById("totalDays").textContent = dataCount;
-  
-  dataHarian.forEach((item, index) => {
-    const row = document.createElement("div");
-    row.className = "mobile-table-row";
-    row.dataset.index = index;
-    
-    let achievementBadge = '';
-    if (item.targetHarian > 0 && item.nilai > 0) {
-      const achievementPercent = (item.nilai / item.targetHarian) * 100;
-      if (achievementPercent >= 100) {
-        achievementBadge = `<span class="achievement-badge achievement-met">
-          <i class="fas fa-check text-xs mr-1"></i>Target
-        </span>`;
-      } else if (achievementPercent >= 80) {
-        achievementBadge = `<span class="achievement-badge achievement-exceed">
-          <i class="fas fa-star text-xs mr-1"></i>${Math.round(achievementPercent)}%
-        </span>`;
-      } else {
-        achievementBadge = `<span class="achievement-badge achievement-below">
-          <i class="fas fa-exclamation text-xs mr-1"></i>${Math.round(achievementPercent)}%
-        </span>`;
-      }
-    }
-    
-    let comparisonBadge = '';
-    if (item.isFilled && item.hasPrevious && item.comparison !== 0) {
-      if (item.comparison > 0) {
-        comparisonBadge = `<span class="comparison-badge comparison-up">
-          <i class="fas fa-arrow-up text-xs mr-1"></i>+${Math.abs(item.comparison)}
-        </span>`;
-      } else if (item.comparison < 0) {
-        comparisonBadge = `<span class="comparison-badge comparison-down">
-          <i class="fas fa-arrow-down text-xs mr-1"></i>${item.comparison}
-        </span>`;
-      }
-    }
-    
-    row.innerHTML = `
-      <div class="flex-1">
-        <div class="flex items-center">
-          <div class="w-8 h-8 rounded-full ${item.isFilled ? 'bg-amber-100' : 'bg-gray-100'} 
-                flex items-center justify-center mr-3">
-            <i class="fas ${item.isFilled ? 'fa-coffee text-amber-600' : 'fa-coffee text-gray-400'}"></i>
-          </div>
-          <div>
-            <p class="font-medium text-gray-800">${item.tanggal}</p>
-            <p class="text-sm text-gray-600">${item.hari}</p>
-          </div>
-        </div>
-      </div>
-      <div class="text-right">
-        <div class="flex items-center justify-end">
-          <p class="font-bold ${item.isFilled ? 'text-indigo-700' : 'text-gray-400'}">
-            ${item.isFilled ? item.nilai.toLocaleString('id-ID') : '—'}
-          </p>
-          ${comparisonBadge}
-          ${achievementBadge}
-        </div>
-        <p class="text-xs ${item.isFilled ? 'text-emerald-600' : 'text-amber-600'} mt-1">
-          <i class="fas ${item.isFilled ? 'fa-check-circle' : 'fa-clock'} mr-1"></i>
-          ${item.isFilled ? 'Tercatat' : 'Belum diisi'}
-        </p>
-      </div>
-    `;
-    
-    row.addEventListener('click', () => openMobileModal(index));
-    mobileTable.appendChild(row);
-  });
-  
-  calculateStats();
-}
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--grab-light-bg);
+            color: var(--grab-dark);
+            -webkit-tap-highlight-color: transparent;
+        }
 
-function calculateStats() {
-  let total = 0;
-  let filledCount = 0;
-  
-  dataHarian.forEach(item => {
-    if (item.isFilled) {
-      total += item.nilai;
-      filledCount++;
-    }
-  });
-  
-  const totalFormatted = total.toLocaleString('id-ID');
-  const average = filledCount > 0 ? Math.round(total / filledCount) : 0;
-  const averageFormatted = average.toLocaleString('id-ID');
-  
-  document.getElementById("total").textContent = totalFormatted;
-  
-  const notificationBadge = document.getElementById("notificationBadge");
-  const unfilledCount = dataCount - filledCount;
-  if (unfilledCount > 0) {
-    notificationBadge.textContent = unfilledCount > 9 ? '9+' : unfilledCount;
-    notificationBadge.classList.remove("hidden");
-  } else {
-    notificationBadge.classList.add("hidden");
-  }
-  
-  updateTargetDisplay();
-}
+        /* Grab Style Button */
+        button[onclick="openModal()"], #submitBtn { 
+            background-color: var(--grab-green) !important; 
+            color: #FFFFFF;
+            border-radius: 100px; /* Grab identik dengan pill-shaped button */
+            font-weight: 700;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 177, 79, 0.2) !important;
+        }
 
-function updateTargetDisplay() {
-  const total = dataHarian.reduce((sum, item) => sum + item.nilai, 0);
-  
-  const progressPercentage = monthlyTarget > 0 ? Math.min(100, (total / monthlyTarget) * 100) : 0;
-  document.getElementById('progressFill').style.width = `${progressPercentage}%`;
-  document.getElementById('progressPercentage').textContent = `${Math.round(progressPercentage)}%`;
-  
-  document.getElementById('targetValue').textContent = monthlyTarget.toLocaleString('id-ID');
-  document.getElementById('targetDisplay').textContent = monthlyTarget.toLocaleString('id-ID');
-  document.getElementById('achievedValue').textContent = total.toLocaleString('id-ID');
-  document.getElementById('achievementPercent').textContent = `${Math.round(progressPercentage)}%`;
-  
-  const achievementMessage = document.getElementById('achievementMessage');
-  if (monthlyTarget > 0) {
-    if (total >= monthlyTarget) {
-      achievementMessage.innerHTML = `
-        <i class="fas fa-trophy mr-2"></i>
-        Target tercapai! 🎉 Anda telah melampaui target bulanan.
-      `;
-      achievementMessage.className = "text-sm text-center p-3 rounded-lg bg-emerald-50 text-emerald-700";
-    } else if (total >= monthlyTarget * 0.8) {
-      achievementMessage.innerHTML = `
-        <i class="fas fa-chart-line mr-2"></i>
-        Hampir mencapai target! Anda sudah mencapai ${Math.round(progressPercentage)}% dari target.
-      `;
-      achievementMessage.className = "text-sm text-center p-3 rounded-lg bg-amber-50 text-amber-700";
-    } else {
-      achievementMessage.innerHTML = `
-        <i class="fas fa-bullseye mr-2"></i>
-        Target: ${monthlyTarget.toLocaleString('id-ID')}. Saat ini: ${total.toLocaleString('id-ID')} (${Math.round(progressPercentage)}%)
-      `;
-      achievementMessage.className = "text-sm text-center p-3 rounded-lg bg-blue-50 text-blue-700";
-    }
-    achievementMessage.classList.remove('hidden');
-  } else {
-    achievementMessage.classList.add('hidden');
-  }
-}
+        button:active { transform: scale(0.96); }
 
-// ================= MODAL FUNCTIONS =================
-function openMobileModal(index) {
-  barisAktif = index;
-  
-  if (index === null || index === undefined || !dataHarian[index]) {
-    console.error("Index tidak valid:", index);
-    return;
-  }
-  
-  const item = dataHarian[index];
-  
-  document.getElementById("mobileModalTanggal").textContent = 
-    `${item.tanggal} • ${item.hari}`;
-  
-  const input = document.getElementById("mobileModalInput");
-  input.value = item.nilai > 0 ? item.nilai : '';
-  
-  const comparisonInfo = document.getElementById("comparisonInfo");
-  const comparisonResult = document.getElementById("comparisonResult");
-  const previousValueText = document.getElementById("previousValueText");
-  
-  if (item.hasPrevious && item.previousValue > 0) {
-    comparisonInfo.classList.remove("hidden");
-    previousValueText.textContent = `Sebelumnya: ${item.previousValue.toLocaleString('id-ID')}`;
-    
-    if (item.nilai > 0) {
-      const diff = item.nilai - item.previousValue;
-      if (diff > 0) {
-        comparisonResult.innerHTML = `
-          <span class="comparison-badge comparison-up">
-            <i class="fas fa-arrow-up mr-1"></i>+${Math.abs(diff)}
-          </span>
-          <p class="text-xs text-green-600 mt-1">Naik dari sebelumnya</p>
-        `;
-      } else if (diff < 0) {
-        comparisonResult.innerHTML = `
-          <span class="comparison-badge comparison-down">
-            <i class="fas fa-arrow-down mr-1"></i>${diff}
-          </span>
-          <p class="text-xs text-red-600 mt-1">Turun dari sebelumnya</p>
-        `;
-      } else {
-        comparisonResult.innerHTML = `
-          <span class="comparison-badge comparison-neutral">
-            <i class="fas fa-equals mr-1"></i>0
-          </span>
-          <p class="text-xs text-gray-600 mt-1">Sama dengan sebelumnya</p>
-        `;
-      }
-    } else {
-      comparisonResult.innerHTML = `
-        <span class="comparison-badge comparison-neutral">
-          <i class="fas fa-minus mr-1"></i>0
-        </span>
-        <p class="text-xs text-gray-600 mt-1">Belum ada data</p>
-      `;
-    }
-  } else {
-    comparisonInfo.classList.add("hidden");
-  }
-  
-  const modal = document.getElementById("mobileModal");
-  const backdrop = document.getElementById("modalBackdrop");
-  
-  modal.classList.add("open");
-  backdrop.classList.add("show");
-  
-  setTimeout(() => {
-    input.focus();
-    if (window.innerWidth > 768) {
-      input.select();
-    }
-  }, 300);
-}
+        /* Card Styling */
+        .grab-card {
+            background: var(--grab-white);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
 
-function closeMobileModal() {
-  const modal = document.getElementById("mobileModal");
-  const backdrop = document.getElementById("modalBackdrop");
-  
-  modal.classList.remove("open");
-  backdrop.classList.remove("show");
-  
-  barisAktif = null;
-}
+        /* Input Styling */
+        input {
+            border: 1px solid #E5E7EB !important;
+            border-radius: 12px !important;
+        }
+        input:focus {
+            border-color: var(--grab-green) !important;
+            ring: 2px var(--grab-green);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen p-3 md:p-8">
 
-function setMobileQuickValue(value) {
-  const input = document.getElementById("mobileModalInput");
-  input.value = value;
-  input.focus();
-}
-
-async function saveMobileModal() {
-  const input = document.getElementById("mobileModalInput");
-  const nilai = parseInt(input.value) || 0;
-  
-  if (barisAktif === null || barisAktif === undefined) {
-    console.error("Tidak ada baris aktif yang dipilih");
-    return;
-  }
-  
-  const index = barisAktif;
-  
-  if (dataHarian[index]) {
-    const oldValue = dataHarian[index].nilai;
-    const oldFilled = dataHarian[index].isFilled;
-    
-    dataHarian[index].nilai = nilai;
-    dataHarian[index].isFilled = nilai > 0;
-    
-    calculateComparisons();
-    updateRowUIWithAnimation(index, oldValue, oldFilled);
-    calculateStats();
-    
-    const googleSheetsSuccess = await saveDataToGoogleSheets();
-    const localStorageSuccess = saveDataToLocalStorage();
-    
-    if (googleSheetsSuccess) {
-      showToast('Data berhasil disimpan ke Google Sheets');
-    } else if (localStorageSuccess) {
-      showToast('Data berhasil disimpan secara lokal');
-    } else {
-      showToast('Gagal menyimpan data');
-    }
-    
-  }
-  
-  closeMobileModal();
-}
-
-function updateRowUIWithAnimation(index, oldValue, oldFilled) {
-  const item = dataHarian[index];
-  const row = mobileTable.querySelector(`[data-index="${index}"]`);
-  
-  if (row) {
-    let achievementBadge = '';
-    if (item.targetHarian > 0 && item.nilai > 0) {
-      const achievementPercent = (item.nilai / item.targetHarian) * 100;
-      if (achievementPercent >= 100) {
-        achievementBadge = `<span class="achievement-badge achievement-met">
-          <i class="fas fa-check text-xs mr-1"></i>Target
-        </span>`;
-      } else if (achievementPercent >= 80) {
-        achievementBadge = `<span class="achievement-badge achievement-exceed">
-          <i class="fas fa-star text-xs mr-1"></i>${Math.round(achievementPercent)}%
-        </span>`;
-      } else {
-        achievementBadge = `<span class="achievement-badge achievement-below">
-          <i class="fas fa-exclamation text-xs mr-1"></i>${Math.round(achievementPercent)}%
-        </span>`;
-      }
-    }
-    
-    let comparisonBadge = '';
-    if (item.isFilled && item.hasPrevious && item.comparison !== 0) {
-      if (item.comparison > 0) {
-        comparisonBadge = `<span class="comparison-badge comparison-up">
-          <i class="fas fa-arrow-up text-xs mr-1"></i>+${Math.abs(item.comparison)}
-        </span>`;
-      } else if (item.comparison < 0) {
-        comparisonBadge = `<span class="comparison-badge comparison-down">
-          <i class="fas fa-arrow-down text-xs mr-1"></i>${item.comparison}
-        </span>`;
-      }
-    }
-    
-    row.innerHTML = `
-      <div class="flex-1">
-        <div class="flex items-center">
-          <div class="w-8 h-8 rounded-full ${item.isFilled ? 'bg-amber-100' : 'bg-gray-100'} 
-                flex items-center justify-center mr-3">
-            <i class="fas ${item.isFilled ? 'fa-coffee text-amber-600' : 'fa-coffee text-gray-400'}"></i>
-          </div>
-          <div>
-            <p class="font-medium text-gray-800">${item.tanggal}</p>
-            <p class="text-sm text-gray-600">${item.hari}</p>
-          </div>
-        </div>
-      </div>
-      <div class="text-right">
-        <div class="flex items-center justify-end">
-          <p class="font-bold ${item.isFilled ? 'text-indigo-700' : 'text-gray-400'}">
-            ${item.isFilled ? item.nilai.toLocaleString('id-ID') : '—'}
-          </p>
-          ${comparisonBadge}
-          ${achievementBadge}
-        </div>
-        <p class="text-xs ${item.isFilled ? 'text-emerald-600' : 'text-amber-600'} mt-1">
-          <i class="fas ${item.isFilled ? 'fa-check-circle' : 'fa-clock'} mr-1"></i>
-          ${item.isFilled ? 'Tercatat' : 'Belum diisi'}
-        </p>
-      </div>
-    `;
-    
-    row.addEventListener('click', () => openMobileModal(index));
-  }
-}
-
-// ================= FILTER FUNCTIONS =================
-function openFilterModal() {
-  document.getElementById('filterYear').textContent = selectedYear;
-  
-  document.querySelectorAll('.month-option').forEach(option => {
-    option.classList.remove('active');
-    if (parseInt(option.dataset.month) === selectedMonth && !isRangeFilter) {
-      option.classList.add('active');
-    }
-  });
-  
-  document.getElementById('rangeStartMonth').value = rangeStart.month;
-  document.getElementById('rangeEndMonth').value = rangeEnd.month;
-  
-  const modal = document.getElementById("filterModal");
-  const backdrop = document.getElementById("filterBackdrop");
-  
-  modal.classList.add("open");
-  backdrop.classList.add("show");
-}
-
-function closeFilterModal() {
-  const modal = document.getElementById("filterModal");
-  const backdrop = document.getElementById("filterBackdrop");
-  
-  modal.classList.remove("open");
-  backdrop.classList.remove("show");
-}
-
-function changeFilterYear(delta) {
-  const yearElement = document.getElementById('filterYear');
-  let currentYear = parseInt(yearElement.textContent);
-  currentYear += delta;
-  yearElement.textContent = currentYear;
-}
-
-function selectMonth(month) {
-  document.querySelectorAll('.month-option').forEach(option => {
-    option.classList.remove('active');
-  });
-  event.target.classList.add('active');
-  
-  isRangeFilter = false;
-  selectedMonth = month;
-  selectedYear = parseInt(document.getElementById('filterYear').textContent);
-}
-
-function resetFilter() {
-  isRangeFilter = false;
-  const now = new Date();
-  selectedMonth = now.getMonth();
-  selectedYear = now.getFullYear();
-  
-  document.getElementById('filterYear').textContent = selectedYear;
-  document.querySelectorAll('.month-option').forEach(option => {
-    option.classList.remove('active');
-    if (parseInt(option.dataset.month) === selectedMonth) {
-      option.classList.add('active');
-    }
-  });
-}
-
-async function applyFilter() {
-  if (isRangeFilter) {
-    const startMonth = parseInt(document.getElementById('rangeStartMonth').value);
-    const endMonth = parseInt(document.getElementById('rangeEndMonth').value);
-    const year = parseInt(document.getElementById('filterYear').textContent);
-    
-    if (startMonth > endMonth) {
-      showToast('Bulan awal tidak boleh setelah bulan akhir');
-      return;
-    }
-    
-    rangeStart = { month: startMonth, year: year };
-    rangeEnd = { month: endMonth, year: year };
-  }
-  
-  updatePeriodeDisplay();
-  cachedData = null;
-  lastFetchTime = null;
-  
-  await loadDataFromGoogleSheets();
-  closeFilterModal();
-}
-
-// ================= TARGET FUNCTIONS =================
-function openTargetModal() {
-  document.getElementById('targetModalPeriod').textContent = 
-    `Target untuk ${formatBulanTahun(selectedMonth, selectedYear)}`;
-  document.getElementById('targetInput').value = monthlyTarget;
-  
-  const modal = document.getElementById("targetModal");
-  const backdrop = document.getElementById("targetBackdrop");
-  
-  modal.classList.add("open");
-  backdrop.classList.add("show");
-}
-
-function closeTargetModal() {
-  const modal = document.getElementById("targetModal");
-  const backdrop = document.getElementById("targetBackdrop");
-  
-  modal.classList.remove("open");
-  backdrop.classList.remove("show");
-}
-
-function setTargetQuickValue(value) {
-  document.getElementById('targetInput').value = value;
-}
-
-async function saveTarget() {
-  const input = document.getElementById('targetInput');
-  const newTarget = parseInt(input.value) || 0;
-  
-  monthlyTarget = newTarget;
-  updateTargetDisplay();
-  
-  const googleSheetsSuccess = await saveTargetToGoogleSheets();
-  const currentPeriod = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}`;
-  localStorage.setItem(`coffee-target-${currentPeriod}`, monthlyTarget);
-  
-  if (googleSheetsSuccess) {
-    showToast('Target berhasil disimpan ke Google Sheets');
-  } else {
-    showToast('Target berhasil disimpan secara lokal');
-  }
-  
-  closeTargetModal();
-}
-
-// ================= OTHER FUNCTIONS =================
-function toggleStats() {
-  const statsSection = document.getElementById("statsSection");
-  if (statsSection.classList.contains("hidden")) {
-    statsSection.classList.remove("hidden");
-  } else {
-    statsSection.classList.add("hidden");
-  }
-}
-
-function editToday() {
-  const todayStr = formatTanggal(sekarang.getDate(), sekarang.getMonth(), sekarang.getFullYear());
-  const todayIndex = dataHarian.findIndex(item => item.tanggal === todayStr);
-  
-  if (todayIndex !== -1) {
-    openMobileModal(todayIndex);
-  } else {
-    showToast("Hari ini bukan hari operasional (Senin, Rabu, Jumat)");
-  }
-}
-
-function showSummary() {
-  const filledData = dataHarian.filter(item => item.isFilled);
-  const total = filledData.reduce((sum, item) => sum + item.nilai, 0);
-  const average = filledData.length > 0 ? Math.round(total / filledData.length) : 0;
-  
-  let totalIncrease = 0;
-  let totalDecrease = 0;
-  let comparisonCount = 0;
-  
-  dataHarian.forEach(item => {
-    if (item.isFilled && item.hasPrevious && item.comparison !== 0) {
-      if (item.comparison > 0) {
-        totalIncrease += item.comparison;
-      } else {
-        totalDecrease += Math.abs(item.comparison);
-      }
-      comparisonCount++;
-    }
-  });
-  
-  let highestDay = null;
-  let lowestDay = null;
-  
-  if (filledData.length > 0) {
-    highestDay = filledData.reduce((max, item) => item.nilai > max.nilai ? item : max, filledData[0]);
-    lowestDay = filledData.reduce((min, item) => item.nilai < min.nilai ? item : min, filledData[0]);
-  }
-  
-  document.getElementById("summaryPeriode").textContent = 
-    `${sekarang.toLocaleString("id-ID",{month:"long",year:"numeric"})}`;
-  
-  const summaryContent = document.getElementById("summaryContent");
-  summaryContent.innerHTML = `
-    <div class="space-y-4">
-      <div class="bg-gray-50 p-4 rounded-xl">
-        <p class="text-sm text-gray-600 mb-2">Total Penjualan</p>
-        <p class="text-2xl font-bold text-gray-800">${total.toLocaleString('id-ID')} <span class="text-sm">cangkir</span></p>
-      </div>
-      
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-amber-50 p-4 rounded-xl">
-          <p class="text-sm text-gray-600 mb-1">Hari Tercatat</p>
-          <p class="text-xl font-bold text-amber-700">${filledData.length}/${dataCount}</p>
-        </div>
+    <div class="max-w-4xl mx-auto">
         
-        <div class="bg-indigo-50 p-4 rounded-xl">
-          <p class="text-sm text-gray-600 mb-1">Rata-rata</p>
-          <p class="text-xl font-bold text-indigo-700">${average.toLocaleString('id-ID')}</p>
-        </div>
-      </div>
-      
-      ${comparisonCount > 0 ? `
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-emerald-50 p-4 rounded-xl">
-          <p class="text-sm text-gray-600 mb-1">Total Kenaikan</p>
-          <p class="text-xl font-bold text-emerald-700">+${totalIncrease.toLocaleString('id-ID')}</p>
-        </div>
+        <header class="mb-5 flex justify-between items-center px-1">
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-[var(--grab-dark)] tracking-tight">Monitoring Penjualan</h1>
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Coffeday Beanspot Pramuka</p>
+            </div>
+            
+            <button onclick="openModal()" class="px-5 py-2.5 text-xs flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Tambah Data
+            </button>
+        </header>
         
-        <div class="bg-red-50 p-4 rounded-xl">
-          <p class="text-sm text-gray-600 mb-1">Total Penurunan</p>
-          <p class="text-xl font-bold text-red-700">-${totalDecrease.toLocaleString('id-ID')}</p>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <div class="grab-card p-4">
+                <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Target</p>
+                <p id="statTotalTarget" class="text-lg font-extrabold text-[var(--grab-dark)]">0</p>
+            </div>
+            <div class="grab-card p-4 border-l-4 border-[var(--grab-green)]">
+                <p class="text-[9px] font-bold text-[var(--grab-green)] uppercase mb-1">Total Aktual</p>
+                <p id="statTotalActual" class="text-lg font-extrabold text-[var(--grab-green)]">0</p>
+            </div>
+            <div class="grab-card p-4">
+                <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Gap Selisih</p>
+                <p id="statGap" class="text-lg font-extrabold">0</p>
+            </div>
+            <div class="grab-card p-4 bg-green-50/50 border border-green-100">
+                <p class="text-[9px] font-bold text-[var(--grab-green)] uppercase mb-1">Achievement</p>
+                <p id="statAchievement" class="text-lg font-extrabold text-[var(--grab-green)]">0%</p>
+            </div>
+            <div class="grab-card p-4 col-span-2 md:col-span-1 bg-[var(--grab-dark)]">
+                <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Avg/Day</p>
+                <p id="statAverage" class="text-lg font-extrabold text-white">0</p>
+            </div>
         </div>
-      </div>
-      ` : ''}
-      
-      ${highestDay ? `
-      <div class="bg-emerald-50 p-4 rounded-xl">
-        <p class="text-sm text-gray-600 mb-1">Penjualan Tertinggi</p>
-        <p class="font-bold text-emerald-800">${highestDay.tanggal} (${highestDay.hari})</p>
-        <p class="text-xl font-bold text-emerald-800 mt-1">${highestDay.nilai.toLocaleString('id-ID')} cangkir</p>
-        ${highestDay.hasPrevious && highestDay.comparison > 0 ? `
-          <p class="text-xs text-emerald-700 mt-1">
-            <i class="fas fa-arrow-up mr-1"></i>+${highestDay.comparison} dari sebelumnya
-          </p>
-        ` : ''}
-      </div>
-      ` : ''}
-      
-      ${lowestDay && filledData.length > 1 ? `
-      <div class="bg-blue-50 p-4 rounded-xl">
-        <p class="text-sm text-gray-600 mb-1">Penjualan Terendah</p>
-        <p class="font-bold text-blue-800">${lowestDay.tanggal} (${lowestDay.hari})</p>
-        <p class="text-xl font-bold text-blue-800 mt-1">${lowestDay.nilai.toLocaleString('id-ID')} cangkir</p>
-        ${lowestDay.hasPrevious && lowestDay.comparison < 0 ? `
-          <p class="text-xs text-red-700 mt-1">
-            <i class="fas fa-arrow-down mr-1"></i>${lowestDay.comparison} dari sebelumnya
-          </p>
-        ` : ''}
-      </div>
-      ` : ''}
+
+        <div class="grab-card overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-bold text-[var(--grab-dark)] text-sm">Riwayat Laporan</h2>
+                <span id="currentDate" class="text-[9px] font-bold text-gray-400"></span>
+            </div>
+
+            <div class="overflow-x-auto p-2">
+                <table class="w-full text-left border-separate border-spacing-y-2">
+                    <thead>
+                        <tr class="text-gray-400 text-[10px] uppercase tracking-widest font-bold">
+                            <th class="px-3 pb-1">Waktu</th>
+                            <th class="px-3 pb-1 text-right">Target</th>
+                            <th class="px-3 pb-1 text-right">Aktual</th>
+                            <th class="px-3 pb-1 text-center">Trend</th>
+                            <th class="px-3 pb-1 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody" class="text-xs">
+                        </tbody>
+                </table>
+                <div id="emptyState" class="hidden text-center py-12">
+                    <p class="text-gray-400 text-xs font-bold italic">Belum ada aktivitas penjualan</p>
+                </div>
+            </div>
+        </div>
     </div>
-  `;
-  
-  const modal = document.getElementById("summaryModal");
-  const backdrop = document.getElementById("modalBackdrop");
-  
-  modal.classList.add("open");
-  backdrop.classList.add("show");
-}
 
-function closeSummaryModal() {
-  const modal = document.getElementById("summaryModal");
-  const backdrop = document.getElementById("modalBackdrop");
-  
-  modal.classList.remove("open");
-  backdrop.classList.remove("show");
-}
+    <div id="entryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px] p-4">
+        <div class="modal-content bg-white shadow-2xl w-full max-w-sm rounded-[24px] overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-extrabold text-[var(--grab-dark)]">Input Laporan</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                
+                <form id="salesForm" class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pilih Tanggal</label>
+                        <input type="date" id="inputDate" class="w-full p-3 bg-gray-50 focus:outline-none font-bold text-sm text-[var(--grab-dark)]" required>
+                    </div>
 
-function switchTab(tabName) {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-    item.classList.add('text-gray-500');
-  });
-  
-  const activeTab = event.currentTarget;
-  if (activeTab) {
-    activeTab.classList.add('active');
-    activeTab.classList.remove('text-gray-500');
-  }
-  
-  switch(tabName) {
-    case 'home':
-      break;
-    case 'stats':
-      showSummary();
-      break;
-    case 'add':
-      editToday();
-      break;
-    case 'filter':
-      openFilterModal();
-      break;
-    case 'sync':
-      syncWithGoogleSheets();
-      break;
-  }
-}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Target</label>
+                            <input type="number" id="inputTarget" class="w-full p-3 bg-gray-50 focus:outline-none font-bold text-sm" required placeholder="0">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Aktual</label>
+                            <input type="number" id="inputActual" class="w-full p-3 bg-gray-50 focus:outline-none font-bold text-sm" required placeholder="0">
+                        </div>
+                    </div>
 
-function exportToCSV() {
-  if (dataHarian.length === 0) {
-    showToast('Tidak ada data untuk diexport');
-    return;
-  }
-  
-  const headers = ['Tanggal', 'Hari', 'Penjualan', 'Target Harian', 'Pencapaian', 'Perbandingan'];
-  const csvData = [headers];
-  
-  dataHarian.forEach(item => {
-    let achievement = '';
-    if (item.targetHarian > 0) {
-      if (item.nilai >= item.targetHarian) {
-        achievement = 'Target Tercapai';
-      } else if (item.nilai >= item.targetHarian * 0.8) {
-        achievement = 'Mendekati Target';
-      } else {
-        achievement = 'Di Bawah Target';
-      }
-    }
-    
-    let comparison = '';
-    if (item.hasPrevious && item.comparison !== 0) {
-      comparison = item.comparison > 0 ? `+${item.comparison}` : `${item.comparison}`;
-    }
-    
-    csvData.push([
-      item.tanggal,
-      item.hari,
-      item.nilai,
-      item.targetHarian || '',
-      achievement,
-      comparison
-    ]);
-  });
-  
-  const total = dataHarian.reduce((sum, item) => sum + item.nilai, 0);
-  const filledDays = dataHarian.filter(item => item.isFilled).length;
-  const average = filledDays > 0 ? Math.round(total / filledDays) : 0;
-  const achievementPercent = monthlyTarget > 0 ? Math.round((total / monthlyTarget) * 100) : 0;
-  
-  csvData.push([]);
-  csvData.push(['Ringkasan', '', '', '', '', '']);
-  csvData.push(['Total Penjualan', total, '', '', '', '']);
-  csvData.push(['Hari Tercatat', filledDays, '', '', '', '']);
-  csvData.push(['Rata-rata Harian', average, '', '', '', '']);
-  csvData.push(['Target Bulanan', monthlyTarget, '', '', '', '']);
-  csvData.push(['Pencapaian Target', `${achievementPercent}%`, '', '', '', '']);
-  
-  const csvContent = csvData.map(row => 
-    row.map(cell => `"${cell}"`).join(',')
-  ).join('\n');
-  
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', `penjualan-coffee-${selectedYear}-${selectedMonth + 1}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  showToast('Data berhasil diexport ke CSV');
-}
+                    <div class="pt-4">
+                        <button type="submit" id="submitBtn" class="w-full py-3.5 text-sm uppercase tracking-wide">Konfirmasi Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-function showLoading(show) {
-  const loading = document.getElementById('loadingState');
-  const table = document.getElementById('mobileTable');
-  const empty = document.getElementById('emptyState');
-  
-  if (show) {
-    loading.classList.remove('hidden');
-    table.classList.add('hidden');
-    empty.classList.add('hidden');
-  } else {
-    loading.classList.add('hidden');
-  }
-}
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzBYHv-m-kskZznNhjxICosu9zzBsKlz-lC7NK-GPtHISxteXpzYPvqjZ5lq_e2HHcI/exec";
+        let salesData = [];
+        const modal = document.getElementById('entryModal');
+        const form = document.getElementById('salesForm');
+        const tableBody = document.getElementById('salesTableBody');
+        const emptyState = document.getElementById('emptyState');
 
-function showToast(message) {
-  let toast = document.getElementById('toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'toast';
-    toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg bg-gray-800 text-white text-sm font-medium shadow-lg opacity-0 transition-opacity duration-300';
-    document.body.appendChild(toast);
-  }
-  
-  toast.textContent = message;
-  toast.classList.remove('opacity-0');
-  toast.classList.add('opacity-100');
-  
-  setTimeout(() => {
-    toast.classList.remove('opacity-100');
-    toast.classList.add('opacity-0');
-  }, 3000);
-}
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', { dateStyle: 'medium' });
+        window.onload = refreshData;
 
-// ================= INITIALIZATION =================
-document.addEventListener('DOMContentLoaded', async function() {
-  updatePeriodeDisplay();
-  updateTargetDisplay();
-  
-  // Sembunyikan stats di mobile
-  if (window.innerWidth < 768) {
-    document.getElementById("statsSection").classList.add("hidden");
-  }
-  
-  // Coba koneksi ke Google Sheets
-  await initGoogleSheets();
-});
+        async function refreshData() {
+            tableBody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-gray-300 text-xs font-bold animate-pulse">Menghubungkan ke server...</td></tr>';
+            try {
+                const response = await fetch(`${API_URL}?action=read`);
+                salesData = await response.json();
+                renderTable();
+            } catch (err) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-red-400 py-10 text-xs italic">Koneksi Terputus.</td></tr>';
+            }
+        }
 
-// Event listener untuk input real-time
-document.getElementById('mobileModalInput').addEventListener('input', function(e) {
-  const value = e.target.value;
-  if (value && barisAktif !== null) {
-    updateComparisonInModal(value);
-  }
-});
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerText = "SABAR YA...";
 
-function updateComparisonInModal(value) {
-  const item = dataHarian[barisAktif];
-  if (!item || !item.hasPrevious) return;
-  
-  const comparisonResult = document.getElementById("comparisonResult");
-  const numValue = parseInt(value) || 0;
-  const diff = numValue - item.previousValue;
-  
-  if (diff > 0) {
-    comparisonResult.innerHTML = `
-      <span class="comparison-badge comparison-up">
-        <i class="fas fa-arrow-up mr-1"></i>+${Math.abs(diff)}
-      </span>
-      <p class="text-xs text-green-600 mt-1">Naik dari sebelumnya</p>
-    `;
-  } else if (diff < 0) {
-    comparisonResult.innerHTML = `
-      <span class="comparison-badge comparison-down">
-        <i class="fas fa-arrow-down mr-1"></i>${diff}
-      </span>
-      <p class="text-xs text-red-600 mt-1">Turun dari sebelumnya</p>
-    `;
-  } else {
-    comparisonResult.innerHTML = `
-      <span class="comparison-badge comparison-neutral">
-        <i class="fas fa-equals mr-1"></i>0
-      </span>
-      <p class="text-xs text-gray-600 mt-1">Sama dengan sebelumnya</p>
-    `;
-  }
-}
+            const payload = {
+                action: 'insert',
+                payload: {
+                    dateRaw: document.getElementById('inputDate').value,
+                    target: parseInt(document.getElementById('inputTarget').value),
+                    actual: parseInt(document.getElementById('inputActual').value)
+                }
+            };
 
-// Close modal dengan klik di luar
-document.addEventListener('click', (e) => {
-  const modal = document.getElementById('mobileModal');
-  const backdrop = document.getElementById('modalBackdrop');
-  
-  if (modal && backdrop && backdrop.classList.contains('show') && 
-      !modal.contains(e.target) && !e.target.closest('.mobile-table-row')) {
-    closeMobileModal();
-    closeSummaryModal();
-  }
-});
+            try {
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                setTimeout(() => { closeModal(); refreshData(); btn.disabled = false; btn.innerText = "Konfirmasi Simpan"; }, 1000);
+            } catch (err) {
+                alert("Gagal!"); btn.disabled = false;
+            }
+        });
 
-// Handle keyboard escape
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeMobileModal();
-    closeSummaryModal();
-    closeFilterModal();
-    closeTargetModal();
-  }
-});
+        function renderTable() {
+            tableBody.innerHTML = '';
+            if (!salesData || salesData.length === 0) {
+                emptyState.classList.remove('hidden');
+                updateDashboard();
+                return;
+            }
+            emptyState.classList.add('hidden');
+            salesData.sort((a, b) => new Date(b.dateRaw) - new Date(a.dateRaw));
 
-// Handle resize
-window.addEventListener('resize', function() {
-  if (window.innerWidth >= 768) {
-    document.getElementById("statsSection").classList.remove("hidden");
-  }
-});
+            salesData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const dateObj = new Date(item.dateRaw);
+                const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
+                const dateNum = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+                const target = parseInt(item.target) || 0;
+                const actual = parseInt(item.actual) || 0;
+                const achievement = target > 0 ? ((actual / target) * 100).toFixed(0) : 0;
+                
+                let trend = '<span class="text-gray-200">-</span>';
+                if (index < salesData.length - 1) {
+                    const diff = actual - (parseInt(salesData[index + 1].actual) || 0);
+                    if (diff > 0) trend = `<span class="text-[var(--grab-green)] font-bold">▲</span>`;
+                    else if (diff < 0) trend = `<span class="text-[var(--grab-red)] font-bold">▼</span>`;
+                }
 
-// Global functions untuk button onclick
-window.syncWithGoogleSheets = syncWithGoogleSheets;
-window.openFilterModal = openFilterModal;
-window.toggleStats = toggleStats;
-window.editToday = editToday;
-window.showSummary = showSummary;
-window.exportToCSV = exportToCSV;
-</script>
+                const statusBg = achievement >= 100 ? 'bg-green-100 text-[var(--grab-green)]' : 'bg-blue-50 text-[var(--grab-blue)]';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-3 border-b border-gray-50">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-[var(--grab-dark)]">${dayName}</span>
+                            <span class="text-[9px] text-gray-400 font-bold">${dateNum}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-3 text-right border-b border-gray-50 font-medium text-dark-300">
+                        ${target.toLocaleString()}
+                    </td>
+                    <td class="py-3 px-3 text-right border-b border-gray-50 font-extrabold text-[var(--grab-dark)] text-sm">
+                        ${actual.toLocaleString()}
+                    </td>
+                    <td class="py-3 px-3 text-center border-b border-gray-50">
+                        ${trend}
+                    </td>
+                    <td class="py-3 px-3 text-center border-b border-gray-50">
+                        <span class="${statusBg} px-2.5 py-1 rounded-full text-[9px] font-black uppercase">
+                            ${achievement}%
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            const totalT = salesData.reduce((s, i) => s + (parseInt(i.target) || 0), 0);
+            const totalA = salesData.reduce((s, i) => s + (parseInt(i.actual) || 0), 0);
+            const gap = totalA - totalT;
+            const ach = totalT > 0 ? ((totalA / totalT) * 100).toFixed(1) : 0;
+            const avg = salesData.length > 0 ? (totalA / salesData.length).toFixed(0) : 0;
+
+            document.getElementById('statTotalTarget').innerText = totalT.toLocaleString('id-ID');
+            document.getElementById('statTotalActual').innerText = totalA.toLocaleString('id-ID');
+            document.getElementById('statAverage').innerText = parseInt(avg).toLocaleString('id-ID');
+            document.getElementById('statAchievement').innerText = ach + '%';
+            
+            const elGap = document.getElementById('statGap');
+            elGap.innerText = (gap > 0 ? '+' : '') + gap.toLocaleString('id-ID');
+            elGap.className = `text-lg font-extrabold ${gap >= 0 ? 'text-[var(--grab-dark)]' : 'text-[var(--grab-red)]'}`;
+        }
+
+        function openModal() { modal.classList.remove('hidden'); document.getElementById('inputDate').valueAsDate = new Date(); }
+        function closeModal() { modal.classList.add('hidden'); form.reset(); }
+    </script>
 </body>
 </html>
