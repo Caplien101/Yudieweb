@@ -3,326 +3,193 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Serah Terima Shift</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>ST SHIFT PRO</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
-    :root {
-      --primary: #4f46e5; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-      --background: #f8fafc; --card: #ffffff; --text-dark: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
-    }
-
-    * { 
-      box-sizing: border-box; 
-      -webkit-tap-highlight-color: transparent; 
-      font-family: 'Inter', sans-serif; 
-    }
-
-    body { 
-      margin: 0; 
-      background: var(--background); 
-      color: var(--text-dark); 
-      min-height: 100vh; 
-      overflow-x: hidden;
-      font-size: 13px; /* Lebih kecil untuk mobile */
-    }
-
-    /* Loader Spinner */
-    #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-    .spinner { width: 32px; height: 32px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    header { 
-      background: white; 
-      padding: 8px 12px; 
-      border-bottom: 1px solid var(--border); 
-      position: sticky; 
-      top: 0; 
-      z-index: 100; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-    }
-    header span { font-size: 13px; font-weight: 800; }
-
-    .container { padding: 8px; max-width: 500px; margin: 0 auto; width: 100%; }
-    .hidden { display: none !important; }
-
-    /* Dashboard UI lebih compact */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .nav-card {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 10px 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-      transition: all 0.2s ease;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .nav-card:active { transform: scale(0.96); background: #f1f5f9; }
-
-    .nav-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .icon-master { background: #e0e7ff; color: #4f46e5; }
-    .icon-opname { background: #dcfce7; color: #10b981; }
-
-    .nav-text h3 { margin: 0; font-size: 12px; font-weight: 700; color: var(--text-dark); }
-    .nav-text p { display: none; }
-
-    .user-greeting {
-      font-size: 11px;
-      color: var(--success);
-      margin-bottom: 6px;
-      font-weight: 600;
-      min-height: 14px;
-    }
-
-    /* Cards lebih rapat */
-    .data-card { 
-      background: var(--card); 
-      border-radius: 8px; 
-      padding: 8px 10px; 
-      margin-bottom: 6px; 
-      border: 1px solid var(--border); 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      gap: 8px;
-    }
-    .data-card.filled { border-left: 4px solid var(--success); background: #f0fdf4; }
-
-    .card-info { flex: 1; }
-    .card-info h4 { margin: 0 0 2px 0; font-size: 12px; line-height: 1.2; }
-    .card-info p { margin: 0; font-size: 9px; color: var(--text-muted); }
-
-    .qty-badge { background: #e0e7ff; color: var(--primary); padding: 2px 5px; border-radius: 5px; font-weight: 700; font-size: 10px; }
-    .badge { 
-      background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; 
-      font-size: 9px; font-weight: 600; border: 1px solid var(--border);
-      display: inline-flex; align-items: center; margin-bottom: 4px;
-    }
-
-    .input-group { margin-bottom: 10px; }
-    .input-group label { display: block; font-size: 9px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; }
-
-    input, select { 
-      width: 100%; 
-      padding: 8px; 
-      border-radius: 6px; 
-      border: 1px solid var(--border); 
-      font-size: 14px; /* Mencegah auto-zoom */
-      margin-bottom: 4px; 
-    }
-    input[readonly] { background: #f1f5f9; color: #64748b; }
-
-    button { padding: 8px; border-radius: 6px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; }
-    .btn-primary { background: var(--primary); color: white; width: 100%; }
-    .btn-secondary { background: #e2e8f0; color: var(--text-dark); padding: 6px 10px; font-size: 11px; }
-
-    /* Modal compact */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; z-index: 1000; }
-    .modal-content { 
-      background: white; 
-      width: 100%; 
-      border-radius: 16px 16px 0 0; 
-      padding: 12px; 
-      padding-bottom: env(safe-area-inset-bottom);
-      max-height: 80vh; 
-      overflow-y: auto; 
-    }
-
-    .bottom-nav { 
-      position: fixed; 
-      bottom: 0; left: 0; right: 0; 
-      background: white; 
-      padding: 8px; 
-      padding-bottom: calc(8px + env(safe-area-inset-bottom)); 
-      border-top: 1px solid var(--border); 
-      display: flex; 
-      gap: 6px; 
-      max-width: 500px; 
-      margin: 0 auto; 
-    }
-
-    /* Barcode lebih kecil */
-    .bc-svg { max-width: 100px; height: auto; }
-
-    /* Penyesuaian khusus untuk step 2 card */
-    #cardListStep2 .data-card {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    #cardListStep2 .data-card > div:first-child {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    #cardListStep2 input[type="number"] {
-      width: 70px;
-      padding: 4px;
-      font-size: 12px;
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    input:focus { outline: none; border-color: #4f46e5; ring: 2px; ring-color: #4f46e5; }
+    /* Spinner Custom */
+    .loader-spin { border-top-color: #4f46e5; border-left-color: #4f46e5; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
-<body>
+<body class="text-slate-800">
 
-<div id="loader" class="hidden"><div class="spinner"></div><p style="margin-top:8px; font-weight:600">Sinkronisasi...</p></div>
+<div id="loader" class="fixed inset-0 z-[9999] hidden bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center">
+  <div class="w-12 h-12 border-4 border-slate-200 loader-spin rounded-full"></div>
+  <p class="mt-4 font-bold text-slate-600 animate-pulse">Sinkronisasi Data...</p>
+</div>
 
-<header id="appHeader" class="hidden">
-  <span style="font-weight: 800; letter-spacing: -0.5px;">ST SHIFT</span>
-  <button onclick="doLogout()" style="background:none; border:none; color: var(--danger); font-size: 11px; font-weight: 800;">LOGOUT</button>
+<header id="appHeader" class="hidden glass-header sticky top-0 z-[100] border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+  <div class="flex items-center gap-2">
+    <span class="bg-indigo-600 text-white p-1.5 rounded-lg text-xs font-bold">W-PRO</span>
+    <span class="font-extrabold tracking-tight text-slate-800">ST SHIFT</span>
+  </div>
+  <button onclick="doLogout()" class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full">KELUAR</button>
 </header>
 
-<div class="container" id="loginPage" style="text-align: center; padding-top: 50px;">
-  <div style="font-size: 50px; margin-bottom: 8px;">🛡️</div>
-  <h2 style="margin-bottom: 4px; font-size: 20px;">Stock Opname</h2>
-  <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 24px;">Login menggunakan NIK</p>
+<div id="loginPage" class="container mx-auto max-w-md px-6 pt-20 text-center">
+  <div class="mb-6 inline-flex w-20 h-20 items-center justify-center bg-indigo-50 rounded-3xl text-4xl">🛡️</div>
+  <h2 class="text-2xl font-extrabold text-slate-900">Stock Opname</h2>
+  <p class="text-slate-500 text-sm mt-1 mb-10">Gunakan NIK untuk akses sistem</p>
   
-  <div class="input-group">
-    <input type="text" id="username" placeholder="Masukkan NIK" oninput="handleNIKInput(this.value)">
-  </div>
-  <div id="displayEmployeeName" class="user-greeting-login" style="font-size:11px; margin-bottom:8px;"></div>
-  
-  <div class="input-group">
-    <input type="password" id="password" placeholder="Password">
-  </div>
-  <button class="btn-primary" onclick="doLogin()">Masuk</button>
-</div>
-
-<div class="container hidden" id="dashboard">
-  <div style="margin-bottom: 16px;">
-    <h2 style="margin: 0; font-size: 20px;">Halo, <span id="displayUser" style="color: var(--primary);">User</span> 👋</h2>
-    <p id="displayNIK" style="margin: 2px 0 0 0; font-size: 11px; color: var(--text-muted);"></p>
-  </div>
-
-  <div class="dashboard-grid">
-    <div class="nav-card" onclick="openMaster()">
-      <div class="nav-icon icon-master">📂</div>
-      <div class="nav-text"><h3>Master Data</h3></div>
+  <div class="space-y-4">
+    <div class="text-left">
+      <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">NIK Karyawan</label>
+      <input type="text" id="username" placeholder="Contoh: 202401" oninput="handleNIKInput(this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-lg shadow-sm focus:border-indigo-500 transition-all">
+      <div id="displayEmployeeName" class="text-xs font-semibold text-emerald-600 mt-2 px-1 h-4"></div>
     </div>
-    <div class="nav-card" onclick="openOpname()">
-      <div class="nav-icon icon-opname">📝</div>
-      <div class="nav-text"><h3>Mulai Opname</h3></div>
+    <div class="text-left">
+      <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Password</label>
+      <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-lg shadow-sm focus:border-indigo-500 transition-all">
+    </div>
+    <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="doLogin()">Masuk Sekarang</button>
+  </div>
+</div>
+
+<div id="dashboard" class="container mx-auto max-w-md px-4 py-6 hidden">
+  <div class="mb-8 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+    <h2 class="text-2xl font-bold">Halo, <span id="displayUser" class="text-indigo-600 italic">User</span> 👋</h2>
+    <p id="displayNIK" class="text-slate-400 text-sm font-medium mt-1"></p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div onclick="openMaster()" class="bg-white p-6 rounded-[2rem] border border-slate-200 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer hover:border-indigo-300">
+      <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl">📂</div>
+      <span class="font-bold text-slate-700">Master Data</span>
+    </div>
+    <div onclick="openOpname()" class="bg-indigo-600 p-6 rounded-[2rem] shadow-xl shadow-indigo-100 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer">
+      <div class="w-14 h-14 bg-white/20 text-white rounded-2xl flex items-center justify-center text-2xl">📝</div>
+      <span class="font-bold text-white">Mulai Opname</span>
     </div>
   </div>
 </div>
 
-<div class="container hidden" id="masterPage">
-  <div style="display:flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-    <button onclick="showPage('dashboard')" class="btn-secondary" style="padding:6px 10px;">←</button>
-    <input type="text" id="searchMaster" oninput="filterMaster()" placeholder="Cari PLU / Nama..." style="margin-bottom:0; font-size:13px;">
+<div id="masterPage" class="container mx-auto max-w-md px-4 py-4 hidden">
+  <div class="flex items-center gap-3 mb-6">
+    <button onclick="showPage('dashboard')" class="w-12 h-12 flex items-center justify-center bg-white border border-slate-200 rounded-2xl text-xl">←</button>
+    <div class="flex-1">
+      <input type="text" id="searchMaster" oninput="filterMaster()" placeholder="Cari barang..." class="w-full p-3 bg-white border border-slate-200 rounded-2xl">
+    </div>
   </div>
-  <div id="cardListMaster"></div>
+  <div id="cardListMaster" class="space-y-3 pb-10"></div>
 </div>
 
-<div class="container hidden" id="opnamePage" style="padding-bottom: 80px;">
+<div id="opnamePage" class="container mx-auto max-w-md px-4 py-4 hidden pb-32">
   <div id="step1Content">
-    <div style="margin-bottom: 10px;"><small><b>STEP 1:</b> INPUT DISPLAY</small></div>
-    <input type="text" id="filterOpname" oninput="applyFilter()" placeholder="Cari barang display...">
-    <div id="cardListStep1"></div>
-    <div class="bottom-nav">
-      <button class="btn-secondary" onclick="showPage('dashboard')">Batal</button>
-      <button class="btn-primary" onclick="goStep2()">Lanjut</button>
+    <div class="flex justify-between items-end mb-4">
+      <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest leading-none">Step 1: Input Display</h3>
+      <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">SINKRON</span>
+    </div>
+    <input type="text" id="filterOpname" oninput="applyFilter()" placeholder="Filter barang..." class="w-full p-3 bg-white border border-slate-200 rounded-xl mb-4">
+    <div id="cardListStep1" class="space-y-2"></div>
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-100 flex gap-3 safe-bottom z-50">
+      <button class="flex-1 py-4 rounded-2xl font-bold bg-slate-100 text-slate-600" onclick="showPage('dashboard')">Batal</button>
+      <button class="flex-[2] py-4 rounded-2xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200" onclick="goStep2()">Lanjut Step 2</button>
     </div>
   </div>
 
   <div id="step2Content" class="hidden">
-    <div style="margin-bottom: 10px;"><small><b>STEP 2:</b> DATA PENERIMAAN</small></div>
-    <select id="shift" style="margin-bottom:8px;"><option value="">Pilih Shift</option><option>Pagi</option><option>Siang</option><option>Malam</option></select>
-    <div class="input-group">
-      <label>Penyerah (Login)</label>
-      <input type="text" id="penyerah" readonly>
+    <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4">Step 2: Data Penerimaan</h3>
+    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-4 mb-6">
+        <select id="shift" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold">
+            <option value="">Pilih Shift</option><option>Pagi</option><option>Siang</option><option>Malam</option>
+        </select>
+        <div class="flex gap-2">
+            <div class="flex-1">
+                <label class="text-[10px] font-bold text-slate-400 block ml-1 uppercase">Penyerah</label>
+                <input type="text" id="penyerah" readonly class="w-full p-3 bg-slate-100 text-slate-500 rounded-xl text-sm">
+            </div>
+            <div class="flex-1">
+                <label class="text-[10px] font-bold text-slate-400 block ml-1 uppercase">Penerima</label>
+                <input type="text" id="penerima" placeholder="..." class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm">
+            </div>
+        </div>
     </div>
-    <div class="input-group">
-      <label>Penerima</label>
-      <input type="text" id="penerima" placeholder="Nama penerima...">
-    </div>
-    <div id="cardListStep2" style="margin-top:16px;"></div>
-    <div class="bottom-nav">
-      <button class="btn-secondary" onclick="setStep(1)">Kembali</button>
-      <button class="btn-primary" onclick="goStep3()">Review</button>
+    
+    <div id="cardListStep2" class="space-y-3"></div>
+
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 flex gap-3 safe-bottom z-50">
+      <button class="flex-1 py-4 rounded-2xl font-bold bg-slate-100" onclick="setStep(1)">Kembali</button>
+      <button class="flex-[2] py-4 rounded-2xl font-bold bg-indigo-600 text-white shadow-lg" onclick="goStep3()">Review Data</button>
     </div>
   </div>
 
-  <div id="step3Content" class="hidden">
-    <div style="margin-bottom: 10px;"><small><b>STEP 3:</b> REVIEW & SINKRONISASI</small></div>
-    <div id="cardListStep3"></div>
-    <div class="bottom-nav">
-      <button class="btn-primary" onclick="finishAll()" style="background:var(--success)">Selesai</button>
+  <div id="step3Content" class="hidden text-center">
+    <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-6">Step 3: Hasil Review</h3>
+    <div id="cardListStep3" class="space-y-3 mb-10 text-left"></div>
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 safe-bottom">
+      <button class="w-full py-4 rounded-2xl font-extrabold bg-emerald-500 text-white shadow-lg shadow-emerald-100 text-lg" onclick="finishAll()">SELESAI & SINKRON</button>
     </div>
   </div>
 </div>
 
-<div id="modalEntry" class="modal hidden">
-  <div class="modal-content">
-    <h3 id="modalTitle" style="margin:0 0 4px 0; font-size:16px;">Item</h3>
-    <p id="modalPLU" style="color:var(--text-muted); font-size: 11px; margin-bottom: 16px;">PLU: 0000</p>
+<div id="modalEntry" class="modal fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center hidden">
+  <div class="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl animate-slide-up">
+    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+    <h3 id="modalTitle" class="text-xl font-extrabold text-slate-900">Item Name</h3>
+    <p id="modalPLU" class="text-indigo-600 font-bold text-sm mb-6 uppercase tracking-wider"></p>
     
     <div id="modalBodyDisplay">
-        <div style="text-align:center; padding: 16px; background: #f8fafc; border-radius: 12px; margin-bottom:16px;">
-            <small style="color:var(--text-muted); font-weight:600">Qty Display</small>
-            <h1 id="displayTotal" style="margin:4px 0 0 0; color:var(--primary); font-size: 36px;">0</h1>
+        <div class="text-center py-8 bg-indigo-50/50 rounded-[2rem] mb-6">
+            <small class="text-slate-400 font-bold uppercase tracking-widest">Jumlah di Display</small>
+            <h1 id="displayTotal" class="text-6xl font-black text-indigo-600 mt-2 tracking-tighter">0</h1>
         </div>
-        <input type="number" id="inputAddQty" placeholder="Tambah jumlah..." style="text-align:center; font-size: 18px; margin-bottom:12px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom:8px;">
-            <button class="btn-secondary" onclick="resetCurrentQty()">Reset</button>
-            <button class="btn-primary" onclick="handleModalSave()">Tambahkan</button>
+        <div class="flex gap-4 items-center mb-6">
+            <input type="number" id="inputAddQty" placeholder="0" class="flex-1 p-5 bg-white border-2 border-slate-100 rounded-2xl text-center text-3xl font-bold focus:border-indigo-500">
         </div>
-        <button class="btn-secondary" onclick="closeModal()" style="width:100%">Batal</button>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <button class="py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl" onclick="resetCurrentQty()">Reset</button>
+            <button class="py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100" onclick="handleModalSave()">Input</button>
+        </div>
+        <button class="w-full py-4 text-slate-400 font-semibold" onclick="closeModal()">Tutup</button>
     </div>
 
-    <div id="modalBodyRevisi" class="hidden">
-        <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap:4px;">
-            <span class="badge">Gudang: <span id="bGd">0</span></span>
-            <span class="badge">Mako: <span id="bMk">0</span></span>
-            <span class="badge">Disp: <span id="bDs">0</span></span>
-            <span class="badge">On Hand: <span id="bOh">0</span></span>
+    <div id="modalBodyRevisi" class="hidden space-y-4">
+        <div class="flex flex-wrap gap-2 justify-center mb-4">
+            <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Gudang: <span id="bGd">0</span></span>
+            <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Mako: <span id="bMk">0</span></span>
+            <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Disp: <span id="bDs">0</span></span>
         </div>
-        <div class="input-group"><label>Qty Gudang Baru</label><input type="number" id="revG"></div>
-        <div class="input-group"><label>Qty Mako (Read Only)</label><input type="number" id="revM" readonly></div>
-        <div class="input-group"><label>Qty Display Baru</label><input type="number" id="revD"></div>
-        <div class="input-group"><label>Qty On Hand</label><input type="number" id="revOH"></div>
-        <div style="display: flex; gap: 8px; margin-top:8px;">
-            <button class="btn-primary" onclick="handleModalSave()" style="flex:2">Simpan</button>
-            <button class="btn-secondary" onclick="closeModal()" style="flex:1">Batal</button>
+        <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1">QTY GUDANG</label><input type="number" id="revG" class="w-full p-3 border border-slate-200 rounded-xl font-bold text-center"></div>
+            <div><label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1">QTY DISPLAY</label><input type="number" id="revD" class="w-full p-3 border border-slate-200 rounded-xl font-bold text-center"></div>
+        </div>
+        <div class="pt-2"><label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 italic text-emerald-600">AKTUAL ON HAND (INPUT LAPANGAN)</label><input type="number" id="revOH" class="w-full p-4 border-2 border-emerald-500 bg-emerald-50 rounded-xl font-black text-2xl text-center text-emerald-700"></div>
+        <div class="flex gap-3 pt-4">
+            <button class="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg" onclick="handleModalSave()">Simpan Revisi</button>
+            <button class="px-6 py-4 bg-slate-100 text-slate-400 font-bold rounded-2xl" onclick="closeModal()">X</button>
         </div>
     </div>
   </div>
 </div>
 
-<div id="modalMaster" class="modal hidden">
-  <div class="modal-content">
-    <h3 style="margin-bottom:16px; font-size:16px;">Update Stok Gudang</h3>
-    <div class="input-group"><label>PLU / Nama</label><input type="text" id="mDesc" readonly></div>
-    <div class="input-group"><label>Qty Gudang</label><input type="number" id="mQtyG"></div>
-    <div class="input-group"><label>Qty Mako (Read Only)</label><input type="number" id="mQtyM" readonly></div>
-    <button class="btn-primary" onclick="saveMasterUpdate()" style="margin-bottom:8px;">Update</button>
-    <button class="btn-secondary" onclick="closeModal()" style="width:100%">Tutup</button>
+<div id="modalMaster" class="modal fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center hidden">
+  <div class="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl">
+    <h3 class="text-xl font-extrabold text-slate-900 mb-6">Update Stok Gudang</h3>
+    <div class="space-y-4 mb-8">
+        <div><label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Deskripsi Barang</label><input type="text" id="mDesc" readonly class="w-full p-3 bg-slate-50 border-none text-slate-500 font-bold rounded-xl italic"></div>
+        <div class="flex gap-4">
+            <div class="flex-1"><label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Stok Gudang</label><input type="number" id="mQtyG" class="w-full p-5 bg-indigo-50 border-2 border-indigo-200 text-indigo-700 font-black text-3xl rounded-2xl text-center"></div>
+            <div class="flex-1"><label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Mako</label><input type="number" id="mQtyM" readonly class="w-full p-5 bg-slate-100 text-slate-400 font-black text-3xl rounded-2xl text-center"></div>
+        </div>
+    </div>
+    <div class="flex flex-col gap-2">
+        <button class="w-full py-5 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl shadow-indigo-100 text-lg" onclick="saveMasterUpdate()">Update Data</button>
+        <button class="w-full py-4 text-slate-400 font-semibold" onclick="closeModal()">Batalkan</button>
+    </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script>
+// SEMUA LOGIKA JAVASCRIPT ANDA DI SINI (TETAP SAMA SEPERTI SEBELUMNYA)
+// Hanya bagian Render HTML yang disesuaikan untuk Tailwind
+
 const API_URL = "https://script.google.com/macros/s/AKfycbwjqh46cEuJB8kmsRpHBJwD607fPgZCLJeGba6z7B6rvxXEZMOBFhAwJSiFdyRtX6Dt/exec"; 
 let masterData = [];
 let opnameSession = JSON.parse(localStorage.getItem('opname_session')) || [];
@@ -336,13 +203,12 @@ async function callGAS(payload) {
     } catch (err) { console.error(err); throw err; }
 }
 
-// LOGIN FEATURES
 async function handleNIKInput(nik) {
     const display = document.getElementById('displayEmployeeName');
     if (nik.length >= 4) {
         try {
             const res = await callGAS({ action: 'checkNIK', nik: nik });
-            display.innerText = res.status === 'success' ? "Karyawan: " + res.nama : "";
+            display.innerText = res.status === 'success' ? "✓ " + res.nama : "";
         } catch (e) {}
     } else { display.innerText = ""; }
 }
@@ -350,7 +216,7 @@ async function handleNIKInput(nik) {
 async function doLogin() {
     const user_name = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    if(!user_name || !password) return alert("Lengkapi data!");
+    if(!user_name || !password) return alert("NIK & Password wajib diisi!");
     
     toggleLoading(true);
     try {
@@ -359,20 +225,20 @@ async function doLogin() {
             sessionStorage.setItem('isLogged', '1');
             sessionStorage.setItem('userName', res.user);
             sessionStorage.setItem('userNIK', res.nik);
-            
             document.getElementById('displayUser').innerText = res.user;
-            document.getElementById('displayNIK').innerText = "NIK: " + res.nik;
-            
+            document.getElementById('displayNIK').innerText = "ID KARYAWAN: " + res.nik;
             await initMaster();
             showPage('dashboard');
-        } else { alert("NIK/Password Salah!"); }
-    } catch(e) { alert("Gagal koneksi ke server."); } 
+        } else { alert("Akses ditolak. Cek NIK/Pass!"); }
+    } catch(e) { alert("Server tidak merespon."); } 
     finally { toggleLoading(false); }
 }
 
-// DASHBOARD & NAVIGATION
 function showPage(id) {
-    document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('dashboard').classList.add('hidden');
+    document.getElementById('masterPage').classList.add('hidden');
+    document.getElementById('opnamePage').classList.add('hidden');
     document.getElementById(id).classList.remove('hidden');
     document.getElementById('appHeader').classList.toggle('hidden', id === 'loginPage');
 }
@@ -389,7 +255,6 @@ function openOpname() {
     setStep(1);
 }
 
-// DATA LOGIC
 async function initMaster() {
     toggleLoading(true);
     try {
@@ -402,16 +267,14 @@ async function initMaster() {
 function renderMasterList() {
     const container = document.getElementById('cardListMaster');
     container.innerHTML = masterData.map((it, i) => `
-        <div class="data-card" onclick="openMasterDetailModal(${i})">
-            <div class="card-info">
-                <h4>${it.description}</h4>
-                <p>PLU: ${it.plu} | Mako: ${it.qty_mako}</p>
-                <div style="margin-top:4px;"><svg class="bc-svg" data-val="${it.barcode}"></svg></div>
+        <div class="bg-white p-4 rounded-3xl border border-slate-200 flex justify-between items-center active:scale-[0.98] transition-all shadow-sm" onclick="openMasterDetailModal(${i})">
+            <div>
+                <h4 class="font-extrabold text-slate-800 text-sm">${it.description}</h4>
+                <p class="text-[10px] text-slate-400 font-bold tracking-widest mt-1">PLU ${it.plu} • MAKO: ${it.qty_mako}</p>
             </div>
-            <div class="qty-badge">${it.qty_gudang}</div>
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-black text-sm">${it.qty_gudang}</div>
         </div>
     `).join('');
-    renderBarcodes();
 }
 
 function openMasterDetailModal(i) {
@@ -434,7 +297,6 @@ async function saveMasterUpdate() {
     } finally { toggleLoading(false); }
 }
 
-// OPNAME STEPS
 function setStep(n) {
     [1,2,3].forEach(i => document.getElementById(`step${i}Content`).classList.toggle('hidden', i !== n));
     if(n === 1) renderStep1();
@@ -442,23 +304,36 @@ function setStep(n) {
 
 function renderStep1() {
     document.getElementById('cardListStep1').innerHTML = opnameSession.map((it, i) => `
-        <div class="data-card ${it.qtyDisplay > 0 ? 'filled' : ''}" onclick="openEntryModal(${i}, 'DISPLAY')">
-            <div class="card-info"><h4>${it.description}</h4><p>PLU: ${it.plu}</p></div>
-            <div class="qty-badge">${it.qtyDisplay}</div>
+        <div class="bg-white p-4 rounded-3xl border-2 ${it.qtyDisplay > 0 ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-100'} flex justify-between items-center" onclick="openEntryModal(${i}, 'DISPLAY')">
+            <div class="card-info">
+                <h4 class="font-bold text-slate-800 text-sm">${it.description}</h4>
+                <p class="text-[9px] text-slate-400 font-bold uppercase">PLU: ${it.plu}</p>
+            </div>
+            <div class="px-4 py-2 ${it.qtyDisplay > 0 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'} rounded-2xl font-black text-sm">${it.qtyDisplay}</div>
         </div>
     `).join('');
 }
 
 function goStep2() {
     setStep(2);
+    // STEP 2: MINIMALIST (Permintaan No. 2)
     document.getElementById('cardListStep2').innerHTML = opnameSession.map((it, i) => `
-        <div class="data-card">
-            <div>
-                <div class="card-info"><h4>${it.description}</h4><p>PLU: ${it.plu}</p></div>
-                <input type="number" placeholder="OnHand" value="${it.qtyOnHand || ''}" 
-                    onchange="updateFisik(${i}, this.value)" style="width:70px; text-align:center; padding:4px;">
+        <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm space-y-3">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h4 class="font-bold text-slate-800 leading-tight">${it.description}</h4>
+                    <p class="text-[10px] text-indigo-500 font-bold mt-1 uppercase tracking-widest">${it.plu}</p>
+                </div>
+                <div class="ml-2">
+                    <svg class="bc-svg" data-val="${it.barcode}"></svg>
+                </div>
             </div>
-            <svg class="bc-svg" data-val="${it.barcode}"></svg>
+            <div class="relative">
+                <input type="number" placeholder="Entry On Hand..." value="${it.qtyOnHand || ''}" 
+                    onchange="updateFisik(${i}, this.value)" 
+                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-xl font-black text-indigo-600 focus:border-indigo-400 transition-all">
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-300">FISIK</div>
+            </div>
         </div>
     `).join('');
     renderBarcodes();
@@ -493,22 +368,24 @@ function renderStep3() {
         const sel = it.qtyOnHand - totalSis;
         if(sel !== 0) {
             container.innerHTML += `
-                <div class="data-card">
-                    <div class="card-info">
-                        <h4>${it.description}</h4>
-                        <p>OnHand: ${it.qtyOnHand} | Fisik: ${totalSis} | Sel: <b style="color:${sel<0?'red':'green'}">${sel}</b></p>
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-200 flex justify-between items-center">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm leading-tight">${it.description}</h4>
+                        <p class="text-[10px] font-bold mt-1 text-slate-400">OH: ${it.qtyOnHand} | FISIK: ${totalSis}</p>
+                        <p class="text-xs font-black mt-1 ${sel<0?'text-red-500':'text-emerald-500'}">SELISIH: ${sel}</p>
                     </div>
-                    <button class="btn-secondary" onclick="openEntryModal(${i}, 'REVISI')" style="padding:4px 8px;">Edit</button>
+                    <button class="bg-indigo-50 text-indigo-600 font-bold px-4 py-3 rounded-2xl text-xs" onclick="openEntryModal(${i}, 'REVISI')">Edit</button>
                 </div>`;
         }
     });
+    if(container.innerHTML === "") container.innerHTML = "<div class='py-20 text-center text-slate-300 font-bold'>✓ Tidak ada selisih data.</div>";
 }
 
 function openEntryModal(i, mode) {
     currentIdx = i; currentMode = mode;
     const it = opnameSession[i];
     document.getElementById('modalTitle').innerText = it.description;
-    document.getElementById('modalPLU').innerText = "PLU: " + it.plu;
+    document.getElementById('modalPLU').innerText = "KODE PLU: " + it.plu;
     
     if(mode === 'DISPLAY') {
         document.getElementById('modalBodyDisplay').classList.remove('hidden');
@@ -521,9 +398,7 @@ function openEntryModal(i, mode) {
         document.getElementById('bGd').innerText = it.qty_gudang;
         document.getElementById('bMk').innerText = it.qty_mako;
         document.getElementById('bDs').innerText = it.qtyDisplay;
-        document.getElementById('bOh').innerText = it.qtyOnHand;
         document.getElementById('revG').value = it.qty_gudang;
-        document.getElementById('revM').value = it.qty_mako;
         document.getElementById('revD').value = it.qtyDisplay;
         document.getElementById('revOH').value = it.qtyOnHand;
     }
@@ -562,24 +437,23 @@ async function handleModalSave() {
 
 function toggleLoading(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
 function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
-function backStep1() { setStep(1); }
 function resetCurrentQty() { 
     opnameSession[currentIdx].qtyDisplay = 0; 
     document.getElementById('displayTotal').innerText = "0"; 
     document.getElementById('inputAddQty').value = '';
 }
 function doLogout() { sessionStorage.clear(); localStorage.removeItem('opname_session'); location.reload(); }
-function renderBarcodes() { document.querySelectorAll('.bc-svg').forEach(el => JsBarcode(el, el.dataset.val, { height: 25, width: 1, fontSize: 8 })); }
+function renderBarcodes() { document.querySelectorAll('.bc-svg').forEach(el => JsBarcode(el, el.dataset.val, { height: 25, width: 1.2, fontSize: 8, background: "transparent" })); }
 function filterMaster() {
     const f = document.getElementById('searchMaster').value.toLowerCase();
-    document.querySelectorAll('#cardListMaster .data-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
+    document.querySelectorAll('#cardListMaster > div').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
 }
 function applyFilter() {
     const f = document.getElementById('filterOpname').value.toLowerCase();
-    document.querySelectorAll('#cardListStep1 .data-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
+    document.querySelectorAll('#cardListStep1 > div').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
 }
 function finishAll() {
-    if(confirm("Selesaikan opname dan hapus data lokal?")) {
+    if(confirm("Pastikan semua data benar. Selesaikan?")) {
         localStorage.removeItem('opname_session'); opnameSession = []; showPage('dashboard');
     }
 }
@@ -587,7 +461,7 @@ function finishAll() {
 window.onload = () => {
     if(sessionStorage.getItem('isLogged')) { 
         document.getElementById('displayUser').innerText = sessionStorage.getItem('userName');
-        document.getElementById('displayNIK').innerText = "NIK: " + sessionStorage.getItem('userNIK');
+        document.getElementById('displayNIK').innerText = "ID KARYAWAN: " + sessionStorage.getItem('userNIK');
         initMaster(); showPage('dashboard'); 
     }
 };
