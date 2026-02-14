@@ -5,112 +5,537 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ST SHIFT PRO</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Heroicons CDN -->
+  <script src="https://unpkg.com/heroicons@2.0.18/20/outline/index.js"></script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
     .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
     input:focus { outline: none; border-color: #4f46e5; ring: 2px; ring-color: #4f46e5; }
-    /* Spinner Custom */
     .loader-spin { border-top-color: #4f46e5; border-left-color: #4f46e5; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 antialiased">
 
-<div id="loader" class="fixed inset-0 z-[9999] hidden bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center">
-  <div class="w-12 h-12 border-4 border-slate-200 loader-spin rounded-full"></div>
-  <p class="mt-4 font-bold text-slate-600 animate-pulse">Sinkronisasi Data...</p>
+<!-- LOADER -->
+<div id="loader" class="fixed inset-0 z-[9999] hidden bg-white/90 backdrop-blur-sm flex items-center justify-center">
+  <div class="flex flex-col items-center">
+    <div class="w-14 h-14 border-4 border-slate-200 loader-spin rounded-full"></div>
+    <p class="mt-4 font-bold text-slate-600 animate-pulse">Sinkronisasi Data...</p>
+  </div>
 </div>
 
+<!-- HEADER -->
 <header id="appHeader" class="hidden glass-header sticky top-0 z-[100] border-b border-slate-200 px-4 py-3 flex justify-between items-center">
   <div class="flex items-center gap-2">
-    <span class="bg-indigo-600 text-white p-1.5 rounded-lg text-xs font-bold">W-PRO</span>
-    <span class="font-extrabold tracking-tight text-slate-800">ST SHIFT</span>
+    <span class="bg-indigo-600 text-white p-1.5 rounded-xl text-xs font-bold">W-PRO</span>
+    <span class="font-extrabold tracking-tight text-slate-800 text-lg">ST SHIFT</span>
   </div>
-  <button onclick="doLogout()" class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full">KELUAR</button>
+  <button onclick="doLogout()" class="text-xs font-bold text-red-500 bg-red-50 px-4 py-2 rounded-full active:scale-95 transition-transform">KELUAR</button>
 </header>
 
-<div id="loginPage" class="container mx-auto max-w-md px-6 pt-20 text-center">
-  <div class="mb-6 inline-flex w-20 h-20 items-center justify-center bg-indigo-50 rounded-3xl text-4xl">🛡️</div>
-  <h2 class="text-2xl font-extrabold text-slate-900">Stock Opname</h2>
-  <p class="text-slate-500 text-sm mt-1 mb-10">Gunakan NIK untuk akses sistem</p>
-  
-  <div class="space-y-4">
-    <div class="text-left">
-      <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">NIK Karyawan</label>
-      <input type="text" id="username" placeholder="Contoh: 202401" oninput="handleNIKInput(this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-lg shadow-sm focus:border-indigo-500 transition-all">
-      <div id="displayEmployeeName" class="text-xs font-semibold text-emerald-600 mt-2 px-1 h-4"></div>
+<!-- HALAMAN LOGIN -->
+<div id="loginPage" class="container mx-auto max-w-md px-6 pt-16 text-center min-h-screen flex flex-col">
+  <div class="flex-1 flex flex-col justify-center">
+    <!-- Ikon perisai diganti dengan Heroicons Shield Check -->
+    <div class="mb-6 inline-flex w-20 h-20 items-center justify-center bg-indigo-50 rounded-3xl shadow-inner">
+      <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286z" />
+      </svg>
     </div>
-    <div class="text-left">
-      <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Password</label>
-      <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-lg shadow-sm focus:border-indigo-500 transition-all">
+    <h2 class="text-2xl font-extrabold text-slate-900">Stock Opname</h2>
+    <p class="text-slate-500 text-sm mt-1 mb-10">Gunakan NIK untuk akses sistem</p>
+    
+    <div class="space-y-5">
+      <div class="text-left">
+        <label class="text-xs font-bold text-slate-400 uppercase ml-1">NIK Karyawan</label>
+        <input type="text" id="username" placeholder="Contoh: 202401" oninput="handleNIKInput(this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-base shadow-sm focus:border-indigo-500 transition-all">
+        <div id="displayEmployeeName" class="text-xs font-semibold text-emerald-600 mt-2 px-1 h-4"></div>
+      </div>
+      <div class="text-left">
+        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Password</label>
+        <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-base shadow-sm focus:border-indigo-500 transition-all">
+      </div>
+      <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="doLogin()">Masuk Sekarang</button>
     </div>
-    <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="doLogin()">Masuk Sekarang</button>
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="dashboard" class="container mx-auto max-w-md px-4 py-6 hidden">
-  <div class="mb-8 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+  <div class="mb-8 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
     <h2 class="text-2xl font-bold">Halo, <span id="displayUser" class="text-indigo-600 italic">User</span> 👋</h2>
     <p id="displayNIK" class="text-slate-400 text-sm font-medium mt-1"></p>
   </div>
 
   <div class="grid grid-cols-2 gap-4">
-    <div onclick="openMaster()" class="bg-white p-6 rounded-[2rem] border border-slate-200 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer hover:border-indigo-300">
-      <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl">📂</div>
+    <!-- Card Master Data dengan ikon Folder -->
+    <div onclick="openMaster()" class="bg-white p-6 rounded-3xl border border-slate-200 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer hover:border-indigo-300 shadow-sm">
+      <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+        </svg>
+      </div>
       <span class="font-bold text-slate-700">Master Data</span>
     </div>
-    <div onclick="openOpname()" class="bg-indigo-600 p-6 rounded-[2rem] shadow-xl shadow-indigo-100 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer">
-      <div class="w-14 h-14 bg-white/20 text-white rounded-2xl flex items-center justify-center text-2xl">📝</div>
+    <!-- Card Mulai Opname dengan ikon Clipboard Document List -->
+    <div onclick="openOpname()" class="bg-indigo-600 p-6 rounded-3xl shadow-xl shadow-indigo-100 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer">
+      <div class="w-14 h-14 bg-white/20 text-white rounded-2xl flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+      </div>
       <span class="font-bold text-white">Mulai Opname</span>
     </div>
   </div>
 </div>
 
-<div id="masterPage" class="container mx-auto max-w-md px-4 py-4 hidden">
+<!-- MASTER PAGE -->
+<div id="masterPage" class="container mx-auto max-w-md px-4 py-4 hidden pb-8">
   <div class="flex items-center gap-3 mb-6">
-    <button onclick="showPage('dashboard')" class="w-12 h-12 flex items-center justify-center bg-white border border-slate-200 rounded-2xl text-xl">←</button>
+    <!-- Tombol kembali dengan ikon Arrow Left -->
+    <button onclick="showPage('dashboard')" class="w-12 h-12 flex items-center justify-center bg-white border border-slate-200 rounded-2xl shadow-sm active:scale-95 transition-transform">
+      <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+      </svg>
+    </button>
     <div class="flex-1">
-      <input type="text" id="searchMaster" oninput="filterMaster()" placeholder="Cari barang..." class="w-full p-3 bg-white border border-slate-200 rounded-2xl">
+      <input type="text" id="searchMaster" oninput="filterMaster()" placeholder="Cari barang..." class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:border-indigo-500">
     </div>
   </div>
-  <div id="cardListMaster" class="space-y-3 pb-10"></div>
+  <div id="cardListMaster" class="space-y-3"></div>
 </div>
 
+<!-- OPNAME PAGE (MULTI-STEP) -->
 <div id="opnamePage" class="container mx-auto max-w-md px-4 py-4 hidden pb-32">
+  <!-- STEP 1 -->
   <div id="step1Content">
     <div class="flex justify-between items-end mb-4">
       <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest leading-none">Step 1: Input Display</h3>
       <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">SINKRON</span>
     </div>
-    <input type="text" id="filterOpname" oninput="applyFilter()" placeholder="Filter barang..." class="w-full p-3 bg-white border border-slate-200 rounded-xl mb-4">
+    <input type="text" id="filterOpname" oninput="applyFilter()" placeholder="Filter barang..." class="w-full p-3 bg-white border border-slate-200 rounded-xl mb-4 focus:border-indigo-500">
     <div id="cardListStep1" class="space-y-2"></div>
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-100 flex gap-3 safe-bottom z-50">
-      <button class="flex-1 py-4 rounded-2xl font-bold bg-slate-100 text-slate-600" onclick="showPage('dashboard')">Batal</button>
-      <button class="flex-[2] py-4 rounded-2xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200" onclick="goStep2()">Lanjut Step 2</button>
+      <button class="flex-1 py-4 rounded-xl font-bold bg-slate-100 text-slate-600 active:scale-95 transition-transform" onclick="showPage('dashboard')">Batal</button>
+      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="goStep2()">Lanjut Step 2</button>
     </div>
   </div>
 
+  <!-- STEP 2 -->
   <div id="step2Content" class="hidden">
     <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4">Step 2: Data Penerimaan</h3>
-    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-4 mb-6">
-        <select id="shift" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold">
-            <option value="">Pilih Shift</option><option>Pagi</option><option>Siang</option><option>Malam</option>
-        </select>
-        <div class="flex gap-2">
-            <div class="flex-1">
-                <label class="text-[10px] font-bold text-slate-400 block ml-1 uppercase">Penyerah</label>
-                <input type="text" id="penyerah" readonly class="w-full p-3 bg-slate-100 text-slate-500 rounded-xl text-sm">
-            </div>
-            <div class="flex-1">
-                <label class="text-[10px] font-bold text-slate-400 block ml-1 uppercase">Penerima</label>
-                <input type="text" id="penerima" placeholder="..." class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm">
-            </div>
+    <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4 mb-6">
+      <select id="shift" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-indigo-500">
+        <option value="">Pilih Shift</option>
+        <option>Pagi</option>
+        <option>Siang</option>
+        <option>Malam</option>
+      </select>
+      <div class="flex gap-3">
+        <div class="flex-1">
+          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Penyerah</label>
+          <input type="text" id="penyerah" readonly class="w-full p-3 bg-slate-100 text-slate-500 rounded-xl text-sm">
         </div>
+        <div class="flex-1">
+          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Penerima</label>
+          <input type="text" id="penerima" placeholder="Nama penerima" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500">
+        </div>
+      </div>
     </div>
     
+    <div id="cardListStep2" class="space-y-3"></div>
+
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 flex gap-3 safe-bottom z-50">
+      <!-- Tombol kembali dengan ikon Arrow Left -->
+      <button class="flex-1 py-4 rounded-xl font-bold bg-slate-100 text-slate-600 flex items-center justify-center gap-2 active:scale-95 transition-transform" onclick="setStep(1)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Kembali
+      </button>
+      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg active:scale-95 transition-transform" onclick="goStep3()">Review Data</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="step3Content" class="hidden">
+    <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-6">Step 3: Hasil Review</h3>
+    <div id="cardListStep3" class="space-y-3 mb-24"></div>
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 safe-bottom">
+      <button class="w-full py-4 rounded-xl font-extrabold bg-emerald-500 text-white shadow-lg shadow-emerald-100 text-lg active:scale-95 transition-transform" onclick="finishAll()">SELESAI & SINKRON</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENTRY (DISPLAY & REVISI) -->
+<div id="modalEntry" class="modal fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-end justify-center hidden transition-opacity">
+  <div class="bg-white w-full max-w-md rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+    <h3 id="modalTitle" class="text-xl font-extrabold text-slate-900">Item Name</h3>
+    <p id="modalPLU" class="text-indigo-600 font-bold text-sm mb-6 uppercase tracking-wider"></p>
+    
+    <!-- MODE DISPLAY -->
+    <div id="modalBodyDisplay">
+      <div class="text-center py-8 bg-indigo-50/50 rounded-2xl mb-6">
+        <small class="text-slate-400 font-bold uppercase tracking-widest">Jumlah di Display</small>
+        <h1 id="displayTotal" class="text-6xl font-black text-indigo-600 mt-2 tracking-tighter">0</h1>
+      </div>
+      <div class="flex gap-4 items-center mb-6">
+        <input type="number" id="inputAddQty" placeholder="0" class="flex-1 p-4 bg-white border-2 border-slate-100 rounded-xl text-center text-2xl font-bold focus:border-indigo-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <button class="py-4 bg-slate-100 text-slate-500 font-bold rounded-xl active:scale-95 transition-transform" onclick="resetCurrentQty()">Reset</button>
+        <button class="py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 active:scale-95 transition-transform" onclick="handleModalSave()">Input</button>
+      </div>
+      <button class="w-full py-4 text-slate-400 font-semibold active:scale-95 transition-transform" onclick="closeModal()">Tutup</button>
+    </div>
+
+    <!-- MODE REVISI -->
+    <div id="modalBodyRevisi" class="hidden space-y-4">
+      <div class="flex flex-wrap gap-2 justify-center mb-4">
+        <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Gudang: <span id="bGd">0</span></span>
+        <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Mako: <span id="bMk">0</span></span>
+        <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Disp: <span id="bDs">0</span></span>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">QTY GUDANG</label>
+          <input type="number" id="revG" class="w-full p-3 border border-slate-200 rounded-xl font-bold text-center focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">QTY DISPLAY</label>
+          <input type="number" id="revD" class="w-full p-3 border border-slate-200 rounded-xl font-bold text-center focus:border-indigo-500">
+        </div>
+      </div>
+      <div class="pt-2">
+        <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 italic text-emerald-600">AKTUAL ON HAND (INPUT LAPANGAN)</label>
+        <input type="number" id="revOH" class="w-full p-4 border-2 border-emerald-500 bg-emerald-50 rounded-xl font-black text-2xl text-center text-emerald-700 focus:border-emerald-600">
+      </div>
+      <div class="flex gap-3 pt-4">
+        <button class="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform" onclick="handleModalSave()">Simpan Revisi</button>
+        <button class="px-6 py-4 bg-slate-100 text-slate-400 font-bold rounded-xl active:scale-95 transition-transform" onclick="closeModal()">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MASTER (UPDATE STOK GUDANG) -->
+<div id="modalMaster" class="modal fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-end justify-center hidden">
+  <div class="bg-white w-full max-w-md rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+    <h3 class="text-xl font-extrabold text-slate-900 mb-6">Update Stok Gudang</h3>
+    <div class="space-y-4 mb-8">
+      <div>
+        <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Deskripsi Barang</label>
+        <input type="text" id="mDesc" readonly class="w-full p-3 bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-xl">
+      </div>
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Stok Gudang</label>
+          <input type="number" id="mQtyG" class="w-full p-5 bg-indigo-50 border-2 border-indigo-200 text-indigo-700 font-black text-3xl rounded-xl text-center focus:border-indigo-500">
+        </div>
+        <div class="flex-1">
+          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Mako</label>
+          <input type="number" id="mQtyM" readonly class="w-full p-5 bg-slate-100 text-slate-400 font-black text-3xl rounded-xl text-center">
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <button class="w-full py-5 bg-indigo-600 text-white font-bold rounded-xl shadow-xl shadow-indigo-100 text-lg active:scale-95 transition-transform" onclick="saveMasterUpdate()">Update Data</button>
+      <button class="w-full py-4 text-slate-400 font-semibold active:scale-95 transition-transform" onclick="closeModal()">Batalkan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+// LOGIKA JAVASCRIPT (sama seperti sebelumnya, tidak ada perubahan)
+const API_URL = "https://script.google.com/macros/s/AKfycbwjqh46cEuJB8kmsRpHBJwD607fPgZCLJeGba6z7B6rvxXEZMOBFhAwJSiFdyRtX6Dt/exec"; 
+let masterData = [];
+let opnameSession = JSON.parse(localStorage.getItem('opname_session')) || [];
+let currentIdx = -1;
+let currentMode = "";
+
+async function callGAS(payload) {
+    try {
+        const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+        return await response.json();
+    } catch (err) { console.error(err); throw err; }
+}
+
+async function handleNIKInput(nik) {
+    const display = document.getElementById('displayEmployeeName');
+    if (nik.length >= 4) {
+        try {
+            const res = await callGAS({ action: 'checkNIK', nik: nik });
+            display.innerText = res.status === 'success' ? "✓ " + res.nama : "";
+        } catch (e) {}
+    } else { display.innerText = ""; }
+}
+
+async function doLogin() {
+    const user_name = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    if(!user_name || !password) return alert("NIK & Password wajib diisi!");
+    
+    toggleLoading(true);
+    try {
+        const res = await callGAS({ action: 'login', user_name, password });
+        if(res.status === 'success') {
+            sessionStorage.setItem('isLogged', '1');
+            sessionStorage.setItem('userName', res.user);
+            sessionStorage.setItem('userNIK', res.nik);
+            document.getElementById('displayUser').innerText = res.user;
+            document.getElementById('displayNIK').innerText = "ID KARYAWAN: " + res.nik;
+            await initMaster();
+            showPage('dashboard');
+        } else { alert("Akses ditolak. Cek NIK/Pass!"); }
+    } catch(e) { alert("Server tidak merespon."); } 
+    finally { toggleLoading(false); }
+}
+
+function showPage(id) {
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('dashboard').classList.add('hidden');
+    document.getElementById('masterPage').classList.add('hidden');
+    document.getElementById('opnamePage').classList.add('hidden');
+    document.getElementById(id).classList.remove('hidden');
+    document.getElementById('appHeader').classList.toggle('hidden', id === 'loginPage');
+}
+
+function openMaster() { showPage('masterPage'); renderMasterList(); }
+
+function openOpname() {
+    if(opnameSession.length === 0) {
+        opnameSession = masterData.map(m => ({ ...m, qtyDisplay: 0, qtyOnHand: 0 }));
+        localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+    }
+    document.getElementById('penyerah').value = sessionStorage.getItem('userName');
+    showPage('opnamePage');
+    setStep(1);
+}
+
+async function initMaster() {
+    toggleLoading(true);
+    try {
+        const res = await callGAS({ action: 'getMaster' });
+        masterData = Array.isArray(res) ? res : [];
+        renderMasterList();
+    } finally { toggleLoading(false); }
+}
+
+function renderMasterList() {
+    const container = document.getElementById('cardListMaster');
+    container.innerHTML = masterData.map((it, i) => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between items-center active:scale-[0.98] transition-all shadow-sm" onclick="openMasterDetailModal(${i})">
+            <div>
+                <h4 class="font-extrabold text-slate-800 text-sm">${it.description}</h4>
+                <p class="text-[10px] text-slate-400 font-bold tracking-widest mt-1">PLU ${it.plu} • MAKO: ${it.qty_mako}</p>
+            </div>
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black text-sm">${it.qty_gudang}</div>
+        </div>
+    `).join('');
+}
+
+function openMasterDetailModal(i) {
+    currentIdx = i; const it = masterData[i];
+    document.getElementById('mDesc').value = it.description;
+    document.getElementById('mQtyG').value = it.qty_gudang;
+    document.getElementById('mQtyM').value = it.qty_mako;
+    document.getElementById('modalMaster').classList.remove('hidden');
+}
+
+async function saveMasterUpdate() {
+    const user = sessionStorage.getItem('userName');
+    const plu = masterData[currentIdx].plu;
+    const qty = Number(document.getElementById('mQtyG').value);
+    toggleLoading(true);
+    try {
+        await callGAS({ action: 'updateMaster', plu, qty_gudang: qty, user });
+        await initMaster();
+        closeModal();
+    } finally { toggleLoading(false); }
+}
+
+function setStep(n) {
+    [1,2,3].forEach(i => document.getElementById(`step${i}Content`).classList.toggle('hidden', i !== n));
+    if(n === 1) renderStep1();
+}
+
+function renderStep1() {
+    document.getElementById('cardListStep1').innerHTML = opnameSession.map((it, i) => `
+        <div class="bg-white p-4 rounded-2xl border-2 ${it.qtyDisplay > 0 ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-100'} flex justify-between items-center active:scale-[0.98] transition-all" onclick="openEntryModal(${i}, 'DISPLAY')">
+            <div class="card-info">
+                <h4 class="font-bold text-slate-800 text-sm">${it.description}</h4>
+                <p class="text-[9px] text-slate-400 font-bold uppercase">PLU: ${it.plu}</p>
+            </div>
+            <div class="px-4 py-2 ${it.qtyDisplay > 0 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'} rounded-xl font-black text-sm">${it.qtyDisplay}</div>
+        </div>
+    `).join('');
+}
+
+function goStep2() {
+    setStep(2);
+    document.getElementById('cardListStep2').innerHTML = opnameSession.map((it, i) => `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h4 class="font-bold text-slate-800 leading-tight">${it.description}</h4>
+                    <p class="text-[10px] text-indigo-500 font-bold mt-1 uppercase tracking-widest">${it.plu}</p>
+                </div>
+                <div class="ml-2">
+                    <svg class="bc-svg" data-val="${it.barcode}"></svg>
+                </div>
+            </div>
+            <div class="relative">
+                <input type="number" placeholder="Entry On Hand..." value="${it.qtyOnHand || ''}" 
+                    onchange="updateFisik(${i}, this.value)" 
+                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl text-center text-xl font-black text-indigo-600 focus:border-indigo-400 transition-all">
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-300">FISIK</div>
+            </div>
+        </div>
+    `).join('');
+    renderBarcodes();
+}
+
+function updateFisik(i, val) {
+    opnameSession[i].qtyOnHand = Number(val);
+    localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+}
+
+async function goStep3() {
+    const shift = document.getElementById('shift').value;
+    const pen = document.getElementById('penerima').value;
+    if(!shift || !pen) return alert("Pilih Shift & Nama Penerima!");
+    
+    toggleLoading(true);
+    try {
+        await callGAS({
+            action: 'saveHistory',
+            shift, penerima: pen, penyerah: sessionStorage.getItem('userName'),
+            items: opnameSession.map(it => ({ ...it, selisih: it.qtyOnHand - (Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay)) }))
+        });
+        setStep(3); renderStep3();
+    } finally { toggleLoading(false); }
+}
+
+function renderStep3() {
+    const container = document.getElementById('cardListStep3');
+    container.innerHTML = "";
+    opnameSession.forEach((it, i) => {
+        const totalSis = Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay);
+        const sel = it.qtyOnHand - totalSis;
+        if(sel !== 0) {
+            container.innerHTML += `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm leading-tight">${it.description}</h4>
+                        <p class="text-[10px] font-bold mt-1 text-slate-400">OH: ${it.qtyOnHand} | FISIK: ${totalSis}</p>
+                        <p class="text-xs font-black mt-1 ${sel<0?'text-red-500':'text-emerald-500'}">SELISIH: ${sel}</p>
+                    </div>
+                    <button class="bg-indigo-50 text-indigo-600 font-bold px-4 py-3 rounded-xl text-xs active:scale-95 transition-transform" onclick="openEntryModal(${i}, 'REVISI')">Edit</button>
+                </div>`;
+        }
+    });
+    if(container.innerHTML === "") container.innerHTML = "<div class='py-20 text-center text-slate-300 font-bold'>✓ Tidak ada selisih data.</div>";
+}
+
+function openEntryModal(i, mode) {
+    currentIdx = i; currentMode = mode;
+    const it = opnameSession[i];
+    document.getElementById('modalTitle').innerText = it.description;
+    document.getElementById('modalPLU').innerText = "KODE PLU: " + it.plu;
+    
+    if(mode === 'DISPLAY') {
+        document.getElementById('modalBodyDisplay').classList.remove('hidden');
+        document.getElementById('modalBodyRevisi').classList.add('hidden');
+        document.getElementById('displayTotal').innerText = it.qtyDisplay || 0;
+        document.getElementById('inputAddQty').value = '';
+    } else {
+        document.getElementById('modalBodyDisplay').classList.add('hidden');
+        document.getElementById('modalBodyRevisi').classList.remove('hidden');
+        document.getElementById('bGd').innerText = it.qty_gudang;
+        document.getElementById('bMk').innerText = it.qty_mako;
+        document.getElementById('bDs').innerText = it.qtyDisplay;
+        document.getElementById('revG').value = it.qty_gudang;
+        document.getElementById('revD').value = it.qtyDisplay;
+        document.getElementById('revOH').value = it.qtyOnHand;
+    }
+    document.getElementById('modalEntry').classList.remove('hidden');
+}
+
+async function handleModalSave() {
+    const it = opnameSession[currentIdx];
+    if(currentMode === 'DISPLAY') {
+        const add = Number(document.getElementById('inputAddQty').value);
+        if(add) {
+            it.qtyDisplay += add;
+            localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+            renderStep1();
+        }
+        closeModal();
+    } else {
+        const user = sessionStorage.getItem('userName');
+        const inputs = [{id:'revG', k:'qty_gudang'}, {id:'revD', k:'qtyDisplay'}, {id:'revOH', k:'qtyOnHand'}];
+        toggleLoading(true);
+        try {
+            for(let inp of inputs) {
+                const val = document.getElementById(inp.id).value;
+                if(val !== "" && Number(val) !== it[inp.k]) {
+                    await callGAS({ action: 'saveLogEdit', plu: it.plu, parameter_revisi: inp.k, nilai_awal: it[inp.k], nilai_revisi: val });
+                    if(inp.k === 'qty_gudang') await callGAS({ action: 'updateMaster', plu: it.plu, qty_gudang: Number(val), user });
+                    it[inp.k] = Number(val);
+                }
+            }
+            localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+            renderStep3();
+            closeModal();
+        } finally { toggleLoading(false); }
+    }
+}
+
+function toggleLoading(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
+function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
+
+function resetCurrentQty() { 
+    if (currentIdx !== -1) {
+        opnameSession[currentIdx].qtyDisplay = 0; 
+        localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+        document.getElementById('displayTotal').innerText = "0"; 
+        document.getElementById('inputAddQty').value = '';
+        renderStep1();
+    }
+}
+
+function doLogout() { sessionStorage.clear(); localStorage.removeItem('opname_session'); location.reload(); }
+function renderBarcodes() { document.querySelectorAll('.bc-svg').forEach(el => JsBarcode(el, el.dataset.val, { height: 25, width: 1.2, fontSize: 8, background: "transparent" })); }
+function filterMaster() {
+    const f = document.getElementById('searchMaster').value.toLowerCase();
+    document.querySelectorAll('#cardListMaster > div').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
+}
+function applyFilter() {
+    const f = document.getElementById('filterOpname').value.toLowerCase();
+    document.querySelectorAll('#cardListStep1 > div').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
+}
+function finishAll() {
+    if(confirm("Pastikan semua data benar. Selesaikan?")) {
+        localStorage.removeItem('opname_session'); opnameSession = []; showPage('dashboard');
+    }
+}
+
+window.onload = () => {
+    if(sessionStorage.getItem('isLogged')) { 
+        document.getElementById('displayUser').innerText = sessionStorage.getItem('userName');
+        document.getElementById('displayNIK').innerText = "ID KARYAWAN: " + sessionStorage.getItem('userNIK');
+        initMaster(); showPage('dashboard'); 
+    }
+};
+</script>
+</body>
+</html>    
     <div id="cardListStep2" class="space-y-3"></div>
 
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 flex gap-3 safe-bottom z-50">
