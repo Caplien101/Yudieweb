@@ -30,7 +30,7 @@
 <!-- HEADER -->
 <header id="appHeader" class="hidden glass-header sticky top-0 z-[100] border-b border-slate-200 px-4 py-3 flex justify-between items-center">
   <div class="flex items-center gap-2">
-    <span class="bg-indigo-600 text-white p-1.5 rounded-xl text-xs font-bold">W-PRO</span>
+    <span class="bg-indigo-600 text-white p-1.5 rounded-xl text-xs font-bold">C940</span>
     <span class="font-extrabold tracking-tight text-slate-800 text-lg">ST SHIFT</span>
   </div>
   <button onclick="doLogout()" class="text-xs font-bold text-red-500 bg-red-50 px-4 py-2 rounded-full active:scale-95 transition-transform">KELUAR</button>
@@ -40,10 +40,8 @@
 <div id="loginPage" class="container mx-auto max-w-md px-6 pt-16 text-center min-h-screen flex flex-col">
   <div class="flex-1 flex flex-col justify-center">
     <!-- Ikon perisai diganti dengan Heroicons Shield Check -->
-    <div class="mb-6 inline-flex w-20 h-20 items-center justify-center bg-indigo-50 rounded-3xl shadow-inner">
-      <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286z" />
-      </svg>
+    <div class="mb-6 inline-flex w-20 h-20 items-center justify-center bg-indigo-50 rounded-3xl shadow-inner self-center">
+      <img src="Yudieweb/public/pngwing.com.png" alt="Logo" class="w-10 h-10 object-contain">
     </div>
     <h2 class="text-2xl font-extrabold text-slate-900">Stock Opname</h2>
     <p class="text-slate-500 text-sm mt-1 mb-10">Gunakan NIK untuk akses sistem</p>
@@ -58,7 +56,7 @@
         <label class="text-xs font-bold text-slate-400 uppercase ml-1">Password</label>
         <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-base shadow-sm focus:border-indigo-500 transition-all">
       </div>
-      <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="doLogin()">Masuk Sekarang</button>
+      <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="doLogin()">Masuk</button>
     </div>
   </div>
 </div>
@@ -120,13 +118,13 @@
     <div id="cardListStep1" class="space-y-2"></div>
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-100 flex gap-3 safe-bottom z-50">
       <button class="flex-1 py-4 rounded-xl font-bold bg-slate-100 text-slate-600 active:scale-95 transition-transform" onclick="showPage('dashboard')">Batal</button>
-      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="goStep2()">Lanjut Step 2</button>
+      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="goStep2()">Lanjut On Hand</button>
     </div>
   </div>
 
   <!-- STEP 2 -->
   <div id="step2Content" class="hidden">
-    <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4">Step 2: Data Penerimaan</h3>
+    <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4">Step 2: Data On Hand</h3>
     <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4 mb-6">
       <select id="shift" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-indigo-500">
         <option value="">Pilih Shift</option>
@@ -149,14 +147,9 @@
     <div id="cardListStep2" class="space-y-3"></div>
 
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 flex gap-3 safe-bottom z-50">
-      <!-- Tombol kembali dengan ikon Arrow Left -->
-      <button class="flex-1 py-4 rounded-xl font-bold bg-slate-100 text-slate-600 flex items-center justify-center gap-2 active:scale-95 transition-transform" onclick="setStep(1)">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        Kembali
-      </button>
-      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg active:scale-95 transition-transform" onclick="goStep3()">Review Data</button>
+      
+      
+      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg active:scale-95 transition-transform" onclick="goStep3()">Review Selisih</button>
     </div>
   </div>
 
@@ -165,7 +158,7 @@
     <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-6">Step 3: Hasil Review</h3>
     <div id="cardListStep3" class="space-y-3 mb-24"></div>
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 safe-bottom">
-      <button class="w-full py-4 rounded-xl font-extrabold bg-emerald-500 text-white shadow-lg shadow-emerald-100 text-lg active:scale-95 transition-transform" onclick="finishAll()">SELESAI & SINKRON</button>
+      <button class="w-full py-4 rounded-xl font-extrabold bg-emerald-500 text-white shadow-lg shadow-emerald-100 text-lg active:scale-95 transition-transform" onclick="finishAll()">SELESAI</button>
     </div>
   </div>
 </div>
@@ -211,7 +204,7 @@
         </div>
       </div>
       <div class="pt-2">
-        <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 italic text-emerald-600">AKTUAL ON HAND (INPUT LAPANGAN)</label>
+        <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 italic text-emerald-600">AKTUAL ON HAND</label>
         <input type="number" id="revOH" class="w-full p-4 border-2 border-emerald-500 bg-emerald-50 rounded-xl font-black text-2xl text-center text-emerald-700 focus:border-emerald-600">
       </div>
       <div class="flex gap-3 pt-4">
@@ -271,7 +264,7 @@ async function handleNIKInput(nik) {
     if (nik.length >= 4) {
         try {
             const res = await callGAS({ action: 'checkNIK', nik: nik });
-            display.innerText = res.status === 'success' ? "✓ " + res.nama : "";
+            display.innerText = res.status === 'success' ? " Nama : " + res.nama : "";
         } catch (e) {}
     } else { display.innerText = ""; }
 }
@@ -416,7 +409,7 @@ async function goStep3() {
         await callGAS({
             action: 'saveHistory',
             shift, penerima: pen, penyerah: sessionStorage.getItem('userName'),
-            items: opnameSession.map(it => ({ ...it, selisih: it.qtyOnHand - (Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay)) }))
+            items: opnameSession.map(it => ({ ...it, selisih: (Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay)) - it.qtyOnHand }))
         });
         setStep(3); renderStep3();
     } finally { toggleLoading(false); }
@@ -427,7 +420,7 @@ function renderStep3() {
     container.innerHTML = "";
     opnameSession.forEach((it, i) => {
         const totalSis = Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay);
-        const sel = it.qtyOnHand - totalSis;
+        const sel = totalSis - it.qtyOnHand;
         if(sel !== 0) {
             container.innerHTML += `
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center">
@@ -485,7 +478,7 @@ async function handleModalSave() {
             for(let inp of inputs) {
                 const val = document.getElementById(inp.id).value;
                 if(val !== "" && Number(val) !== it[inp.k]) {
-                    await callGAS({ action: 'saveLogEdit', plu: it.plu, parameter_revisi: inp.k, nilai_awal: it[inp.k], nilai_revisi: val });
+                    await callGAS({ action: 'saveLogEdit', plu: it.plu,barcode: it.barcode,nama_barang: it.description, parameter_revisi: inp.k, nilai_awal: it[inp.k], nilai_revisi: val });
                     if(inp.k === 'qty_gudang') await callGAS({ action: 'updateMaster', plu: it.plu, qty_gudang: Number(val), user });
                     it[inp.k] = Number(val);
                 }
