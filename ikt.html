@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Target & Actual</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f3ef;
+            --surface: #ffffff;
+            --surface2: #eeede7;
+            --border: #e0ddd4;
+            --border2: #cccbc0;
+            --accent: #4f46e5;
+            --accent2: #e85d4a;
+            --accent3: #16a34a;
+            --text-primary: #1a1a2e;
+            --text-secondary: #5a5a7a;
+            --text-muted: #9999b0;
+            --positive: #16a34a;
+            --negative: #dc2626;
+            --mono: 'DM Mono', monospace;
+            --display: 'DM Mono', sans-serif;
+            --body: 'DM Sans', sans-serif;
+            --header-bg: #1e1e2d;
+            --header-muted: #8888aa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--body);
+            min-height: 100vh;
+            font-size: 14px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -30%; left: -10%;
+            width: 60%; height: 60%;
+            background: radial-gradient(ellipse, rgba(79,70,229,0.06) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+        .wrapper { max-width: 1100px; margin: 0 auto; padding: 32px 20px; position: relative; z-index: 1; }
+        .header { margin-bottom: 28px; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+        .header-left h1 { font-family: var(--display); font-size: clamp(22px,4vw,32px); font-weight: 800; letter-spacing: -0.5px; color: var(--text-primary); line-height: 1; }
+        .header-left h1 span { color: var(--accent); }
+        .header-left .subtitle { font-family: var(--mono); font-size: 11px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+        .header-actions { display: flex; gap: 10px; }
+        .info-bar { background: var(--surface); border: 1px solid var(--border); padding: 18px 24px; display: flex; flex-wrap: wrap; gap: 36px; align-items: center; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+        .info-bar::before { content: ''; position: absolute; top: 0; left: 0; height: 3px; width: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+        .info-item .label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+        .info-item .value { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--text-primary); line-height: 1; }
+        .info-item .value small { font-size: 11px; color: var(--text-secondary); margin-left: 4px; }
+        .table-container { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+        thead tr { background: var(--header-bg); }
+        thead th { padding: 14px 18px; text-align: right; font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--header-muted); border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; }
+        thead th:first-child { text-align: left; color: #d0d0e8; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover:not(.section-header):not(.summary-row) { background: rgba(79,70,229,0.03); }
+        tbody td { padding: 12px 18px; text-align: right; color: var(--text-secondary); white-space: nowrap; }
+        tbody td:first-child { text-align: left; font-family: var(--body); font-size: 13px; color: var(--text-primary); }
+        tr.section-header td { background: var(--surface2); padding-top: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border2); }
+        tr.section-header td:first-child { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-muted); }
+        tr.section-header td:not(:first-child) { color: transparent; }
+        tr.summary-row { background: #eeedf5; }
+        tr.summary-row:hover { background: #e6e5f0 !important; }
+        tr.summary-row td { color: var(--text-primary); font-weight: 500; }
+        tr.summary-row td:first-child { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); }
+        .pencapaian { font-weight: 500; color: var(--text-primary) !important; }
+        .gap-positive { color: var(--positive) !important; font-weight: 500; }
+        .gap-negative { color: var(--negative) !important; font-weight: 500; }
+        .gm-label { color: #7c3aed !important; }
+        .btn { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 10px 20px; border: 1.5px solid; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn-primary:hover { background: #3730a3; border-color: #3730a3; }
+        .btn-secondary { background: transparent; color: var(--accent2); border-color: var(--accent2); }
+        .btn-secondary:hover { background: var(--accent2); color: #fff; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(20,20,40,0.45); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .modal-overlay.visible { opacity: 1; pointer-events: all; }
+        .modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; margin: 16px; transform: translateY(12px); transition: transform 0.2s; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .modal-overlay.visible .modal { transform: translateY(0); }
+        .modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+        .modal-header { padding: 24px 24px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-family: var(--display); font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: var(--text-primary); }
+        .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 22px; line-height: 1; transition: color 0.15s; font-family: var(--mono); }
+        .modal-close:hover { color: var(--text-primary); }
+        .modal-body { padding: 20px 24px; }
+        .modal-section { margin-bottom: 20px; }
+        .modal-section-title { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-group label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; background: var(--bg); border: 1px solid var(--border2); color: var(--text-primary); font-family: var(--mono); font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); background: #fff; }
+        .form-group input[readonly] { color: var(--text-secondary); cursor: not-allowed; background: var(--surface2); }
+        .avg-display { background: rgba(79,70,229,0.06); border: 1px solid rgba(79,70,229,0.15); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .avg-display .avg-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+        .avg-display .avg-value { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--accent); }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: var(--surface2); }
+        .btn-ghost { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 10px 20px; background: none; border: 1.5px solid var(--border2); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+        .btn-ghost:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+        .btn-save { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 10px 24px; background: var(--accent); border: 1.5px solid var(--accent); color: #fff; cursor: pointer; transition: all 0.15s; }
+        .btn-save:hover { background: #3730a3; border-color: #3730a3; }
+        .hari-info { background: var(--surface2); border: 1px solid var(--border); padding: 10px 12px; font-family: var(--mono); font-size: 12px; color: var(--text-secondary); margin-top: 12px; }
+        .hari-info span { color: var(--accent3); font-weight: 500; }
+        @media (max-width: 640px) { table { font-size: 0.8rem; } thead th, tbody td { padding: 8px 10px; } .info-bar { gap: 20px; padding: 10px 11px; } }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            display: none;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+<div class="wrapper">
+    <div class="header">
+        <div class="header-left">
+            <h1>Target<span> & </span>Actual</h1>
+            <div class="subtitle">Insentif Kinerja Toko</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="updateActualBtn">↑ Update Actual</button>
+            <button class="btn btn-primary" id="updateTargetBtn">↑ Update Target</button>
+        </div>
+    </div>
+    <div class="info-bar">
+        <div class="info-item"><div class="label">Bulan</div><div class="value" id="displayBulan" style="font-size:16px">—</div></div>
+        <div class="info-item"><div class="label">Hari Kerja</div><div class="value"><span id="displayTotalHari">0</span><small>hari</small></div></div>
+        <div class="info-item"><div class="label">Sisa Hari</div><div class="value"><span id="displaySisaHari">0</span><small>hari</small></div></div>
+    </div>
+    <div class="table-container">
+        <table id="dataTable">
+            <thead><tr>
+                <th style="text-align:left">Kategori</th>
+                <th>Target</th><th>Actual</th><th>ACV %</th><th>Gap</th>
+            </tr></thead>
+            <tbody id="tableBody">
+                <tr class="section-header"><td>Sales</td><td></td><td></td><td></td><td></td></tr>
+                <tr id="row-net-sales"><td>Net Sales</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-avg"><td>SPD</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-gm"><td class="gm-label">GM%</td><td class="target">0%</td><td class="actual">0%</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <!-- Baris Gross Margin -->
+                <tr id="row-gross-margin" class="summary-row"><td>Gross Margin</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr class="section-header"><td>PWP</td><td></td><td></td><td></td><td></td></tr>
+                <tr id="row-pwp1"><td>PWP Periode 1</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-pwp2"><td>PWP Periode 2</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-total-pwp" class="summary-row"><td>Total PWP</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr class="section-header"><td>Serba Gratis</td><td></td><td></td><td></td><td></td></tr>
+                <tr id="row-sg1"><td>Sergap Periode 1</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-sg2"><td>Sergap Periode 2</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-total-sg" class="summary-row"><td>Total Sergap</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr class="section-header"><td>PSM</td><td></td><td></td><td></td><td></td></tr>
+                <tr id="row-psm1"><td>PSM Periode 1</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-psm2"><td>PSM Periode 2</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-psm3"><td>PSM Periode 3</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-psm4"><td>PSM Periode 4</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-total-psm" class="summary-row"><td>Total PSM</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <!-- Section Lainnya -->
+                <tr class="section-header"><td>Lainnya</td><td></td><td></td><td></td><td></td></tr>
+                <tr id="row-std"><td>STD</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-kontribusi-member"><td>Con. Member</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-nsb"><td>NSB</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-musnah"><td>Musnah</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-market-return"><td>Market Return</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <!-- Gross Profit (otomatis) -->
+                <tr id="row-gross-profit"><td>Gross Profit</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-opex"><td>OPEX</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <tr id="row-fee-base"><td>Fee Base</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+                <!-- Net Profit (baru) -->
+                <tr id="row-net-profit" class="summary-row"><td>Net Profit</td><td class="target">0</td><td class="actual">0</td><td class="pencapaian">0%</td><td class="gap">0</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL TARGET -->
+<div id="modalTarget" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header"><h3>Update Target</h3><button class="modal-close" id="closeTargetModal">×</button></div>
+        <div class="modal-body">
+            <div class="modal-section">
+                <div class="modal-section-title">Periode</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Bulan</label>
+                        <select id="targetBulan">
+                            <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option>
+                            <option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option>
+                            <option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Tahun</label><input type="number" id="targetTahun" value="2025" min="2000" max="2100"></div>
+                </div>
+                <div class="form-group" style="margin-top:12px"><label>Jumlah Hari Kerja</label><input type="number" id="targetTotalHari" readonly></div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">Data Target</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Net Sales</label><input type="number" id="targetNetSales"></div>
+                    <div class="form-group"><label>GM%</label><input type="number" id="targetGM"></div>
+                    <div class="form-group"><label>PWP Periode 1</label><input type="number" id="targetPwp1"></div>
+                    <div class="form-group"><label>PWP Periode 2</label><input type="number" id="targetPwp2"></div>
+                    <div class="form-group"><label>Serba Gratis P1</label><input type="number" id="targetSg1"></div>
+                    <div class="form-group"><label>Serba Gratis P2</label><input type="number" id="targetSg2"></div>
+                    <div class="form-group"><label>PSM Periode 1</label><input type="number" id="targetPsm1"></div>
+                    <div class="form-group"><label>PSM Periode 2</label><input type="number" id="targetPsm2"></div>
+                    <div class="form-group"><label>PSM Periode 3</label><input type="number" id="targetPsm3"></div>
+                    <div class="form-group"><label>PSM Periode 4</label><input type="number" id="targetPsm4"></div>
+                </div>
+            </div>
+            <!-- Section untuk Lainnya (target) - termasuk Net Profit -->
+            <div class="modal-section">
+                <div class="modal-section-title">Lainnya</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>STD</label><input type="number" id="targetStd"></div>
+                    <div class="form-group"><label>Kontribusi Member</label><input type="number" id="targetKontribusiMember"></div>
+                    <div class="form-group"><label>NSB</label><input type="number" id="targetNsb"></div>
+                    <div class="form-group"><label>Musnah</label><input type="number" id="targetMusnah"></div>
+                    <div class="form-group"><label>Market Return</label><input type="number" id="targetMarketReturn"></div>
+                    <div class="form-group"><label>OPEX</label><input type="number" id="targetOpex"></div>
+                    <div class="form-group"><label>Fee Base</label><input type="number" id="targetFeeBase"></div>
+                    <!-- Tambahan input Target Net Profit -->
+                    <div class="form-group"><label>Net Profit (Target)</label><input type="number" id="targetNetProfit"></div>
+                </div>
+            </div>
+            <div class="avg-display"><span class="avg-label">Average Net Sales Target</span><span class="avg-value" id="avgTargetDisplay">0</span></div>
+        </div>
+        <div class="modal-footer"><button class="btn-ghost" id="cancelTargetModal">Batal</button><button class="btn-save" id="saveTargetBtn">Simpan Target</button></div>
+    </div>
+</div>
+
+<!-- MODAL ACTUAL -->
+<div id="modalActual" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header"><h3>Update Actual</h3><button class="modal-close" id="closeActualModal">×</button></div>
+        <div class="modal-body">
+            <div class="modal-section">
+                <div class="modal-section-title">Tanggal</div>
+                <div class="form-group"><label>Pilih Tanggal</label><input type="date" id="tanggalActual"></div>
+                <div class="hari-info">Hari Kerja Terlalui: <span id="hariTerlaluiActual">0</span> hari</div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">Data Actual</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Net Sales</label><input type="number" id="actualNetSales"></div>
+                    <div class="form-group"><label>GM%</label><input type="number" id="actualGM"></div>
+                    <div class="form-group"><label>PWP Periode 1</label><input type="number" id="actualPwp1"></div>
+                    <div class="form-group"><label>PWP Periode 2</label><input type="number" id="actualPwp2"></div>
+                    <div class="form-group"><label>Serba Gratis P1</label><input type="number" id="actualSg1"></div>
+                    <div class="form-group"><label>Serba Gratis P2</label><input type="number" id="actualSg2"></div>
+                    <div class="form-group"><label>PSM Periode 1</label><input type="number" id="actualPsm1"></div>
+                    <div class="form-group"><label>PSM Periode 2</label><input type="number" id="actualPsm2"></div>
+                    <div class="form-group"><label>PSM Periode 3</label><input type="number" id="actualPsm3"></div>
+                    <div class="form-group"><label>PSM Periode 4</label><input type="number" id="actualPsm4"></div>
+                </div>
+            </div>
+            <!-- Section untuk Lainnya (actual) - tanpa Gross Profit -->
+            <div class="modal-section">
+                <div class="modal-section-title">Lainnya</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>STD</label><input type="number" id="actualStd"></div>
+                    <div class="form-group"><label>Kontribusi Member</label><input type="number" id="actualKontribusiMember"></div>
+                    <div class="form-group"><label>NSB</label><input type="number" id="actualNsb"></div>
+                    <div class="form-group"><label>Musnah</label><input type="number" id="actualMusnah"></div>
+                    <div class="form-group"><label>Market Return</label><input type="number" id="actualMarketReturn"></div>
+                    <!-- Gross Profit dihapus -->
+                    <div class="form-group"><label>OPEX</label><input type="number" id="actualOpex"></div>
+                    <div class="form-group"><label>Fee Base</label><input type="number" id="actualFeeBase"></div>
+                </div>
+            </div>
+            <div class="avg-display"><span class="avg-label">Average Net Sales Actual</span><span class="avg-value" id="avgActualDisplay">0</span></div>
+        </div>
+        <div class="modal-footer"><button class="btn-ghost" id="cancelActualModal">Batal</button><button class="btn-save" id="saveActualBtn">Simpan Actual</button></div>
+    </div>
+</div>
+
+<script>
+(function(){
+    // ============================================
+    // FUNGSI FORMAT ANGKA
+    // ============================================
+    const nf = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
+    const pf = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2, minimumFractionDigits: 2, useGrouping: false });
+    
+    function pN(s) { return parseFloat((s || '').toString().replace(/\./g, '').replace(',', '.')) || 0; }
+    function pP(s) { return parseFloat((s || '').toString().replace('%', '').replace(',', '.')) || 0; }
+    function fN(v) { return nf.format(Math.round(v || 0)); }
+    function fP(v) { return pf.format(v || 0) + '%'; }
+    
+    // ============================================
+    // SELECTOR ELEMEN
+    // ============================================
+    const $ = id => document.getElementById(id);
+    const dB = $('displayBulan'), dT = $('displayTotalHari'), dS = $('displaySisaHari');
+    const rNS = $('row-net-sales'), rAv = $('row-avg'), rGm = $('row-gm'), rGMargin = $('row-gross-margin');
+    const rP1 = $('row-pwp1'), rP2 = $('row-pwp2'), rTP = $('row-total-pwp');
+    const rS1 = $('row-sg1'), rS2 = $('row-sg2'), rTS = $('row-total-sg');
+    const rPS1 = $('row-psm1'), rPS2 = $('row-psm2'), rPS3 = $('row-psm3'), rPS4 = $('row-psm4'), rTPS = $('row-total-psm');
+    const rStd = $('row-std'), rKontribusiMember = $('row-kontribusi-member'), rNsb = $('row-nsb'), rMusnah = $('row-musnah'), rMarketReturn = $('row-market-return'), rOpex = $('row-opex'), rFeeBase = $('row-fee-base');
+    const rGrossProfit = $('row-gross-profit');
+    const rNetProfit = $('row-net-profit');
+
+    const mT = $('modalTarget'), mA = $('modalActual');
+    const tB = $('targetBulan'), tTh = $('targetTahun'), tTH = $('targetTotalHari');
+    const tNS = $('targetNetSales'), tGM = $('targetGM'), tP1 = $('targetPwp1'), tP2 = $('targetPwp2');
+    const tS1 = $('targetSg1'), tS2 = $('targetSg2'), tPS1 = $('targetPsm1'), tPS2 = $('targetPsm2'), tPS3 = $('targetPsm3'), tPS4 = $('targetPsm4');
+    const tStd = $('targetStd'), tKontribusiMember = $('targetKontribusiMember'), tNsb = $('targetNsb'), tMusnah = $('targetMusnah'), tMarketReturn = $('targetMarketReturn'), tOpex = $('targetOpex'), tFeeBase = $('targetFeeBase');
+    // Tambahan input target Net Profit
+    const tNetProfit = $('targetNetProfit');
+
+    const aD = $('avgTargetDisplay'), tA = $('tanggalActual'), hT = $('hariTerlaluiActual');
+    const aNS = $('actualNetSales'), aGM = $('actualGM'), aP1 = $('actualPwp1'), aP2 = $('actualPwp2');
+    const aS1 = $('actualSg1'), aS2 = $('actualSg2'), aPS1 = $('actualPsm1'), aPS2 = $('actualPsm2'), aPS3 = $('actualPsm3'), aPS4 = $('actualPsm4');
+    const aStd = $('actualStd'), aKontribusiMember = $('actualKontribusiMember'), aNsb = $('actualNsb'), aMusnah = $('actualMusnah'), aMarketReturn = $('actualMarketReturn'), aOpex = $('actualOpex'), aFeeBase = $('actualFeeBase');
+    const aAD = $('avgActualDisplay');
+
+    // Loading Overlay
+    const loadingOverlay = $('loadingOverlay');
+    function showLoading() { loadingOverlay.style.display = 'flex'; }
+    function hideLoading() { loadingOverlay.style.display = 'none'; }
+
+    // Variabel untuk menyimpan tanggal actual yang sedang ditampilkan
+    let currentActualDate = null;
+
+    // ============================================
+    // FUNGSI BANTU
+    // ============================================
+    function getDIM(m, y) { return new Date(y, m + 1, 0).getDate(); }
+    function updTH() { const b = parseInt(tB.value), t = parseInt(tTh.value); if (!isNaN(b) && !isNaN(t)) tTH.value = getDIM(b, t); updAT(); }
+    function updAT() { const h = parseFloat(tTH.value) || 0, n = parseFloat(tNS.value) || 0; aD.textContent = h ? (n / h).toFixed(2) : '0'; }
+    function updAA() { if (!tA.value) { hT.textContent = '0'; aAD.textContent = '0'; return; } const d = new Date(tA.value).getDate(); hT.textContent = d; const n = parseFloat(aNS.value) || 0; aAD.textContent = d ? (n / d).toFixed(2) : '0'; }
+
+    function rdT() {
+        tNS.value = pN(rNS.querySelector('.target').textContent);
+        tGM.value = pP(rGm.querySelector('.target').textContent);
+        tP1.value = pN(rP1.querySelector('.target').textContent);
+        tP2.value = pN(rP2.querySelector('.target').textContent);
+        tS1.value = pN(rS1.querySelector('.target').textContent);
+        tS2.value = pN(rS2.querySelector('.target').textContent);
+        tPS1.value = pN(rPS1.querySelector('.target').textContent);
+        tPS2.value = pN(rPS2.querySelector('.target').textContent);
+        tPS3.value = pN(rPS3.querySelector('.target').textContent);
+        tPS4.value = pN(rPS4.querySelector('.target').textContent);
+        tStd.value = pN(rStd.querySelector('.target').textContent);
+        tKontribusiMember.value = pN(rKontribusiMember.querySelector('.target').textContent);
+        tNsb.value = pN(rNsb.querySelector('.target').textContent);
+        tMusnah.value = pN(rMusnah.querySelector('.target').textContent);
+        tMarketReturn.value = pN(rMarketReturn.querySelector('.target').textContent);
+        tOpex.value = pN(rOpex.querySelector('.target').textContent);
+        tFeeBase.value = pN(rFeeBase.querySelector('.target').textContent);
+        tNetProfit.value = pN(rNetProfit.querySelector('.target').textContent); // baca target Net Profit dari tabel
+    }
+
+    function rdA() {
+        aNS.value = pN(rNS.querySelector('.actual').textContent);
+        aGM.value = pP(rGm.querySelector('.actual').textContent);
+        aP1.value = pN(rP1.querySelector('.actual').textContent);
+        aP2.value = pN(rP2.querySelector('.actual').textContent);
+        aS1.value = pN(rS1.querySelector('.actual').textContent);
+        aS2.value = pN(rS2.querySelector('.actual').textContent);
+        aPS1.value = pN(rPS1.querySelector('.actual').textContent);
+        aPS2.value = pN(rPS2.querySelector('.actual').textContent);
+        aPS3.value = pN(rPS3.querySelector('.actual').textContent);
+        aPS4.value = pN(rPS4.querySelector('.actual').textContent);
+        aStd.value = pN(rStd.querySelector('.actual').textContent);
+        aKontribusiMember.value = pN(rKontribusiMember.querySelector('.actual').textContent);
+        aNsb.value = pN(rNsb.querySelector('.actual').textContent);
+        aMusnah.value = pN(rMusnah.querySelector('.actual').textContent);
+        aMarketReturn.value = pN(rMarketReturn.querySelector('.actual').textContent);
+        aOpex.value = pN(rOpex.querySelector('.actual').textContent);
+        aFeeBase.value = pN(rFeeBase.querySelector('.actual').textContent);
+        
+        if (currentActualDate) {
+            tA.value = currentActualDate;
+        } else {
+            tA.value = new Date().toISOString().slice(0, 10);
+        }
+        updAA();
+    }
+
+    function oM(el) { el.classList.add('visible'); }
+    function cM(el) { el.classList.remove('visible'); }
+
+    // ============================================
+    // FUNGSI CALC (PERHITUNGAN UTAMA)
+    // ============================================
+    function calc() {
+        const th = parseInt(dT.textContent) || 0;
+        let ha = 0;
+        if (currentActualDate) {
+            ha = new Date(currentActualDate).getDate();
+        } else if (tA.value) {
+            ha = new Date(tA.value).getDate();
+        }
+        const nT = pN(rNS.querySelector('.target').textContent), nA = pN(rNS.querySelector('.actual').textContent);
+        const gT = pP(rGm.querySelector('.target').textContent), gA = pP(rGm.querySelector('.actual').textContent);
+        rAv.querySelector('.target').textContent = fN(th ? nT / th : 0);
+        rAv.querySelector('.actual').textContent = fN(ha ? nA / ha : 0);
+        rGMargin.querySelector('.target').textContent = fN(nT * (gT / 100));
+        rGMargin.querySelector('.actual').textContent = fN(nA * (gA / 100));
+
+        const p1T = pN(rP1.querySelector('.target').textContent), p1A = pN(rP1.querySelector('.actual').textContent);
+        const p2T = pN(rP2.querySelector('.target').textContent), p2A = pN(rP2.querySelector('.actual').textContent);
+        rTP.querySelector('.target').textContent = fN(p1T + p2T);
+        rTP.querySelector('.actual').textContent = fN(p1A + p2A);
+        const s1T = pN(rS1.querySelector('.target').textContent), s1A = pN(rS1.querySelector('.actual').textContent);
+        const s2T = pN(rS2.querySelector('.target').textContent), s2A = pN(rS2.querySelector('.actual').textContent);
+        rTS.querySelector('.target').textContent = fN(s1T + s2T);
+        rTS.querySelector('.actual').textContent = fN(s1A + s2A);
+        const ps1T = pN(rPS1.querySelector('.target').textContent), ps1A = pN(rPS1.querySelector('.actual').textContent);
+        const ps2T = pN(rPS2.querySelector('.target').textContent), ps2A = pN(rPS2.querySelector('.actual').textContent);
+        const ps3T = pN(rPS3.querySelector('.target').textContent), ps3A = pN(rPS3.querySelector('.actual').textContent);
+        const ps4T = pN(rPS4.querySelector('.target').textContent), ps4A = pN(rPS4.querySelector('.actual').textContent);
+        rTPS.querySelector('.target').textContent = fN(ps1T + ps2T + ps3T + ps4T);
+        rTPS.querySelector('.actual').textContent = fN(ps1A + ps2A + ps3A + ps4A);
+
+        const nsbT = pN(rNsb.querySelector('.target').textContent);
+        const nsbA = pN(rNsb.querySelector('.actual').textContent);
+        const musnahT = pN(rMusnah.querySelector('.target').textContent);
+        const musnahA = pN(rMusnah.querySelector('.actual').textContent);
+        const mrkT = pN(rMarketReturn.querySelector('.target').textContent);
+        const mrkA = pN(rMarketReturn.querySelector('.actual').textContent);
+        const opexT = pN(rOpex.querySelector('.target').textContent);
+        const opexA = pN(rOpex.querySelector('.actual').textContent);
+        const feeT = pN(rFeeBase.querySelector('.target').textContent);
+        const feeA = pN(rFeeBase.querySelector('.actual').textContent);
+
+        const grossMarginT = pN(rGMargin.querySelector('.target').textContent);
+        const grossMarginA = pN(rGMargin.querySelector('.actual').textContent);
+        const grossProfitT = grossMarginT - (nsbT + musnahT + mrkT);
+        const grossProfitA = grossMarginA - (nsbA + musnahA + mrkA);
+        rGrossProfit.querySelector('.target').textContent = fN(grossProfitT);
+        rGrossProfit.querySelector('.actual').textContent = fN(grossProfitA);
+
+        // Hitung actual Net Profit (target Net Profit sudah diisi dari sheet)
+        const netProfitA = (grossProfitA - opexA) + feeA;
+        rNetProfit.querySelector('.actual').textContent = fN(netProfitA);
+        // Target Net Profit tidak dihitung ulang, sudah dari input/sheet
+
+        const allRows = [rNS, rAv, rGm, rGMargin, rP1, rP2, rTP, rS1, rS2, rTS, rPS1, rPS2, rPS3, rPS4, rTPS, rStd, rKontribusiMember, rNsb, rMusnah, rMarketReturn, rGrossProfit, rOpex, rFeeBase, rNetProfit];
+        // Daftar baris yang memerlukan pewarnaan terbalik (gap negatif = hijau, positif = merah)
+        const reversedRows = ['row-nsb', 'row-musnah', 'row-market-return'];
+        
+        allRows.forEach(row => {
+            let tV, aV;
+            if (row === rGm) {
+                tV = pP(row.querySelector('.target').textContent);
+                aV = pP(row.querySelector('.actual').textContent);
+            } else {
+                tV = pN(row.querySelector('.target').textContent);
+                aV = pN(row.querySelector('.actual').textContent);
+            }
+            const pc = tV ? (aV / tV) * 100 : 0;
+            const gap = aV - tV;
+            
+            row.querySelector('.pencapaian').textContent = fP(pc);
+            const gc = row.querySelector('.gap');
+            gc.textContent = (gap > 0 ? '+' : '') + fN(gap);
+            
+            // Reset class warna
+            gc.className = 'gap';
+            
+            // Tentukan apakah baris ini perlu dibalik warnanya
+            const isReversed = reversedRows.includes(row.id);
+            
+            if (gap < 0) {
+                gc.classList.add(isReversed ? 'gap-positive' : 'gap-negative');
+            } else if (gap > 0) {
+                gc.classList.add(isReversed ? 'gap-negative' : 'gap-positive');
+            }
+            // Jika gap == 0, tidak diberi warna tambahan
+        });
+    }
+
+    // ============================================
+    // INTEGRASI GOOGLE APPS SCRIPT
+    // ============================================
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUH0FDu18PJbZl3uKdkVXCtOK8W9hQ4F1UCcHddGIMxvSyCdM9Jl0kn-2A5EtMY3E3ew/exec';
+
+    async function loadDataFromSheet() {
+        showLoading();
+        try {
+            console.log('Memuat data dari server...');
+            const response = await fetch(APPS_SCRIPT_URL + '?action=getAll');
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const now = new Date();
+                const bulan = now.getMonth() + 1; // 1-12
+                const tahun = now.getFullYear();
+                const todayStr = now.toISOString().slice(0, 10);
+
+                // 1. Load data Target untuk bulan ini
+                const targetData = result.target.find(t => t.Bulan == bulan && t.Tahun == tahun);
+                if (targetData) {
+                    const bulanNama = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][bulan - 1];
+                    dB.textContent = `${bulanNama} ${tahun}`;
+                    dT.textContent = targetData.TotalHari;
+                    
+                    rNS.querySelector('.target').textContent = fN(targetData.NetSales);
+                    rGm.querySelector('.target').textContent = fP(targetData.GM);
+                    rP1.querySelector('.target').textContent = fN(targetData.Pwp1);
+                    rP2.querySelector('.target').textContent = fN(targetData.Pwp2);
+                    rS1.querySelector('.target').textContent = fN(targetData.Sg1);
+                    rS2.querySelector('.target').textContent = fN(targetData.Sg2);
+                    rPS1.querySelector('.target').textContent = fN(targetData.Psm1);
+                    rPS2.querySelector('.target').textContent = fN(targetData.Psm2);
+                    rPS3.querySelector('.target').textContent = fN(targetData.Psm3);
+                    rPS4.querySelector('.target').textContent = fN(targetData.Psm4);
+                    rStd.querySelector('.target').textContent = fN(targetData.Std);
+                    rKontribusiMember.querySelector('.target').textContent = fN(targetData.KontribusiMember);
+                    rNsb.querySelector('.target').textContent = fN(targetData.Nsb);
+                    rMusnah.querySelector('.target').textContent = fN(targetData.Musnah);
+                    rMarketReturn.querySelector('.target').textContent = fN(targetData.MarketReturn);
+                    rOpex.querySelector('.target').textContent = fN(targetData.Opex);
+                    rFeeBase.querySelector('.target').textContent = fN(targetData.FeeBase);
+                    rNetProfit.querySelector('.target').textContent = fN(targetData.NetProfit); // isi target Net Profit dari sheet
+
+                    const totalHari = parseInt(targetData.TotalHari) || 1;
+                    aD.textContent = (targetData.NetSales / totalHari).toFixed(2);
+                } else {
+                    console.log('Tidak ada data target untuk bulan ini');
+                }
+
+                // 2. Load data Actual: cari data hari ini, jika tidak ada ambil data terbaru (<= hari ini)
+                let actualData = result.actual.find(a => a.Tanggal === todayStr);
+                if (!actualData) {
+                    const sortedActual = result.actual
+                        .filter(a => a.Tanggal <= todayStr)
+                        .sort((a, b) => (a.Tanggal < b.Tanggal ? 1 : -1));
+                    actualData = sortedActual[0];
+                }
+                if (actualData) {
+                    currentActualDate = actualData.Tanggal;
+                    
+                    rNS.querySelector('.actual').textContent = fN(actualData.NetSales);
+                    rGm.querySelector('.actual').textContent = fP(actualData.GM);
+                    rP1.querySelector('.actual').textContent = fN(actualData.Pwp1);
+                    rP2.querySelector('.actual').textContent = fN(actualData.Pwp2);
+                    rS1.querySelector('.actual').textContent = fN(actualData.Sg1);
+                    rS2.querySelector('.actual').textContent = fN(actualData.Sg2);
+                    rPS1.querySelector('.actual').textContent = fN(actualData.Psm1);
+                    rPS2.querySelector('.actual').textContent = fN(actualData.Psm2);
+                    rPS3.querySelector('.actual').textContent = fN(actualData.Psm3);
+                    rPS4.querySelector('.actual').textContent = fN(actualData.Psm4);
+                    rStd.querySelector('.actual').textContent = fN(actualData.Std);
+                    rKontribusiMember.querySelector('.actual').textContent = fN(actualData.KontribusiMember);
+                    rNsb.querySelector('.actual').textContent = fN(actualData.Nsb);
+                    rMusnah.querySelector('.actual').textContent = fN(actualData.Musnah);
+                    rMarketReturn.querySelector('.actual').textContent = fN(actualData.MarketReturn);
+                    rOpex.querySelector('.actual').textContent = fN(actualData.Opex);
+                    rFeeBase.querySelector('.actual').textContent = fN(actualData.FeeBase);
+
+                    const hariActual = new Date(actualData.Tanggal).getDate();
+                    aAD.textContent = (actualData.NetSales / hariActual).toFixed(2);
+                    dS.textContent = Math.max(0, (parseInt(dT.textContent) || 0) - hariActual);
+                    
+                    console.log(`Menampilkan data actual tanggal: ${actualData.Tanggal}`);
+                } else {
+                    currentActualDate = null;
+                    console.log('Tidak ada data actual');
+                }
+
+                calc();
+                console.log('Data berhasil dimuat');
+            } else {
+                console.error('Respon error dari server:', result);
+            }
+        } catch (err) {
+            console.error('Gagal memuat data dari Google Sheets:', err);
+            alert('Gagal memuat data. Periksa koneksi atau konsol untuk detail error.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function sT() {
+        const nb = tB.options[tB.selectedIndex].text;
+        dB.textContent = `${nb} ${tTh.value}`;
+        dT.textContent = tTH.value;
+
+        rNS.querySelector('.target').textContent = fN(tNS.value);
+        rGm.querySelector('.target').textContent = fP(tGM.value);
+        rP1.querySelector('.target').textContent = fN(tP1.value);
+        rP2.querySelector('.target').textContent = fN(tP2.value);
+        rS1.querySelector('.target').textContent = fN(tS1.value);
+        rS2.querySelector('.target').textContent = fN(tS2.value);
+        rPS1.querySelector('.target').textContent = fN(tPS1.value);
+        rPS2.querySelector('.target').textContent = fN(tPS2.value);
+        rPS3.querySelector('.target').textContent = fN(tPS3.value);
+        rPS4.querySelector('.target').textContent = fN(tPS4.value);
+        rStd.querySelector('.target').textContent = fN(tStd.value);
+        rKontribusiMember.querySelector('.target').textContent = fN(tKontribusiMember.value);
+        rNsb.querySelector('.target').textContent = fN(tNsb.value);
+        rMusnah.querySelector('.target').textContent = fN(tMusnah.value);
+        rMarketReturn.querySelector('.target').textContent = fN(tMarketReturn.value);
+        rOpex.querySelector('.target').textContent = fN(tOpex.value);
+        rFeeBase.querySelector('.target').textContent = fN(tFeeBase.value);
+        rNetProfit.querySelector('.target').textContent = fN(tNetProfit.value); // simpan target Net Profit ke tabel
+
+        calc();
+
+        const data = {
+            Bulan: parseInt(tB.value) + 1, // 1-12
+            Tahun: parseInt(tTh.value),
+            TotalHari: parseInt(tTH.value),
+            NetSales: pN(tNS.value),
+            GM: pP(tGM.value),
+            Pwp1: pN(tP1.value),
+            Pwp2: pN(tP2.value),
+            Sg1: pN(tS1.value),
+            Sg2: pN(tS2.value),
+            Psm1: pN(tPS1.value),
+            Psm2: pN(tPS2.value),
+            Psm3: pN(tPS3.value),
+            Psm4: pN(tPS4.value),
+            Std: pN(tStd.value),
+            KontribusiMember: pN(tKontribusiMember.value),
+            Nsb: pN(tNsb.value),
+            Musnah: pN(tMusnah.value),
+            MarketReturn: pN(tMarketReturn.value),
+            Opex: pN(tOpex.value),
+            FeeBase: pN(tFeeBase.value),
+            NetProfit: pN(tNetProfit.value) // kirim target Net Profit
+        };
+
+        showLoading();
+        try {
+            await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'target', data: data })
+            });
+            console.log('Data target berhasil dikirim ke server');
+        } catch (err) {
+            console.error('Gagal menyimpan target ke server:', err);
+            alert('Data tersimpan lokal tapi gagal sinkron ke server. Periksa koneksi.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function sA() {
+        if (!tA.value) {
+            alert('Pilih tanggal terlebih dahulu');
+            return;
+        }
+
+        const d = new Date(tA.value).getDate();
+        rNS.querySelector('.actual').textContent = fN(aNS.value);
+        rGm.querySelector('.actual').textContent = fP(aGM.value);
+        rP1.querySelector('.actual').textContent = fN(aP1.value);
+        rP2.querySelector('.actual').textContent = fN(aP2.value);
+        rS1.querySelector('.actual').textContent = fN(aS1.value);
+        rS2.querySelector('.actual').textContent = fN(aS2.value);
+        rPS1.querySelector('.actual').textContent = fN(aPS1.value);
+        rPS2.querySelector('.actual').textContent = fN(aPS2.value);
+        rPS3.querySelector('.actual').textContent = fN(aPS3.value);
+        rPS4.querySelector('.actual').textContent = fN(aPS4.value);
+        rStd.querySelector('.actual').textContent = fN(aStd.value);
+        rKontribusiMember.querySelector('.actual').textContent = fN(aKontribusiMember.value);
+        rNsb.querySelector('.actual').textContent = fN(aNsb.value);
+        rMusnah.querySelector('.actual').textContent = fN(aMusnah.value);
+        rMarketReturn.querySelector('.actual').textContent = fN(aMarketReturn.value);
+        rOpex.querySelector('.actual').textContent = fN(aOpex.value);
+        rFeeBase.querySelector('.actual').textContent = fN(aFeeBase.value);
+
+        const th = parseInt(dT.textContent) || 0;
+        dS.textContent = Math.max(0, th - d);
+
+        currentActualDate = tA.value;
+
+        calc();
+
+        const data = {
+            Tanggal: tA.value,
+            NetSales: pN(aNS.value),
+            GM: pP(aGM.value),
+            Pwp1: pN(aP1.value),
+            Pwp2: pN(aP2.value),
+            Sg1: pN(aS1.value),
+            Sg2: pN(aS2.value),
+            Psm1: pN(aPS1.value),
+            Psm2: pN(aPS2.value),
+            Psm3: pN(aPS3.value),
+            Psm4: pN(aPS4.value),
+            Std: pN(aStd.value),
+            KontribusiMember: pN(aKontribusiMember.value),
+            Nsb: pN(aNsb.value),
+            Musnah: pN(aMusnah.value),
+            MarketReturn: pN(aMarketReturn.value),
+            Opex: pN(aOpex.value),
+            FeeBase: pN(aFeeBase.value)
+        };
+
+        showLoading();
+        try {
+            await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'actual', data: data })
+            });
+            console.log('Data actual berhasil dikirim ke server');
+        } catch (err) {
+            console.error('Gagal menyimpan actual ke server:', err);
+            alert('Data tersimpan lokal tapi gagal sinkron ke server. Periksa koneksi.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // ============================================
+    // EVENT LISTENER
+    // ============================================
+    tB.addEventListener('change', updTH);
+    tTh.addEventListener('input', updTH);
+    tNS.addEventListener('input', updAT);
+    tA.addEventListener('change', updAA);
+    aNS.addEventListener('input', updAA);
+
+    $('updateTargetBtn').addEventListener('click', () => {
+        const txt = dB.textContent;
+        if (txt !== '—') {
+            const [bT, thn] = txt.split(' ');
+            const opt = Array.from(tB.options).find(o => o.text === bT);
+            if (opt) tB.value = opt.value;
+            if (thn) tTh.value = thn;
+        }
+        updTH();
+        rdT();
+        oM(mT);
+    });
+
+    $('updateActualBtn').addEventListener('click', () => {
+        rdA();
+        oM(mA);
+    });
+
+    $('closeTargetModal').addEventListener('click', () => cM(mT));
+    $('cancelTargetModal').addEventListener('click', () => cM(mT));
+    $('closeActualModal').addEventListener('click', () => cM(mA));
+    $('cancelActualModal').addEventListener('click', () => cM(mA));
+
+    mT.addEventListener('click', e => { if (e.target === mT) cM(mT); });
+    mA.addEventListener('click', e => { if (e.target === mA) cM(mA); });
+
+    $('saveTargetBtn').addEventListener('click', async () => {
+        await sT();
+        cM(mT);
+    });
+
+    $('saveActualBtn').addEventListener('click', async () => {
+        await sA();
+        cM(mA);
+    });
+
+    // ============================================
+    // INISIALISASI
+    // ============================================
+    tB.value = '0';
+    tTh.value = '2025';
+    updTH();
+    calc();
+    loadDataFromSheet();
+})();
+</script>
+</body>
+</html>
