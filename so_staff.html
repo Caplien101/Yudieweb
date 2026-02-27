@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory 979</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        .card-enter {
+            animation: fadeInUp 0.3s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .edited {
+            border-color: #f59e0b !important;
+            background-color: #fff7ed !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans">
+
+    <!-- HEADER STICKY dengan background blur -->
+    <div class="sticky top-0 z-20 bg-slate-50/90 backdrop-blur-sm border-b border-slate-200 shadow-sm py-4">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl font-bold text-slate-800 whitespace-nowrap">SO 979 Non ST Shift</h1>
+            <div class="flex w-full md:w-auto gap-2">
+                <input type="text" id="searchInput" placeholder="Cari PLU, deskripsi, atau barcode..." 
+                       class="flex-1 md:w-80 px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none transition shadow-sm">
+                <button id="globalUpdateBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition disabled:opacity-50 whitespace-nowrap">
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Konten utama dengan padding atas agar tidak menempel langsung -->
+    <div class="max-w-7xl mx-auto p-4 md:p-6">
+        <!-- Container Card -->
+        <div id="cardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Akan diisi JavaScript -->
+        </div>
+
+        <!-- Pesan Kosong -->
+        <div id="emptyMessage" class="hidden text-center py-20">
+            <p class="text-slate-400 text-lg">Tidak ada data ditemukan.</p>
+        </div>
+    </div>
+
+    <script>
+        // GANTI URL INI DENGAN ENDPOINT APPS SCRIPT ANDA
+        const MASTER_DATA_URL = "https://script.google.com/macros/s/AKfycbwzI5BkPFjXQ1zQA8QURf0l0LFTgYi0UeP9noy4hvVIX1QNBKWIx_YzCdwsxkNouxKRFA/exec";
+
+        let allData = [];
+        let edits = {};
+        const STORAGE_KEY = 'inventoryEdits';
+
+        async function loadMasterData() {
+            const container = document.getElementById('cardContainer');
+            container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400">Memuat data...</div>';
+
+            try {
+                const response = await fetch(MASTER_DATA_URL);
+                const data = await response.json();
+
+                allData = data.map(item => ({
+                    plu: item.plu || '',
+                    barcode: item.barcode || '',
+                    description: item.description || '',
+                    rak: Number(item.rak) || 0,
+                    gudang: Number(item.gudang) || 0,
+                    onhand: Number(item.onhand) || Number(item.mako) || 0
+                }));
+
+                loadEditsFromStorage();
+                renderCards(allData);
+            } catch (error) {
+                console.error('Gagal memuat data:', error);
+                container.innerHTML = '<div class="col-span-full text-center py-10 text-red-500">Gagal memuat data. Periksa koneksi atau URL.</div>';
+            }
+        }
+
+        function loadEditsFromStorage() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    edits = JSON.parse(stored) || {};
+                } else {
+                    edits = {};
+                }
+            } catch (e) {
+                console.warn('Gagal membaca localStorage', e);
+                edits = {};
+            }
+        }
+
+        function saveEditsToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(edits));
+        }
+
+        function renderCards(dataArray) {
+            const container = document.getElementById('cardContainer');
+            const emptyMsg = document.getElementById('emptyMessage');
+
+            if (!dataArray || dataArray.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            container.innerHTML = '';
+
+            dataArray.forEach((item, index) => {
+                const storedEdit = edits[item.plu] || {};
+                const rakValue = storedEdit.rak !== undefined ? storedEdit.rak : item.rak;
+                const gudangValue = storedEdit.gudang !== undefined ? storedEdit.gudang : item.gudang;
+                const onhandValue = storedEdit.onhand !== undefined ? storedEdit.onhand : item.onhand;
+
+                const card = document.createElement('div');
+                card.className = 'card-enter bg-white rounded-xl shadow-md border border-slate-100 p-3 flex flex-col hover:shadow-lg transition-shadow text-sm';
+                card.dataset.plu = item.plu;
+
+                // Header
+                const header = document.createElement('div');
+                header.className = 'mb-2';
+                header.innerHTML = `
+                    <span class="inline-block bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">${item.plu || 'N/A'}</span>
+                    <h2 class="font-bold text-slate-800 text-sm mt-0.5 truncate" title="${item.description}">${item.description || 'Tanpa Deskripsi'}</h2>
+                `;
+                card.appendChild(header);
+
+                // Barcode
+                const barcodeDiv = document.createElement('div');
+                barcodeDiv.className = 'bg-slate-50 p-2 rounded-lg flex justify-center items-center mb-2';
+                const svgId = `barcode-${index}-${Date.now()}`;
+                barcodeDiv.innerHTML = `<svg id="${svgId}" class="max-w-full h-8"></svg>`;
+                card.appendChild(barcodeDiv);
+
+                // Input fields
+                const inputArea = document.createElement('div');
+                inputArea.className = 'grid grid-cols-3 gap-1 mb-2';
+                inputArea.innerHTML = `
+                    <div>
+                        <label class="block text-[9px] font-medium text-slate-400">RAK</label>
+                        <input type="number" class="rak-input w-full border border-slate-200 rounded-md px-2 py-1 text-xs focus:border-blue-400 focus:ring focus:ring-blue-100" value="${rakValue}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-medium text-slate-400">GUDANG</label>
+                        <input type="number" class="gudang-input w-full border border-slate-200 rounded-md px-2 py-1 text-xs focus:border-blue-400 focus:ring focus:ring-blue-100" value="${gudangValue}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-medium text-slate-400">ON HAND</label>
+                        <input type="number" class="onhand-input w-full border border-slate-200 rounded-md px-2 py-1 text-xs focus:border-blue-400 focus:ring focus:ring-blue-100" value="${onhandValue}">
+                    </div>
+                `;
+                card.appendChild(inputArea);
+
+                // Selisih
+                const selisihDiv = document.createElement('div');
+                selisihDiv.className = 'flex justify-between items-center bg-slate-100 p-2 rounded-lg mb-2';
+                selisihDiv.innerHTML = `
+                    <span class="text-[10px] font-medium text-slate-600">Selisih:</span>
+                    <span class="selisih-value text-sm font-bold text-blue-600">${rakValue + gudangValue - onhandValue}</span>
+                `;
+                card.appendChild(selisihDiv);
+
+                container.appendChild(card);
+
+                // Generate barcode
+                setTimeout(() => {
+                    const barcodeElem = document.getElementById(svgId);
+                    if (barcodeElem && item.barcode) {
+                        try {
+                            if (item.barcode.length === 13 && /^\d+$/.test(item.barcode)) {
+                                JsBarcode(barcodeElem, item.barcode, {
+                                    format: "EAN13",
+                                    width: 1.5,
+                                    height: 30,
+                                    displayValue: false,
+                                    margin: 0
+                                });
+                            } else {
+                                JsBarcode(barcodeElem, item.barcode, {
+                                    format: "CODE128",
+                                    width: 1.5,
+                                    height: 30,
+                                    displayValue: false,
+                                    margin: 0
+                                });
+                            }
+                        } catch (e) {
+                            barcodeDiv.innerHTML = '<p class="text-red-400 text-[8px]">Barcode error</p>';
+                        }
+                    } else {
+                        barcodeDiv.innerHTML = '<p class="text-slate-400 text-[8px] italic">No barcode</p>';
+                    }
+                }, 50);
+
+                const rakInput = card.querySelector('.rak-input');
+                const gudangInput = card.querySelector('.gudang-input');
+                const onhandInput = card.querySelector('.onhand-input');
+                const selisihSpan = card.querySelector('.selisih-value');
+
+                function updateSelisihAndStorage() {
+                    const rak = parseFloat(rakInput.value) || 0;
+                    const gudang = parseFloat(gudangInput.value) || 0;
+                    const onhand = parseFloat(onhandInput.value) || 0;
+                    selisihSpan.textContent = rak + gudang - onhand;
+
+                    if (!edits[item.plu]) edits[item.plu] = {};
+                    edits[item.plu].rak = rak;
+                    edits[item.plu].gudang = gudang;
+                    edits[item.plu].onhand = onhand;
+                    saveEditsToStorage();
+
+                    [rakInput, gudangInput, onhandInput].forEach(inp => inp.classList.add('edited'));
+                }
+
+                rakInput.addEventListener('input', updateSelisihAndStorage);
+                gudangInput.addEventListener('input', updateSelisihAndStorage);
+                onhandInput.addEventListener('input', updateSelisihAndStorage);
+            });
+        }
+
+        async function submitAllUpdates() {
+            const btn = document.getElementById('globalUpdateBtn');
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = 'Mengirim...';
+
+            const cards = document.querySelectorAll('#cardContainer > div');
+            const payloads = [];
+
+            cards.forEach(card => {
+                const plu = card.dataset.plu;
+                const rakInput = card.querySelector('.rak-input');
+                const gudangInput = card.querySelector('.gudang-input');
+                const onhandInput = card.querySelector('.onhand-input');
+
+                if (!plu || !rakInput || !gudangInput || !onhandInput) return;
+
+                const rak = parseFloat(rakInput.value) || 0;
+                const gudang = parseFloat(gudangInput.value) || 0;
+                const onhand = parseFloat(onhandInput.value) || 0;
+                const selisih = rak + gudang - onhand;
+
+                const original = allData.find(d => d.plu === plu) || {};
+                payloads.push({
+                    plu: plu,
+                    barcode: original.barcode || '',
+                    description: original.description || '',
+                    rak: rak,
+                    gudang: gudang,
+                    onhand: onhand,
+                    selisih: selisih,
+                    timestamp: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })
+                });
+            });
+
+            if (payloads.length === 0) {
+                alert('Tidak ada data untuk dikirim.');
+                btn.disabled = false;
+                btn.textContent = originalText;
+                return;
+            }
+
+            try {
+                const response = await fetch(MASTER_DATA_URL, {
+                    method: 'POST',
+                    
+                    body: JSON.stringify(payloads)
+                });
+
+                if (response.ok) {
+                    const result = await response.text();
+                    console.log('Update sukses:', result);
+                    btn.textContent = 'Sukses!';
+                    localStorage.removeItem(STORAGE_KEY);
+                    edits = {};
+                    setTimeout(() => {
+                        loadMasterData();
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }, 1500);
+                } else {
+                    throw new Error('Gagal mengirim');
+                }
+            } catch (error) {
+                console.error('Update error:', error);
+                btn.textContent = 'Gagal!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            }
+        }
+
+        function filterData(keyword) {
+            if (!keyword.trim()) {
+                renderCards(allData);
+                return;
+            }
+            const lowerKeyword = keyword.toLowerCase();
+            const filtered = allData.filter(item => 
+                item.plu.toLowerCase().includes(lowerKeyword) ||
+                item.description.toLowerCase().includes(lowerKeyword) ||
+                item.barcode.toLowerCase().includes(lowerKeyword)
+            );
+            renderCards(filtered);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            filterData(e.target.value);
+        });
+
+        document.getElementById('globalUpdateBtn').addEventListener('click', submitAllUpdates);
+
+        window.addEventListener('DOMContentLoaded', loadMasterData);
+    </script>
+</body>
+</html>
