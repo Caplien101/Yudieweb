@@ -1,530 +1,1112 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>ST SHIFT PRO</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Heroicons CDN -->
-  <script src="https://unpkg.com/heroicons@2.0.18/20/outline/index.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-    .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    input:focus { outline: none; border-color: #4f46e5; ring: 2px; ring-color: #4f46e5; }
-    .loader-spin { border-top-color: #4f46e5; border-left-color: #4f46e5; animation: spin 0.8s linear infinite; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f0f4fb;
+      --surface:   #ffffff;
+      --surface2:  #f7f9fc;
+      --border:    #e3e8f0;
+      --border2:   #c8d3e8;
+      --primary:        #4338ca;
+      --primary-dark:   #3730a3;
+      --primary-light:  #ede9fe;
+      --primary-mid:    #a5b4fc;
+      --txt1: #0f172a;
+      --txt2: #4b5675;
+      --txt3: #94a3b8;
+      --green:   #059669;
+      --green-l: #d1fae5;
+      --red:     #dc2626;
+      --red-l:   #fee2e2;
+      --amber:   #d97706;
+      --amber-l: #fef3c7;
+      --r-sm: 8px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+      --sh-sm: 0 1px 4px rgba(0,0,0,.06);
+      --sh-md: 0 4px 16px rgba(0,0,0,.08);
+      --sh-lg: 0 8px 32px rgba(67,56,202,.18);
+      --ease: .18s cubic-bezier(.4,0,.2,1);
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--txt1);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    /* ═══════════════════════════════════
+       LOADER
+    ═══════════════════════════════════ */
+    #loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+      display: none; place-items: center;
+    }
+    #loader.on { display: grid; }
+    .spin {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary); border-left-color: var(--primary);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .spin-lbl {
+      margin-top: 12px; font-size: 11px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--txt2);
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ═══════════════════════════════════
+       HEADER
+    ═══════════════════════════════════ */
+    #appHeader {
+      position: sticky; top: 0; z-index: 200;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      height: 58px; display: none;
+      align-items: center; justify-content: space-between;
+      padding: 0 18px; box-shadow: var(--sh-sm);
+    }
+    #appHeader.show { display: flex; }
+    .brand { display: flex; align-items: center; gap: 9px; }
+    .brand-pill {
+      background: var(--primary); color: #fff;
+      font-size: 10px; font-weight: 800; letter-spacing: .05em;
+      padding: 4px 9px; border-radius: 7px;
+    }
+    .brand-name { font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+    .btn-logout {
+      font-size: 11px; font-weight: 700; color: var(--red);
+      background: var(--red-l); border: none;
+      padding: 7px 15px; border-radius: 99px;
+      cursor: pointer; transition: var(--ease);
+    }
+    .btn-logout:active { transform: scale(.94); }
+
+    /* ═══════════════════════════════════
+       PAGE SYSTEM
+       Semua halaman tersembunyi secara default.
+       showPage(id) hanya menampilkan 1 halaman.
+    ═══════════════════════════════════ */
+    .page {
+      display: none;
+      width: 100%; max-width: 540px;
+      margin: 0 auto; padding: 0 16px;
+    }
+    .page.on { display: block; }
+
+    /* ═══════════════════════════════════
+       HALAMAN 1: LOGIN
+    ═══════════════════════════════════ */
+    #loginPage {
+      max-width: 420px; min-height: 100vh;
+      display: none; flex-direction: column; justify-content: center;
+      padding: 48px 24px; margin: 0 auto;
+    }
+    #loginPage.on { display: flex; }
+    .login-logo { width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 24px; }
+    .login-title { text-align: center; font-size: 26px; font-weight: 800; letter-spacing: -.03em; }
+    .login-sub   { text-align: center; font-size: 13px; color: var(--txt3); font-weight: 500; margin: 6px 0 36px; }
+    .f-stack { display: flex; flex-direction: column; gap: 18px; }
+    .f-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--txt3); padding-left: 3px; margin-bottom: 6px; }
+    .f-hint  { font-size: 12px; font-weight: 600; color: var(--green); padding-left: 3px; min-height: 18px; margin-top: 5px; }
+    .fi {
+      width: 100%; padding: 14px 16px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-md); font-family: 'Inter', sans-serif;
+      font-size: 15px; font-weight: 500; color: var(--txt1);
+      outline: none; box-shadow: var(--sh-sm);
+      transition: border-color var(--ease), box-shadow var(--ease);
+    }
+    .fi:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,56,202,.11); }
+    .fi[readonly] { background: var(--surface2); color: var(--txt2); cursor: default; }
+    .btn-login {
+      width: 100%; padding: 15px;
+      background: var(--primary); color: #fff; border: none;
+      border-radius: var(--r-md); font-family: 'Inter', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; box-shadow: var(--sh-lg);
+      transition: var(--ease); margin-top: 6px;
+    }
+    .btn-login:hover { background: var(--primary-dark); }
+    .btn-login:active { transform: scale(.97); }
+
+    /* ═══════════════════════════════════
+       HALAMAN 2: DASHBOARD
+    ═══════════════════════════════════ */
+    #dashboard { padding-top: 24px; padding-bottom: 32px; }
+    .hero {
+      background: var(--primary); border-radius: var(--r-xl);
+      padding: 24px 24px 28px; color: #fff; margin-bottom: 22px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before { content:''; position:absolute; top:-28px; right:-28px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.08); }
+    .hero::after  { content:''; position:absolute; bottom:-42px; right:48px; width:90px;  height:90px;  border-radius:50%; background:rgba(255,255,255,.05); }
+    .hero-greet { font-size: 12px; font-weight: 600; opacity: .65; letter-spacing: .05em; margin-bottom: 4px; }
+    .hero-name  { font-size: 24px; font-weight: 800; letter-spacing: -.025em; }
+    .hero-nik   { font-size: 12px; font-weight: 500; opacity: .55; margin-top: 5px; }
+    .dash-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .dash-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); padding: 22px 14px;
+      display: flex; flex-direction: column; align-items: center; gap: 13px;
+      cursor: pointer; box-shadow: var(--sh-sm);
+      transition: var(--ease); user-select: none;
+    }
+    .dash-card:hover { border-color: var(--primary-mid); box-shadow: var(--sh-md); }
+    .dash-card:active { transform: scale(.95); }
+    .dash-card.accent { background: var(--primary); border-color: var(--primary); box-shadow: var(--sh-lg); }
+    .card-ico { width: 50px; height: 50px; border-radius: 13px; background: var(--primary-light); color: var(--primary); display: grid; place-items: center; }
+    .dash-card.accent .card-ico { background: rgba(255,255,255,.2); color: #fff; }
+    .card-lbl { font-size: 13px; font-weight: 700; color: var(--txt1); text-align: center; }
+    .dash-card.accent .card-lbl { color: #fff; }
+
+    /* ═══════════════════════════════════
+       SHARED: PAGE HEADER (back btn + title)
+    ═══════════════════════════════════ */
+    .ph {
+      display: flex; align-items: center; gap: 11px;
+      padding: 18px 0 14px;
+    }
+    .btn-back {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      display: grid; place-items: center;
+      cursor: pointer; flex-shrink: 0;
+      box-shadow: var(--sh-sm); transition: var(--ease);
+    }
+    .btn-back:active { transform: scale(.92); }
+    .ph-title { font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+    .ph-badge {
+      margin-left: auto;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      background: var(--primary-light); color: var(--primary);
+      padding: 4px 10px; border-radius: 99px;
+    }
+    .ph-badge.green  { background: var(--green-l);  color: var(--green); }
+    .ph-badge.amber  { background: var(--amber-l);  color: var(--amber); }
+
+    /* ═══════════════════════════════════
+       SHARED: SEARCH INPUT
+    ═══════════════════════════════════ */
+    .sw { position: relative; margin-bottom: 14px; }
+    .sw svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--txt3); pointer-events: none; }
+    .si {
+      width: 100%; padding: 12px 14px 12px 40px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-md); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 500; color: var(--txt1);
+      outline: none; box-shadow: var(--sh-sm);
+      transition: border-color var(--ease), box-shadow var(--ease);
+    }
+    .si:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,56,202,.09); }
+
+    /* ═══════════════════════════════════
+       SHARED: CARD LIST
+    ═══════════════════════════════════ */
+    .card-list { display: flex; flex-direction: column; gap: 9px; }
+    .empty { text-align: center; padding: 60px 20px; color: var(--txt3); font-weight: 700; font-size: 14px; }
+
+    /* ═══════════════════════════════════
+       SHARED: BOTTOM BAR (fixed CTA)
+    ═══════════════════════════════════ */
+    .bot-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      padding: 11px 16px; padding-bottom: max(11px, env(safe-area-inset-bottom));
+    }
+    .bot-inner { max-width: 540px; margin: 0 auto; display: flex; gap: 10px; }
+    .btn-ghost {
+      flex: 1; padding: 14px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: var(--r-md); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--txt2);
+      cursor: pointer; transition: var(--ease);
+    }
+    .btn-ghost:active { transform: scale(.96); }
+    .btn-cta {
+      flex: 2; padding: 14px;
+      background: var(--primary); border: none;
+      border-radius: var(--r-md); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 700; color: #fff;
+      cursor: pointer; box-shadow: var(--sh-lg); transition: var(--ease);
+    }
+    .btn-cta:active { transform: scale(.96); }
+    .btn-cta.green  { background: var(--green);  box-shadow: 0 6px 20px rgba(5,150,105,.22); }
+    .btn-cta.amber  { background: var(--amber);  box-shadow: 0 6px 20px rgba(217,119,6,.2); }
+    .btn-cta.full   { flex: unset; width: 100%; }
+
+    /* ═══════════════════════════════════
+       HALAMAN 3: GUDANG (Master Data)
+       Daftar barang + qty gudang.
+       Klik row → modal edit qty gudang.
+    ═══════════════════════════════════ */
+    #gudangPage { padding-bottom: 32px; }
+
+    .gudang-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-md); padding: 15px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; box-shadow: var(--sh-sm); transition: var(--ease);
+    }
+    .gudang-card:hover { border-color: var(--primary-mid); }
+    .gudang-card:active { transform: scale(.98); }
+    .g-name { font-size: 13px; font-weight: 700; color: var(--txt1); margin-bottom: 4px; line-height: 1.3; }
+    .g-meta { font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--txt3); }
+    .g-qty  { width: 48px; height: 48px; border-radius: 11px; background: var(--primary-light); color: var(--primary); display: grid; place-items: center; font-size: 16px; font-weight: 800; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════
+       HALAMAN 4: SO - DAFTAR ITEM (Entry Display)
+       Daftar semua barang.
+       Klik row → modal entry qty display.
+       CTA: Lanjut ke Entry On Hand →
+    ═══════════════════════════════════ */
+    #displayPage { padding-bottom: 96px; }
+
+    .disp-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--r-md); padding: 14px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: var(--ease); box-shadow: var(--sh-sm);
+    }
+    .disp-card:active { transform: scale(.98); }
+    .disp-card.filled {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, rgba(67,56,202,.04) 0%, #fff 100%);
+    }
+    .disp-badge {
+      min-width: 46px; padding: 8px 11px;
+      background: var(--border); color: var(--txt2);
+      border-radius: 10px; font-size: 14px; font-weight: 800;
+      text-align: center; transition: var(--ease); flex-shrink: 0;
+    }
+    .disp-card.filled .disp-badge { background: var(--primary); color: #fff; }
+
+    /* ═══════════════════════════════════
+       HALAMAN 5: SO - ENTRY ON HAND
+       Form shift + penyerah + penerima.
+       List barang: PLU, deskripsi, field On Hand.
+       CTA: Review Selisih →
+    ═══════════════════════════════════ */
+    #onhandPage { padding-bottom: 96px; }
+
+    .oh-form-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); padding: 18px; margin-bottom: 16px;
+      box-shadow: var(--sh-sm);
+    }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .fs { /* form select */
+      width: 100%; padding: 11px 13px;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: var(--r-sm); font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; color: var(--txt1);
+      outline: none; transition: border-color var(--ease);
+    }
+    .fs:focus { border-color: var(--primary); }
+
+    .oh-item-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-md); padding: 14px 16px;
+      box-shadow: var(--sh-sm);
+    }
+    /* baris atas: info + barcode */
+    .oh-card-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 12px; margin-bottom: 12px;
+    }
+    .oh-info { flex: 1; min-width: 0; }
+    .oh-plu  { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--primary); margin-bottom: 4px; }
+    .oh-name { font-size: 13px; font-weight: 700; color: var(--txt1); line-height: 1.3; }
+    /* area barcode */
+    .oh-barcode {
+      flex-shrink: 0;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 6px 8px;
+      display: flex; align-items: center; justify-content: center;
+      max-width: 130px;
+    }
+    .oh-barcode svg { display: block; max-width: 100%; }
+    /* baris bawah: input on hand full-width */
+    .oh-field-wrap { position: relative; }
+    .oh-input {
+      width: 100%; padding: 12px 44px 12px 14px;
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: var(--r-sm); font-family: 'Inter', sans-serif;
+      font-size: 22px; font-weight: 800; color: var(--primary); text-align: center;
+      outline: none; transition: border-color var(--ease);
+    }
+    .oh-input:focus { border-color: var(--primary); background: var(--primary-light); }
+    .oh-tag {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 8px; font-weight: 800; letter-spacing: .08em;
+      color: var(--txt3); pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════
+       HALAMAN 6: SO - REVIEW SELISIH
+       Hanya item selisih ≠ 0.
+       Klik row → modal edit (REVISI).
+    ═══════════════════════════════════ */
+    #selisihPage { padding-bottom: 96px; }
+
+    .sel-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r-md); padding: 15px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; box-shadow: var(--sh-sm); transition: var(--ease);
+    }
+    .sel-card:hover { border-color: var(--border2); }
+    .sel-card:active { transform: scale(.98); }
+    .sel-num {
+      font-size: 12px; font-weight: 800;
+      padding: 4px 10px; border-radius: 7px; margin-top: 6px; display: inline-block;
+    }
+    .neg { background: var(--red-l);   color: var(--red);   }
+    .pos { background: var(--green-l); color: var(--green); }
+    .sel-arrow { color: var(--txt3); flex-shrink: 0; margin-left: 10px; }
+
+    /* ═══════════════════════════════════
+       MODAL SYSTEM
+    ═══════════════════════════════════ */
+    .m-back {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(15,23,42,.5); backdrop-filter: blur(5px);
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .m-back.open { display: flex; }
+    .m-sheet {
+      background: var(--surface); width: 100%; max-width: 540px;
+      border-radius: var(--r-xl) var(--r-xl) 0 0;
+      padding: 18px 20px max(20px, env(safe-area-inset-bottom));
+      max-height: 88vh; overflow-y: auto;
+      box-shadow: 0 -8px 40px rgba(0,0,0,.12);
+    }
+    .m-handle { width: 34px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 18px; }
+    .m-title  { font-size: 18px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 3px; }
+    .m-sub    { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--primary); margin-bottom: 22px; }
+    .m-label  { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--txt3); margin-bottom: 6px; }
+    .m-inp {
+      width: 100%; padding: 12px 14px;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: var(--r-sm); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; color: var(--txt1);
+      outline: none; margin-bottom: 14px;
+      transition: border-color var(--ease);
+    }
+    .m-inp:focus { border-color: var(--primary); }
+    .m-inp[readonly] { background: var(--bg); color: var(--txt2); }
+    .m-inp.big { font-size: 28px; font-weight: 900; text-align: center; color: var(--primary); padding: 14px; }
+    .m-inp.big:focus { background: var(--primary-light); border-color: var(--primary); }
+    .m-inp.oh  { font-size: 28px; font-weight: 900; text-align: center; color: var(--green); background: var(--green-l); border: 2px solid var(--green); padding: 14px; }
+    .m-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .m-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 18px; }
+    .m-chip  { padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; font-size: 11px; font-weight: 700; color: var(--txt2); }
+
+    /* modal display count box */
+    .disp-count-box { background: var(--primary-light); border-radius: var(--r-lg); padding: 28px 20px; text-align: center; margin-bottom: 18px; }
+    .disp-count-lbl { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--primary); opacity: .7; margin-bottom: 4px; }
+    .disp-count-num { font-size: 66px; font-weight: 900; color: var(--primary); letter-spacing: -.04em; line-height: 1; }
+
+    /* modal buttons */
+    .m-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
+    .mb {
+      padding: 14px; border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; border: none; transition: var(--ease);
+    }
+    .mb:active { transform: scale(.95); }
+    .mb.out  { background: var(--bg); color: var(--txt2); border: 1.5px solid var(--border); }
+    .mb.pri  { background: var(--primary); color: #fff; box-shadow: var(--sh-lg); }
+    .mb.grn  { background: var(--green); color: #fff; box-shadow: 0 6px 20px rgba(5,150,105,.2); }
+    .mb.txt  { width: 100%; display: block; background: transparent; color: var(--txt3); font-size: 13px; }
+    .mb.full { width: 100%; }
+
+    /* ═══════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════ */
+    @media (min-width: 600px) {
+      #loginPage { padding: 64px 36px; }
+      .hero { padding: 28px 30px 32px; }
+      .m-sheet { border-radius: var(--r-xl); margin-bottom: 24px; }
+    }
+    @media (min-width: 1024px) {
+      body { display: flex; flex-direction: column; align-items: center; }
+      #appHeader { width: 100%; max-width: 100%; }
+      .page, #loginPage { max-width: 600px; }
+      .bot-bar { left: 50%; transform: translateX(-50%); width: 600px; }
+      .m-sheet { max-width: 520px; }
+    }
   </style>
 </head>
-<body class="text-slate-800 antialiased">
+<body>
 
 <!-- LOADER -->
-<div id="loader" class="fixed inset-0 z-[9999] hidden bg-white/90 backdrop-blur-sm flex items-center justify-center">
-  <div class="flex flex-col items-center">
-    <div class="w-14 h-14 border-4 border-slate-200 loader-spin rounded-full"></div>
-    <p class="mt-4 font-bold text-slate-600 animate-pulse">Sinkronisasi Data...</p>
+<div id="loader">
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="spin"></div>
+    <p class="spin-lbl">Sinkronisasi Data...</p>
   </div>
 </div>
 
-<!-- HEADER -->
-<header id="appHeader" class="hidden glass-header sticky top-0 z-[100] border-b border-slate-200 px-4 py-3 flex justify-between items-center">
-  <div class="flex items-center gap-2">
-    <span class="bg-indigo-600 text-white p-1.5 rounded-xl text-xs font-bold">C940</span>
-    <span class="font-extrabold tracking-tight text-slate-800 text-lg">ST SHIFT</span>
+<!-- HEADER (tersembunyi di login) -->
+<header id="appHeader">
+  <div class="brand">
+    <span class="brand-pill">C940</span>
+    <span class="brand-name">ST SHIFT</span>
   </div>
-  <button onclick="doLogout()" class="text-xs font-bold text-red-500 bg-red-50 px-4 py-2 rounded-full active:scale-95 transition-transform">KELUAR</button>
+  <button class="btn-logout" onclick="doLogout()">KELUAR</button>
 </header>
 
-<!-- HALAMAN LOGIN -->
-<div id="loginPage" class="container mx-auto max-w-md px-6 pt-16 text-center min-h-screen flex flex-col">
-  <div class="flex-1 flex flex-col justify-center">
-    <!-- Ikon perisai diganti dengan Heroicons Shield Check -->
-    <div class="mb-3 inline-flex w-100 h-30 items-center justify-center self-center">
-  <img src="public/pngwing.com.png" alt="Logo" class="w-full h-full object-contain">
-</div>
-    <h2 class="text-2xl font-extrabold text-slate-900">Stock Opname</h2>
-    <p class="text-slate-500 text-sm mt-1 mb-10">Gunakan NIK untuk akses sistem</p>
-    
-    <div class="space-y-5">
-      <div class="text-left">
-        <label class="text-xs font-bold text-slate-400 uppercase ml-1">NIK Karyawan</label>
-        <input type="text" id="username" placeholder="Contoh: 202401" oninput="handleNIKInput(this.value)" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-base shadow-sm focus:border-indigo-500 transition-all">
-        <div id="displayEmployeeName" class="text-xs font-semibold text-emerald-600 mt-2 px-1 h-4"></div>
-      </div>
-      <div class="text-left">
-        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Password</label>
-        <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border border-slate-200 rounded-2xl text-base shadow-sm focus:border-indigo-500 transition-all">
-      </div>
-      <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="doLogin()">Masuk</button>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 1: LOGIN
+═══════════════════════════════════════ -->
+<div id="loginPage">
+  <img src="public/pngwing.com.png" alt="Logo" class="login-logo" onerror="this.style.display='none'">
+  <h2 class="login-title">Stock Opname</h2>
+  <p class="login-sub">Gunakan NIK untuk akses sistem</p>
+  <div class="f-stack">
+    <div>
+      <p class="f-label">NIK Karyawan</p>
+      <input type="text" id="username" class="fi" placeholder="Contoh: 202401" oninput="handleNIKInput(this.value)" autocomplete="off">
+      <div id="displayEmployeeName" class="f-hint"></div>
     </div>
+    <div>
+      <p class="f-label">Password</p>
+      <input type="password" id="password" class="fi" placeholder="••••••••">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Masuk</button>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="container mx-auto max-w-md px-4 py-6 hidden">
-  <div class="mb-8 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-    <h2 class="text-2xl font-bold">Halo, <span id="displayUser" class="text-indigo-600 italic">User</span> 👋</h2>
-    <p id="displayNIK" class="text-slate-400 text-sm font-medium mt-1"></p>
-  </div>
 
-  <div class="grid grid-cols-2 gap-4">
-    <!-- Card Master Data dengan ikon Folder -->
-    <div onclick="openMaster()" class="bg-white p-6 rounded-3xl border border-slate-200 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer hover:border-indigo-300 shadow-sm">
-      <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+<!-- ═══════════════════════════════════════
+     HALAMAN 2: DASHBOARD
+═══════════════════════════════════════ -->
+<div id="dashboard" class="page">
+  <div class="hero">
+    <p class="hero-greet">Selamat datang</p>
+    <h2 class="hero-name" id="displayUser">User</h2>
+    <p class="hero-nik"  id="displayNIK"></p>
+  </div>
+  <div class="dash-grid">
+    <!-- Card Gudang -->
+    <div class="dash-card" onclick="showPage('gudangPage')">
+      <div class="card-ico">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
         </svg>
       </div>
-      <span class="font-bold text-slate-700">Master Data</span>
+      <span class="card-lbl">Gudang</span>
     </div>
-    <!-- Card Mulai Opname dengan ikon Clipboard Document List -->
-    <div onclick="openOpname()" class="bg-indigo-600 p-6 rounded-3xl shadow-xl shadow-indigo-100 flex flex-col items-center gap-4 active:scale-95 transition-all cursor-pointer">
-      <div class="w-14 h-14 bg-white/20 text-white rounded-2xl flex items-center justify-center">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    <!-- Card Mulai SO -->
+    <div class="dash-card accent" onclick="openSO()">
+      <div class="card-ico">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
         </svg>
       </div>
-      <span class="font-bold text-white">Mulai Opname</span>
+      <span class="card-lbl">Mulai Opname</span>
     </div>
   </div>
 </div>
 
-<!-- MASTER PAGE -->
-<div id="masterPage" class="container mx-auto max-w-md px-4 py-4 hidden pb-8">
-  <div class="flex items-center gap-3 mb-6">
-    <!-- Tombol kembali dengan ikon Arrow Left -->
-    <button onclick="showPage('dashboard')" class="w-12 h-12 flex items-center justify-center bg-white border border-slate-200 rounded-2xl shadow-sm active:scale-95 transition-transform">
-      <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 3: GUDANG
+     Daftar barang + qty gudang.
+     Klik row → modal edit qty gudang & mako.
+═══════════════════════════════════════ -->
+<div id="gudangPage" class="page">
+  <div class="ph">
+    <button class="btn-back" onclick="showPage('dashboard')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
       </svg>
     </button>
-    <div class="flex-1">
-      <input type="text" id="searchMaster" oninput="filterMaster()" placeholder="Cari barang..." class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:border-indigo-500">
-    </div>
+    <span class="ph-title">Master Gudang</span>
   </div>
-  <div id="cardListMaster" class="space-y-3"></div>
+  <div class="sw">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/>
+    </svg>
+    <input type="text" id="searchGudang" class="si" placeholder="Cari barang..." oninput="filterGudang()">
+  </div>
+  <div id="listGudang" class="card-list"></div>
 </div>
 
-<!-- OPNAME PAGE (MULTI-STEP) -->
-<div id="opnamePage" class="container mx-auto max-w-md px-4 py-4 hidden pb-32">
-  <!-- STEP 1 -->
-  <div id="step1Content">
-    <div class="flex justify-between items-end mb-4">
-      <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest leading-none">Step 1: Input Display</h3>
-      <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">SINKRON</span>
-    </div>
-    <input type="text" id="filterOpname" oninput="applyFilter()" placeholder="Filter barang..." class="w-full p-3 bg-white border border-slate-200 rounded-xl mb-4 focus:border-indigo-500">
-    <div id="cardListStep1" class="space-y-2"></div>
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-100 flex gap-3 safe-bottom z-50">
-      <button class="flex-1 py-4 rounded-xl font-bold bg-slate-100 text-slate-600 active:scale-95 transition-transform" onclick="showPage('dashboard')">Batal</button>
-      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 active:scale-95 transition-transform" onclick="goStep2()">Lanjut On Hand</button>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 4: SO - ENTRY DISPLAY
+     Daftar semua barang.
+     Klik row → modal entry qty display.
+     Bottom: Lanjut ke Entry On Hand →
+═══════════════════════════════════════ -->
+<div id="displayPage" class="page">
+  <div class="ph">
+    <button class="btn-back" onclick="showPage('dashboard')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+      </svg>
+    </button>
+    <span class="ph-title">Input Display</span>
+    <span class="ph-badge">Step 1 / 3</span>
+  </div>
+  <div class="sw">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/>
+    </svg>
+    <input type="text" id="filterDisplay" class="si" placeholder="Filter barang..." oninput="filterDisplayList()">
+  </div>
+  <div id="listDisplay" class="card-list"></div>
+
+  <div class="bot-bar">
+    <div class="bot-inner">
+      <button class="btn-ghost" onclick="showPage('dashboard')">Batal</button>
+      <button class="btn-cta" onclick="goOnHand()">Lanjut On Hand →</button>
     </div>
   </div>
+</div>
 
-  <!-- STEP 2 -->
-  <div id="step2Content" class="hidden">
-    <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4">Step 2: Data On Hand</h3>
-    <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4 mb-6">
-      <select id="shift" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-indigo-500">
-        <option value="">Pilih Shift</option>
+
+<!-- ═══════════════════════════════════════
+     HALAMAN 5: SO - ENTRY ON HAND
+     Form: Shift, Penyerah, Penerima.
+     List barang: PLU | Deskripsi | Input On Hand.
+     Bottom: Review Selisih →
+═══════════════════════════════════════ -->
+<div id="onhandPage" class="page">
+  <div class="ph">
+    <span class="ph-title">Entry On Hand</span>
+    <span class="ph-badge amber">Step 2 / 3</span>
+  </div>
+
+  <!-- Form shift + penyerah + penerima -->
+  <div class="oh-form-card">
+    <div style="margin-bottom:12px">
+      <p class="f-label">Pilih Shift</p>
+      <select id="shift" class="fs">
+        <option value="">-- Pilih Shift --</option>
         <option>Pagi</option>
         <option>Siang</option>
         <option>Malam</option>
       </select>
-      <div class="flex gap-3">
-        <div class="flex-1">
-          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Penyerah</label>
-          <input type="text" id="penyerah" readonly class="w-full p-3 bg-slate-100 text-slate-500 rounded-xl text-sm">
-        </div>
-        <div class="flex-1">
-          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Penerima</label>
-          <input type="text" id="penerima" placeholder="Nama penerima" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500">
-        </div>
-      </div>
     </div>
-    
-    <div id="cardListStep2" class="space-y-3"></div>
-
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 flex gap-3 safe-bottom z-50">
-      
-      
-      <button class="flex-[2] py-4 rounded-xl font-bold bg-indigo-600 text-white shadow-lg active:scale-95 transition-transform" onclick="goStep3()">Review Selisih</button>
-    </div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div id="step3Content" class="hidden">
-    <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-6">Step 3: Hasil Review</h3>
-    <div id="cardListStep3" class="space-y-3 mb-24"></div>
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 safe-bottom">
-      <button class="w-full py-4 rounded-xl font-extrabold bg-emerald-500 text-white shadow-lg shadow-emerald-100 text-lg active:scale-95 transition-transform" onclick="finishAll()">SELESAI</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL ENTRY (DISPLAY & REVISI) -->
-<div id="modalEntry" class="modal fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-end justify-center hidden transition-opacity">
-  <div class="bg-white w-full max-w-md rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
-    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
-    <h3 id="modalTitle" class="text-xl font-extrabold text-slate-900">Item Name</h3>
-    <p id="modalPLU" class="text-indigo-600 font-bold text-sm mb-6 uppercase tracking-wider"></p>
-    
-    <!-- MODE DISPLAY -->
-    <div id="modalBodyDisplay">
-      <div class="text-center py-8 bg-indigo-50/50 rounded-2xl mb-6">
-        <small class="text-slate-400 font-bold uppercase tracking-widest">Jumlah di Display</small>
-        <h1 id="displayTotal" class="text-6xl font-black text-indigo-600 mt-2 tracking-tighter">0</h1>
-      </div>
-      <div class="flex gap-4 items-center mb-6">
-        <input type="number" id="inputAddQty" placeholder="0" class="flex-1 p-4 bg-white border-2 border-slate-100 rounded-xl text-center text-2xl font-bold focus:border-indigo-500">
-      </div>
-      <div class="grid grid-cols-2 gap-3 mb-3">
-        <button class="py-4 bg-slate-100 text-slate-500 font-bold rounded-xl active:scale-95 transition-transform" onclick="resetCurrentQty()">Reset</button>
-        <button class="py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 active:scale-95 transition-transform" onclick="handleModalSave()">Input</button>
-      </div>
-      <button class="w-full py-4 text-slate-400 font-semibold active:scale-95 transition-transform" onclick="closeModal()">Tutup</button>
-    </div>
-
-    <!-- MODE REVISI -->
-    <div id="modalBodyRevisi" class="hidden space-y-4">
-      <div class="flex flex-wrap gap-2 justify-center mb-4">
-        <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Gudang: <span id="bGd">0</span></span>
-        <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Mako: <span id="bMk">0</span></span>
-        <span class="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold">Disp: <span id="bDs">0</span></span>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">QTY GUDANG</label>
-          <input type="number" id="revG" class="w-full p-3 border border-slate-200 rounded-xl font-bold text-center focus:border-indigo-500">
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">QTY DISPLAY</label>
-          <input type="number" id="revD" class="w-full p-3 border border-slate-200 rounded-xl font-bold text-center focus:border-indigo-500">
-        </div>
-      </div>
-      <div class="pt-2">
-        <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 italic text-emerald-600">AKTUAL ON HAND</label>
-        <input type="number" id="revOH" class="w-full p-4 border-2 border-emerald-500 bg-emerald-50 rounded-xl font-black text-2xl text-center text-emerald-700 focus:border-emerald-600">
-      </div>
-      <div class="flex gap-3 pt-4">
-        <button class="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform" onclick="handleModalSave()">Simpan Revisi</button>
-        <button class="px-6 py-4 bg-slate-100 text-slate-400 font-bold rounded-xl active:scale-95 transition-transform" onclick="closeModal()">Batal</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL MASTER (UPDATE STOK GUDANG) -->
-<div id="modalMaster" class="modal fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-end justify-center hidden">
-  <div class="bg-white w-full max-w-md rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
-    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
-    <h3 class="text-xl font-extrabold text-slate-900 mb-6">Update Stok Gudang</h3>
-    <div class="space-y-4 mb-8">
+    <div class="f-row">
       <div>
-        <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Deskripsi Barang</label>
-        <input type="text" id="mDesc" readonly class="w-full p-3 bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-xl">
+        <p class="f-label">Penyerah</p>
+        <input type="text" id="penyerah" class="fi" style="padding:11px 13px;font-size:13px" readonly>
       </div>
-      <div class="flex gap-4">
-        <div class="flex-1">
-          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Stok Gudang</label>
-          <input type="number" id="mQtyG" class="w-full p-5 bg-indigo-50 border-2 border-indigo-200 text-indigo-700 font-black text-3xl rounded-xl text-center focus:border-indigo-500">
-        </div>
-        <div class="flex-1">
-          <label class="text-[10px] font-bold text-slate-400 block ml-1 mb-1 uppercase">Mako</label>
-          <input type="number" id="mQtyM" readonly class="w-full p-5 bg-slate-100 text-slate-400 font-black text-3xl rounded-xl text-center">
-        </div>
+      <div>
+        <p class="f-label">Penerima</p>
+        <input type="text" id="penerima" class="fi" style="padding:11px 13px;font-size:13px" placeholder="Nama penerima">
       </div>
     </div>
-    <div class="flex flex-col gap-2">
-      <button class="w-full py-5 bg-indigo-600 text-white font-bold rounded-xl shadow-xl shadow-indigo-100 text-lg active:scale-95 transition-transform" onclick="saveMasterUpdate()">Update Data</button>
-      <button class="w-full py-4 text-slate-400 font-semibold active:scale-95 transition-transform" onclick="closeModal()">Batalkan</button>
+  </div>
+
+  <!-- List barang: PLU + deskripsi + input On Hand langsung -->
+  <div id="listOnHand" class="card-list"></div>
+
+  <div class="bot-bar">
+    <div class="bot-inner">
+      <button class="btn-cta" onclick="goSelisih()">Review Selisih →</button>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<script>
-// LOGIKA JAVASCRIPT (sama seperti sebelumnya, tidak ada perubahan)
-const API_URL = "https://script.google.com/macros/s/AKfycbwjqh46cEuJB8kmsRpHBJwD607fPgZCLJeGba6z7B6rvxXEZMOBFhAwJSiFdyRtX6Dt/exec"; 
-let masterData = [];
-let opnameSession = JSON.parse(localStorage.getItem('opname_session')) || [];
-let currentIdx = -1;
-let currentMode = "";
 
+<!-- ═══════════════════════════════════════
+     HALAMAN 6: SO - REVIEW SELISIH
+     Hanya item dengan selisih ≠ 0.
+     Klik row → modal REVISI.
+     Bottom: SELESAI
+═══════════════════════════════════════ -->
+<div id="selisihPage" class="page">
+  <div class="ph">
+    <span class="ph-title">Review Selisih</span>
+    <span class="ph-badge green">Step 3 / 3</span>
+  </div>
+  <div id="listSelisih" class="card-list"></div>
+
+  <div class="bot-bar">
+    <div class="bot-inner">
+      <button class="btn-cta green full" onclick="finishAll()">✓ SELESAI</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODAL: GUDANG — Edit Qty Gudang
+═══════════════════════════════════════ -->
+<div id="modalGudang" class="m-back">
+  <div class="m-sheet">
+    <div class="m-handle"></div>
+    <h3 class="m-title">Update Stok Gudang</h3>
+    <p class="m-sub">Edit stok barang</p>
+
+    <p class="m-label">Deskripsi Barang</p>
+    <input type="text" id="gDesc" class="m-inp" readonly>
+
+    <div class="m-2col" style="margin-bottom:20px">
+      <div>
+        <p class="m-label" style="color:var(--primary)">Stok Gudang</p>
+        <input type="number" id="gQtyG" class="m-inp big" inputmode="numeric" style="margin-bottom:0">
+      </div>
+      <div>
+        <p class="m-label">Mako</p>
+        <input type="number" id="gQtyM" class="m-inp big" readonly style="margin-bottom:0;color:var(--txt3)">
+      </div>
+    </div>
+
+    <button class="mb grn full" onclick="saveGudang()" style="margin-bottom:8px">Update Data</button>
+    <button class="mb txt" onclick="closeModal()">Batalkan</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODAL: DISPLAY — Entry Qty Display
+     (terbuka dari Halaman 4)
+═══════════════════════════════════════ -->
+<div id="modalDisplay" class="m-back">
+  <div class="m-sheet">
+    <div class="m-handle"></div>
+    <h3 class="m-title" id="dModalTitle"></h3>
+    <p class="m-sub" id="dModalPLU"></p>
+
+    <div class="disp-count-box">
+      <p class="disp-count-lbl">Jumlah di Display</p>
+      <div class="disp-count-num" id="dCurrent">0</div>
+    </div>
+
+    <p class="m-label">Tambah Qty</p>
+    <input type="number" id="dAddQty" class="m-inp big" placeholder="0" inputmode="numeric">
+
+    <div class="m-btn-row">
+      <button class="mb out" onclick="resetDisplay()">Reset</button>
+      <button class="mb pri" onclick="saveDisplay()">Input</button>
+    </div>
+    <button class="mb txt" onclick="closeModal()">Tutup</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODAL: REVISI — Edit Selisih
+     (terbuka dari Halaman 6)
+═══════════════════════════════════════ -->
+<div id="modalRevisi" class="m-back">
+  <div class="m-sheet">
+    <div class="m-handle"></div>
+    <h3 class="m-title" id="rModalTitle"></h3>
+    <p class="m-sub" id="rModalPLU"></p>
+
+    <div class="m-chips">
+      <span class="m-chip">Gudang: <strong id="rBGd">0</strong></span>
+      <span class="m-chip">Mako: <strong id="rBMk">0</strong></span>
+      <span class="m-chip">Display: <strong id="rBDs">0</strong></span>
+    </div>
+
+    <div class="m-2col" style="margin-bottom:14px">
+      <div>
+        <p class="m-label">Qty Gudang</p>
+        <input type="number" id="rRevG" class="m-inp" style="text-align:center;font-size:18px;font-weight:800" inputmode="numeric">
+      </div>
+      <div>
+        <p class="m-label">Qty Display</p>
+        <input type="number" id="rRevD" class="m-inp" style="text-align:center;font-size:18px;font-weight:800" inputmode="numeric">
+      </div>
+    </div>
+
+    <p class="m-label" style="color:var(--green);font-style:italic">Aktual On Hand</p>
+    <input type="number" id="rRevOH" class="m-inp oh" inputmode="numeric">
+
+    <div class="m-btn-row">
+      <button class="mb out" onclick="closeModal()">Batal</button>
+      <button class="mb pri" onclick="saveRevisi()">Simpan Revisi</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwjqh46cEuJB8kmsRpHBJwD607fPgZCLJeGba6z7B6rvxXEZMOBFhAwJSiFdyRtX6Dt/exec";
+
+let masterData    = [];
+let opnameSession = JSON.parse(localStorage.getItem('opname_session')) || [];
+let currentIdx    = -1;
+
+/* ─────────────────────────────────────
+   API
+───────────────────────────────────── */
 async function callGAS(payload) {
-    try {
-        const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-        return await response.json();
-    } catch (err) { console.error(err); throw err; }
+  try {
+    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+    return await res.json();
+  } catch(e) { console.error(e); throw e; }
 }
 
+/* ─────────────────────────────────────
+   PAGE NAVIGATION
+   Semua page di-hide, hanya 1 yang tampil.
+───────────────────────────────────── */
+const ALL_PAGES = ['loginPage','dashboard','gudangPage','displayPage','onhandPage','selisihPage'];
+
+function showPage(id) {
+  ALL_PAGES.forEach(p => {
+    const el = document.getElementById(p);
+    el.classList.remove('on');
+    if (p === 'loginPage') el.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  target.classList.add('on');
+  if (id === 'loginPage') target.style.display = 'flex';
+  document.getElementById('appHeader').classList.toggle('show', id !== 'loginPage');
+  window.scrollTo(0, 0);
+}
+
+/* ─────────────────────────────────────
+   LOGIN
+───────────────────────────────────── */
 async function handleNIKInput(nik) {
-    const display = document.getElementById('displayEmployeeName');
-    if (nik.length >= 4) {
-        try {
-            const res = await callGAS({ action: 'checkNIK', nik: nik });
-            display.innerText = res.status === 'success' ? " Nama : " + res.nama : "";
-        } catch (e) {}
-    } else { display.innerText = ""; }
+  const el = document.getElementById('displayEmployeeName');
+  if (nik.length >= 4) {
+    try {
+      const res = await callGAS({ action: 'checkNIK', nik });
+      el.innerText = res.status === 'success' ? "✓ Nama: " + res.nama : "";
+    } catch(e) {}
+  } else { el.innerText = ""; }
 }
 
 async function doLogin() {
-    const user_name = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    if(!user_name || !password) return alert("NIK & Password wajib diisi!");
-    
-    toggleLoading(true);
-    try {
-        const res = await callGAS({ action: 'login', user_name, password });
-        if(res.status === 'success') {
-            sessionStorage.setItem('isLogged', '1');
-            sessionStorage.setItem('userName', res.user);
-            sessionStorage.setItem('userNIK', res.nik);
-            document.getElementById('displayUser').innerText = res.user;
-            document.getElementById('displayNIK').innerText = "ID KARYAWAN: " + res.nik;
-            await initMaster();
-            showPage('dashboard');
-        } else { alert("Akses ditolak. Cek NIK/Pass!"); }
-    } catch(e) { alert("Server tidak merespon."); } 
-    finally { toggleLoading(false); }
+  const user_name = document.getElementById('username').value;
+  const password  = document.getElementById('password').value;
+  if (!user_name || !password) return alert("NIK & Password wajib diisi!");
+  toggleLoading(true);
+  try {
+    const res = await callGAS({ action: 'login', user_name, password });
+    if (res.status === 'success') {
+      sessionStorage.setItem('isLogged', '1');
+      sessionStorage.setItem('userName', res.user);
+      sessionStorage.setItem('userNIK',  res.nik);
+      document.getElementById('displayUser').innerText = res.user;
+      document.getElementById('displayNIK').innerText  = "ID KARYAWAN: " + res.nik;
+      await initMaster();
+      showPage('dashboard');
+    } else { alert("Akses ditolak. Cek NIK/Pass!"); }
+  } catch(e) { alert("Server tidak merespon."); }
+  finally { toggleLoading(false); }
 }
 
-function showPage(id) {
-    document.getElementById('loginPage').classList.add('hidden');
-    document.getElementById('dashboard').classList.add('hidden');
-    document.getElementById('masterPage').classList.add('hidden');
-    document.getElementById('opnamePage').classList.add('hidden');
-    document.getElementById(id).classList.remove('hidden');
-    document.getElementById('appHeader').classList.toggle('hidden', id === 'loginPage');
+function doLogout() {
+  sessionStorage.clear();
+  localStorage.removeItem('opname_session');
+  location.reload();
 }
 
-function openMaster() { showPage('masterPage'); renderMasterList(); }
-
-function openOpname() {
-    if(opnameSession.length === 0) {
-        opnameSession = masterData.map(m => ({ ...m, qtyDisplay: 0, qtyOnHand: 0 }));
-        localStorage.setItem('opname_session', JSON.stringify(opnameSession));
-    }
-    document.getElementById('penyerah').value = sessionStorage.getItem('userName');
-    showPage('opnamePage');
-    setStep(1);
-}
-
+/* ─────────────────────────────────────
+   MASTER DATA
+───────────────────────────────────── */
 async function initMaster() {
-    toggleLoading(true);
-    try {
-        const res = await callGAS({ action: 'getMaster' });
-        masterData = Array.isArray(res) ? res : [];
-        renderMasterList();
-    } finally { toggleLoading(false); }
+  toggleLoading(true);
+  try {
+    const res = await callGAS({ action: 'getMaster' });
+    masterData = Array.isArray(res) ? res : [];
+    renderGudang();
+  } finally { toggleLoading(false); }
 }
 
-function renderMasterList() {
-    const container = document.getElementById('cardListMaster');
-    container.innerHTML = masterData.map((it, i) => `
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between items-center active:scale-[0.98] transition-all shadow-sm" onclick="openMasterDetailModal(${i})">
-            <div>
-                <h4 class="font-extrabold text-slate-800 text-sm">${it.description}</h4>
-                <p class="text-[10px] text-slate-400 font-bold tracking-widest mt-1">PLU ${it.plu} • MAKO: ${it.qty_mako}</p>
-            </div>
-            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black text-sm">${it.qty_gudang}</div>
-        </div>
-    `).join('');
+/* ─────────────────────────────────────
+   HALAMAN 3: GUDANG
+───────────────────────────────────── */
+function renderGudang() {
+  const c = document.getElementById('listGudang');
+  if (!masterData.length) { c.innerHTML = '<div class="empty">Tidak ada data.</div>'; return; }
+  c.innerHTML = masterData.map((it, i) => `
+    <div class="gudang-card" onclick="openModalGudang(${i})">
+      <div>
+        <p class="g-name">${it.description}</p>
+        <p class="g-meta">PLU ${it.plu} &nbsp;·&nbsp; MAKO: ${it.qty_mako}</p>
+      </div>
+      <div class="g-qty">${it.qty_gudang}</div>
+    </div>
+  `).join('');
 }
 
-function openMasterDetailModal(i) {
-    currentIdx = i; const it = masterData[i];
-    document.getElementById('mDesc').value = it.description;
-    document.getElementById('mQtyG').value = it.qty_gudang;
-    document.getElementById('mQtyM').value = it.qty_mako;
-    document.getElementById('modalMaster').classList.remove('hidden');
+function filterGudang() {
+  const f = document.getElementById('searchGudang').value.toLowerCase();
+  document.querySelectorAll('#listGudang > div').forEach(c =>
+    c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none'
+  );
 }
 
-async function saveMasterUpdate() {
-    const user = sessionStorage.getItem('userName');
-    const plu = masterData[currentIdx].plu;
-    const qty = Number(document.getElementById('mQtyG').value);
-    toggleLoading(true);
-    try {
-        await callGAS({ action: 'updateMaster', plu, qty_gudang: qty, user });
-        await initMaster();
-        closeModal();
-    } finally { toggleLoading(false); }
+function openModalGudang(i) {
+  currentIdx = i;
+  const it = masterData[i];
+  document.getElementById('gDesc').value = it.description;
+  document.getElementById('gQtyG').value = it.qty_gudang;
+  document.getElementById('gQtyM').value = it.qty_mako;
+  document.getElementById('modalGudang').classList.add('open');
 }
 
-function setStep(n) {
-    [1,2,3].forEach(i => document.getElementById(`step${i}Content`).classList.toggle('hidden', i !== n));
-    if(n === 1) renderStep1();
+async function saveGudang() {
+  const user = sessionStorage.getItem('userName');
+  const plu  = masterData[currentIdx].plu;
+  const qty  = Number(document.getElementById('gQtyG').value);
+  toggleLoading(true);
+  try {
+    await callGAS({ action: 'updateMaster', plu, qty_gudang: qty, user });
+    await initMaster();
+    closeModal();
+  } finally { toggleLoading(false); }
 }
 
-function renderStep1() {
-    document.getElementById('cardListStep1').innerHTML = opnameSession.map((it, i) => `
-        <div class="bg-white p-4 rounded-2xl border-2 ${it.qtyDisplay > 0 ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-100'} flex justify-between items-center active:scale-[0.98] transition-all" onclick="openEntryModal(${i}, 'DISPLAY')">
-            <div class="card-info">
-                <h4 class="font-bold text-slate-800 text-sm">${it.description}</h4>
-                <p class="text-[9px] text-slate-400 font-bold uppercase">PLU: ${it.plu}</p>
-            </div>
-            <div class="px-4 py-2 ${it.qtyDisplay > 0 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'} rounded-xl font-black text-sm">${it.qtyDisplay}</div>
-        </div>
-    `).join('');
-}
-
-function goStep2() {
-    setStep(2);
-    document.getElementById('cardListStep2').innerHTML = opnameSession.map((it, i) => `
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <div class="flex justify-between items-start">
-                <div class="flex-1">
-                    <h4 class="font-bold text-slate-800 leading-tight">${it.description}</h4>
-                    <p class="text-[10px] text-indigo-500 font-bold mt-1 uppercase tracking-widest">${it.plu}</p>
-                </div>
-                <div class="ml-2">
-                    <svg class="bc-svg" data-val="${it.barcode}"></svg>
-                </div>
-            </div>
-            <div class="relative">
-                <input type="number" placeholder="Entry On Hand..." value="${it.qtyOnHand || ''}" 
-                    onchange="updateFisik(${i}, this.value)" 
-                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl text-center text-xl font-black text-indigo-600 focus:border-indigo-400 transition-all">
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-300">FISIK</div>
-            </div>
-        </div>
-    `).join('');
-    renderBarcodes();
-}
-
-function updateFisik(i, val) {
-    opnameSession[i].qtyOnHand = Number(val);
+/* ─────────────────────────────────────
+   HALAMAN 4: SO - ENTRY DISPLAY
+   Inisiasi sesi opname, render daftar item.
+   Klik → modal entry qty display.
+───────────────────────────────────── */
+function openSO() {
+  // Inisiasi sesi jika belum ada
+  if (opnameSession.length === 0) {
+    opnameSession = masterData.map(m => ({ ...m, qtyDisplay: 0, qtyOnHand: 0 }));
     localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+  }
+  renderDisplayList();
+  showPage('displayPage');
 }
 
-async function goStep3() {
-    const shift = document.getElementById('shift').value;
-    const pen = document.getElementById('penerima').value;
-    if(!shift || !pen) return alert("Pilih Shift & Nama Penerima!");
-    
-    toggleLoading(true);
+function renderDisplayList() {
+  document.getElementById('listDisplay').innerHTML = opnameSession.map((it, i) => `
+    <div class="disp-card ${it.qtyDisplay > 0 ? 'filled' : ''}" onclick="openModalDisplay(${i})">
+      <div>
+        <p class="g-name">${it.description}</p>
+        <p class="g-meta">PLU: ${it.plu}</p>
+      </div>
+      <div class="disp-badge">${it.qtyDisplay}</div>
+    </div>
+  `).join('');
+}
+
+function filterDisplayList() {
+  const f = document.getElementById('filterDisplay').value.toLowerCase();
+  document.querySelectorAll('#listDisplay > div').forEach(c =>
+    c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none'
+  );
+}
+
+function openModalDisplay(i) {
+  currentIdx = i;
+  const it = opnameSession[i];
+  document.getElementById('dModalTitle').innerText = it.description;
+  document.getElementById('dModalPLU').innerText   = "KODE PLU: " + it.plu;
+  document.getElementById('dCurrent').innerText    = it.qtyDisplay || 0;
+  document.getElementById('dAddQty').value         = '';
+  document.getElementById('modalDisplay').classList.add('open');
+}
+
+function saveDisplay() {
+  const add = Number(document.getElementById('dAddQty').value);
+  if (add) {
+    opnameSession[currentIdx].qtyDisplay += add;
+    localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+    renderDisplayList();
+  }
+  closeModal();
+}
+
+function resetDisplay() {
+  opnameSession[currentIdx].qtyDisplay = 0;
+  localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+  document.getElementById('dCurrent').innerText = "0";
+  document.getElementById('dAddQty').value = '';
+  renderDisplayList();
+}
+
+/* ─────────────────────────────────────
+   HALAMAN 5: SO - ENTRY ON HAND
+   Navigasi dari displayPage.
+   List barang: PLU | Deskripsi | input On Hand.
+───────────────────────────────────── */
+function goOnHand() {
+  document.getElementById('penyerah').value = sessionStorage.getItem('userName');
+  renderOnHandList();
+  showPage('onhandPage');
+}
+
+function renderOnHandList() {
+  document.getElementById('listOnHand').innerHTML = opnameSession.map((it, i) => `
+    <div class="oh-item-card">
+      <!-- baris atas: info (PLU + nama) | kode batang -->
+      <div class="oh-card-top">
+        <div class="oh-info">
+          <p class="oh-plu">${it.plu}</p>
+          <p class="oh-name">${it.description}</p>
+        </div>
+        <div class="oh-barcode">
+          <svg class="bc-oh" data-val="${it.barcode || it.plu}"></svg>
+        </div>
+      </div>
+      <!-- baris bawah: input On Hand full-width -->
+      <div class="oh-field-wrap">
+        <input type="number" class="oh-input"
+          placeholder="0"
+          value="${it.qtyOnHand || ''}"
+          onchange="updateOnHand(${i}, this.value)"
+          inputmode="numeric">
+        <span class="oh-tag">ON HAND</span>
+      </div>
+    </div>
+  `).join('');
+  // render semua kode batang setelah DOM ter-update
+  document.querySelectorAll('.bc-oh').forEach(el => {
     try {
-        await callGAS({
-            action: 'saveHistory',
-            shift, penerima: pen, penyerah: sessionStorage.getItem('userName'),
-            items: opnameSession.map(it => ({ ...it, selisih: (Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay)) - it.qtyOnHand }))
-        });
-        setStep(3); renderStep3();
-    } finally { toggleLoading(false); }
+      JsBarcode(el, el.dataset.val, {
+        height: 36, width: 1.3, fontSize: 9,
+        background: 'transparent', lineColor: '#0f172a',
+        displayValue: true
+      });
+    } catch(e) {}
+  });
 }
 
-function renderStep3() {
-    const container = document.getElementById('cardListStep3');
-    container.innerHTML = "";
-    opnameSession.forEach((it, i) => {
-        const totalSis = Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay);
-        const sel = totalSis - it.qtyOnHand;
-        if(sel !== 0) {
-            container.innerHTML += `
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-sm leading-tight">${it.description}</h4>
-                        <p class="text-[10px] font-bold mt-1 text-slate-400">OH: ${it.qtyOnHand} | FISIK: ${totalSis}</p>
-                        <p class="text-xs font-black mt-1 ${sel<0?'text-red-500':'text-emerald-500'}">SELISIH: ${sel}</p>
-                    </div>
-                    <button class="bg-indigo-50 text-indigo-600 font-bold px-4 py-3 rounded-xl text-xs active:scale-95 transition-transform" onclick="openEntryModal(${i}, 'REVISI')">Edit</button>
-                </div>`;
-        }
+function updateOnHand(i, val) {
+  opnameSession[i].qtyOnHand = Number(val);
+  localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+}
+
+/* ─────────────────────────────────────
+   HALAMAN 6: SO - REVIEW SELISIH
+   Kirim data ke GAS, lalu render item selisih.
+   Klik item → modal REVISI.
+───────────────────────────────────── */
+async function goSelisih() {
+  const shift = document.getElementById('shift').value;
+  const pen   = document.getElementById('penerima').value;
+  if (!shift || !pen) return alert("Pilih Shift & isi Nama Penerima!");
+  toggleLoading(true);
+  try {
+    await callGAS({
+      action: 'saveHistory', shift,
+      penerima: pen,
+      penyerah: sessionStorage.getItem('userName'),
+      items: opnameSession.map(it => ({
+        ...it,
+        selisih: (Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay)) - it.qtyOnHand
+      }))
     });
-    if(container.innerHTML === "") container.innerHTML = "<div class='py-20 text-center text-slate-300 font-bold'>✓ Tidak ada selisih data.</div>";
+    renderSelisihList();
+    showPage('selisihPage');
+  } finally { toggleLoading(false); }
 }
 
-function openEntryModal(i, mode) {
-    currentIdx = i; currentMode = mode;
-    const it = opnameSession[i];
-    document.getElementById('modalTitle').innerText = it.description;
-    document.getElementById('modalPLU').innerText = "KODE PLU: " + it.plu;
-    
-    if(mode === 'DISPLAY') {
-        document.getElementById('modalBodyDisplay').classList.remove('hidden');
-        document.getElementById('modalBodyRevisi').classList.add('hidden');
-        document.getElementById('displayTotal').innerText = it.qtyDisplay || 0;
-        document.getElementById('inputAddQty').value = '';
-    } else {
-        document.getElementById('modalBodyDisplay').classList.add('hidden');
-        document.getElementById('modalBodyRevisi').classList.remove('hidden');
-        document.getElementById('bGd').innerText = it.qty_gudang;
-        document.getElementById('bMk').innerText = it.qty_mako;
-        document.getElementById('bDs').innerText = it.qtyDisplay;
-        document.getElementById('revG').value = it.qty_gudang;
-        document.getElementById('revD').value = it.qtyDisplay;
-        document.getElementById('revOH').value = it.qtyOnHand;
+function renderSelisihList() {
+  const c = document.getElementById('listSelisih');
+  c.innerHTML = "";
+  opnameSession.forEach((it, i) => {
+    const totalFisik = Number(it.qty_gudang) + Number(it.qty_mako) + Number(it.qtyDisplay);
+    const sel = totalFisik - it.qtyOnHand;
+    if (sel !== 0) {
+      c.innerHTML += `
+        <div class="sel-card" onclick="openModalRevisi(${i})">
+          <div style="flex:1">
+            <p class="g-name">${it.description}</p>
+            <p class="g-meta" style="margin:4px 0">OH: ${it.qtyOnHand} &nbsp;|&nbsp; FISIK: ${totalFisik}</p>
+            <span class="sel-num ${sel < 0 ? 'neg' : 'pos'}">SELISIH: ${sel > 0 ? '+' : ''}${sel}</span>
+          </div>
+          <svg class="sel-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+          </svg>
+        </div>`;
     }
-    document.getElementById('modalEntry').classList.remove('hidden');
+  });
+  if (!c.innerHTML) c.innerHTML = '<div class="empty">✓ Tidak ada selisih data.</div>';
 }
 
-async function handleModalSave() {
-    const it = opnameSession[currentIdx];
-    if(currentMode === 'DISPLAY') {
-        const add = Number(document.getElementById('inputAddQty').value);
-        if(add) {
-            it.qtyDisplay += add;
-            localStorage.setItem('opname_session', JSON.stringify(opnameSession));
-            renderStep1();
-        }
-        closeModal();
-    } else {
-        const user = sessionStorage.getItem('userName');
-        const inputs = [{id:'revG', k:'qty_gudang'}, {id:'revD', k:'qtyDisplay'}, {id:'revOH', k:'qtyOnHand'}];
-        toggleLoading(true);
-        try {
-            for(let inp of inputs) {
-                const val = document.getElementById(inp.id).value;
-                if(val !== "" && Number(val) !== it[inp.k]) {
-                    await callGAS({ action: 'saveLogEdit', plu: it.plu,barcode: it.barcode,nama_barang: it.description, parameter_revisi: inp.k, nilai_awal: it[inp.k], nilai_revisi: val });
-                    if(inp.k === 'qty_gudang') await callGAS({ action: 'updateMaster', plu: it.plu, qty_gudang: Number(val), user });
-                    it[inp.k] = Number(val);
-                }
-            }
-            localStorage.setItem('opname_session', JSON.stringify(opnameSession));
-            renderStep3();
-            closeModal();
-        } finally { toggleLoading(false); }
+function openModalRevisi(i) {
+  currentIdx = i;
+  const it = opnameSession[i];
+  document.getElementById('rModalTitle').innerText = it.description;
+  document.getElementById('rModalPLU').innerText   = "KODE PLU: " + it.plu;
+  document.getElementById('rBGd').innerText        = it.qty_gudang;
+  document.getElementById('rBMk').innerText        = it.qty_mako;
+  document.getElementById('rBDs').innerText        = it.qtyDisplay;
+  document.getElementById('rRevG').value           = it.qty_gudang;
+  document.getElementById('rRevD').value           = it.qtyDisplay;
+  document.getElementById('rRevOH').value          = it.qtyOnHand;
+  document.getElementById('modalRevisi').classList.add('open');
+}
+
+async function saveRevisi() {
+  const it     = opnameSession[currentIdx];
+  const user   = sessionStorage.getItem('userName');
+  const inputs = [
+    { id: 'rRevG',  k: 'qty_gudang' },
+    { id: 'rRevD',  k: 'qtyDisplay' },
+    { id: 'rRevOH', k: 'qtyOnHand'  }
+  ];
+  toggleLoading(true);
+  try {
+    for (let inp of inputs) {
+      const val = document.getElementById(inp.id).value;
+      if (val !== "" && Number(val) !== it[inp.k]) {
+        await callGAS({ action: 'saveLogEdit', plu: it.plu, barcode: it.barcode, nama_barang: it.description, parameter_revisi: inp.k, nilai_awal: it[inp.k], nilai_revisi: val });
+        if (inp.k === 'qty_gudang') await callGAS({ action: 'updateMaster', plu: it.plu, qty_gudang: Number(val), user });
+        it[inp.k] = Number(val);
+      }
     }
+    localStorage.setItem('opname_session', JSON.stringify(opnameSession));
+    renderSelisihList();
+    closeModal();
+  } finally { toggleLoading(false); }
 }
 
-function toggleLoading(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
-function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
-
-function resetCurrentQty() { 
-    if (currentIdx !== -1) {
-        opnameSession[currentIdx].qtyDisplay = 0; 
-        localStorage.setItem('opname_session', JSON.stringify(opnameSession));
-        document.getElementById('displayTotal').innerText = "0"; 
-        document.getElementById('inputAddQty').value = '';
-        renderStep1();
-    }
-}
-
-function doLogout() { sessionStorage.clear(); localStorage.removeItem('opname_session'); location.reload(); }
-function renderBarcodes() { document.querySelectorAll('.bc-svg').forEach(el => JsBarcode(el, el.dataset.val, { height: 25, width: 1.2, fontSize: 8, background: "transparent" })); }
-function filterMaster() {
-    const f = document.getElementById('searchMaster').value.toLowerCase();
-    document.querySelectorAll('#cardListMaster > div').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
-}
-function applyFilter() {
-    const f = document.getElementById('filterOpname').value.toLowerCase();
-    document.querySelectorAll('#cardListStep1 > div').forEach(c => c.style.display = c.innerText.toLowerCase().includes(f) ? '' : 'none');
-}
 function finishAll() {
-    if(confirm("Pastikan semua data benar. Selesaikan?")) {
-        localStorage.removeItem('opname_session'); opnameSession = []; showPage('dashboard');
-    }
+  if (confirm("Pastikan semua data benar. Selesaikan?")) {
+    localStorage.removeItem('opname_session');
+    opnameSession = [];
+    showPage('dashboard');
+  }
 }
 
+/* ─────────────────────────────────────
+   UTILS
+───────────────────────────────────── */
+function toggleLoading(s) { document.getElementById('loader').classList.toggle('on', s); }
+function closeModal() { document.querySelectorAll('.m-back').forEach(m => m.classList.remove('open')); }
+
+// Tutup modal dengan klik backdrop
+document.querySelectorAll('.m-back').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(); });
+});
+
+/* ─────────────────────────────────────
+   INIT
+───────────────────────────────────── */
 window.onload = () => {
-    if(sessionStorage.getItem('isLogged')) { 
-        document.getElementById('displayUser').innerText = sessionStorage.getItem('userName');
-        document.getElementById('displayNIK').innerText = "ID KARYAWAN: " + sessionStorage.getItem('userNIK');
-        initMaster(); showPage('dashboard'); 
-    }
+  if (sessionStorage.getItem('isLogged')) {
+    document.getElementById('displayUser').innerText = sessionStorage.getItem('userName');
+    document.getElementById('displayNIK').innerText  = "ID KARYAWAN: " + sessionStorage.getItem('userNIK');
+    initMaster();
+    showPage('dashboard');
+  } else {
+    showPage('loginPage');
+  }
 };
 </script>
 </body>
