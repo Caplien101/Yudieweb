@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aplikasi Inventory Barang</title>
+    <title>Inventory Barang</title>
+
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,559 +18,1103 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.4/css/all.min.css">
 
     <style>
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .status-connected {
-            background-color: #28a745;
-            box-shadow: 0 0 6px #28a745;
-        }
-        .status-disconnected {
-            background-color: #dc3545;
-        }
-        .status-syncing {
-            background-color: #ffc107;
-            animation: blink 1.5s infinite;
-        }
-        @keyframes blink {
-            50% { opacity: 0.5; }
+        /* ─── Base ─────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        :root {
+            --primary:        #2563EB;
+            --primary-light:  #EFF6FF;
+            --primary-hover:  #1D4ED8;
+            --success:        #16A34A;
+            --success-light:  #F0FDF4;
+            --danger:         #DC2626;
+            --danger-light:   #FEF2F2;
+            --warning:        #D97706;
+            --warning-light:  #FFFBEB;
+            --surface:        #FFFFFF;
+            --bg:             #F8FAFC;
+            --border:         #E2E8F0;
+            --text:           #0F172A;
+            --text-muted:     #64748B;
+            --text-subtle:    #94A3B8;
+            --header-h:       64px;
+            --bottom-bar-h:   72px;
+            --radius-sm:      8px;
+            --radius-md:      12px;
+            --radius-lg:      16px;
+            --shadow-sm:      0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+            --shadow-md:      0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+            --shadow-lg:      0 10px 30px rgba(0,0,0,.1),  0 4px 8px rgba(0,0,0,.05);
         }
 
-        .highlight {
-            animation: highlight-animation 2s;
-            background-color: #d4edda !important;
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+            height: 100%;
         }
-        @keyframes highlight-animation {
-            0% { background-color: #d4edda; }
-            100% { background-color: transparent; }
-        }
 
-        .btn-loading {
-    position: relative;
-    pointer-events: none;
-    color: transparent !important; /* Sembunyikan teks tombol saat loading */
-}
-
-.btn-loading::after {
-    content: "";
-    position: absolute;
-    width: 20px; /* Ukuran spinner lebih besar */
-    height: 20px;
-    top: 50%;
-    left: 50%;
-    margin-top: -10px;
-    margin-left: -10px;
-    border: 3px solid #fff; /* Warna border lebih tebal */
-    border-top: 3px solid transparent;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite; /* Animasi lebih cepat */
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Pastikan spinner terlihat jelas di perangkat mobile */
-@media (max-width: 576px) {
-    .btn-loading::after {
-        width: 18px;
-        height: 18px;
-        margin-top: -9px;
-        margin-left: -9px;
-        border-width: 2px; /* Sedikit lebih tipis di mobile */
-    }
-}
-
-        /* Filter Badges Styling: 3 kolom sejajar di semua ukuran layar */
-        #filterBadgesContainer {
+        /* ─── Top Header ────────────────────────────────────── */
+        .app-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--header-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            align-items: center;
             justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
         }
 
-        .badge-filter {
-            background-color: #e9ecef;
-            color: #495057;
-            border: 1px solid #dee2e6;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-            flex: 1 1 calc(33.333% - 0.34rem); /* 3 kolom dengan jarak antar badge */
-            text-align: center;
-            padding: 0.5rem;
-            min-width: 80px; /* Lebar minimum untuk keterbacaan */
-        }
-
-        .badge-filter:hover {
-            background-color: #dee2e6;
-            transform: translateY(-1px);
-        }
-
-        .badge-filter.active {
-            background-color: #0d6efd;
-            color: white;
-            border-color: #0d6efd;
-            transform: scale(1.03);
-            box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
-        }
-
-        /* Tombol Aksi: 2 kolom sejajar di semua ukuran layar */
-        #actionButtonsContainer {
+        .app-header__brand {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
         }
 
-        #actionButtonsContainer .btn {
-            flex: 1 1 calc(50% - 0.25rem); /* 2 kolom dengan jarak antar tombol */
-            font-size: 0.9rem;
-            padding: 0.5rem;
-            min-width: 120px; /* Lebar minimum untuk keterbacaan */
+        .app-header__icon {
+            width: 36px; height: 36px;
+            background: var(--primary);
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px;
         }
 
-        /* Pastikan ukuran font untuk input minimal 16px untuk mencegah zoom di Safari */
-        .form-control {
-            font-size: 16px !important;
-        }
-
-        input[type="text"], input[type="number"] {
+        .app-header__title {
             font-size: 16px;
-            -webkit-text-size-adjust: 100%; /* Mencegah penyesuaian ukuran teks oleh Safari */
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text);
         }
 
-        /* Modal responsif */
-        .modal-content {
-            min-width: 100%;
-            max-width: 100%;
+        .app-header__subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: -1px;
+        }
+
+        /* ─── Connection Status ─────────────────────────────── */
+        .conn-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all .3s;
+        }
+
+        .status-indicator {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .status-connected    { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
+        .status-disconnected { background: var(--danger); }
+        .status-syncing      { background: #F59E0B; animation: pulse-dot 1.5s ease infinite; }
+
+        @keyframes pulse-dot {
+            0%,100% { opacity: 1; }
+            50%      { opacity: .4; }
+        }
+
+        /* ─── Main scroll area ──────────────────────────────── */
+        .app-body {
+            padding-top: calc(var(--header-h) + 12px);
+            padding-bottom: calc(var(--bottom-bar-h) + 16px);
+            min-height: 100dvh;
+        }
+
+        .app-content {
+            max-width: 640px;
             margin: 0 auto;
+            padding: 0 12px;
         }
 
-        @media (max-width: 576px) {
-            .modal-dialog {
-                margin: 0.5rem;
-            }
-            .modal-content {
-                font-size: 16px;
-            }
-            .modal-body input {
-                padding: 0.5rem;
-                height: 40px; /* Tinggi input lebih besar untuk sentuhan */
-            }
+        /* ─── Stats Row ─────────────────────────────────────── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
         }
 
-        /* Pastikan tabel responsif */
-        .table-responsive {
-            overflow-x: auto;
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
         }
 
-        .table th, .table td {
-            font-size: 0.9rem;
-            white-space: nowrap; /* Mencegah teks membungkus */
+        .stat-card__num {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1;
         }
 
-        /* Toast container */
-        .toast-container {
-            z-index: 9999;
+        .stat-card__label {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-top: 3px;
+        }
+
+        .stat-card--all   .stat-card__num { color: var(--primary); }
+        .stat-card--in    .stat-card__num { color: var(--success); }
+        .stat-card--out   .stat-card__num { color: var(--danger); }
+
+        /* ─── Search ────────────────────────────────────────── */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-wrap__icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-subtle);
+            font-size: 15px;
+            pointer-events: none;
         }
 
         #searchBox {
-            transition: all 0.3s;
-            font-size: 16px;
+            width: 100%;
+            height: 44px;
+            padding: 0 16px 0 40px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            box-shadow: var(--shadow-sm);
         }
+
+        #searchBox::placeholder { color: var(--text-subtle); }
         #searchBox:focus {
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.12);
         }
 
-        .table-danger {
-            background-color: #f8d7da !important;
+        /* ─── Filter Pills ──────────────────────────────────── */
+        .filter-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
-        
-        /* Tambahkan CSS ini di dalam tag <style> yang sudah ada */
+        .filter-bar::-webkit-scrollbar { display: none; }
 
-.table-hover tr {
-    transition: all 0.2s ease;
-}
+        .badge-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            padding: 7px 14px;
+            border-radius: 999px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            user-select: none;
+            flex-shrink: 0;
+            font-family: inherit;
+        }
 
-.table-hover tr.selected-row {
-    background-color: #e3f2fd !important; /* Biru muda yang lembut */
-    border-left: 4px solid #2196f3; /* Garis kiri biru untuk indikator */
-    box-shadow: inset 0 0 0 1px rgba(33, 150, 243, 0.1);
-}
+        .badge-filter:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
 
-.table-hover tr.selected-row td {
-    color: #1976d2; /* Warna teks biru gelap untuk kontras yang baik */
-    font-weight: 500; /* Sedikit lebih tebal untuk menonjol */
-}
+        .badge-filter.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37,99,235,.3);
+        }
 
-.table-hover tr.selected-row:hover {
-    background-color: #bbdefb !important; /* Biru sedikit lebih gelap saat hover */
-    color: #1565c0; /* Biru lebih gelap saat hover */
-}
+        /* ─── Empty State ───────────────────────────────────── */
+        #emptyState {
+            text-align: center;
+            padding: 48px 24px;
+            background: var(--surface);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-lg);
+            color: var(--text-muted);
+        }
 
-/* Pastikan warna tetap readable di row dengan status habis */
-.table-hover tr.selected-row.table-danger {
-    background-color: #f4e6e6 !important; /* Merah muda lembut untuk row habis */
-    border-left: 4px solid #f44336; /* Garis merah untuk row habis */
-}
+        #emptyState .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: .4;
+        }
 
-.table-hover tr.selected-row.table-danger td {
-    color: #d32f2f; /* Merah gelap untuk kontras */
-}
+        #emptyState p {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0;
+        }
 
-/* Efek highlight tetap berfungsi */
-.table-hover tr.selected-row.highlight {
-    background-color: #e3f2fd !important; /* Prioritaskan warna selected */
-}
+        /* ─── Table Card ────────────────────────────────────── */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
 
-/* Animasi transisi yang smooth */
-.table-hover tr {
-    cursor: pointer;
-}
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-.table-hover tr:not(.selected-row):hover {
-    background-color: rgba(33, 150, 243, 0.04); /* Hover default yang sangat ringan */
-}
+        .inv-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-/* Responsive untuk mobile */
-@media (max-width: 576px) {
-    .table-hover tr.selected-row {
-        border-left-width: 3px; /* Garis lebih tebal di mobile */
-    }
-    
-    .table-hover tr.selected-row td {
-        padding: 0.75rem 0.5rem; /* Padding lebih besar di mobile */
-    }
-}
-        
+        .inv-table thead th {
+            background: #F8FAFC;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .inv-table thead th:hover { color: var(--primary); }
+
+        .inv-table thead th .sort-icon {
+            margin-left: 4px;
+            opacity: .4;
+            font-size: 10px;
+        }
+
+        .inv-table tbody tr {
+            border-bottom: 1px solid #F1F5F9;
+            transition: background .15s;
+            cursor: pointer;
+        }
+
+        .inv-table tbody tr:last-child { border-bottom: none; }
+
+        .inv-table tbody tr:hover { background: #F8FAFC; }
+
+        .inv-table tbody td {
+            padding: 11px 12px;
+            font-size: 13px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .inv-table tbody td.td-desc {
+            white-space: normal;
+            min-width: 120px;
+            font-weight: 500;
+        }
+
+        /* Row number badge */
+        .row-num {
+            display: inline-flex;
+            width: 22px; height: 22px;
+            align-items: center; justify-content: center;
+            background: #F1F5F9;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* PLU chip */
+        .plu-chip {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            padding: 2px 7px;
+            border-radius: 5px;
+            letter-spacing: .3px;
+        }
+
+        /* Qty badge */
+        .qty-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .qty-badge--ok {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .qty-badge--zero {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        /* Row states */
+        .inv-table tbody tr.row-empty-stock td {
+            background: #FFF5F5;
+        }
+
+        .inv-table tbody tr.selected-row td {
+            background: var(--primary-light) !important;
+        }
+
+        .inv-table tbody tr.selected-row .row-num {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Highlight animation */
+        @keyframes row-highlight {
+            from { background: #DCFCE7; }
+            to   { background: transparent; }
+        }
+
+        .inv-table tbody tr.highlight {
+            animation: row-highlight 2s ease forwards;
+        }
+
+        /* Edit button */
+        .btn-edit {
+            width: 32px; height: 32px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all .2s;
+            font-size: 14px;
+        }
+
+        .btn-edit:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* ─── Bottom Action Bar ─────────────────────────────── */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: var(--bottom-bar-h);
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 10px;
+            z-index: 100;
+            box-shadow: 0 -4px 16px rgba(0,0,0,.06);
+        }
+
+        .btn-sync {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 44px;
+            padding: 0 16px;
+            background: var(--success-light);
+            border: 1.5px solid #86EFAC;
+            border-radius: var(--radius-md);
+            color: var(--success);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .btn-sync:hover {
+            background: #DCFCE7;
+            border-color: var(--success);
+        }
+
+        .btn-sync:disabled {
+            opacity: .6;
+            pointer-events: none;
+        }
+
+        /* ── Blinking red state when there are unsynced changes ── */
+        @keyframes sync-blink {
+            0%, 100% {
+                background: #FEF2F2;
+                border-color: #FCA5A5;
+                color: var(--danger);
+                box-shadow: 0 0 0 0 rgba(220,38,38,0);
+            }
+            50% {
+                background: var(--danger);
+                border-color: var(--danger);
+                color: white;
+                box-shadow: 0 0 0 5px rgba(220,38,38,.15);
+            }
+        }
+
+        .btn-sync.has-changes {
+            animation: sync-blink 1.4s ease-in-out infinite;
+        }
+
+        .btn-sync.has-changes:hover {
+            animation: none;
+            background: #FEE2E2;
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-add {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 44px;
+            padding: 0 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            box-shadow: 0 2px 8px rgba(37,99,235,.35);
+        }
+
+        .btn-add:hover    { background: var(--primary-hover); }
+        .btn-add:active   { transform: scale(.97); }
+
+        /* Badge for unsynced */
+        .unsynced-badge {
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            min-width: 18px; height: 18px;
+            padding: 0 5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* ─── Modal ─────────────────────────────────────────── */
+        .modal-content {
+            border: none;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-header {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -.3px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            gap: 8px;
+        }
+
+        /* Form fields */
+        .field-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .field-input {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field-input:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+        }
+
+        .field-input[readonly] {
+            background: #F1F5F9;
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .field-error {
+            font-size: 12px;
+            color: var(--danger);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Modal buttons */
+        .modal-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 40px;
+            padding: 0 16px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+        }
+
+        .modal-btn--cancel {
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            color: var(--text-muted);
+        }
+        .modal-btn--cancel:hover { background: #F1F5F9; }
+
+        .modal-btn--primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 1px 4px rgba(37,99,235,.3);
+        }
+        .modal-btn--primary:hover { background: var(--primary-hover); }
+
+        .modal-btn--danger {
+            background: var(--danger-light);
+            border: 1.5px solid #FECACA;
+            color: var(--danger);
+        }
+        .modal-btn--danger:hover { background: #FEE2E2; }
+
+        /* ─── Delete Confirm Modal ───────────────────────────── */
+        .delete-modal-header {
+            background: var(--danger);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 18px 20px 14px;
+        }
+
+        .delete-modal-header .modal-title { color: white; }
+        .delete-modal-header .btn-close { filter: invert(1) brightness(2); }
+
+        .delete-target {
+            background: var(--danger-light);
+            border: 1px solid #FECACA;
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--danger);
+            margin: 8px 0;
+        }
+
+        .delete-warning {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        /* ─── Toast ─────────────────────────────────────────── */
+        .toast-container {
+            position: fixed;
+            top: calc(var(--header-h) + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            width: min(calc(100vw - 32px), 420px);
+        }
+
+        @keyframes toast-in {
+            from {
+                opacity: 0;
+                transform: translateY(-12px) scale(.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toast-out {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                max-height: 80px;
+                margin-bottom: 0;
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-8px) scale(.96);
+                max-height: 0;
+                margin-bottom: -8px;
+            }
+        }
+
+        .app-toast {
+            pointer-events: all;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            border-radius: var(--radius-md);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,.15), 0 1px 4px rgba(0,0,0,.1);
+            animation: toast-in .28s cubic-bezier(.34,1.4,.64,1) forwards;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .app-toast.hiding {
+            animation: toast-out .25s ease forwards;
+        }
+
+        .app-toast__icon {
+            font-size: 15px;
+            flex-shrink: 0;
+            opacity: .9;
+        }
+
+        .app-toast__body { flex: 1; line-height: 1.4; }
+
+        .app-toast__close {
+            flex-shrink: 0;
+            width: 22px; height: 22px;
+            background: rgba(255,255,255,.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .15s;
+            padding: 0;
+        }
+        .app-toast__close:hover { background: rgba(255,255,255,.35); }
+
+        /* ─── Loading spinner ───────────────────────────────── */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 18px; height: 18px;
+            top: 50%; left: 50%;
+            margin: -9px 0 0 -9px;
+            border: 2.5px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            color: inherit;
+        }
+
+        .btn-sync.btn-loading::after { border-color: var(--success); border-top-color: transparent; }
+        .btn-add.btn-loading::after  { border-color: white; border-top-color: transparent; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ─── Responsive Tweaks ─────────────────────────────── */
+        @media (max-width: 400px) {
+            .conn-pill span { display: none; }
+            .app-header__subtitle { display: none; }
+            .btn-sync span.sync-label { display: none; }
+        }
+
+        @media (min-width: 640px) {
+            .app-content { padding: 0 20px; }
+            .app-header { padding: 0 24px; }
+            .bottom-bar { padding: 0 24px; }
+        }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <div class="container py-4">
+<!-- ─── Fixed Top Header ─────────────────────────── -->
+<header class="app-header">
+    <div class="app-header__brand">
+        <div class="app-header__icon">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+            <div class="app-header__title">Inventory</div>
+            <div class="app-header__subtitle">Barang &amp; Stok</div>
+        </div>
+    </div>
+    <div class="conn-pill">
+        <div id="connectionStatus" class="status-indicator status-syncing"></div>
+        <span id="connectionMessage">Menyiapkan...</span>
+    </div>
+</header>
 
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-box-seam me-2"></i>Inventory Barang</h2>
-            <div class="connection-status d-flex align-items-center">
-                <div id="connectionStatus" class="status-indicator status-syncing"></div>
-                <span id="connectionMessage" class="ms-2 small">Menyiapkan koneksi...</span>
+<!-- ─── Main Body ────────────────────────────────── -->
+<div class="app-body">
+    <div class="app-content">
+
+        <!-- Stats Row (diisi JS) -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card stat-card--all">
+                <div class="stat-card__num" id="statAll">–</div>
+                <div class="stat-card__label">Total</div>
+            </div>
+            <div class="stat-card stat-card--in">
+                <div class="stat-card__num" id="statIn">–</div>
+                <div class="stat-card__label">Tersedia</div>
+            </div>
+            <div class="stat-card stat-card--out">
+                <div class="stat-card__num" id="statOut">–</div>
+                <div class="stat-card__label">Habis</div>
             </div>
         </div>
 
-       <!-- Filter & Search -->
-<div class="row mb-3 g-3">
-
-   
-
-    <!-- Filter Badges -->
-    <div class="col-12">
-    <div class="d-flex flex-wrap gap-2 justify-content-center" id="filterBadgesContainer">
-        <span class="badge-filter text-center bi bi-bag-fill py-2 rounded fw-medium" data-filter="all"> Semua</span>
-        <span class="badge-filter text-center bi bi-bag-check-fill py-2 rounded fw-medium" data-filter="inStock"> Tersedia</span>
-        <span class="badge-filter text-center bi bi-bag-x-fill py-2 rounded fw-medium" data-filter="outOfStock"> Habis</span>
-    </div>
-</div>
-
-    <!-- Action Buttons -->
-    <div class="col-12">
-        <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-end" id="actionButtonsContainer">
-            <button id="syncBtn" class="btn btn-success flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center bi bi-cloud-arrow-up px-3">
-                <i class="fas fa-sync-alt me-1"></i> Update Data
-                <span id="unsyncedBadge" class="badge bg-danger ms-2 d-none">0</span>
-            </button>
-            <button id="addNewItemBtn" class="btn btn-primary flex-grow-1 flex-md-grow-0 d-flex align-items-center justify-content-center bi bi-plus-circle px-3">
-                <i class="fas fa-plus me-1"></i> Tambah Barang
-            </button>
+        <!-- Search -->
+        <div class="search-wrap">
+            <i class="bi bi-search search-wrap__icon"></i>
+            <input type="text" id="searchBox" placeholder="Cari PLU atau deskripsi…" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
-    </div>
 
-</div>
-
- <!-- Search Box -->
-    <div class="col-12 mb-2">
-        <div class="input-group">
-            <span class="input-group-text"><i class="fas fa-search bi bi-search"></i></span>
-            <input type="text" id="searchBox" class="form-control" placeholder="Cari PLU atau Deskripsi...">
+        <!-- Filter Pills -->
+        <div class="filter-bar" id="filterBadgesContainer">
+            <span class="badge-filter active" data-filter="all">
+                <i class="bi bi-grid-3x3-gap-fill"></i> Semua
+            </span>
+            <span class="badge-filter" data-filter="inStock">
+                <i class="bi bi-check-circle-fill"></i> Tersedia
+            </span>
+            <span class="badge-filter" data-filter="outOfStock">
+                <i class="bi bi-x-circle-fill"></i> Habis
+            </span>
         </div>
-    </div>
 
         <!-- Empty State -->
-        <div id="emptyState" class="alert alert-info text-center d-none">
-            <i class="bi bi-inbox me-2"></i>
-            Tidak ada data barang. Silakan tambahkan barang pertama Anda!
+        <div id="emptyState" class="d-none">
+            <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+            <p>Tidak ada data barang.<br>Tambahkan barang pertama Anda!</p>
         </div>
 
-        <!-- Table -->
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th data-sort="plu">PLU <i class="fas fa-sort"></i></th>
-                        <th data-sort="description">Deskripsi <i class="fas fa-sort"></i></th>
-                        <th data-sort="qty">Qty <i class="fas fa-sort"></i></th>
-                        <th class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Data akan diisi oleh JavaScript -->
-                </tbody>
-            </table>
-        </div>
-
-    </div>
-
-    <!-- Toast Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
-
-    <!-- Modal: Tambah/Edit Barang -->
-    <div class="modal fade" id="itemModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="itemModalLabel">Input Data Barang</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="itemForm">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">PLU <small class="text-muted"></small></label>
-                            <input type="number" id="plu" class="form-control" required min="0">
-                            <div id="pluError" class="text-danger small mt-1 d-none">
-                                <i class="fas fa-exclamation-circle me-1"></i>
-                                <span>PLU harus berupa angka positif.</span>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Deskripsi</label>
-                            <input type="text" id="description" class="form-control" required>
-                            <div id="descriptionError" class="text-danger small mt-1 d-none">
-                                <i class="fas fa-exclamation-circle me-1"></i>
-                                <span>Deskripsi hanya boleh berisi huruf, angka, dan spasi.</span>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kuantitas</label>
-                            <input type="number" id="qty" class="form-control" required min="0" value="0">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="submitButton" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Tambah Barang
-                        </button>
-                        <button type="button" id="deleteFromModalBtn" class="btn btn-danger d-none">
-                            <i class="fas fa-trash me-2"></i>Hapus
-                        </button>
-                    </div>
-                </form>
+        <!-- Table Card -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="inv-table">
+                    <thead>
+                        <tr>
+                            <th style="width:36px">#</th>
+                            <th data-sort="plu">PLU <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th data-sort="description">Deskripsi <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th data-sort="qty" style="text-align:center">Qty <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th style="width:44px; text-align:center"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- filled by JS -->
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
 
-    <!-- Modal: Konfirmasi Hapus -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
+    </div><!-- /app-content -->
+</div><!-- /app-body -->
+
+<!-- ─── Bottom Action Bar ─────────────────────────── -->
+<div class="bottom-bar">
+    <button id="syncBtn" class="btn-sync">
+        <i class="bi bi-cloud-arrow-up-fill"></i>
+        <span class="sync-label">Update</span>
+        <span id="unsyncedBadge" class="unsynced-badge d-none">0</span>
+    </button>
+    <button id="addNewItemBtn" class="btn-add">
+        <i class="bi bi-plus-lg"></i>
+        Tambah Barang
+    </button>
+</div>
+
+<!-- ─── Toast Container ───────────────────────────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ─── Modal: Tambah / Edit ──────────────────────── -->
+<div class="modal fade" id="itemModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemModalLabel">Input Data Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="itemForm">
                 <div class="modal-body">
-                    <p>Anda yakin ingin menghapus barang:</p>
-                    <h5><span id="itemToDelete">-</span></h5>
-                    <p class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Aksi ini tidak dapat dibatalkan kecuali dengan tombol Undo setelah hapus.</p>
+                    <!-- PLU -->
+                    <div class="mb-3">
+                        <label class="field-label" for="plu">PLU</label>
+                        <input type="number" id="plu" class="field-input" required min="0" inputmode="numeric">
+                        <div id="pluError" class="field-error d-none">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <span>PLU harus berupa angka positif.</span>
+                        </div>
+                    </div>
+                    <!-- Deskripsi -->
+                    <div class="mb-3">
+                        <label class="field-label" for="description">Deskripsi</label>
+                        <input type="text" id="description" class="field-input" required>
+                        <div id="descriptionError" class="field-error d-none">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <span>Deskripsi hanya boleh berisi huruf, angka, dan spasi.</span>
+                        </div>
+                    </div>
+                    <!-- Kuantitas -->
+                    <div class="mb-0">
+                        <label class="field-label" for="qty">Kuantitas</label>
+                        <input type="number" id="qty" class="field-input" required min="0" value="0" inputmode="numeric">
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
-                        <i class="fas fa-trash me-2"></i>Hapus
+                    <button type="button" class="modal-btn modal-btn--cancel" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" id="deleteFromModalBtn" class="modal-btn modal-btn--danger d-none">
+                        <i class="bi bi-trash3-fill"></i> Hapus
+                    </button>
+                    <button type="submit" id="submitButton" class="modal-btn modal-btn--primary">
+                        <i class="bi bi-plus-lg"></i> Tambah
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Modal: Konfirmasi Hapus ───────────────────── -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header delete-modal-header">
+                <h5 class="modal-title">Hapus Barang?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Anda akan menghapus:</p>
+                <div class="delete-target" id="itemToDelete">–</div>
+                <div class="delete-warning">
+                    <i class="bi bi-exclamation-triangle-fill" style="color:var(--warning); margin-top:1px;"></i>
+                    Aksi ini tidak dapat dibatalkan kecuali dengan tombol Undo setelah penghapusan.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn--cancel" data-bs-dismiss="modal">Batal</button>
+                <button type="button" id="confirmDeleteBtn" class="modal-btn modal-btn--primary" style="background:var(--danger); box-shadow: 0 1px 4px rgba(220,38,38,.3)">
+                    <i class="bi bi-trash3-fill"></i> Ya, Hapus
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- JavaScript Utama -->
-    <script>
-        // Mencegah zoom saat input difokuskan di Safari
+<script>
+// Prevent zoom on input focus (Safari)
 document.querySelectorAll('input, textarea').forEach(input => {
-    input.addEventListener('focus', function() {
-        document.querySelector('meta[name=viewport]').setAttribute('content', 
-            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-        );
+    input.addEventListener('focus', () => {
+        document.querySelector('meta[name=viewport]').setAttribute('content',
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
     });
-    input.addEventListener('blur', function() {
-        document.querySelector('meta[name=viewport]').setAttribute('content', 
-            'width=device-width, initial-scale=1.0'
-        );
+    input.addEventListener('blur', () => {
+        document.querySelector('meta[name=viewport]').setAttribute('content',
+            'width=device-width, initial-scale=1.0');
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    // ✅ Ambil semua elemen penting
+document.addEventListener('DOMContentLoaded', function () {
+
     const requiredElements = {
-        itemModal: document.getElementById('itemModal'),
+        itemModal:          document.getElementById('itemModal'),
         deleteConfirmModal: document.getElementById('deleteConfirmModal'),
-        form: document.getElementById('itemForm'),
-        pluInput: document.getElementById('plu'),
-        descriptionInput: document.getElementById('description'),
-        qtyInput: document.getElementById('qty'),
-        submitButton: document.getElementById('submitButton'),
+        form:               document.getElementById('itemForm'),
+        pluInput:           document.getElementById('plu'),
+        descriptionInput:   document.getElementById('description'),
+        qtyInput:           document.getElementById('qty'),
+        submitButton:       document.getElementById('submitButton'),
         deleteFromModalBtn: document.getElementById('deleteFromModalBtn'),
-        confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
-        modalLabel: document.getElementById('itemModalLabel'),
-        searchBox: document.getElementById('searchBox'),
-        tableBody: document.getElementById('tableBody'),
-        emptyState: document.getElementById('emptyState'),
-        syncBtn: document.getElementById('syncBtn'),
-        unsyncedBadge: document.getElementById('unsyncedBadge'),
-        pluError: document.getElementById('pluError'),
-        descriptionError: document.getElementById('descriptionError'),
-        toastContainer: document.querySelector('.toast-container'),
-        connectionStatus: document.getElementById('connectionStatus'),
-        connectionMessage: document.getElementById('connectionMessage'),
-        itemToDelete: document.getElementById('itemToDelete')
+        confirmDeleteBtn:   document.getElementById('confirmDeleteBtn'),
+        modalLabel:         document.getElementById('itemModalLabel'),
+        searchBox:          document.getElementById('searchBox'),
+        tableBody:          document.getElementById('tableBody'),
+        emptyState:         document.getElementById('emptyState'),
+        syncBtn:            document.getElementById('syncBtn'),
+        unsyncedBadge:      document.getElementById('unsyncedBadge'),
+        pluError:           document.getElementById('pluError'),
+        descriptionError:   document.getElementById('descriptionError'),
+        toastContainer:     document.getElementById('toastContainer'),
+        connectionStatus:   document.getElementById('connectionStatus'),
+        connectionMessage:  document.getElementById('connectionMessage'),
+        itemToDelete:       document.getElementById('itemToDelete')
     };
 
-    // ✅ Validasi Bootstrap tersedia
     if (typeof bootstrap === 'undefined') {
-        console.error('Bootstrap JS belum dimuat');
-        alert('Bootstrap JS belum dimuat. Pastikan Anda sudah include bootstrap.bundle.min.js');
-        return;
+        alert('Bootstrap JS belum dimuat.'); return;
     }
 
-    // ✅ Validasi semua elemen penting
-    for (const [name, element] of Object.entries(requiredElements)) {
-        if (!element) {
-            console.error(`❌ Elemen '${name}' tidak ditemukan di DOM!`);
-            alert(`Kesalahan inisialisasi: Elemen '${name}' tidak ditemukan. Periksa HTML Anda.`);
-            return;
-        }
+    for (const [name, el] of Object.entries(requiredElements)) {
+        if (!el) { alert(`Kesalahan: Elemen '${name}' tidak ditemukan.`); return; }
     }
 
-    // Buat instance modal setelah validasi
-    const itemModal = new bootstrap.Modal(requiredElements.itemModal, { keyboard: true });
-    const deleteConfirmModal = new bootstrap.Modal(requiredElements.deleteConfirmModal);
+    const itemModal         = new bootstrap.Modal(requiredElements.itemModal, { keyboard: true });
+    const deleteConfirmModal= new bootstrap.Modal(requiredElements.deleteConfirmModal);
 
-    // Konfigurasi Google Sheets - GANTI DENGAN URL ANDA
     const scriptURL = 'https://script.google.com/macros/s/AKfycbzxWUyz4vGbGgAxKxSduGmHfdwF64DOtnEEodunxWYf67wcSmOoEgNeNyfoBsraquN0/exec';
     let dataList = [];
     let itemIndex = -1;
     let currentFilter = 'all';
     let sortField = 'plu';
     let sortDirection = 'asc';
-    const LOCAL_STORAGE_KEY = 'unsynced_items';
-    const DELETED_ITEMS_KEY = 'deleted_items';
+    const LOCAL_STORAGE_KEY  = 'unsynced_items';
+    const DELETED_ITEMS_KEY  = 'deleted_items';
 
     let retryBtn = null;
     let deletedItemBackup = null;
-    let selectedRowIndex = -1; // Track row yang sedang dipilih
+    let selectedRowIndex = -1;
 
-    // Format PLU to have leading zeros (e.g., 123 -> 00123)
-    function formatPLU(plu) {
-        return String(plu).padStart(5, '');
+    function formatPLU(plu)          { return String(plu).padStart(5, ''); }
+    function formatDescription(desc) {
+        return desc.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
     }
-
-    // Capitalize each word in description
-    function formatDescription(description) {
-        return description
-            .trim()
-            .toLowerCase()
-            .replace(/\b\w/g, char => char.toUpperCase());
-    }
-
-    // Check for duplicate PLU or description
     function checkDuplicate(plu, description, excludeIndex = -1) {
-        return dataList.findIndex((item, index) => {
-            return index !== excludeIndex && item && (item.plu === plu || item.description.toLowerCase() === description.toLowerCase());
-        });
+        return dataList.findIndex((item, idx) =>
+            idx !== excludeIndex && item &&
+            (item.plu === plu || item.description.toLowerCase() === description.toLowerCase())
+        );
     }
-
-    // Validate dataList integrity
     function validateDataList(data) {
-        return data.every(item => 
-            item && 
-            typeof item.plu === 'number' && 
-            typeof item.description === 'string' && 
-            typeof item.qty === 'number' && 
+        return data.every(item =>
+            item && typeof item.plu === 'number' &&
+            typeof item.description === 'string' &&
+            typeof item.qty === 'number' &&
             typeof item.isSynced === 'boolean'
         );
     }
 
-    // Update connection status UI
+    // ── Update connection status ──
     function updateConnectionStatus(status, message) {
-        if (!requiredElements.connectionStatus || !requiredElements.connectionMessage) {
-            console.error('Elemen connectionStatus atau connectionMessage tidak ditemukan');
-            return;
-        }
-        requiredElements.connectionStatus.className = 'status-indicator';
-        requiredElements.connectionStatus.classList.remove('status-connected', 'status-disconnected', 'status-syncing');
-        if (status === 'connected') {
-            requiredElements.connectionStatus.classList.add('status-connected');
-        } else if (status === 'disconnected') {
-            requiredElements.connectionStatus.classList.add('status-disconnected');
-        } else if (status === 'syncing') {
-            requiredElements.connectionStatus.classList.add('status-syncing');
-        }
-        requiredElements.connectionMessage.textContent = message;
+        const el = requiredElements.connectionStatus;
+        const msg = requiredElements.connectionMessage;
+        el.className = 'status-indicator';
+        if (status === 'connected')    el.classList.add('status-connected');
+        else if (status === 'disconnected') el.classList.add('status-disconnected');
+        else                           el.classList.add('status-syncing');
+        msg.textContent = message;
     }
 
-    // Show toast notification
+    // ── Toast ──
+    const toastIcons  = { success:'bi-check-circle-fill', danger:'bi-x-circle-fill', warning:'bi-exclamation-triangle-fill', info:'bi-info-circle-fill' };
+    const toastColors = { success:'#16A34A', danger:'#DC2626', warning:'#D97706', info:'#2563EB' };
+
     function showToast(message, type = 'info') {
+        const container = requiredElements.toastContainer;
         const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0 mb-2`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-        
+        toast.className = 'app-toast';
+        toast.style.background = toastColors[type] || toastColors.info;
         toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        `;
-        
-        requiredElements.toastContainer.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-        
-        toast.addEventListener('hidden.bs.toast', () => {
-            toast.remove();
-        });
+            <i class="bi ${toastIcons[type] || toastIcons.info} app-toast__icon"></i>
+            <div class="app-toast__body">${message}</div>
+            <button class="app-toast__close" aria-label="Tutup"><i class="bi bi-x"></i></button>`;
+        container.appendChild(toast);
 
-        // Handle undo button if exists
-        if (message.includes('Undo')) {
+        const dismiss = () => {
+            if (toast.classList.contains('hiding')) return;
+            toast.classList.add('hiding');
+            toast.addEventListener('animationend', () => toast.remove(), { once: true });
+        };
+
+        toast.querySelector('.app-toast__close').addEventListener('click', dismiss);
+        setTimeout(dismiss, 3500);
+
+        if (message.includes('btn-undo')) {
             const undoBtn = toast.querySelector('.btn-undo');
-            if (undoBtn) {
-                undoBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    undoDelete();
-                });
-            }
+            if (undoBtn) undoBtn.addEventListener('click', e => { e.stopPropagation(); dismiss(); undoDelete(); });
         }
     }
 
-    // Cek koneksi internet
     function checkOnline() {
-        if (!navigator.onLine) {
-            showToast('Tidak ada koneksi internet. Gunakan mode offline.', 'warning');
-            return false;
-        }
+        if (!navigator.onLine) { showToast('Tidak ada koneksi internet.', 'warning'); return false; }
         return true;
     }
 
-    // Fungsi undo delete
     function undoDelete() {
         if (deletedItemBackup) {
             dataList.push(deletedItemBackup);
@@ -576,198 +1125,131 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Clear selection dari semua row
     function clearRowSelection() {
-        document.querySelectorAll('.selected-row').forEach(row => {
-            row.classList.remove('selected-row');
-        });
+        document.querySelectorAll('.selected-row').forEach(r => r.classList.remove('selected-row'));
         selectedRowIndex = -1;
     }
 
-    // Set selection ke row tertentu
     function setRowSelection(index) {
         clearRowSelection();
-        
-        if (index >= 0 && index < requiredElements.tableBody.children.length) {
-            const row = requiredElements.tableBody.children[index];
-            if (row) {
-                row.classList.add('selected-row');
-                selectedRowIndex = index;
-                
-                // Scroll ke row yang dipilih
-                row.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'nearest' 
-                });
-                
-                // Optional: Fokus ke tombol edit
-                const editBtn = row.querySelector('button');
-                if (editBtn) {
-                    setTimeout(() => editBtn.focus(), 100);
-                }
-                
-                
-            }
+        const rows = requiredElements.tableBody.children;
+        if (index >= 0 && index < rows.length) {
+            rows[index].classList.add('selected-row');
+            selectedRowIndex = index;
+            rows[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const editBtn = rows[index].querySelector('.btn-edit');
+            if (editBtn) setTimeout(() => editBtn.focus(), 100);
         }
     }
 
-    // Load data from Google Sheets
+    // ── Stats update ──
+    function updateStats() {
+        const total   = dataList.length;
+        const inStock = dataList.filter(i => i.qty > 0).length;
+        const outStock= dataList.filter(i => i.qty === 0).length;
+        document.getElementById('statAll').textContent = total;
+        document.getElementById('statIn').textContent  = inStock;
+        document.getElementById('statOut').textContent = outStock;
+    }
+
+    // ── Load from Google Sheets ──
     async function loadDataFromSheets() {
         if (!checkOnline()) {
-            updateConnectionStatus('disconnected', 'Tidak ada koneksi. Menggunakan data lokal.');
-            loadFromLocalStorage();
-            renderTable();
-            updateUnsyncedBadge();
-            return;
+            updateConnectionStatus('disconnected', 'Tidak ada koneksi. Data lokal.');
+            loadFromLocalStorage(); renderTable(); updateUnsyncedBadge(); return;
         }
-        updateConnectionStatus('syncing', 'Mengambil data dari Google Sheets...');
-        
+        updateConnectionStatus('syncing', 'Mengambil data…');
         try {
             const response = await fetch(scriptURL + '?action=get');
-            if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-            }
-            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             let result;
-            try {
-                result = await response.json();
-            } catch (error) {
-                throw new Error('Gagal memproses JSON dari server: ' + error.message);
-            }
+            try { result = await response.json(); }
+            catch (e) { throw new Error('Format JSON tidak valid: ' + e.message); }
 
-            console.log('📡 Respons dari server:', result);
-
-            if (result && result.status === 'success' && Array.isArray(result.data)) {
-                console.log('Data dari server diterima:', result.data.length, 'item');
-
+            if (result?.status === 'success' && Array.isArray(result.data)) {
                 dataList = result.data.map(item => ({
-                    ...item,
-                    plu: parseInt(item.plu),
-                    qty: parseInt(item.qty),
-                    isSynced: true,
-                    hasBeenRendered: false
+                    ...item, plu: parseInt(item.plu), qty: parseInt(item.qty),
+                    isSynced: true, hasBeenRendered: false
                 })).filter(item => !isNaN(item.plu) && !isNaN(item.qty));
-
-                loadFromLocalStorage();
-                renderTable();
-                updateUnsyncedBadge();
+                loadFromLocalStorage(); renderTable(); updateUnsyncedBadge();
                 updateConnectionStatus('connected', 'Terhubung ke Google Sheets');
-                showToast(`Data berhasil dimuat (${dataList.length} item)`, 'success');
-            } else if (result && result.status === 'success' && result.data === null) {
-                console.log('Server: data null — dianggap sebagai data kosong.');
+                showToast(`Data dimuat (${dataList.length} item)`, 'success');
+            } else if (result?.status === 'success' && result.data === null) {
                 dataList = [];
-                loadFromLocalStorage();
-                renderTable();
-                updateUnsyncedBadge();
+                loadFromLocalStorage(); renderTable(); updateUnsyncedBadge();
                 updateConnectionStatus('connected', 'Terhubung (data kosong)');
-                showToast('Tidak ada data di server — menggunakan data lokal.', 'info');
+                showToast('Data server kosong — menggunakan lokal.', 'info');
             } else {
-                console.error('❌ Format respons tidak valid:', result);
-                throw new Error('Format data tidak dikenali dari server');
+                throw new Error('Format data tidak dikenali');
             }
         } catch (error) {
-            console.error('⛔ Error saat load data dari Google Sheets:', error);
-            updateConnectionStatus('disconnected', 'Gagal memuat dari Google Sheets');
-            
-            if (error.message.includes('HTTP') || error.message.includes('JSON')) {
-                showToast('Gagal memuat data: ' + error.message, 'danger');
-            }
-
-            loadFromLocalStorage();
-            renderTable();
-            updateUnsyncedBadge();
+            updateConnectionStatus('disconnected', 'Gagal memuat data');
+            if (error.message.includes('HTTP') || error.message.includes('JSON'))
+                showToast('Gagal: ' + error.message, 'danger');
+            loadFromLocalStorage(); renderTable(); updateUnsyncedBadge();
         }
     }
 
-    // Sync data to Google Sheets with retry
+    // ── Sync to Google Sheets ──
     async function syncDataToSheets(maxRetries = 3, retryDelay = 5000) {
-        const unsyncedItems = dataList.filter(item => !item.isSynced);
-        const deletedItems = getDeletedItemsFromLocalStorage();
-        
+        const unsyncedItems = dataList.filter(i => !i.isSynced);
+        const deletedItems  = getDeletedItemsFromLocalStorage();
         if (unsyncedItems.length === 0 && deletedItems.length === 0) {
-            showToast('Tidak ada data baru yang perlu disinkronkan', 'info');
-            return;
+            showToast('Tidak ada data baru untuk disinkronkan', 'info'); return;
         }
-
-        // Validasi data sebelum dikirim
-        if (!unsyncedItems.every(item => item.plu && item.description && !isNaN(item.qty))) {
-            showToast('Data tidak valid untuk sinkronisasi', 'danger');
-            return;
+        if (!unsyncedItems.every(i => i.plu && i.description && !isNaN(i.qty))) {
+            showToast('Data tidak valid untuk sinkronisasi', 'danger'); return;
         }
+        if (!checkOnline()) { showToast('Tidak ada koneksi. Data tersimpan lokal.', 'warning'); return; }
 
-        if (!checkOnline()) {
-            showToast('Tidak ada koneksi internet. Data disimpan lokal.', 'warning');
-            return;
-        }
-
-        updateConnectionStatus('syncing', 'Menyinkronkan data ke Google Sheets...');
+        updateConnectionStatus('syncing', 'Menyinkronkan…');
         requiredElements.syncBtn.classList.add('btn-loading');
         requiredElements.syncBtn.disabled = true;
 
         let retries = 0;
         while (retries < maxRetries) {
             try {
-                console.log('Mengirim data untuk sinkronisasi:', { unsyncedItems, deletedItems });
                 const response = await fetch(scriptURL, {
                     method: 'POST',
-                    
-                    body: JSON.stringify({
-                        action: 'sync',
-                        unsyncedItems,
-                        deletedItems
-                    })
+                    body: JSON.stringify({ action: 'sync', unsyncedItems, deletedItems })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Gagal menyinkronkan data ke server: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 let result;
-                try {
-                    result = await response.json();
-                } catch (error) {
-                    throw new Error('Gagal memproses respons server: Format JSON tidak valid');
-                }
+                try { result = await response.json(); }
+                catch (e) { throw new Error('Format JSON tidak valid'); }
 
-                console.log('Respons server:', result);
-
-                if (result && result.status === 'success') {
-                    dataList.forEach(item => item.isSynced = true);
+                if (result?.status === 'success') {
+                    dataList.forEach(i => i.isSynced = true);
                     localStorage.removeItem(LOCAL_STORAGE_KEY);
                     localStorage.removeItem(DELETED_ITEMS_KEY);
                     updateUnsyncedBadge();
-                    updateConnectionStatus('connected', 'Data tersinkronisasi dengan Google Sheets');
-                    showToast(`${unsyncedItems.length + deletedItems.length} item berhasil disinkronkan`, 'success');
-                    if (retryBtn && document.body.contains(retryBtn)) {
-                        retryBtn.remove(); // Hapus tombol retry jika berhasil
-                        retryBtn = null;
-                    }
+                    updateConnectionStatus('connected', 'Tersinkronisasi');
+                    showToast(`${unsyncedItems.length + deletedItems.length} item tersinkron`, 'success');
+                    if (retryBtn?.parentNode) { retryBtn.remove(); retryBtn = null; }
                     return;
                 } else {
-                    throw new Error(result.message || 'Gagal menyinkronkan data');
+                    throw new Error(result.message || 'Gagal sinkronisasi');
                 }
             } catch (error) {
-                console.error('Error syncing data to Google Sheets:', error);
                 retries++;
                 if (retries < maxRetries) {
-                    showToast(`Gagal menyinkronkan (percobaan ${retries}/${maxRetries}). Mencoba ulang dalam ${retryDelay/1000} detik...`, 'warning');
-                    await new Promise(resolve => setTimeout(resolve, retryDelay));
-                    continue;
-                }
-                updateConnectionStatus('disconnected', 'Gagal menyinkronkan data');
-                showToast('Gagal menyinkronkan: ' + error.message, 'danger');
-                if (!retryBtn || !document.body.contains(retryBtn)) {
-                    retryBtn = document.createElement('button');
-                    retryBtn.className = 'btn btn-retry btn-sm ms-2 btn-warning';
-                    retryBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Retry Sync';
-                    retryBtn.onclick = async () => {
-                        retryBtn.classList.add('btn-loading');
-                        retryBtn.disabled = true;
-                        await syncDataToSheets(maxRetries, retryDelay);
-                        retryBtn.classList.remove('btn-loading');
-                        retryBtn.disabled = false;
-                    };
-                    requiredElements.syncBtn.parentNode.appendChild(retryBtn);
+                    showToast(`Gagal (percobaan ${retries}/${maxRetries}). Mencoba ulang…`, 'warning');
+                    await new Promise(r => setTimeout(r, retryDelay));
+                } else {
+                    updateConnectionStatus('disconnected', 'Gagal sinkronisasi');
+                    showToast('Gagal: ' + error.message, 'danger');
+                    if (!retryBtn?.parentNode) {
+                        retryBtn = document.createElement('button');
+                        retryBtn.className = 'modal-btn modal-btn--primary ms-2';
+                        retryBtn.style.cssText = 'height:36px;font-size:12px';
+                        retryBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Retry';
+                        retryBtn.onclick = async () => {
+                            retryBtn.disabled = true;
+                            await syncDataToSheets(maxRetries, retryDelay);
+                            retryBtn.disabled = false;
+                        };
+                        requiredElements.syncBtn.parentNode.appendChild(retryBtn);
+                    }
                 }
             } finally {
                 requiredElements.syncBtn.classList.remove('btn-loading');
@@ -776,339 +1258,187 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Delete item from Google Sheets with retry
+    // ── Delete from Sheets ──
     async function deleteItemFromSheets(item, maxRetries = 3, retryDelay = 5000) {
-        if (!checkOnline()) {
-            saveDeletedItemToLocalStorage(item);
-            return false;
-        }
-        updateConnectionStatus('syncing', 'Menghapus data dari Google Sheets...');
-        
+        if (!checkOnline()) { saveDeletedItemToLocalStorage(item); return false; }
+        updateConnectionStatus('syncing', 'Menghapus dari Google Sheets…');
         let retries = 0;
         while (retries < maxRetries) {
             try {
-                console.log('Mengirim permintaan hapus:', { plu: item.plu, description: item.description });
                 const response = await fetch(scriptURL, {
                     method: 'POST',
-                    
-                    body: JSON.stringify({
-                        action: 'delete',
-                        plu: item.plu,
-                        description: item.description
-                    })
+                    body: JSON.stringify({ action: 'delete', plu: item.plu, description: item.description })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Gagal menghapus data dari server: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 let result;
-                try {
-                    result = await response.json();
-                } catch (error) {
-                    throw new Error('Gagal memproses respons server: Format JSON tidak valid');
-                }
-
-                console.log('Respons server untuk hapus:', result);
-
-                if (result && result.status === 'success') {
-                    updateConnectionStatus('connected', 'Data terhapus dari Google Sheets');
+                try { result = await response.json(); }
+                catch (e) { throw new Error('Format JSON tidak valid'); }
+                if (result?.status === 'success') {
+                    updateConnectionStatus('connected', 'Data dihapus');
                     return true;
-                } else {
-                    throw new Error(result.message || 'Gagal menghapus data');
-                }
+                } else throw new Error(result.message || 'Gagal hapus');
             } catch (error) {
-                console.error('Error deleting item from Google Sheets:', error);
                 retries++;
                 if (retries < maxRetries) {
-                    showToast(`Gagal menghapus (percobaan ${retries}/${maxRetries}). Mencoba ulang dalam ${retryDelay/1000} detik...`, 'warning');
-                    await new Promise(resolve => setTimeout(resolve, retryDelay));
-                    continue;
+                    showToast(`Gagal hapus (${retries}/${maxRetries}). Mencoba ulang…`, 'warning');
+                    await new Promise(r => setTimeout(r, retryDelay));
+                } else {
+                    updateConnectionStatus('disconnected', 'Gagal hapus. Disimpan lokal.');
+                    saveDeletedItemToLocalStorage(item);
+                    return false;
                 }
-                updateConnectionStatus('disconnected', 'Gagal menghapus data. Menyimpan di lokal.');
-                saveDeletedItemToLocalStorage(item);
-                return false;
             }
         }
     }
 
     function loadFromLocalStorage() {
         try {
-            const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (storedData) {
-                const unsyncedItems = JSON.parse(storedData);
-                if (!Array.isArray(unsyncedItems)) {
-                    throw new Error('Data lokal bukan array');
-                }
-                unsyncedItems.forEach(unsyncedItem => {
-                    if (!unsyncedItem.plu || !unsyncedItem.description || isNaN(unsyncedItem.qty)) {
-                        console.warn('Item lokal tidak valid:', unsyncedItem);
-                        return;
-                    }
-                    const existingIndex = dataList.findIndex(item => 
-                        item.plu === unsyncedItem.plu && 
-                        item.description === unsyncedItem.description
-                    );
-                    if (existingIndex > -1) {
-                        dataList[existingIndex].qty = unsyncedItem.qty;
-                        dataList[existingIndex].isSynced = false;
-                    } else {
-                        dataList.push({...unsyncedItem, isSynced: false, hasBeenRendered: false});
-                    }
-                });
-            }
-        } catch (error) {
-            console.error("Gagal memuat dari Local Storage:", error);
-            showToast('Gagal memuat data lokal: ' + error.message, 'danger');
-        }
+            const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!stored) return;
+            const items = JSON.parse(stored);
+            if (!Array.isArray(items)) throw new Error('Bukan array');
+            items.forEach(ui => {
+                if (!ui.plu || !ui.description || isNaN(ui.qty)) return;
+                const idx = dataList.findIndex(i => i.plu === ui.plu && i.description === ui.description);
+                if (idx > -1) { dataList[idx].qty = ui.qty; dataList[idx].isSynced = false; }
+                else dataList.push({ ...ui, isSynced: false, hasBeenRendered: false });
+            });
+        } catch (e) { showToast('Gagal memuat data lokal', 'danger'); }
     }
 
     function saveToLocalStorage() {
         try {
-            const unsyncedItems = dataList.filter(item => !item.isSynced);
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(unsyncedItems));
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataList.filter(i => !i.isSynced)));
             updateUnsyncedBadge();
-        } catch (error) {
-            console.error("Gagal menyimpan ke Local Storage:", error);
-            showToast('Gagal menyimpan data ke penyimpanan lokal', 'danger');
-        }
+        } catch (e) { showToast('Gagal menyimpan ke lokal', 'danger'); }
     }
 
     function saveDeletedItemToLocalStorage(item) {
         try {
-            const deletedItems = getDeletedItemsFromLocalStorage();
-            deletedItems.push(item);
-            localStorage.setItem(DELETED_ITEMS_KEY, JSON.stringify(deletedItems));
+            const items = getDeletedItemsFromLocalStorage();
+            items.push(item);
+            localStorage.setItem(DELETED_ITEMS_KEY, JSON.stringify(items));
             updateUnsyncedBadge();
-        } catch (error) {
-            console.error("Gagal menyimpan item terhapus ke Local Storage:", error);
-        }
+        } catch (e) { /* silent */ }
     }
 
     function getDeletedItemsFromLocalStorage() {
         try {
-            const storedData = localStorage.getItem(DELETED_ITEMS_KEY);
-            return storedData ? JSON.parse(storedData) : [];
-        } catch (error) {
-            console.error("Gagal memuat item terhapus dari Local Storage:", error);
-            return [];
-        }
+            const s = localStorage.getItem(DELETED_ITEMS_KEY);
+            return s ? JSON.parse(s) : [];
+        } catch (e) { return []; }
     }
 
     function updateUnsyncedBadge() {
-        const unsyncedCount = dataList.filter(item => !item.isSynced).length;
-        const deletedCount = getDeletedItemsFromLocalStorage().length;
-        const totalUnsynced = unsyncedCount + deletedCount;
-        
-        requiredElements.unsyncedBadge.textContent = totalUnsynced;
-        requiredElements.unsyncedBadge.classList.toggle('d-none', totalUnsynced === 0);
-        
-        if (totalUnsynced > 0) {
-            requiredElements.syncBtn.classList.add('pulse');
-        } else {
-            requiredElements.syncBtn.classList.remove('pulse');
-        }
+        const total = dataList.filter(i => !i.isSynced).length + getDeletedItemsFromLocalStorage().length;
+        requiredElements.unsyncedBadge.textContent = total;
+        requiredElements.unsyncedBadge.classList.toggle('d-none', total === 0);
+        requiredElements.syncBtn.classList.toggle('has-changes', total > 0);
     }
 
-    // Sort data
+    // ── Sort & Filter ──
     function sortData(data) {
         return data.sort((a, b) => {
-            let valueA, valueB;
-            
-            switch(sortField) {
-                case 'plu':
-                    valueA = a.plu;
-                    valueB = b.plu;
-                    break;
-                case 'description':
-                    valueA = a.description.toLowerCase();
-                    valueB = b.description.toLowerCase();
-                    break;
-                case 'qty':
-                    valueA = a.qty;
-                    valueB = b.qty;
-                    break;
-                default:
-                    valueA = a.plu;
-                    valueB = b.plu;
-            }
-            
-            if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
-            if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+            let va, vb;
+            if (sortField === 'plu')         { va = a.plu; vb = b.plu; }
+            else if (sortField === 'description') { va = a.description.toLowerCase(); vb = b.description.toLowerCase(); }
+            else { va = a.qty; vb = b.qty; }
+            if (va < vb) return sortDirection === 'asc' ? -1 :  1;
+            if (va > vb) return sortDirection === 'asc' ?  1 : -1;
             return 0;
         });
     }
 
-    // Filter data
     function filterData(data) {
-        switch(currentFilter) {
-            case 'inStock':
-                return data.filter(item => item.qty > 0);
-            case 'outOfStock':
-                return data.filter(item => item.qty === 0);
-            default:
-                return data;
-        }
+        if (currentFilter === 'inStock')   return data.filter(i => i.qty > 0);
+        if (currentFilter === 'outOfStock')return data.filter(i => i.qty === 0);
+        return data;
     }
 
-    // MODIFIED: Fungsi renderTable dengan fitur klik row
+    // ── Render Table ──
     function renderTable(filterText = '') {
         requiredElements.tableBody.innerHTML = '';
-        
-        let filteredList = dataList.filter(item => {
-            return item && (
+        let list = dataList.filter(item =>
+            item && (
                 formatPLU(item.plu).includes(filterText.toLowerCase()) ||
                 item.description.toLowerCase().includes(filterText.toLowerCase())
-            );
-        });
-        
-        filteredList = filterData(filteredList);
-        filteredList = sortData(filteredList);
+            )
+        );
+        list = filterData(list);
+        list = sortData(list);
 
-        if (filteredList.length > 100) {
-            filteredList = filteredList.slice(0, 100);
-            showToast('Gunakan filter untuk melihat lebih banyak.', 'info');
-        }
+        updateStats();
 
-        if (filteredList.length === 0) {
+        if (list.length === 0) {
             requiredElements.emptyState.classList.remove('d-none');
-            clearRowSelection(); // Clear selection saat tidak ada data
+            clearRowSelection();
             return;
         }
-        
         requiredElements.emptyState.classList.add('d-none');
 
-        filteredList.forEach((item, index) => {
-            const originalIndex = dataList.findIndex(d => d.plu === item.plu && d.description === item.description && d.qty === item.qty);
+        list.forEach((item, index) => {
+            const origIdx = dataList.findIndex(d => d.plu === item.plu && d.description === item.description && d.qty === item.qty);
             const row = document.createElement('tr');
-            
-            if (!item.hasBeenRendered) {
-                row.classList.add('highlight');
-                item.hasBeenRendered = true;
-            }
-            
-            if (item.qty === 0) {
-                row.classList.add('table-danger');
-            }
-            
-            // Tambahkan class selected-row jika ini adalah row yang dipilih
-            if (selectedRowIndex === index) {
-                row.classList.add('selected-row');
-            }
-            
+
+            if (!item.hasBeenRendered) { row.classList.add('highlight'); item.hasBeenRendered = true; }
+            if (item.qty === 0)        row.classList.add('row-empty-stock');
+            if (selectedRowIndex === index) row.classList.add('selected-row');
+
             row.innerHTML = `
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle">${formatPLU(item.plu)}</td>
-                <td class="align-middle">${item.description}</td>
-                <td class="align-middle">${item.qty}</td>
-                <td class="align-middle text-center">
-                    <button class="btn btn-sm" onclick="editItem(${originalIndex})" title="Edit Barang">
-                        <i class="bi bi-arrow-right-circle-fill"></i>
+                <td><span class="row-num">${index + 1}</span></td>
+                <td><span class="plu-chip">${formatPLU(item.plu)}</span></td>
+                <td class="td-desc">${item.description}${!item.isSynced ? ' <span style="display:inline-block;width:6px;height:6px;background:#F59E0B;border-radius:50%;vertical-align:middle;" title="Belum disinkron"></span>' : ''}</td>
+                <td style="text-align:center"><span class="qty-badge ${item.qty > 0 ? 'qty-badge--ok' : 'qty-badge--zero'}">${item.qty}</span></td>
+                <td style="text-align:center">
+                    <button class="btn-edit" onclick="editItem(${origIdx})" title="Edit">
+                        <i class="bi bi-pencil-fill" style="font-size:12px"></i>
                     </button>
-                </td>
-            `;
-            
-            // Tambahkan event listener untuk klik row
-            row.addEventListener('click', function(e) {
-                // Cek apakah klik pada tombol edit
-                if (e.target.closest('button')) {
-                    return; // Biarkan event onclick tombol edit bekerja
-                }
-                
-                // Clear selection dari semua row
+                </td>`;
+
+            row.addEventListener('click', function (e) {
+                if (e.target.closest('.btn-edit')) return;
                 clearRowSelection();
-                
-                // Tambahkan selected-row ke row yang diklik
                 this.classList.add('selected-row');
                 selectedRowIndex = index;
-                
-                // Scroll ke row yang dipilih
-                this.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'nearest' 
-                });
-                
-                // Fokus ke tombol edit
-                const editBtn = this.querySelector('button');
-                if (editBtn) {
-                    setTimeout(() => editBtn.focus(), 100);
-                }
-                
-               
-                
-                // Prevent event bubbling
+                this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                const btn = this.querySelector('.btn-edit');
+                if (btn) setTimeout(() => btn.focus(), 100);
                 e.stopPropagation();
             });
-            
-            // Tambahkan event listener untuk keyboard navigation (optional)
-            row.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    this.click();
-                }
-            });
-            
+
             requiredElements.tableBody.appendChild(row);
         });
-        
-        // Restore selection jika row masih ada
-        if (selectedRowIndex >= 0 && selectedRowIndex < filteredList.length) {
-            const row = requiredElements.tableBody.children[selectedRowIndex];
-            if (row && !row.classList.contains('selected-row')) {
-                row.classList.add('selected-row');
-            }
+
+        if (selectedRowIndex >= 0 && selectedRowIndex < list.length) {
+            const r = requiredElements.tableBody.children[selectedRowIndex];
+            if (r && !r.classList.contains('selected-row')) r.classList.add('selected-row');
         }
-        
-        // Update sorting icons
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-            const icon = th.querySelector('i');
-            if (th.dataset.sort === sortField) {
-                icon.className = sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
-            } else {
-                icon.className = 'fas fa-sort';
-            }
-        });
-        
-        // Update filter badges
-        document.querySelectorAll('.badge-filter').forEach(badge => {
-            if (badge.dataset.filter === currentFilter) {
-                badge.classList.add('active');
-            } else {
-                badge.classList.remove('active');
-            }
-        });
-        
-        saveToLocalStorage();
     }
 
-    // MODIFIED: Edit item function untuk bekerja dengan selected row
-    window.editItem = function(index) {
-        // Clear selection saat edit
-        clearRowSelection();
-        
-        if (!dataList[index]) {
-            showToast('Item tidak ditemukan', 'danger');
-            return;
+    // ── Edit Item ──
+    window.editItem = function (index) {
+        if (index < 0 || index >= dataList.length || !dataList[index]) {
+            showToast('Item tidak valid', 'danger'); return;
         }
-        const itemToEdit = dataList[index];
-        requiredElements.pluInput.value = itemToEdit.plu;
-        requiredElements.descriptionInput.value = itemToEdit.description;
-        requiredElements.qtyInput.value = itemToEdit.qty;
+        const item = dataList[index];
         itemIndex = index;
-        requiredElements.submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Simpan Perubahan';
-        requiredElements.modalLabel.textContent = 'Edit Data Barang';
+        requiredElements.pluInput.value         = item.plu;
+        requiredElements.descriptionInput.value = item.description;
+        requiredElements.qtyInput.value         = item.qty;
+        requiredElements.modalLabel.textContent = 'Edit Barang';
+        requiredElements.submitButton.innerHTML = '<i class="bi bi-check-lg"></i> Simpan';
         requiredElements.deleteFromModalBtn.classList.remove('d-none');
 
-        requiredElements.deleteFromModalBtn.onclick = function() {
+        requiredElements.deleteFromModalBtn.onclick = function () {
+            const itemName = `${formatPLU(item.plu)} — ${item.description}`;
+            requiredElements.itemToDelete.textContent = itemName;
             itemModal.hide();
-            requiredElements.itemToDelete.textContent = `${formatPLU(itemToEdit.plu)} - ${itemToEdit.description}`;
-            deleteConfirmModal.show();
+            setTimeout(() => deleteConfirmModal.show(), 300);
 
-            requiredElements.confirmDeleteBtn.onclick = async function() {
+            requiredElements.confirmDeleteBtn.onclick = async function () {
                 deleteConfirmModal.hide();
                 deletedItemBackup = { ...dataList[index] };
                 await removeItem(index);
-                showToast('Barang dihapus. <button class="btn btn-sm btn-light btn-undo">Undo</button>', 'info');
             };
         };
 
@@ -1120,106 +1450,76 @@ document.addEventListener('DOMContentLoaded', function() {
         itemModal.show();
     };
 
-    // MODIFIED: Remove item function
-    window.removeItem = async function(index) {
+    // ── Remove Item ──
+    window.removeItem = async function (index) {
         if (index >= 0 && index < dataList.length) {
-            const removedItem = dataList[index];
-            const success = await deleteItemFromSheets(removedItem);
+            const removed = dataList[index];
+            await deleteItemFromSheets(removed);
             dataList.splice(index, 1);
-            if (success) {
-                showToast(`Barang "${removedItem.description}" telah dihapus dari Google Sheets`, 'success');
-            } else {
-                saveDeletedItemToLocalStorage(removedItem);
-                showToast(`Barang "${removedItem.description}" telah dihapus (akan disinkron nanti)`, 'info');
-            }
             itemModal.hide();
-            clearRowSelection(); // Clear selection saat hapus
+            clearRowSelection();
             renderTable(requiredElements.searchBox.value);
             saveToLocalStorage();
         }
     };
 
-    // Sorting - Clear selection saat sort
+    // ── Sorting ──
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {
             const field = th.dataset.sort;
-            
-            if (sortField === field) {
-                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortField = field;
-                sortDirection = 'asc';
-            }
-            
-            clearRowSelection(); // Clear selection saat sorting
+            sortDirection = (sortField === field && sortDirection === 'asc') ? 'desc' : 'asc';
+            sortField = field;
+            clearRowSelection();
             renderTable(requiredElements.searchBox.value);
         });
     });
 
-    // Filter - Clear selection saat filter berubah
+    // ── Filter badges ──
     document.querySelectorAll('.badge-filter').forEach(badge => {
         badge.addEventListener('click', () => {
+            document.querySelectorAll('.badge-filter').forEach(b => b.classList.remove('active'));
+            badge.classList.add('active');
             currentFilter = badge.dataset.filter;
-            clearRowSelection(); // Clear selection saat filter berubah
+            clearRowSelection();
             renderTable(requiredElements.searchBox.value);
         });
     });
 
-    // Search debounce - Clear selection saat search
+    // ── Search ──
     let searchTimeout;
-    requiredElements.searchBox.addEventListener('input', function() {
+    requiredElements.searchBox.addEventListener('input', function () {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            clearRowSelection(); // Clear selection saat search
-            renderTable(requiredElements.searchBox.value);
+            clearRowSelection();
+            renderTable(this.value);
         }, 300);
     });
 
-    // Keyboard navigation (optional enhancement)
-    document.addEventListener('keydown', function(e) {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return; // Skip jika sedang mengetik
-        }
-        
-        const selectedRow = document.querySelector('.selected-row');
-        let currentIndex = selectedRowIndex;
-        
+    // ── Keyboard nav ──
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const rows = requiredElements.tableBody.children;
         if (e.key === 'ArrowDown' || e.key === 'j') {
             e.preventDefault();
-            currentIndex = Math.min(currentIndex + 1, requiredElements.tableBody.children.length - 1);
-            setRowSelection(currentIndex);
+            setRowSelection(Math.min(selectedRowIndex + 1, rows.length - 1));
         } else if (e.key === 'ArrowUp' || e.key === 'k') {
             e.preventDefault();
-            currentIndex = Math.max(currentIndex - 1, 0);
-            setRowSelection(currentIndex);
-        } else if (e.key === 'Enter' && selectedRow) {
+            setRowSelection(Math.max(selectedRowIndex - 1, 0));
+        } else if (e.key === 'Enter' && selectedRowIndex >= 0) {
             e.preventDefault();
-            const editBtn = selectedRow.querySelector('button');
-            if (editBtn) {
-                editBtn.click();
-            }
-        } else if ((e.key === 'Delete' || e.key === 'x') && selectedRow) {
-            e.preventDefault();
-            const originalIndex = dataList.findIndex(d => 
-                d.plu === parseInt(selectedRow.cells[1].textContent) && 
-                d.description === selectedRow.cells[2].textContent
-            );
-            if (originalIndex > -1) {
-                editItem(originalIndex); // Buka modal edit, lalu hapus dari sana
-            }
+            rows[selectedRowIndex]?.querySelector('.btn-edit')?.click();
         }
     });
 
-    // Form submit
-    requiredElements.form.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const pluValue = requiredElements.pluInput.value.trim();
-        const descriptionValue = requiredElements.descriptionInput.value.trim();
-        const qtyValue = requiredElements.qtyInput.value.trim();
-        const plu = pluValue ? parseInt(pluValue) : NaN;
-        const description = formatDescription(descriptionValue);
-        const qty = qtyValue ? parseInt(qtyValue) : NaN;
+    // ── Form submit ──
+    requiredElements.form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const pluValue  = requiredElements.pluInput.value.trim();
+        const descValue = requiredElements.descriptionInput.value.trim();
+        const qtyValue  = requiredElements.qtyInput.value.trim();
+        const plu   = pluValue ? parseInt(pluValue) : NaN;
+        const desc  = formatDescription(descValue);
+        const qty   = qtyValue ? parseInt(qtyValue) : NaN;
 
         requiredElements.pluError.classList.add('d-none');
         requiredElements.descriptionError.classList.add('d-none');
@@ -1227,64 +1527,48 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isNaN(plu) || plu < 0) {
             requiredElements.pluError.querySelector('span').textContent = 'PLU harus berupa angka positif.';
             requiredElements.pluError.classList.remove('d-none');
-            requiredElements.pluInput.focus();
-            return;
+            requiredElements.pluInput.focus(); return;
         }
-
-        if (!description || !/[A-Za-z0-9\s]+/.test(description)) {
+        if (!desc || !/[A-Za-z0-9\s]+/.test(desc)) {
             requiredElements.descriptionError.querySelector('span').textContent = 'Deskripsi hanya boleh berisi huruf, angka, dan spasi.';
             requiredElements.descriptionError.classList.remove('d-none');
-            requiredElements.descriptionInput.focus();
-            return;
+            requiredElements.descriptionInput.focus(); return;
         }
-
         if (isNaN(qty) || qty < 0) {
             showToast('Kuantitas harus berupa angka positif', 'warning');
-            requiredElements.qtyInput.focus();
-            return;
+            requiredElements.qtyInput.focus(); return;
         }
 
         if (itemIndex > -1) {
-            if (!dataList[itemIndex]) {
-                showToast('Data tidak valid, silakan coba lagi', 'danger');
-                itemModal.hide();
-                return;
-            }
+            if (!dataList[itemIndex]) { showToast('Data tidak valid', 'danger'); itemModal.hide(); return; }
             dataList[itemIndex].qty = qty;
             dataList[itemIndex].isSynced = false;
-            itemModal.hide();
-            requiredElements.form.reset();
+            itemModal.hide(); requiredElements.form.reset();
             renderTable(requiredElements.searchBox.value);
             saveToLocalStorage();
-            showToast('Barang berhasil diperbarui', 'success');
         } else {
-            const duplicateIndex = checkDuplicate(plu, description);
-            if (duplicateIndex > -1 && dataList[duplicateIndex]) {
-                requiredElements.pluError.querySelector('span').textContent = `PLU atau Deskripsi sudah ada. Silakan edit item dengan PLU ${formatPLU(dataList[duplicateIndex].plu)}.`;
+            const dupIdx = checkDuplicate(plu, desc);
+            if (dupIdx > -1 && dataList[dupIdx]) {
+                requiredElements.pluError.querySelector('span').textContent =
+                    `PLU atau Deskripsi sudah ada. Silakan edit item PLU ${formatPLU(dataList[dupIdx].plu)}.`;
                 requiredElements.pluError.classList.remove('d-none');
-                setTimeout(() => {
-                    editItem(duplicateIndex);
-                }, 1000);
+                setTimeout(() => editItem(dupIdx), 1000);
                 return;
             }
-
-            dataList.push({ plu, description, qty, isSynced: false, hasBeenRendered: false });
-            itemModal.hide();
-            requiredElements.form.reset();
+            dataList.push({ plu, description: desc, qty, isSynced: false, hasBeenRendered: false });
+            itemModal.hide(); requiredElements.form.reset();
             renderTable(requiredElements.searchBox.value);
             saveToLocalStorage();
-            showToast('Barang berhasil ditambahkan', 'success');
         }
     });
 
-    // Add new item
-    document.getElementById('addNewItemBtn').addEventListener('click', function() {
-        // Clear selection saat tambah item baru
+    // ── Add New Item ──
+    document.getElementById('addNewItemBtn').addEventListener('click', function () {
         clearRowSelection();
         requiredElements.form.reset();
         itemIndex = -1;
-        requiredElements.submitButton.innerHTML = '<i class="fas fa-plus me-2"></i>Tambah Barang';
-        requiredElements.modalLabel.textContent = 'Input Data Barang';
+        requiredElements.submitButton.innerHTML = '<i class="bi bi-plus-lg"></i> Tambah';
+        requiredElements.modalLabel.textContent = 'Tambah Barang Baru';
         requiredElements.deleteFromModalBtn.classList.add('d-none');
         requiredElements.pluInput.removeAttribute('readonly');
         requiredElements.descriptionInput.removeAttribute('readonly');
@@ -1294,41 +1578,30 @@ document.addEventListener('DOMContentLoaded', function() {
         itemModal.show();
     });
 
-    // Sync button
-    requiredElements.syncBtn.addEventListener('click', function() {
+    // ── Sync button ──
+    requiredElements.syncBtn.addEventListener('click', function () {
         if (!validateDataList(dataList)) {
-            showToast('Data lokal tidak valid, memuat ulang...', 'warning');
-            dataList = [];
-            loadDataFromSheets();
-            return;
+            showToast('Data lokal tidak valid, memuat ulang…', 'warning');
+            dataList = []; loadDataFromSheets(); return;
         }
         syncDataToSheets();
     });
 
-    // Initialize
-    updateConnectionStatus('syncing', 'Menyiapkan aplikasi...');
-    loadDataFromSheets();
-    
-    setTimeout(() => {
-        if (dataList.length === 0) {
-            showToast('Selamat datang! Silakan tambahkan barang pertama Anda', 'info');
-        }
-    }, 1500);
-
-    // Event listener untuk clear selection saat klik di luar tabel
-    document.addEventListener('click', function(e) {
+    // ── Click outside table clears selection ──
+    document.addEventListener('click', function (e) {
         const table = requiredElements.tableBody.closest('table');
-        const isClickInsideTable = table.contains(e.target);
-        
-        if (!isClickInsideTable && selectedRowIndex >= 0) {
-            // Delay untuk menghindari konflik dengan klik row
-            setTimeout(() => {
-                clearRowSelection();
-            }, 100);
+        if (!table.contains(e.target) && selectedRowIndex >= 0) {
+            setTimeout(() => clearRowSelection(), 100);
         }
     });
-});
-    </script>
 
+    // ── Init ──
+    updateConnectionStatus('syncing', 'Menyiapkan aplikasi…');
+    loadDataFromSheets();
+    setTimeout(() => {
+        if (dataList.length === 0) showToast('Selamat datang! Tambahkan barang pertama Anda', 'info');
+    }, 1500);
+});
+</script>
 </body>
 </html>
