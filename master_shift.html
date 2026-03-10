@@ -95,7 +95,7 @@ button {
 .gas-dot  { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
 /* ── INPUTS ── */
-input[type=text], input[type=month], input[type=number], input[type=url], select {
+input[type=text], input[type=month], input[type=number], input[type=url], input[type=password], select {
   font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500;
   color: var(--text); background: var(--card); border: 1px solid var(--border-md);
   border-radius: 8px; padding: 7px 10px; outline: none;
@@ -244,6 +244,77 @@ td.td-sum   { background: #fafbff; cursor: default; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 3px; }
 
+/* ── ADMIN BADGE ── */
+.admin-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700;
+  padding: 5px 12px; border-radius: 20px; border: 1px solid;
+  cursor: pointer; transition: all .15s;
+}
+.admin-badge.guest {
+  color: var(--text-3); background: var(--card); border-color: var(--border);
+}
+.admin-badge.guest:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+.admin-badge.logged {
+  color: var(--green); background: var(--green-lt); border-color: var(--pagi-bd);
+}
+.admin-badge.logged:hover { background: #bbf7d0; }
+.admin-av {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 800;
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.admin-av.green { background: var(--green); }
+
+/* ── READ-ONLY dim pada toolbar saat guest ── */
+body.readonly .toolbar .btn-primary,
+body.readonly .toolbar .btn-secondary:not(#btnRefresh) {
+  opacity: .35; pointer-events: none; cursor: not-allowed;
+}
+body.readonly #btnUpdate { opacity: .35; pointer-events: none; cursor: not-allowed; }
+body.readonly .btn-more  { opacity: .35; pointer-events: none; cursor: not-allowed; }
+body.readonly td.td-cell { cursor: default; }
+body.readonly td.td-cell:hover { background: transparent; }
+
+/* ── READONLY RIBBON di legend ── */
+.ro-ribbon {
+  display: none; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700;
+  color: var(--siang); background: var(--siang-bg);
+  border: 1px solid var(--siang-bd);
+  padding: 3px 10px; border-radius: 20px;
+}
+body.readonly .ro-ribbon { display: inline-flex; }
+
+/* ── LOGIN MODAL khusus ── */
+.login-modal {
+  width: 340px !important;
+}
+.login-header {
+  text-align: center; margin-bottom: 20px;
+}
+.login-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 22px; display: grid; place-items: center;
+  margin: 0 auto 10px;
+}
+.login-title { font-size: 16px; font-weight: 800; }
+.login-sub   { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+.input-icon-wrap { position: relative; }
+.input-icon-wrap input { padding-left: 36px; width: 100%; }
+.input-icon-wrap .ii {
+  position: absolute; left: 11px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3); font-size: 14px;
+  pointer-events: none;
+}
+.login-err {
+  font-size: 12px; color: var(--cuti); font-weight: 600;
+  text-align: center; min-height: 18px; margin-bottom: 4px;
+}
+
 @media print {
   header .hdr-btns, .toolbar .btn-primary, .toolbar .btn-secondary, .btn-icon, .btn-del, .btn-more { display: none !important; }
   .tbl-wrap { box-shadow: none; }
@@ -272,12 +343,20 @@ td.td-sum   { background: #fafbff; cursor: default; }
       <span class="gas-label" id="gasBadgeLabel">Belum terhubung</span>
     </span>
 
+    <!-- Admin badge -->
+    <button class="admin-badge guest" id="adminBadge" onclick="toggleAdmin()" title="Login sebagai Admin">
+      <div class="admin-av" id="adminAv">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <span id="adminLabel">Login Admin</span>
+    </button>
+
     <!-- Update to Google Sheets -->
     <button class="btn-green" id="btnUpdate" onclick="pushToSheet()" title="Kirim ke Google Sheets">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
       <span class="hdr-text">Update GSheet</span>
     </button>
-    <button class="btn-secondary" onclick="window.print()">🖨 <span class="hdr-text">Print</span></button>
+    
   </div>
 </header>
 
@@ -289,7 +368,7 @@ td.td-sum   { background: #fafbff; cursor: default; }
   </div>
   <div class="tb-sep"></div>
   <button class="btn-primary" onclick="openAddEmp()">＋ Tambah Karyawan</button>
-  <button class="btn-secondary" onclick="openBulk()">⚡ <span class="hdr-text">Isi Massal</span></button>
+
   <div style="margin-left:auto">
     <button class="btn-secondary" onclick="loadFromSheet()" id="btnRefresh" title="Tarik data dari Google Sheets">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.27"/></svg>
@@ -307,7 +386,8 @@ td.td-sum   { background: #fafbff; cursor: default; }
   <span class="lg" style="color:var(--off);background:var(--off-bg);border-color:var(--off-bd)">Off</span>
   <span class="lg" style="color:var(--cuti);background:var(--cuti-bg);border-color:var(--cuti-bd)">Cuti</span>
   <span class="lg" style="color:var(--addoff);background:var(--addoff-bg);border-color:var(--addoff-bd)">Add Off</span>
-  <span style="margin-left:auto;font-size:11px;color:var(--text-3);font-weight:500">💡 Klik sel untuk atur shift</span>
+  <span class="ro-ribbon">🔒 Read Only — Login Admin untuk edit</span>
+  <span id="legendTip" style="margin-left:auto;font-size:11px;color:var(--text-3);font-weight:500;display:none">💡 Klik sel untuk atur shift</span>
 </div>
 
 <!-- ═══════════ MAIN ═══════════ -->
@@ -320,6 +400,40 @@ td.td-sum   { background: #fafbff; cursor: default; }
     </table>
   </div>
 </main>
+
+<!-- ═══════════ MODAL: Admin Login ═══════════ -->
+<div class="overlay" id="loginModal">
+  <div class="modal login-modal">
+    <div class="login-header">
+      <div class="login-avatar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="login-title">Admin Login</div>
+      <div class="login-sub">Masukkan kredensial untuk mengaktifkan mode edit</div>
+    </div>
+    <div class="fg">
+      <label>Username</label>
+      <div class="input-icon-wrap">
+        <span class="ii">👤</span>
+        <input type="text" id="loginUser" placeholder="Username" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <div class="input-icon-wrap">
+        <span class="ii">🔑</span>
+        <input type="password" id="loginPass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn-primary" style="width:100%;justify-content:center;padding:10px;font-size:14px" onclick="doLogin()">
+      Masuk sebagai Admin
+    </button>
+    <div style="text-align:center;margin-top:12px">
+      <button class="btn-secondary" style="font-size:12px" onclick="closeModal('loginModal')">Batal</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════ MODAL: Karyawan ═══════════ -->
 <div class="overlay" id="empModal">
@@ -407,7 +521,7 @@ td.td-sum   { background: #fafbff; cursor: default; }
 
 <!-- SUCCESS NOTIF -->
 <div id="successNotif">
-  <div class="sn-icon">❗</div>
+  <div class="sn-icon">🗓️</div>
   <div>
     <div class="sn-title" id="snTitle"></div>
     <div class="sn-body"  id="snBody"></div>
@@ -432,6 +546,12 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbze1ybQEL585KKLOICJutVu
 let gasUrl   = GAS_URL;  // URL hardcoded
 let isDirty  = false;     // ada perubahan yang belum di-push
 
+// ── ADMIN AUTH ──────────────────────────────────────────
+// Ganti ADMIN_USER dan ADMIN_PASS sesuai kebutuhan
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = '05120478';
+let isAdmin = false;
+
 let employees = [];
 let nextId    = 1;
 // schedule key: "{empId}:{YYYY-MM-DD}" → shiftKey
@@ -453,6 +573,7 @@ let bulkShift    = null;
   curM = now.getMonth() + 1;
   document.getElementById('monthPicker').value = `${curY}-${p2(curM)}`;
   updateGasBadge('ok');
+  applyAuthState(); // mulai read-only
   loadFromSheet();
 })();
 
@@ -476,6 +597,67 @@ function setShift(empId, day, shift) {
 
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ═══════════════════════════════════════════════
+   ADMIN AUTH
+═══════════════════════════════════════════════ */
+function toggleAdmin() {
+  if (isAdmin) {
+    // Logout
+    if (!confirm('Keluar dari mode Admin? Halaman akan kembali ke Read Only.')) return;
+    isAdmin = false;
+    applyAuthState();
+    toast('🔒 Logout Admin — kembali ke Read Only');
+  } else {
+    // Buka login modal
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginErr').textContent = '';
+    openModal('loginModal');
+    setTimeout(() => document.getElementById('loginUser').focus(), 200);
+  }
+}
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) { document.getElementById('loginErr').textContent = 'Username dan password wajib diisi'; return; }
+  if (u !== ADMIN_USER || p !== ADMIN_PASS) {
+    document.getElementById('loginErr').textContent = '❌ Username atau password salah';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+    return;
+  }
+  isAdmin = true;
+  closeModal('loginModal');
+  applyAuthState();
+  render(); // re-render supaya tombol edit muncul
+  toast('  Login Admin berhasil — mode Edit aktif');
+}
+
+function applyAuthState() {
+  const body = document.body;
+  const badge = document.getElementById('adminBadge');
+  const av    = document.getElementById('adminAv');
+  const lbl   = document.getElementById('adminLabel');
+  const tip   = document.getElementById('legendTip');
+
+  if (isAdmin) {
+    body.classList.remove('readonly');
+    badge.className = 'admin-badge logged';
+    av.className    = 'admin-av green';
+    av.innerHTML    = ADMIN_USER.charAt(0).toUpperCase();
+    lbl.textContent = ADMIN_USER;
+    if (tip) tip.style.display = 'inline';
+  } else {
+    body.classList.add('readonly');
+    badge.className = 'admin-badge guest';
+    av.className    = 'admin-av';
+    av.innerHTML    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    lbl.textContent = 'Login Admin';
+    if (tip) tip.style.display = 'none';
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -594,7 +776,7 @@ async function loadFromSheet() {
     if (rJ.data.length === 0) {
       toast('ℹ️ Karyawan dimuat (' + employees.length + '), jadwal bulan ini kosong di Sheets');
     } else {
-      toast('' + employees.length + ' karyawan, ' + shiftCount + ' shift dimuat');
+      toast('  ' + employees.length + ' karyawan, ' + shiftCount + ' shift dimuat');
     }
   } catch(err) {
     loadEnd();
@@ -617,6 +799,7 @@ function clearScheduleForMonth() {
    POST — Kirim data ke Google Sheets
 ═══════════════════════════════════════════════ */
 async function pushToSheet() {
+  if (!isAdmin) { toast('🔒 Login Admin untuk update Google Sheets'); return; }
   if (!isDirty) { toast('ℹ️ Tidak ada perubahan baru'); return; }
   if (!employees.length) { toast('⚠️ Tidak ada data karyawan'); return; }
 
@@ -661,7 +844,7 @@ async function pushToSheet() {
       return n;
     })();
     showSuccessNotif(
-      ' Update Berhasil!',
+      '  Update Berhasil!',
       `${employees.length} karyawan · ${totalShifts} shift · ${MONTHS[curM-1]} ${curY} tersimpan ke Google Sheets`
     );
   } catch(err) {
@@ -704,10 +887,7 @@ function renderSummary() {
   });
   document.getElementById('summary').innerHTML = `
     <div class="sc"><div class="sc-val" style="color:var(--accent)">${employees.length}</div><div class="sc-lbl">Karyawan</div></div>
-    <div class="sc"><div class="sc-val">${days}</div><div class="sc-lbl">${MONTHS[curM-1]} ${curY}</div></div>
-    <div class="sc"><div class="sc-val" style="color:var(--pagi)">${cnt.PAGI}</div><div class="sc-lbl">Pagi</div></div>
-    <div class="sc"><div class="sc-val" style="color:var(--siang)">${cnt.SIANG}</div><div class="sc-lbl">Siang</div></div>
-    <div class="sc"><div class="sc-val" style="color:var(--malam)">${cnt.MALAM}</div><div class="sc-lbl">Malam</div></div>
+   
     <div class="sc"><div class="sc-val" style="color:var(--cuti)">${cnt.CUTI}</div><div class="sc-lbl">Cuti</div></div>
   `;
 }
@@ -793,6 +973,7 @@ function renderTable() {
    EMPLOYEE CRUD
 ═══════════════════════════════════════════════ */
 function openAddEmp() {
+  if (!isAdmin) { toast('🔒 Login Admin untuk menambah karyawan'); return; }
   editingEmpId = null;
   document.getElementById('empModalTitle').textContent = 'Tambah Karyawan';
   ['fName','fNik','fJabatan'].forEach(id => document.getElementById(id).value = '');
@@ -802,6 +983,7 @@ function openAddEmp() {
 }
 
 function openEditEmp(id) {
+  if (!isAdmin) { toast('🔒 Login Admin untuk mengedit karyawan'); return; }
   const e = employees.find(x=>x.id===id); if (!e) return;
   editingEmpId = id;
   document.getElementById('empModalTitle').textContent = 'Edit Karyawan';
@@ -821,10 +1003,10 @@ function saveEmp() {
   if (editingEmpId) {
     const e = employees.find(x=>x.id===editingEmpId);
     e.name=name; e.nik=nik; e.jabatan=jabatan;
-    toast('Data karyawan diperbarui');
+    toast('  Data karyawan diperbarui');
   } else {
     employees.push({ id: nextId++, name, nik, jabatan });
-    toast(' Karyawan ditambahkan');
+    toast('  Karyawan ditambahkan');
   }
   closeModal('empModal');
   markDirty();
@@ -848,6 +1030,7 @@ function delEmpFromModal() {
    SHIFT MODAL
 ═══════════════════════════════════════════════ */
 function openShiftModal(empId, day) {
+  if (!isAdmin) { toast('🔒 Login Admin untuk mengubah shift'); return; }
   shiftTarget = { empId, day };
   selShift    = getShift(empId, day) || null;
   const e = employees.find(x=>x.id===empId);
@@ -875,7 +1058,7 @@ function applyShift() {
   closeModal('shiftModal');
   markDirty();
   render();
-  toast(` Shift ${SLABEL[selShift]} disimpan`);
+  toast(`  Shift ${SLABEL[selShift]} disimpan`);
 }
 
 function clearShift() {
@@ -898,6 +1081,7 @@ function rebuildBulkList() {
 }
 
 function openBulk() {
+  if (!isAdmin) { toast('🔒 Login Admin untuk isi massal'); return; }
   if (!employees.length) { toast('⚠️ Tambahkan karyawan terlebih dahulu'); return; }
   bulkShift = null;
   buildPicker('bulkGrid','bulk');
@@ -922,7 +1106,7 @@ function applyBulk() {
   closeModal('bulkModal');
   markDirty();
   render();
-  toast(` Shift ${SLABEL[bulkShift]} diisi tgl ${from}–${to}`);
+  toast(`  Shift ${SLABEL[bulkShift]} diisi tgl ${from}–${to}`);
 }
 
 /* ═══════════════════════════════════════════════
