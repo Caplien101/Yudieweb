@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jadwal Kerja Karyawan</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f0f2f7;
+  --surface:   #ffffff;
+  --card:      #f8f9fc;
+  --border:    #dde1ec;
+  --border-md: #c8cedd;
+  --text:      #1a1d2e;
+  --text-2:    #4a5068;
+  --text-3:    #8a91aa;
+  --accent:    #3b6ef8;
+  --accent-lt: #eef2ff;
+  --accent-dk: #2554d4;
+  --green:     #16a34a;  --green-lt: #dcfce7;
+  --pagi:      #16a34a;  --pagi-bg:   #dcfce7;  --pagi-bd:   #86efac;
+  --siang:     #d97706;  --siang-bg:  #fef3c7;  --siang-bd:  #fcd34d;
+  --malam:     #7c3aed;  --malam-bg:  #ede9fe;  --malam-bd:  #c4b5fd;
+  --off:       #64748b;  --off-bg:    #f1f5f9;  --off-bd:    #cbd5e1;
+  --cuti:      #dc2626;  --cuti-bg:   #fee2e2;  --cuti-bd:   #fca5a5;
+  --addoff:    #0891b2;  --addoff-bg: #cffafe;  --addoff-bd: #67e8f9;
+}
+
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── HEADER ── */
+header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+.logo-name  { font-size: 15px; font-weight: 800; }
+.logo-sub   { font-size: 10px; color: var(--text-3); font-weight: 500; }
+
+/* ── BUTTONS ── */
+button {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600;
+  border: none; border-radius: 8px; padding: 7px 13px; cursor: pointer;
+  transition: all .15s; display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-primary   { background: var(--accent); color: #fff; box-shadow: 0 1px 3px rgba(59,110,248,.3); }
+.btn-primary:hover { background: var(--accent-dk); }
+.btn-secondary { background: var(--surface); color: var(--text-2); border: 1px solid var(--border-md); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+.btn-green  { background: var(--green); color: #fff; box-shadow: 0 1px 3px rgba(22,163,74,.3); }
+.btn-green:hover  { background: #15803d; }
+.btn-icon   { background: transparent; color: var(--text-3); border: 1px solid transparent; padding: 5px 8px; }
+.btn-icon:hover { background: var(--bg); border-color: var(--border); color: var(--text-2); }
+.btn-del    { background: transparent; color: var(--cuti); border: 1px solid transparent; padding: 4px 7px; font-size: 12px; }
+.btn-del:hover  { background: var(--cuti-bg); border-color: var(--cuti-bd); }
+.btn-more   {
+  background: var(--card); color: var(--text-3); border: 1px solid var(--border);
+  border-radius: 7px; padding: 5px 8px; line-height: 1; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-more:hover { background: var(--accent-lt); border-color: var(--accent); color: var(--accent); }
+.btn-more svg { display: block; }
+
+/* Update button – blink saat dirty */
+@keyframes pulse-update {
+  0%,100% { box-shadow: 0 0 0 0   rgba(22,163,74,.6); }
+  50%      { box-shadow: 0 0 0 8px rgba(22,163,74,.0); }
+}
+.btn-update-dirty { animation: pulse-update .9s ease-in-out infinite; }
+.btn-update-dirty::before {
+  content: '●';
+  font-size: 8px; margin-right: 4px; color: #bbf7d0;
+}
+
+/* ── TOOLBAR ── */
+.toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tb-sep { width: 1px; height: 26px; background: var(--border); }
+
+/* ── GAS STATUS BADGE ── */
+.gas-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 9px; border-radius: 20px; border: 1px solid;
+}
+.gas-ok   { color: var(--green); background: var(--green-lt); border-color: var(--pagi-bd); }
+.gas-none { color: var(--text-3); background: var(--bg);      border-color: var(--border);  }
+.gas-err  { color: var(--cuti);  background: var(--cuti-bg);  border-color: var(--cuti-bd); }
+.gas-dot  { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+/* ── INPUTS ── */
+input[type=text], input[type=month], input[type=number], input[type=url], select {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500;
+  color: var(--text); background: var(--card); border: 1px solid var(--border-md);
+  border-radius: 8px; padding: 7px 10px; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,110,248,.12); }
+
+/* ── LEGEND ── */
+.legend { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 20px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.lg { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; border: 1px solid; }
+
+/* ── MAIN ── */
+main { padding: 16px 20px 60px; }
+
+/* ── SUMMARY ── */
+.summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.sc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.sc-val { font-family: 'Roboto Mono', monospace; font-size: 22px; font-weight: 700; line-height: 1; }
+.sc-lbl { font-size: 11px; color: var(--text-3); margin-top: 4px; font-weight: 600; }
+
+/* ── TABLE ── */
+.tbl-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: auto; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+table { border-collapse: collapse; width: max-content; min-width: 100%; }
+
+thead th {
+  background: #f4f6fb; border-bottom: 2px solid var(--border);
+  font-family: 'Roboto Mono', monospace; font-size: 10px; font-weight: 700;
+  color: var(--text-3); padding: 9px 4px; text-align: center; white-space: nowrap;
+}
+thead th.th-info { text-align: left; padding-left: 14px; min-width: 220px; position: sticky; left: 0; z-index: 3; background: #f4f6fb; border-right: 2px solid var(--border); }
+th.th-sum   { background: #eef2ff; color: var(--accent); min-width: 40px; }
+th.th-today { color: var(--accent) !important; background: #e0ebff !important; }
+th.th-sun   { color: var(--cuti)  !important; }
+th.th-sat   { color: var(--siang) !important; }
+
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #fafbff; }
+
+td.td-info { padding: 8px 12px; min-width: 220px; position: sticky; left: 0; z-index: 2; background: var(--surface); border-right: 2px solid var(--border); }
+tbody tr:hover td.td-info { background: #fafbff; }
+.emp-name { font-size: 13px; font-weight: 700; }
+.emp-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; font-weight: 500; }
+.emp-nik  { font-family: 'Roboto Mono', monospace; }
+
+td.td-cell { text-align: center; padding: 4px 2px; cursor: pointer; min-width: 42px; transition: background .1s; }
+td.td-cell:hover { background: var(--accent-lt); }
+td.td-today { background: #f0f5ff; }
+td.td-sum   { background: #fafbff; cursor: default; }
+
+.badge {
+  display: inline-block; font-family: 'Roboto Mono', monospace;
+  font-size: 9px; font-weight: 700; padding: 3px 4px; border-radius: 5px;
+  min-width: 34px; text-align: center; border: 1px solid;
+}
+.b-PAGI   { color:var(--pagi);   background:var(--pagi-bg);   border-color:var(--pagi-bd);   }
+.b-SIANG  { color:var(--siang);  background:var(--siang-bg);  border-color:var(--siang-bd);  }
+.b-MALAM  { color:var(--malam);  background:var(--malam-bg);  border-color:var(--malam-bd);  }
+.b-OFF    { color:var(--off);    background:var(--off-bg);    border-color:var(--off-bd);    }
+.b-CUTI   { color:var(--cuti);   background:var(--cuti-bg);   border-color:var(--cuti-bd);   }
+.b-ADDOFF { color:var(--addoff); background:var(--addoff-bg); border-color:var(--addoff-bd); }
+.b-empty  { color:var(--border-md); background:transparent; border-color:transparent; font-size:11px; }
+
+.tr-total td { background: #eef2ff; font-family: 'Roboto Mono', monospace; font-size: 10px; font-weight: 700; color: var(--accent); text-align: center; padding: 6px 3px; border-top: 2px solid var(--border); }
+.tr-total td.td-info { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-2); text-align: left; padding-left: 14px; }
+
+.empty { text-align: center; padding: 56px 20px; color: var(--text-3); }
+.empty .ei { font-size: 44px; margin-bottom: 10px; }
+.empty p   { font-size: 13px; font-weight: 500; }
+
+/* ── OVERLAY / MODAL ── */
+.overlay { position: fixed; inset: 0; z-index: 300; background: rgba(15,20,40,.4); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; width: 400px; max-width: 95vw; max-height: 92vh; overflow-y: auto; box-shadow: 0 12px 36px rgba(0,0,0,.18); transform: scale(.96); transition: transform .2s; }
+.overlay.open .modal { transform: scale(1); }
+.modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-title { font-size: 15px; font-weight: 800; }
+.modal-close { background: var(--card); border: 1px solid var(--border); color: var(--text-3); font-size: 14px; padding: 4px 9px; border-radius: 7px; cursor: pointer; }
+.modal-close:hover { background: var(--cuti-bg); color: var(--cuti); }
+.fg { margin-bottom: 14px; }
+.fg label { display: block; font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 5px; }
+.fg input, .fg select { width: 100%; }
+.fg small { display: block; font-size: 11px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+/* Shift picker */
+.sp-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.sp-opt { padding: 10px 4px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 700; font-family: 'Roboto Mono', monospace; border: 2px solid transparent; transition: all .15s; opacity: .55; }
+.sp-opt:hover { opacity: 1; transform: scale(1.04); }
+.sp-opt.active { opacity: 1; box-shadow: 0 0 0 2px var(--accent); transform: scale(1.04); }
+.sp-PAGI   { color:var(--pagi);   background:var(--pagi-bg);   }
+.sp-SIANG  { color:var(--siang);  background:var(--siang-bg);  }
+.sp-MALAM  { color:var(--malam);  background:var(--malam-bg);  }
+.sp-OFF    { color:var(--off);    background:var(--off-bg);    }
+.sp-CUTI   { color:var(--cuti);   background:var(--cuti-bg);   }
+.sp-ADDOFF { color:var(--addoff); background:var(--addoff-bg); }
+
+/* Loading overlay */
+.load-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 999; width: 0; transition: width .3s; }
+.load-bar.active { animation: load-anim 1.4s ease-in-out infinite; }
+@keyframes load-anim { 0%{width:0;opacity:1} 50%{width:70%;opacity:1} 100%{width:100%;opacity:0} }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1a1d2e; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,.2); opacity: 0; pointer-events: none; transition: all .28s ease; z-index: 500; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── SUCCESS NOTIF (update berhasil) ── */
+#successNotif {
+  position: fixed; top: 70px; right: 16px; z-index: 500;
+  background: #fff; border: 1px solid var(--pagi-bd);
+  border-left: 4px solid var(--pagi);
+  border-radius: 12px; padding: 14px 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  display: flex; align-items: flex-start; gap: 12px;
+  max-width: 320px; width: calc(100vw - 32px);
+  opacity: 0; pointer-events: none;
+  transform: translateX(20px);
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#successNotif.show { opacity: 1; pointer-events: all; transform: translateX(0); }
+#successNotif .sn-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+#successNotif .sn-title { font-size: 13px; font-weight: 800; color: var(--pagi); margin-bottom: 2px; }
+#successNotif .sn-body  { font-size: 12px; color: var(--text-2); line-height: 1.45; }
+#successNotif .sn-time  { font-size: 10px; color: var(--text-3); margin-top: 4px; font-family: 'Roboto Mono', monospace; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  main { padding: 10px 10px 60px; }
+  .toolbar { padding: 8px 10px; }
+  header { padding: 0 10px; }
+  .legend { padding: 6px 10px; }
+  .logo-sub { display: none; }
+  thead th.th-info { min-width: 150px; }
+  td.td-info { min-width: 150px; padding: 6px 8px; }
+  .emp-name { font-size: 12px; }
+  .emp-meta { font-size: 10px; }
+  .summary { grid-template-columns: repeat(3, 1fr); }
+  .hdr-text { display: none; }
+  .gas-badge .gas-label { display: none; }
+}
+@media (max-width: 480px) {
+  .summary { grid-template-columns: repeat(2, 1fr); }
+  .tb-sep { display: none; }
+}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 3px; }
+
+@media print {
+  header .hdr-btns, .toolbar .btn-primary, .toolbar .btn-secondary, .btn-icon, .btn-del, .btn-more { display: none !important; }
+  .tbl-wrap { box-shadow: none; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading bar -->
+<div class="load-bar" id="loadBar"></div>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🗓️</div>
+    <div>
+      <div class="logo-name">Shift Planner</div>
+      <div class="logo-sub">Jadwal Kerja Karyawan</div>
+    </div>
+  </div>
+  <div class="hdr-btns" style="display:flex;gap:6px;align-items:center">
+    <!-- GAS connection status badge -->
+    <span class="gas-badge gas-none" id="gasBadge">
+      <span class="gas-dot"></span>
+      <span class="gas-label" id="gasBadgeLabel">Belum terhubung</span>
+    </span>
+
+    <!-- Update to Google Sheets -->
+    <button class="btn-green" id="btnUpdate" onclick="pushToSheet()" title="Kirim ke Google Sheets">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      <span class="hdr-text">Update GSheet</span>
+    </button>
+    <button class="btn-secondary" onclick="window.print()">🖨 <span class="hdr-text">Print</span></button>
+  </div>
+</header>
+
+<!-- ═══════════ TOOLBAR ═══════════ -->
+<div class="toolbar">
+  <div style="display:flex;align-items:center;gap:6px">
+    <span style="font-size:12px;font-weight:600;color:var(--text-3)">Periode:</span>
+    <input type="month" id="monthPicker" onchange="changeMonth()">
+  </div>
+  <div class="tb-sep"></div>
+  <button class="btn-primary" onclick="openAddEmp()">＋ Tambah Karyawan</button>
+  <button class="btn-secondary" onclick="openBulk()">⚡ <span class="hdr-text">Isi Massal</span></button>
+  <div style="margin-left:auto">
+    <button class="btn-secondary" onclick="loadFromSheet()" id="btnRefresh" title="Tarik data dari Google Sheets">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.27"/></svg>
+      <span class="hdr-text">Refresh</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════ LEGEND ═══════════ -->
+<div class="legend">
+  <span style="font-size:11px;font-weight:700;color:var(--text-3);margin-right:2px">Shift:</span>
+  <span class="lg" style="color:var(--pagi);background:var(--pagi-bg);border-color:var(--pagi-bd)">Pagi</span>
+  <span class="lg" style="color:var(--siang);background:var(--siang-bg);border-color:var(--siang-bd)">Siang</span>
+  <span class="lg" style="color:var(--malam);background:var(--malam-bg);border-color:var(--malam-bd)">Malam</span>
+  <span class="lg" style="color:var(--off);background:var(--off-bg);border-color:var(--off-bd)">Off</span>
+  <span class="lg" style="color:var(--cuti);background:var(--cuti-bg);border-color:var(--cuti-bd)">Cuti</span>
+  <span class="lg" style="color:var(--addoff);background:var(--addoff-bg);border-color:var(--addoff-bd)">Add Off</span>
+  <span style="margin-left:auto;font-size:11px;color:var(--text-3);font-weight:500">💡 Klik sel untuk atur shift</span>
+</div>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main>
+  <div class="summary" id="summary"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead id="tHead"></thead>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ═══════════ MODAL: Karyawan ═══════════ -->
+<div class="overlay" id="empModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="empModalTitle">Tambah Karyawan</div>
+      <button class="modal-close" onclick="closeModal('empModal')">✕</button>
+    </div>
+    <div class="fg">
+      <label>Nama Lengkap *</label>
+      <input type="text" id="fName" placeholder="Contoh: Budi Santoso" autocomplete="off">
+    </div>
+    <div class="fg">
+      <label>NIK *</label>
+      <input type="text" id="fNik" placeholder="Contoh: EMP001" autocomplete="off">
+    </div>
+    <div class="fg">
+      <label>Jabatan *</label>
+      <input type="text" id="fJabatan" placeholder="Contoh: Kasir, Supervisor, Security…" autocomplete="off">
+    </div>
+    <div id="delEmpWrap" style="display:none;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <button id="btnDelEmp" onclick="delEmpFromModal()"
+        style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
+               padding:10px;border-radius:9px;border:1.5px solid var(--cuti-bd);
+               background:var(--cuti-bg);color:var(--cuti);font-family:inherit;
+               font-size:13px;font-weight:700;cursor:pointer;transition:all .15s">
+        🗑 Hapus Karyawan Ini
+      </button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeModal('empModal')">Batal</button>
+      <button class="btn-primary" onclick="saveEmp()">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: Shift ═══════════ -->
+<div class="overlay" id="shiftModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="shiftModalTitle">Pilih Shift</div>
+      <button class="modal-close" onclick="closeModal('shiftModal')">✕</button>
+    </div>
+    <div class="sp-grid" id="spGrid"></div>
+    <div class="modal-foot" style="margin-top:16px">
+      <button class="btn-del" onclick="clearShift()">🗑 Hapus Shift</button>
+      <button class="btn-secondary" onclick="closeModal('shiftModal')">Batal</button>
+      <button class="btn-primary" onclick="applyShift()">Terapkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: Bulk ═══════════ -->
+<div class="overlay" id="bulkModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">Isi Shift Massal</div>
+      <button class="modal-close" onclick="closeModal('bulkModal')">✕</button>
+    </div>
+    <div class="fg">
+      <label>Karyawan</label>
+      <select id="bulkEmpSel" style="width:100%"><option value="all">— Semua Karyawan —</option></select>
+    </div>
+    <div class="fg">
+      <label>Pilih Shift</label>
+      <div class="sp-grid" id="bulkGrid"></div>
+    </div>
+    <div class="fg">
+      <label>Rentang Tanggal</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="bulkFrom" placeholder="Dari tgl" min="1" max="31" style="width:50%">
+        <span style="color:var(--text-3);font-weight:700">—</span>
+        <input type="number" id="bulkTo" placeholder="S/d tgl" min="1" max="31" style="width:50%">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeModal('bulkModal')">Batal</button>
+      <button class="btn-primary" onclick="applyBulk()">Terapkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SUCCESS NOTIF -->
+<div id="successNotif">
+  <div class="sn-icon">❗</div>
+  <div>
+    <div class="sn-title" id="snTitle"></div>
+    <div class="sn-body"  id="snBody"></div>
+    <div class="sn-time"  id="snTime"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   KONSTANTA
+═══════════════════════════════════════════════ */
+const SHIFTS = ['PAGI','SIANG','MALAM','OFF','CUTI','ADDOFF'];
+const SLABEL = { PAGI:'Pagi', SIANG:'Siang', MALAM:'Malam', OFF:'Off', CUTI:'Cuti', ADDOFF:'Add Off' };
+const DAYS   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni',
+                'Juli','Agustus','September','Oktober','November','Desember'];
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbze1ybQEL585KKLOICJutVugGmOnCHnIAoX05P-W1aTTTInBDaF59WrDtzhzC_SoWf5/exec';
+let gasUrl   = GAS_URL;  // URL hardcoded
+let isDirty  = false;     // ada perubahan yang belum di-push
+
+let employees = [];
+let nextId    = 1;
+// schedule key: "{empId}:{YYYY-MM-DD}" → shiftKey
+// TIDAK ada auto-fill — hanya diisi secara eksplisit oleh user
+let schedule  = {};
+
+let curY, curM;
+let editingEmpId = null;
+let shiftTarget  = null;
+let selShift     = null;
+let bulkShift    = null;
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+(function init() {
+  const now = new Date();
+  curY = now.getFullYear();
+  curM = now.getMonth() + 1;
+  document.getElementById('monthPicker').value = `${curY}-${p2(curM)}`;
+  updateGasBadge('ok');
+  loadFromSheet();
+})();
+
+
+
+/* ═══════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════ */
+function p2(n)      { return String(n).padStart(2,'0'); }
+function daysIn(y,m){ return new Date(y,m,0).getDate(); }
+function dow(y,m,d) { return new Date(y,m-1,d).getDay(); }
+function bulanStr() { return `${curY}-${p2(curM)}`; }
+
+function sKey(empId, day) { return `${empId}:${curY}-${p2(curM)}-${p2(day)}`; }
+function getShift(empId, day) { return schedule[sKey(empId, day)] || ''; }
+function setShift(empId, day, shift) {
+  const k = sKey(empId, day);
+  if (shift) schedule[k] = shift;
+  else       delete schedule[k];
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ═══════════════════════════════════════════════
+   DIRTY FLAG & UPDATE BUTTON
+═══════════════════════════════════════════════ */
+function markDirty() {
+  isDirty = true;
+  document.getElementById('btnUpdate').classList.add('btn-update-dirty');
+}
+function clearDirty() {
+  isDirty = false;
+  document.getElementById('btnUpdate').classList.remove('btn-update-dirty');
+}
+
+/* ═══════════════════════════════════════════════
+   GAS STATUS BADGE
+═══════════════════════════════════════════════ */
+function updateGasBadge(state, msg) {
+  const el  = document.getElementById('gasBadge');
+  const lbl = document.getElementById('gasBadgeLabel');
+  el.className = 'gas-badge ' + (state==='ok' ? 'gas-ok' : state==='err' ? 'gas-err' : 'gas-none');
+  lbl.textContent = msg || (state==='ok' ? 'Terhubung' : state==='err' ? 'Error' : 'Belum terhubung');
+}
+
+/* ═══════════════════════════════════════════════
+   LOADING BAR
+═══════════════════════════════════════════════ */
+function loadStart() { document.getElementById('loadBar').classList.add('active'); }
+function loadEnd()   { document.getElementById('loadBar').classList.remove('active'); }
+
+/* GAS URL sudah di-hardcode di konstanta GAS_URL */
+
+/* ═══════════════════════════════════════════════
+   HTTP HELPER — GAS fetch
+   - GET  : query param ?action=xxx&bulan=xxx
+   - POST : body JSON dengan Content-Type text/plain
+             (menghindari CORS preflight pada GAS)
+   - redirect:'follow' wajib karena GAS selalu redirect
+═══════════════════════════════════════════════ */
+async function fetchGAS(url, method, body, action, extraParams) {
+  let endpoint = url;
+  if (method === 'GET') {
+    const params = [];
+    if (action)      params.push('action=' + encodeURIComponent(action));
+    if (extraParams) Object.entries(extraParams).forEach(([k,v]) => params.push(k+'='+encodeURIComponent(v)));
+    if (params.length) endpoint += '?' + params.join('&');
+  }
+
+  const opts = { method, redirect: 'follow' };
+  if (method === 'POST') {
+    opts.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+    opts.body    = JSON.stringify(body);
+  }
+
+  const res = await fetch(endpoint, opts);
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    console.error('GAS response bukan JSON:', text.substring(0, 300));
+    throw new Error('Response bukan JSON. Pastikan GAS sudah di-deploy sebagai Web App.');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   GET — Tarik data dari Google Sheets
+═══════════════════════════════════════════════ */
+async function loadFromSheet() {
+  loadStart();
+  try {
+    console.log('[GAS] loadFromSheet | URL:', gasUrl, '| Bulan:', bulanStr());
+
+    // ── 1. Karyawan ──────────────────────────────────────────────
+    const rK = await fetchGAS(gasUrl, 'GET', null, 'getKaryawan');
+    console.log('[GAS] getKaryawan:', rK);
+    if (rK.status !== 'ok') throw new Error('getKaryawan: ' + (rK.message || 'gagal'));
+
+    employees = rK.data.map(e => {
+      const numId = parseInt(e.id);
+      return { id: isNaN(numId) ? nextId++ : numId, name: e.nama, nik: e.nik, jabatan: e.jabatan };
+    });
+    if (employees.length) nextId = Math.max(...employees.map(e => e.id)) + 1;
+    console.log('[GAS] employees loaded:', employees.length, '→ ids:', employees.map(e=>e.id));
+
+    // ── 2. Jadwal bulan ini ──────────────────────────────────────
+    const rJ = await fetchGAS(gasUrl, 'GET', null, 'getJadwal', { bulan: bulanStr() });
+    console.log('[GAS] getJadwal:', rJ);
+    if (rJ.status !== 'ok') throw new Error('getJadwal: ' + (rJ.message || 'gagal'));
+
+    clearScheduleForMonth();
+    let shiftCount = 0;
+    rJ.data.forEach(row => {
+      // Cocokkan emp_id dari GAS dengan id lokal
+      const rid  = String(row.emp_id).trim();
+      const emp  = employees.find(e => String(e.id).trim() === rid);
+      if (!emp) {
+        console.warn('[GAS] emp_id tidak cocok:', rid,
+          '| ids lokal:', employees.map(e => String(e.id)));
+        return;
+      }
+      Object.entries(row.shifts || {}).forEach(([dk, sv]) => {
+        const day = parseInt(dk.replace('d',''));
+        if (day >= 1 && day <= 31 && sv && sv !== '0') {
+          setShift(emp.id, day, sv);
+          shiftCount++;
+        }
+      });
+    });
+    console.log('[GAS] Jadwal OK:', rJ.data.length, 'baris,', shiftCount, 'shift | total_rows:', rJ.total, 'skipped:', rJ.skipped);
+
+    loadEnd();
+    clearDirty();
+    updateGasBadge('ok');
+    render();
+    if (rJ.data.length === 0) {
+      toast('ℹ️ Karyawan dimuat (' + employees.length + '), jadwal bulan ini kosong di Sheets');
+    } else {
+      toast('' + employees.length + ' karyawan, ' + shiftCount + ' shift dimuat');
+    }
+  } catch(err) {
+    loadEnd();
+    updateGasBadge('err', 'Error');
+    console.error('[GAS] Error:', err);
+    toast('❌ ' + err.message);
+    render();
+  }
+}
+
+function clearScheduleForMonth() {
+  const prefix = `${curY}-${p2(curM)}`;
+  Object.keys(schedule).forEach(k => {
+    // key format: "empId:YYYY-MM-DD"
+    if (k.includes(':' + prefix)) delete schedule[k];
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   POST — Kirim data ke Google Sheets
+═══════════════════════════════════════════════ */
+async function pushToSheet() {
+  if (!isDirty) { toast('ℹ️ Tidak ada perubahan baru'); return; }
+  if (!employees.length) { toast('⚠️ Tidak ada data karyawan'); return; }
+
+  loadStart();
+  try {
+    // 1. Sync karyawan
+    const karyawanPayload = employees.map(e => ({
+      id:      String(e.id),
+      nik:     e.nik,
+      name:    e.name,
+      jabatan: e.jabatan
+    }));
+    const rK = await fetchGAS(gasUrl, 'POST', {
+      action: 'syncKaryawan',
+      data:   karyawanPayload
+    });
+    if (rK.status !== 'ok') throw new Error('syncKaryawan: ' + (rK.message||'gagal'));
+
+    // 2. Sync jadwal bulan ini
+    const days = daysIn(curY, curM);
+    const jadwalPayload = employees.map(e => {
+      const shifts = {};
+      for (let d=1; d<=days; d++) {
+        const s = getShift(e.id, d);
+        if (s) shifts['d' + d] = s;
+      }
+      return { emp_id: String(e.id), nik: e.nik, name: e.name, jabatan: e.jabatan, shifts };
+    });
+    const rJ = await fetchGAS(gasUrl, 'POST', {
+      action: 'syncJadwal',
+      bulan:  bulanStr(),
+      data:   jadwalPayload
+    });
+    if (rJ.status !== 'ok') throw new Error('syncJadwal: ' + (rJ.message||'gagal'));
+
+    loadEnd();
+    clearDirty();
+    const totalShifts = (() => {
+      let n = 0;
+      const days = daysIn(curY, curM);
+      employees.forEach(e => { for(let d=1;d<=days;d++) if(getShift(e.id,d)) n++; });
+      return n;
+    })();
+    showSuccessNotif(
+      ' Update Berhasil!',
+      `${employees.length} karyawan · ${totalShifts} shift · ${MONTHS[curM-1]} ${curY} tersimpan ke Google Sheets`
+    );
+  } catch(err) {
+    loadEnd();
+    updateGasBadge('err', 'Error');
+    toast('❌ ' + err.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   CHANGE MONTH
+═══════════════════════════════════════════════ */
+function changeMonth() {
+  const v = document.getElementById('monthPicker').value;
+  if (!v) return;
+  [curY, curM] = v.split('-').map(Number);
+  if (gasUrl) {
+    loadFromSheet();
+  } else {
+    clearScheduleForMonth();
+    render();
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════ */
+function render() {
+  renderSummary();
+  renderTable();
+  rebuildBulkList();
+}
+
+function renderSummary() {
+  const days = daysIn(curY, curM);
+  const cnt  = {};
+  SHIFTS.forEach(s => cnt[s] = 0);
+  employees.forEach(e => {
+    for (let d=1; d<=days; d++) { const s=getShift(e.id,d); if(s) cnt[s]++; }
+  });
+  document.getElementById('summary').innerHTML = `
+    <div class="sc"><div class="sc-val" style="color:var(--accent)">${employees.length}</div><div class="sc-lbl">Karyawan</div></div>
+    <div class="sc"><div class="sc-val">${days}</div><div class="sc-lbl">${MONTHS[curM-1]} ${curY}</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--pagi)">${cnt.PAGI}</div><div class="sc-lbl">Pagi</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--siang)">${cnt.SIANG}</div><div class="sc-lbl">Siang</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--malam)">${cnt.MALAM}</div><div class="sc-lbl">Malam</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--cuti)">${cnt.CUTI}</div><div class="sc-lbl">Cuti</div></div>
+  `;
+}
+
+function renderTable() {
+  const days  = daysIn(curY, curM);
+  const now   = new Date();
+  const isNow = now.getFullYear()===curY && now.getMonth()+1===curM;
+  const todD  = isNow ? now.getDate() : -1;
+
+  let head = `<tr><th class="th-info">Karyawan</th>`;
+  for (let d=1; d<=days; d++) {
+    const w  = dow(curY,curM,d);
+    const tc = [d===todD?'th-today':'', w===0?'th-sun':'', w===6?'th-sat':''].filter(Boolean).join(' ');
+    head += `<th class="${tc}"><div>${d}</div><div>${DAYS[w]}</div></th>`;
+  }
+  head += `<th class="th-sum">P</th><th class="th-sum">S</th><th class="th-sum">M</th>
+           <th class="th-sum">Off</th><th class="th-sum">Cuti</th><th class="th-sum">+Off</th></tr>`;
+  document.getElementById('tHead').innerHTML = head;
+
+  if (!employees.length) {
+    document.getElementById('tBody').innerHTML = `
+      <tr><td colspan="${days+7}">
+        <div class="empty">
+          <div class="ei">👤</div>
+          <p>Belum ada karyawan.<br>Klik <strong>+ Tambah Karyawan</strong> untuk mulai.</p>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  const dayWork = new Array(days+2).fill(0);
+  let body = '';
+
+  employees.forEach(emp => {
+    const cnt = {};
+    SHIFTS.forEach(s => cnt[s]=0);
+    let row = `<tr>
+      <td class="td-info">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
+          <div>
+            <div class="emp-name">${esc(emp.name)}</div>
+            <div class="emp-meta"><span class="emp-nik">${esc(emp.nik)}</span> · ${esc(emp.jabatan)}</div>
+          </div>
+          <button class="btn-more" onclick="openEditEmp(${emp.id})" title="Edit / Hapus Karyawan">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </td>`;
+
+    for (let d=1; d<=days; d++) {
+      const s  = getShift(emp.id, d);
+      const tc = d===todD ? ' td-today' : '';
+      if (s) {
+        cnt[s]++;
+        if (s!=='OFF'&&s!=='CUTI'&&s!=='ADDOFF') dayWork[d]++;
+      }
+      row += `<td class="td-cell${tc}" onclick="openShiftModal(${emp.id},${d})">
+        ${s ? `<span class="badge b-${s}">${SLABEL[s]}</span>` : `<span class="badge b-empty">·</span>`}
+      </td>`;
+    }
+    row += `
+      <td class="td-sum"><span class="badge b-PAGI">${cnt.PAGI||'·'}</span></td>
+      <td class="td-sum"><span class="badge b-SIANG">${cnt.SIANG||'·'}</span></td>
+      <td class="td-sum"><span class="badge b-MALAM">${cnt.MALAM||'·'}</span></td>
+      <td class="td-sum"><span class="badge b-OFF">${cnt.OFF||'·'}</span></td>
+      <td class="td-sum"><span class="badge b-CUTI">${cnt.CUTI||'·'}</span></td>
+      <td class="td-sum"><span class="badge b-ADDOFF">${cnt.ADDOFF||'·'}</span></td>
+    </tr>`;
+    body += row;
+  });
+
+  let tot = `<tr class="tr-total"><td class="td-info">TOTAL HADIR / HARI</td>`;
+  for (let d=1; d<=days; d++) {
+    const style = dow(curY,curM,d)===0 ? ' style="color:var(--cuti)"' : '';
+    tot += `<td${style}>${dayWork[d]||'·'}</td>`;
+  }
+  tot += `<td colspan="6"></td></tr>`;
+  document.getElementById('tBody').innerHTML = body + tot;
+}
+
+/* ═══════════════════════════════════════════════
+   EMPLOYEE CRUD
+═══════════════════════════════════════════════ */
+function openAddEmp() {
+  editingEmpId = null;
+  document.getElementById('empModalTitle').textContent = 'Tambah Karyawan';
+  ['fName','fNik','fJabatan'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('delEmpWrap').style.display = 'none';
+  openModal('empModal');
+  setTimeout(() => document.getElementById('fName').focus(), 200);
+}
+
+function openEditEmp(id) {
+  const e = employees.find(x=>x.id===id); if (!e) return;
+  editingEmpId = id;
+  document.getElementById('empModalTitle').textContent = 'Edit Karyawan';
+  document.getElementById('fName').value    = e.name;
+  document.getElementById('fNik').value     = e.nik;
+  document.getElementById('fJabatan').value = e.jabatan;
+  document.getElementById('delEmpWrap').style.display = 'block';
+  openModal('empModal');
+}
+
+function saveEmp() {
+  const name    = document.getElementById('fName').value.trim();
+  const nik     = document.getElementById('fNik').value.trim();
+  const jabatan = document.getElementById('fJabatan').value.trim();
+  if (!name||!nik||!jabatan) { toast('⚠️ Semua field wajib diisi!'); return; }
+
+  if (editingEmpId) {
+    const e = employees.find(x=>x.id===editingEmpId);
+    e.name=name; e.nik=nik; e.jabatan=jabatan;
+    toast('Data karyawan diperbarui');
+  } else {
+    employees.push({ id: nextId++, name, nik, jabatan });
+    toast(' Karyawan ditambahkan');
+  }
+  closeModal('empModal');
+  markDirty();
+  render();
+}
+
+function delEmpFromModal() {
+  if (editingEmpId === null) return;
+  const e = employees.find(x=>x.id===editingEmpId);
+  if (!confirm(`Hapus karyawan "${e.name}" beserta seluruh jadwalnya?`)) return;
+  const id = editingEmpId;
+  closeModal('empModal');
+  employees = employees.filter(x=>x.id!==id);
+  Object.keys(schedule).forEach(k => { if (k.startsWith(id+':')) delete schedule[k]; });
+  markDirty();
+  toast('🗑️ Karyawan dihapus');
+  render();
+}
+
+/* ═══════════════════════════════════════════════
+   SHIFT MODAL
+═══════════════════════════════════════════════ */
+function openShiftModal(empId, day) {
+  shiftTarget = { empId, day };
+  selShift    = getShift(empId, day) || null;
+  const e = employees.find(x=>x.id===empId);
+  const w = dow(curY, curM, day);
+  document.getElementById('shiftModalTitle').textContent =
+    `${e.name} — ${day} ${DAYS[w]}, ${MONTHS[curM-1]} ${curY}`;
+  buildPicker('spGrid', 'sel');
+  openModal('shiftModal');
+}
+
+function buildPicker(gridId, mode) {
+  const cur = mode==='sel' ? selShift : bulkShift;
+  document.getElementById(gridId).innerHTML = SHIFTS.map(s =>
+    `<div class="sp-opt sp-${s}${cur===s?' active':''}"
+          onclick="${mode==='sel'?'pickSel':'pickBulk'}('${s}')">${SLABEL[s]}</div>`
+  ).join('');
+}
+
+function pickSel(s)  { selShift  = s; buildPicker('spGrid',  'sel');  }
+function pickBulk(s) { bulkShift = s; buildPicker('bulkGrid','bulk'); }
+
+function applyShift() {
+  if (!selShift) { toast('⚠️ Pilih shift terlebih dahulu'); return; }
+  setShift(shiftTarget.empId, shiftTarget.day, selShift);
+  closeModal('shiftModal');
+  markDirty();
+  render();
+  toast(` Shift ${SLABEL[selShift]} disimpan`);
+}
+
+function clearShift() {
+  setShift(shiftTarget.empId, shiftTarget.day, null);
+  closeModal('shiftModal');
+  markDirty();
+  render();
+  toast('🗑️ Shift dihapus');
+}
+
+/* ═══════════════════════════════════════════════
+   BULK SHIFT
+═══════════════════════════════════════════════ */
+function rebuildBulkList() {
+  const sel = document.getElementById('bulkEmpSel');
+  const cur = sel.value;
+  sel.innerHTML = `<option value="all">— Semua Karyawan —</option>` +
+    employees.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');
+  if ([...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+
+function openBulk() {
+  if (!employees.length) { toast('⚠️ Tambahkan karyawan terlebih dahulu'); return; }
+  bulkShift = null;
+  buildPicker('bulkGrid','bulk');
+  const days = daysIn(curY, curM);
+  document.getElementById('bulkFrom').value = 1;
+  document.getElementById('bulkTo').value   = days;
+  rebuildBulkList();
+  openModal('bulkModal');
+}
+
+function applyBulk() {
+  if (!bulkShift) { toast('⚠️ Pilih shift terlebih dahulu'); return; }
+  const empVal = document.getElementById('bulkEmpSel').value;
+  const from   = parseInt(document.getElementById('bulkFrom').value);
+  const to     = parseInt(document.getElementById('bulkTo').value);
+  const days   = daysIn(curY, curM);
+  if (isNaN(from)||isNaN(to)||from<1||to>days||from>to) {
+    toast('⚠️ Rentang tanggal tidak valid'); return;
+  }
+  const ids = empVal==='all' ? employees.map(e=>e.id) : [parseInt(empVal)];
+  ids.forEach(id => { for (let d=from; d<=to; d++) setShift(id, d, bulkShift); });
+  closeModal('bulkModal');
+  markDirty();
+  render();
+  toast(` Shift ${SLABEL[bulkShift]} diisi tgl ${from}–${to}`);
+}
+
+/* ═══════════════════════════════════════════════
+   DEBUG — lihat raw data sheet jadwal
+═══════════════════════════════════════════════ */
+async function debugSheet() {
+  if (!gasUrl) { toast('⚠️ Set URL GAS dulu'); return; }
+  loadStart();
+  try {
+    const r = await fetchGAS(gasUrl, 'GET', null, 'debugJadwal');
+    loadEnd();
+    console.log('[DEBUG] raw sheet jadwal:', JSON.stringify(r, null, 2));
+    if (r.status !== 'ok') { toast('❌ ' + r.message); return; }
+    if (!r.rows.length) { toast('ℹ️ Sheet master_jadwal masih kosong (lastRow=' + r.lastRow + ')'); return; }
+    // Tampilkan di alert agar mudah dibaca
+    let msg = 'master_jadwal — ' + r.lastRow + ' baris total\n\n';
+    r.rows.forEach((row, i) => {
+      msg += `Baris ${i+2}:\n`;
+      msg += `  emp_id    : ${row.col_A_emp_id}\n`;
+      msg += `  bulan_raw : ${row.col_E_bulan_raw} (${row.col_E_type}${row.col_E_isDate?' Date':''})\n`;
+      msg += `  normalized: ${row.col_E_normalized}\n`;
+      msg += `  d1=${row.col_F_d1} | d2=${row.col_G_d2}\n\n`;
+    });
+    alert(msg);
+  } catch(err) {
+    loadEnd();
+    toast('❌ ' + err.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.overlay').forEach(el =>
+  el.addEventListener('click', e => { if (e.target===el) el.classList.remove('open'); })
+);
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape')
+    document.querySelectorAll('.overlay.open').forEach(el=>el.classList.remove('open'));
+  if (e.key==='Enter' && document.getElementById('empModal').classList.contains('open'))
+    saveEmp();
+});
+
+/* ═══════════════════════════════════════════════
+   SUCCESS NOTIFICATION
+═══════════════════════════════════════════════ */
+let snTimer;
+function showSuccessNotif(title, body) {
+  const el = document.getElementById('successNotif');
+  document.getElementById('snTitle').textContent = title;
+  document.getElementById('snBody').textContent  = body;
+  const now = new Date();
+  document.getElementById('snTime').textContent  =
+    now.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) + ' ' +
+    now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el.classList.add('show');
+  clearTimeout(snTimer);
+  snTimer = setTimeout(() => el.classList.remove('show'), 5000);
+  el.onclick = () => el.classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
