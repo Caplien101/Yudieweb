@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate Bon Penjualan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Normalize jsPDF global - UMD build exposes it differently across versions
+window.addEventListener('load', function() {
+  if (!window.jsPDF && window.jspdf && window.jspdf.jsPDF) {
+    window.jsPDF = window.jspdf.jsPDF;
+  }
+});
+</script>
+<style id="dynamicPrintStyle">@page{size:58mm auto;margin:2mm;}@media print{body{background:white!important;}.header,.left-panel,.preview-title,.preview-actions,.paper-toggle{display:none!important;}.app-layout{display:block!important;}.right-panel{background:white!important;padding:0!important;display:block!important;}#receiptWrapper{background:white!important;border:none!important;padding:0!important;}#receiptPreview{max-width:100%!important;}.receipt{border:none!important;border-radius:0!important;padding:2mm!important;}.receipt::before{display:none!important;}}</style>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FAF7F2;
+    --cream2: #F2EDE4;
+    --warm: #E8DDD0;
+    --brown: #5C4033;
+    --brown-light: #8B6B5A;
+    --brown-mid: #7A5544;
+    --accent: #C0392B;
+    --accent2: #E8834A;
+    --text: #2C1F17;
+    --text-muted: #7A6558;
+    --border: #D9CFC4;
+    --white: #FFFFFF;
+    --success: #2D6A4F;
+    --shadow: 0 2px 16px rgba(92,64,51,0.10);
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--brown);
+    color: var(--cream);
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-icon {
+    width: 36px; height: 36px;
+    background: var(--accent2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  .header span {
+    font-size: 0.78rem;
+    color: var(--warm);
+    margin-left: auto;
+    font-weight: 300;
+  }
+
+  /* LAYOUT */
+  .app-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 0;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* PANEL KIRI */
+  .left-panel {
+    padding: 2rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brown-light);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* FORM */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-row.three { grid-template-columns: 2fr 1fr 1fr; }
+  .form-full { margin-bottom: 12px; }
+
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--cream);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--brown-mid);
+    box-shadow: 0 0 0 3px rgba(92,64,51,0.08);
+    background: var(--white);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+
+  /* TABEL ITEM */
+  .items-table { width: 100%; border-collapse: collapse; }
+  .items-table thead th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .items-table thead th:last-child { text-align: right; }
+  .items-table tbody td {
+    padding: 6px 4px;
+    vertical-align: middle;
+  }
+  .items-table tbody td input {
+    padding: 7px 10px;
+    font-size: 0.87rem;
+  }
+  .item-subtotal {
+    font-size: 0.87rem;
+    font-weight: 500;
+    color: var(--brown);
+    text-align: right;
+    padding-right: 4px;
+    white-space: nowrap;
+    min-width: 90px;
+  }
+  .btn-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ccc;
+    font-size: 16px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: color 0.2s, background 0.2s;
+  }
+  .btn-del:hover { color: var(--accent); background: #FDECEA; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.87rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--brown);
+  }
+  .btn-outline:hover { background: var(--cream2); border-color: var(--brown-light); }
+  .btn-primary {
+    background: var(--brown);
+    color: var(--cream);
+  }
+  .btn-primary:hover { background: var(--brown-mid); }
+  .btn-success {
+    background: var(--success);
+    color: white;
+  }
+  .btn-success:hover { opacity: 0.9; }
+  .btn-accent {
+    background: var(--accent2);
+    color: white;
+  }
+  .btn-accent:hover { opacity: 0.9; }
+
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* SUMMARY */
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    font-size: 0.9rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row.total {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--brown);
+    padding-top: 10px;
+    border-top: 2px solid var(--brown);
+    margin-top: 4px;
+    border-bottom: none;
+  }
+  .summary-row label { color: var(--text-muted); font-size: 0.85rem; font-weight: 400; }
+
+  .inline-input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .inline-input input {
+    width: 70px;
+    padding: 5px 8px;
+    font-size: 0.85rem;
+    text-align: right;
+  }
+  .inline-input span { font-size: 0.85rem; color: var(--text-muted); }
+
+  /* PREVIEW (KANAN) */
+  .right-panel {
+    background: var(--cream2);
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .preview-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brown-light);
+    margin-bottom: 0.5rem;
+  }
+
+  /* BON / RECEIPT */
+  .receipt {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem 1.75rem;
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    position: relative;
+    overflow: hidden;
+  }
+  .receipt::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brown), var(--accent2), var(--accent));
+  }
+
+  .receipt-header {
+    text-align: center;
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .receipt-store-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--brown);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+  .receipt-address {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  .receipt-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .receipt-meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .receipt-meta-item strong { color: var(--text); font-size: 0.82rem; }
+
+  .receipt-items { margin-bottom: 1rem; }
+  .receipt-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 5px 0;
+    font-size: 0.82rem;
+    border-bottom: 1px dotted #EEE;
+  }
+  .receipt-item:last-child { border-bottom: none; }
+  .receipt-item-left { flex: 1; }
+  .receipt-item-name { color: var(--text); font-weight: 500; font-size: 0.85rem; font-family: 'DM Sans', sans-serif; }
+  .receipt-item-qty { color: var(--text-muted); font-size: 0.77rem; margin-top: 1px; }
+  .receipt-item-price { text-align: right; color: var(--text); font-weight: 500; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; }
+
+  .receipt-totals {
+    border-top: 1px dashed var(--border);
+    padding-top: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .receipt-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    padding: 3px 0;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-muted);
+  }
+  .receipt-total-row.grand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--brown);
+    border-top: 1px solid var(--brown);
+    margin-top: 6px;
+    padding-top: 8px;
+  }
+  .receipt-total-row.paid { color: var(--success); font-weight: 500; }
+  .receipt-total-row.change { color: var(--brown-mid); font-weight: 500; }
+
+  .receipt-note {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .receipt-footer {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.72rem;
+    color: #CCC;
+    letter-spacing: 0.08em;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* BARCODE FAKE */
+  .barcode {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    gap: 1px;
+  }
+  .barcode-bar {
+    background: var(--text);
+    height: 30px;
+    border-radius: 1px;
+  }
+
+  /* BAYAR SECTION */
+  .bayar-section {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+  }
+
+
+
+  /* MOBILE TAB NAV */
+  .mobile-tabs {
+    display: none;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 58px;
+    z-index: 90;
+  }
+  .mobile-tabs-inner {
+    display: flex;
+  }
+  .mobile-tab-btn {
+    flex: 1;
+    padding: 12px 8px;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .mobile-tab-btn.active {
+    color: var(--brown);
+    border-bottom-color: var(--brown);
+  }
+
+  /* RESPONSIVE - TABLET */
+  @media (max-width: 900px) {
+    .app-layout { grid-template-columns: 1fr 340px; }
+  }
+
+  /* RESPONSIVE - MOBILE */
+  @media (max-width: 700px) {
+    .header { padding: 0.9rem 1rem; }
+    .header h1 { font-size: 1.1rem; }
+    .header span { display: none; }
+    .header-icon { width: 30px; height: 30px; font-size: 15px; }
+
+    .mobile-tabs { display: block; }
+
+    .app-layout {
+      grid-template-columns: 1fr;
+      min-height: calc(100vh - 100px);
+    }
+
+    .left-panel {
+      padding: 0.85rem;
+      display: none;
+    }
+    .left-panel.tab-active { display: block; }
+
+    .right-panel {
+      padding: 0.85rem;
+      border-top: none;
+      display: none;
+    }
+    .right-panel.tab-active { display: flex; }
+
+    .form-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .form-row.stack { grid-template-columns: 1fr; }
+
+    .card { padding: 1rem; margin-bottom: 1rem; }
+
+    /* Tabel item → card style di mobile */
+    .items-table thead { display: none; }
+    .items-table tbody tr {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      grid-template-rows: auto auto;
+      gap: 4px 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .items-table tbody tr td:nth-child(1) {
+      grid-column: 1 / 4;
+    }
+    .items-table tbody tr td:nth-child(1) input {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .items-table tbody tr td:nth-child(2) {
+      grid-column: 1;
+    }
+    .items-table tbody tr td:nth-child(2) input {
+      width: 70px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .items-table tbody tr td:nth-child(3) {
+      grid-column: 2;
+    }
+    .items-table tbody tr td:nth-child(3) input {
+      width: 110px;
+      font-size: 0.85rem;
+    }
+    .items-table tbody tr td:nth-child(4) {
+      grid-column: 3;
+      text-align: right;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .items-table tbody tr td:nth-child(5) {
+      grid-column: 4;
+      display: none;
+    }
+    /* Hapus item lewat swipe hint — sembunyikan kolom terakhir, tampilkan di td nama */
+    .item-del-mobile {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 2px 0;
+      margin-top: 2px;
+    }
+
+    .action-bar { gap: 8px; }
+    .action-bar .btn { flex: 1; justify-content: center; padding: 10px 8px; font-size: 0.82rem; }
+
+    .summary-row { font-size: 0.85rem; }
+    .inline-input input { width: 60px; }
+
+    .paper-toggle { gap: 4px; }
+    .paper-btn { font-size: 0.75rem; padding: 6px 6px; }
+
+    #receiptWrapper { padding: 0.75rem 0.5rem; }
+    .preview-actions .btn { font-size: 0.82rem; padding: 10px 8px; }
+  }
+
+  /* Extra small phones */
+  @media (max-width: 380px) {
+    .form-row { grid-template-columns: 1fr; }
+    .action-bar { flex-direction: column; }
+    .action-bar .btn { width: 100%; }
+    .items-table tbody tr td:nth-child(3) input { width: 90px; }
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    background: #FFF3E0;
+    color: #E65100;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+  .empty-state .big { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  .no-items-receipt {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--border);
+    font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .item-del-mobile { display: none; }
+
+  .kasir-badge {
+    display: inline-block;
+    background: var(--cream2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.78rem;
+    color: var(--brown-light);
+    margin-top: 4px;
+  }
+
+  /* PAPER SIZE STYLES */
+  .paper-58 .receipt-store-name { font-size: 1rem !important; }
+  .paper-58 .receipt-address { font-size: 0.68rem !important; }
+  .paper-58 .receipt-meta { font-size: 0.68rem !important; }
+  .paper-58 .receipt-meta-item strong { font-size: 0.7rem !important; }
+  .paper-58 .receipt-item-name { font-size: 0.72rem !important; }
+  .paper-58 .receipt-item-qty { font-size: 0.64rem !important; }
+  .paper-58 .receipt-item-price { font-size: 0.72rem !important; }
+  .paper-58 .receipt-total-row { font-size: 0.7rem !important; }
+  .paper-58 .receipt-total-row.grand { font-size: 0.88rem !important; }
+  .paper-58 .receipt-note { font-size: 0.65rem !important; }
+  .paper-58 .receipt-footer { font-size: 0.6rem !important; }
+  .paper-58 .receipt { padding: 0.85rem 0.75rem !important; }
+  .paper-58 .receipt-header { margin-bottom: 0.6rem !important; padding-bottom: 0.5rem !important; }
+  .paper-58 .receipt-items { margin-bottom: 0.5rem !important; }
+  .paper-58 .receipt-item { padding: 2px 0 !important; }
+  .paper-58 .barcode-bar { height: 18px !important; }
+
+  /* PAPER SIZE TOGGLE */
+  .paper-toggle {
+    display: flex;
+    gap: 6px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .paper-btn {
+    flex: 1;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .paper-btn.active { background: var(--brown); color: var(--cream); }
+  .paper-btn:not(.active):hover { background: var(--cream2); color: var(--text); }
+
+  /* RECEIPT WRAPPER */
+  #receiptWrapper {
+    display: flex;
+    justify-content: center;
+    background: var(--cream);
+    border-radius: var(--radius);
+    padding: 1.2rem 1rem;
+    border: 1px dashed var(--border);
+    min-height: 200px;
+    transition: all 0.3s;
+  }
+  #receiptPreview {
+    width: 100%;
+    transition: max-width 0.3s ease;
+  }
+
+  /* PDF LOADER */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid var(--border);
+    border-top-color: var(--brown);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🧾</div>
+  <h1>Bon Penjualan</h1>
+  <span>Generator Bon Otomatis</span>
+</div>
+
+<div class="mobile-tabs">
+  <div class="mobile-tabs-inner">
+    <button class="mobile-tab-btn active" id="tabFormBtn" onclick="switchTab('form')">
+      ✏️ Form Input
+    </button>
+    <button class="mobile-tab-btn" id="tabPreviewBtn" onclick="switchTab('preview')">
+      👁 Preview Bon
+    </button>
+  </div>
+</div>
+
+<div class="app-layout">
+  <!-- KIRI: FORM -->
+  <div class="left-panel tab-active" id="leftPanel">
+
+    <!-- INFO TOKO -->
+    <div class="section-label">Informasi Toko</div>
+    <div class="card">
+      <div class="form-full">
+        <label>Nama Toko / Usaha</label>
+        <input type="text" id="storeName" placeholder="contoh: Toko Jaya Makmur" value="Toko Jaya Makmur">
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Alamat</label>
+          <textarea id="storeAddress" placeholder="Jl. Contoh No. 1, Kota">Jl. Merdeka No. 12, Bandung</textarea>
+        </div>
+        <div>
+          <label>No. Telepon</label>
+          <input type="text" id="storePhone" placeholder="0812-3456-7890" value="0812-3456-7890">
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO TRANSAKSI -->
+    <div class="section-label">Detail Transaksi</div>
+    <div class="card">
+      <div class="form-row">
+        <div>
+          <label>Nomor Bon</label>
+          <input type="text" id="invoiceNo" value="">
+        </div>
+        <div>
+          <label>Tanggal & Waktu</label>
+          <input type="text" id="invoiceDate" value="">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Nama Kasir</label>
+          <input type="text" id="kasirName" placeholder="Nama kasir" value="Admin">
+        </div>
+        <div>
+          <label>Nama Pelanggan (opsional)</label>
+          <input type="text" id="customerName" placeholder="Nama pelanggan">
+        </div>
+      </div>
+    </div>
+
+    <!-- DAFTAR ITEM -->
+    <div class="section-label">Daftar Item <span class="badge" id="itemCount">0 item</span></div>
+    <div class="card">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width:36%">Nama Barang</th>
+            <th style="width:16%">Jumlah</th>
+            <th style="width:24%">Harga Satuan</th>
+            <th style="width:18%; text-align:right">Subtotal</th>
+            <th style="width:6%"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody">
+        </tbody>
+      </table>
+      <div id="emptyItems" class="empty-state">
+        <div class="big">📦</div>
+        Belum ada item ditambahkan
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-outline" onclick="addItem()">+ Tambah Item</button>
+      </div>
+    </div>
+
+    <!-- DISKON & PAJAK -->
+    <div class="section-label">Ringkasan & Pembayaran</div>
+    <div class="card">
+      <div class="summary-row">
+        <label>Subtotal</label>
+        <span id="subtotalVal" style="font-weight:500">Rp 0</span>
+      </div>
+      <div class="summary-row">
+        <label>Diskon (%)</label>
+        <div class="inline-input">
+          <input type="number" id="discountPct" value="0" min="0" max="100" oninput="recalc()">
+          <span>%</span>
+          <span id="discountAmt" style="color:var(--text-muted); font-size:0.82rem"></span>
+        </div>
+      </div>
+      <div class="summary-row">
+        <label>Pajak / PPN (%)</label>
+        <div class="inline-input">
+          <input type="number" id="taxPct" value="0" min="0" max="100" oninput="recalc()">
+          <span>%</span>
+          <span id="taxAmt" style="color:var(--text-muted); font-size:0.82rem"></span>
+        </div>
+      </div>
+      <div class="summary-row total">
+        <label style="color:var(--brown); font-weight:400">Total</label>
+        <span id="totalVal">Rp 0</span>
+      </div>
+
+      <div style="margin-top:1.2rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
+        <div class="form-row">
+          <div>
+            <label>Bayar</label>
+            <input type="number" id="bayar" placeholder="0" oninput="recalc()">
+          </div>
+          <div>
+            <label>Metode Bayar</label>
+            <select id="metodeBayar" onchange="recalc()">
+              <option value="Tunai">Tunai</option>
+              <option value="Transfer Bank">Transfer Bank</option>
+              <option value="QRIS">QRIS</option>
+              <option value="Kartu Debit">Kartu Debit</option>
+              <option value="Kartu Kredit">Kartu Kredit</option>
+            </select>
+          </div>
+        </div>
+        <div class="summary-row" style="margin-top:6px">
+          <label>Kembalian</label>
+          <span id="kembalianVal" style="font-weight:600; color:var(--success)">Rp 0</span>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <label>Catatan / Pesan</label>
+        <textarea id="noteField" placeholder="Terima kasih atas kunjungan Anda..." rows="2">Terima kasih atas kunjungan Anda!</textarea>
+      </div>
+
+      <div class="action-bar" style="margin-top:1.2rem">
+        <button class="btn btn-primary" onclick="generateReceipt(); if(window.innerWidth<=700) switchTab('preview')">🔄 Preview</button>
+        <button class="btn btn-success" onclick="window.print()">🖨️ Cetak Bon</button>
+        <button class="btn btn-accent" id="btnSavePdf2" onclick="downloadPDF()">💾 Simpan PDF</button>
+        <button class="btn btn-outline" onclick="resetAll()">↺ Reset</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="right-panel" id="rightPanel">
+    <div class="preview-title">👁 Preview Bon</div>
+
+    <div class="paper-toggle">
+      <button class="paper-btn active" id="btn58" onclick="setPaperSize('58mm')">
+        🧾 Thermal 58mm
+      </button>
+      <button class="paper-btn" id="btnA6" onclick="setPaperSize('a6')">
+        📄 Kertas A6
+      </button>
+    </div>
+
+    <div id="receiptWrapper">
+      <div id="receiptPreview" class="receipt paper-58">
+        <!-- generated -->
+      </div>
+    </div>
+
+    <div class="preview-actions" style="display:flex; gap:8px; flex-wrap:wrap">
+      <button class="btn btn-success" style="flex:1" onclick="window.print()">🖨️ Cetak</button>
+      <button class="btn btn-accent" style="flex:1" id="btnSavePdf" onclick="downloadPDF()">💾 Simpan PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let items = [];
+let itemCounter = 0;
+let currentPaper = '58mm';
+
+function fmt(n) {
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+}
+
+function genInvoiceNo() {
+  const d = new Date();
+  const pad = x => String(x).padStart(2,'0');
+  return 'INV-' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '-' + String(Math.floor(Math.random()*9000)+1000);
+}
+
+function getDateTime() {
+  const d = new Date();
+  const pad = x => String(x).padStart(2,'0');
+  const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${days[d.getDay()]}, ${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function addItem() {
+  itemCounter++;
+  const id = itemCounter;
+  items.push({ id, name: '', qty: 1, price: 0 });
+  renderItems();
+}
+
+function removeItem(id) {
+  items = items.filter(i => i.id !== id);
+  renderItems();
+}
+
+function updateItem(id, field, val) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  if (field === 'qty' || field === 'price') {
+    item[field] = parseFloat(val) || 0;
+  } else {
+    item[field] = val;
+  }
+  const row = document.getElementById('row-' + id);
+  if (row) {
+    const sub = row.querySelector('.item-subtotal');
+    sub.textContent = fmt(item.qty * item.price);
+  }
+  recalc();
+}
+
+function renderItems() {
+  const tbody = document.getElementById('itemsBody');
+  const empty = document.getElementById('emptyItems');
+  document.getElementById('itemCount').textContent = items.length + ' item';
+
+  if (items.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    recalc();
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = items.map(item => `
+    <tr id="row-${item.id}">
+      <td>
+        <input type="text" value="${item.name}" placeholder="Nama barang"
+          oninput="updateItem(${item.id},'name',this.value)">
+        <button class="item-del-mobile" onclick="removeItem(${item.id})">✕ hapus</button>
+      </td>
+      <td>
+        <input type="number" value="${item.qty}" min="1" style="text-align:center"
+          oninput="updateItem(${item.id},'qty',this.value)">
+      </td>
+      <td>
+        <input type="number" value="${item.price}" min="0" placeholder="0"
+          oninput="updateItem(${item.id},'price',this.value)">
+      </td>
+      <td class="item-subtotal">${fmt(item.qty * item.price)}</td>
+      <td>
+        <button class="btn-del" onclick="removeItem(${item.id})" title="Hapus">✕</button>
+      </td>
+    </tr>
+  `).join('');
+  recalc();
+}
+
+function recalc() {
+  const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
+  const discPct = parseFloat(document.getElementById('discountPct').value) || 0;
+  const taxPct = parseFloat(document.getElementById('taxPct').value) || 0;
+  const discAmt = subtotal * discPct / 100;
+  const taxAmt = (subtotal - discAmt) * taxPct / 100;
+  const total = subtotal - discAmt + taxAmt;
+  const bayar = parseFloat(document.getElementById('bayar').value) || 0;
+  const kembalian = bayar - total;
+
+  document.getElementById('subtotalVal').textContent = fmt(subtotal);
+  document.getElementById('discountAmt').textContent = discPct > 0 ? '- ' + fmt(discAmt) : '';
+  document.getElementById('taxAmt').textContent = taxPct > 0 ? '+ ' + fmt(taxAmt) : '';
+  document.getElementById('totalVal').textContent = fmt(total);
+  document.getElementById('kembalianVal').textContent = kembalian >= 0 ? fmt(kembalian) : '—';
+
+  generateReceipt();
+}
+
+function generateReceipt() {
+  const storeName = document.getElementById('storeName').value || 'Nama Toko';
+  const storeAddress = document.getElementById('storeAddress').value || '';
+  const storePhone = document.getElementById('storePhone').value || '';
+  const invoiceNo = document.getElementById('invoiceNo').value || '—';
+  const invoiceDate = document.getElementById('invoiceDate').value || getDateTime();
+  const kasirName = document.getElementById('kasirName').value || '—';
+  const customerName = document.getElementById('customerName').value || '';
+  const noteTxt = document.getElementById('noteField').value || '';
+  const metodeBayar = document.getElementById('metodeBayar').value;
+
+  const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
+  const discPct = parseFloat(document.getElementById('discountPct').value) || 0;
+  const taxPct = parseFloat(document.getElementById('taxPct').value) || 0;
+  const discAmt = subtotal * discPct / 100;
+  const taxAmt = (subtotal - discAmt) * taxPct / 100;
+  const total = subtotal - discAmt + taxAmt;
+  const bayar = parseFloat(document.getElementById('bayar').value) || 0;
+  const kembalian = bayar - total;
+
+  const itemsHtml = items.length === 0
+    ? `<div class="no-items-receipt">— Belum ada item —</div>`
+    : items.map(item => `
+      <div class="receipt-item">
+        <div class="receipt-item-left">
+          <div class="receipt-item-name">${item.name || '(tanpa nama)'}</div>
+          <div class="receipt-item-qty">${item.qty} × ${fmt(item.price)}</div>
+        </div>
+        <div class="receipt-item-price">${fmt(item.qty * item.price)}</div>
+      </div>
+    `).join('');
+
+  const barcodeHtml = genBarcode();
+
+  const html = `
+    <div class="receipt-header">
+      <div class="receipt-store-name">${storeName}</div>
+      ${storeAddress ? `<div class="receipt-address">${storeAddress.replace(/\n/g,'<br>')}</div>` : ''}
+      ${storePhone ? `<div class="receipt-address">📞 ${storePhone}</div>` : ''}
+    </div>
+
+    <div class="receipt-meta">
+      <div class="receipt-meta-item">
+        <span style="color:var(--text-muted); font-size:0.72rem">NO. BON</span>
+        <strong>${invoiceNo}</strong>
+      </div>
+      <div class="receipt-meta-item" style="text-align:right">
+        <span style="color:var(--text-muted); font-size:0.72rem">TANGGAL</span>
+        <strong style="font-size:0.78rem">${invoiceDate}</strong>
+      </div>
+    </div>
+
+    ${kasirName || customerName ? `
+    <div class="receipt-meta" style="border:none; padding-bottom:0; margin-bottom:0.75rem">
+      ${kasirName ? `<div class="receipt-meta-item"><span style="color:var(--text-muted); font-size:0.72rem">KASIR</span><strong>${kasirName}</strong></div>` : ''}
+      ${customerName ? `<div class="receipt-meta-item" style="text-align:right"><span style="color:var(--text-muted); font-size:0.72rem">PELANGGAN</span><strong>${customerName}</strong></div>` : ''}
+    </div>
+    ` : ''}
+
+    <div class="receipt-items">${itemsHtml}</div>
+
+    <div class="receipt-totals">
+      <div class="receipt-total-row">
+        <span>Subtotal</span>
+        <span>${fmt(subtotal)}</span>
+      </div>
+      ${discPct > 0 ? `<div class="receipt-total-row" style="color:#C0392B"><span>Diskon (${discPct}%)</span><span>- ${fmt(discAmt)}</span></div>` : ''}
+      ${taxPct > 0 ? `<div class="receipt-total-row"><span>PPN (${taxPct}%)</span><span>+ ${fmt(taxAmt)}</span></div>` : ''}
+      <div class="receipt-total-row grand">
+        <span>TOTAL</span>
+        <span>${fmt(total)}</span>
+      </div>
+      ${bayar > 0 ? `
+      <div class="receipt-total-row paid">
+        <span>Bayar (${metodeBayar})</span>
+        <span>${fmt(bayar)}</span>
+      </div>
+      <div class="receipt-total-row change">
+        <span>Kembalian</span>
+        <span>${kembalian >= 0 ? fmt(kembalian) : '—'}</span>
+      </div>
+      ` : ''}
+    </div>
+
+    ${noteTxt ? `<div class="receipt-note">${noteTxt}</div>` : ''}
+
+    ${barcodeHtml}
+    <div class="receipt-footer" style="margin-top:0.5rem">${invoiceNo}</div>
+  `;
+
+  document.getElementById('receiptPreview').innerHTML = html;
+}
+
+function genBarcode() {
+  const widths = [2,1,3,1,2,3,1,2,1,3,2,1,2,3,1,2,1,3,2,1,3,2,1,2,3,1,2,3,1,2,1,2,3,1,2,3];
+  const bars = widths.map(w => `<div class="barcode-bar" style="width:${w}px; opacity:${0.6 + Math.random()*0.4}"></div>`).join('');
+  return `<div class="barcode" style="margin-top:1rem">${bars}</div>`;
+}
+
+function resetAll() {
+  if (!confirm('Reset semua data?')) return;
+  items = [];
+  itemCounter = 0;
+  renderItems();
+  document.getElementById('storeName').value = '';
+  document.getElementById('storeAddress').value = '';
+  document.getElementById('storePhone').value = '';
+  document.getElementById('customerName').value = '';
+  document.getElementById('kasirName').value = 'Admin';
+  document.getElementById('discountPct').value = 0;
+  document.getElementById('taxPct').value = 0;
+  document.getElementById('bayar').value = '';
+  document.getElementById('noteField').value = 'Terima kasih atas kunjungan Anda!';
+  initMeta();
+  generateReceipt();
+}
+
+function switchTab(tab) {
+  const left = document.getElementById('leftPanel');
+  const right = document.getElementById('rightPanel');
+  const btnForm = document.getElementById('tabFormBtn');
+  const btnPreview = document.getElementById('tabPreviewBtn');
+  if (tab === 'form') {
+    left.classList.add('tab-active');
+    right.classList.remove('tab-active');
+    btnForm.classList.add('active');
+    btnPreview.classList.remove('active');
+  } else {
+    right.classList.add('tab-active');
+    left.classList.remove('tab-active');
+    btnPreview.classList.add('active');
+    btnForm.classList.remove('active');
+    generateReceipt();
+  }
+}
+
+function setPaperSize(size) {
+  currentPaper = size;
+  const el = document.getElementById('receiptPreview');
+  document.getElementById('btn58').classList.toggle('active', size === '58mm');
+  document.getElementById('btnA6').classList.toggle('active', size === 'a6');
+
+  const printBase = '@media print{body{background:white!important;}.header,.left-panel,.preview-title,.preview-actions,.paper-toggle{display:none!important;}.app-layout{display:block!important;}.right-panel{background:white!important;padding:0!important;display:block!important;}#receiptWrapper{background:white!important;border:none!important;padding:0!important;}#receiptPreview{max-width:100%!important;}.receipt::before{display:none!important;}.receipt{border:none!important;border-radius:0!important;}}';
+
+  if (size === '58mm') {
+    el.classList.add('paper-58');
+    el.classList.remove('paper-a6');
+    el.style.maxWidth = '219px';
+    document.getElementById('dynamicPrintStyle').textContent =
+      '@page{size:58mm auto;margin:2mm;}.receipt{padding:2mm!important;}' + printBase;
+  } else {
+    el.classList.remove('paper-58');
+    el.classList.add('paper-a6');
+    el.style.maxWidth = '397px';
+    document.getElementById('dynamicPrintStyle').textContent =
+      '@page{size:A6 portrait;margin:8mm;}' + printBase;
+  }
+}
+
+async function downloadPDF() {
+  const invNo = document.getElementById('invoiceNo').value || 'bon';
+  const btns = ['btnSavePdf','btnSavePdf2'].map(id => document.getElementById(id)).filter(Boolean);
+  btns.forEach(b => { b.innerHTML = '<span class="spinner"></span> Membuat PDF...'; b.disabled = true; });
+
+  try {
+    const el = document.getElementById('receiptPreview');
+    const canvas = await html2canvas(el, {
+      scale: currentPaper === '58mm' ? 3 : 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const jsPDF = window.jsPDF || (window.jspdf && window.jspdf.jsPDF);
+    if (!jsPDF) throw new Error('Library jsPDF belum termuat, coba refresh halaman.');
+
+    if (currentPaper === '58mm') {
+      const mmW = 54;
+      const mmH = (canvas.height / canvas.width) * mmW;
+      const pdf = new jsPDF({ unit: 'mm', format: [58, Math.max(mmH + 4, 80)], orientation: 'portrait' });
+      pdf.addImage(imgData, 'JPEG', 2, 2, mmW, mmH);
+      pdf.save('bon-thermal58-' + invNo + '.pdf');
+    } else {
+      const pdf = new jsPDF({ unit: 'mm', format: 'a6', orientation: 'portrait' });
+      const margin = 6;
+      const imgW = 105 - margin * 2;
+      const imgH = (canvas.height / canvas.width) * imgW;
+      const topY = Math.max(margin, (148 - imgH) / 2);
+      pdf.addImage(imgData, 'JPEG', margin, topY, imgW, Math.min(imgH, 148 - margin * 2));
+      pdf.save('bon-a6-' + invNo + '.pdf');
+    }
+  } catch(e) {
+    alert('Gagal membuat PDF: ' + e.message);
+  } finally {
+    btns.forEach(b => { b.innerHTML = '💾 Simpan PDF'; b.disabled = false; });
+  }
+}
+
+function initMeta() {
+  document.getElementById('invoiceNo').value = genInvoiceNo();
+  document.getElementById('invoiceDate').value = getDateTime();
+}
+
+// INIT
+initMeta();
+setPaperSize('58mm');
+// Demo items
+items = [
+  { id: ++itemCounter, name: 'Kopi Susu Kekinian', qty: 2, price: 25000 },
+  { id: ++itemCounter, name: 'Sandwich Keju', qty: 1, price: 35000 },
+  { id: ++itemCounter, name: 'Air Mineral 600ml', qty: 3, price: 8000 },
+];
+renderItems();
+
+// Auto-update every input change for store info
+document.querySelectorAll('input, textarea, select').forEach(el => {
+  el.addEventListener('input', generateReceipt);
+  el.addEventListener('change', generateReceipt);
+});
+</script>
+</body>
+</html>
