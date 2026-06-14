@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RakBersih — Monitoring Kebersihan</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #007AFF;
+  --blue2: #5AC8FA;
+  --green: #34C759;
+  --red: #FF3B30;
+  --orange: #FF9500;
+  --gray: #8E8E93;
+  --surface: #F0F6FF;
+  --card-bg: #FFFFFF;
+  --text: #1C1C1E;
+  --text2: #6C6C70;
+  --grad: linear-gradient(135deg,#007AFF 0%,#5AC8FA 100%);
+  --grad-soft: linear-gradient(135deg,#EBF4FF 0%,#DDEFFF 100%);
+  --r: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  position: fixed; top: 0; left: 0; width: 230px; height: 100vh;
+  background: #fff; border-right: 1px solid rgba(0,122,255,.1);
+  display: flex; flex-direction: column; z-index: 200;
+  box-shadow: 4px 0 20px rgba(0,122,255,.07);
+}
+.s-logo { padding: 24px 20px 18px; border-bottom: 1px solid rgba(0,122,255,.08); }
+.s-logo .icon {
+  width: 40px; height: 40px; background: var(--grad); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff; margin-bottom: 8px;
+  box-shadow: 0 4px 12px rgba(0,122,255,.3);
+}
+.s-logo h6 { font-weight: 700; font-size: 14px; margin: 0; }
+.s-logo small { font-size: 10.5px; color: var(--text2); }
+.s-section { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding: 14px 18px 5px; }
+.s-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 14px; margin: 2px 10px; border-radius: 12px;
+  cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2);
+  transition: all .15s;
+}
+.s-item:hover { background: var(--grad-soft); color: var(--blue); }
+.s-item.active { background: var(--grad); color: #fff; box-shadow: 0 4px 12px rgba(0,122,255,.28); }
+.s-item .bi { font-size: 15px; }
+.s-badge { margin-left: auto; padding: 1px 7px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(0,122,255,.12); color: var(--blue); }
+.s-item.active .s-badge { background: rgba(255,255,255,.25); color: #fff; }
+.s-footer { margin-top: auto; padding: 14px 10px; border-top: 1px solid rgba(0,122,255,.08); font-size: 11px; color: var(--text2); text-align: center; }
+
+/* MAIN */
+.main { margin-left: 230px; padding: 28px; min-height: 100vh; }
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.topbar h4 { font-weight: 700; font-size: 21px; margin: 0; }
+.date-pill { background: #fff; border: 1px solid rgba(0,122,255,.15); border-radius: 50px; padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--text2); }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* HERO */
+.hero {
+  background: var(--grad); border-radius: 20px; padding: 26px 28px; color: #fff;
+  margin-bottom: 24px; position: relative; overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0,122,255,.3);
+}
+.hero::before { content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; background:rgba(255,255,255,.1); border-radius:50%; }
+.hero::after  { content:''; position:absolute; bottom:-50px; right:80px; width:110px; height:110px; background:rgba(255,255,255,.07); border-radius:50%; }
+.hero h3 { font-weight: 700; font-size: 19px; margin-bottom: 3px; }
+.hero p  { font-size: 12.5px; opacity: .82; margin: 0; }
+.hero-stats { display: flex; gap: 28px; margin-top: 18px; }
+.h-stat-v { font-size: 27px; font-weight: 800; line-height: 1; }
+.h-stat-l { font-size: 10.5px; opacity: .75; font-weight: 500; margin-top: 2px; }
+
+/* CARDS */
+.card-ios {
+  background: #fff; border-radius: var(--r);
+  border: 1px solid rgba(0,122,255,.08);
+  box-shadow: 0 2px 14px rgba(0,0,0,.05);
+}
+.card-head { padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,.05); display: flex; align-items: center; justify-content: space-between; }
+.card-head h6 { font-weight: 700; font-size: 14.5px; margin: 0; }
+
+/* ENTRY FORM — prominent on home page */
+.entry-card { background: #fff; border-radius: 20px; border: 1.5px solid rgba(0,122,255,.18); box-shadow: 0 6px 24px rgba(0,122,255,.1); margin-bottom: 24px; overflow: hidden; }
+.entry-head { background: var(--grad-soft); padding: 18px 22px; border-bottom: 1px solid rgba(0,122,255,.12); }
+.entry-head h5 { font-weight: 700; font-size: 16px; color: var(--blue); margin: 0 0 2px; }
+.entry-head p  { font-size: 12px; color: var(--text2); margin: 0; }
+.entry-body { padding: 20px 22px; }
+
+/* INPUTS */
+.lbl { font-size: 11.5px; font-weight: 600; color: var(--text2); margin-bottom: 5px; display: block; }
+.ios-input, .ios-select {
+  border: 1.5px solid rgba(0,122,255,.2) !important; border-radius: 10px !important;
+  font-size: 13px !important; padding: 9px 13px !important;
+  font-family: 'Inter', sans-serif !important; background: #fff !important; color: var(--text) !important;
+  transition: border .15s, box-shadow .15s !important; width: 100%;
+}
+.ios-input:focus, .ios-select:focus {
+  border-color: var(--blue) !important; box-shadow: 0 0 0 3px rgba(0,122,255,.12) !important; outline: none !important;
+}
+.btn-ios {
+  background: var(--grad); color: #fff; border: none; border-radius: 11px;
+  padding: 10px 22px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: opacity .15s, box-shadow .15s;
+  box-shadow: 0 3px 10px rgba(0,122,255,.3); white-space: nowrap;
+}
+.btn-ios:hover { opacity: .9; box-shadow: 0 5px 14px rgba(0,122,255,.4); }
+.btn-ios-sm { padding: 7px 16px; font-size: 12px; border-radius: 9px; }
+.btn-outline { background: transparent; color: var(--blue); border: 1.5px solid var(--blue); border-radius: 11px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; font-family:'Inter',sans-serif; }
+.btn-outline:hover { background: rgba(0,122,255,.08); }
+.btn-del { background: rgba(255,59,48,.1); color: var(--red); border: none; border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+.btn-del:hover { background: rgba(255,59,48,.2); }
+
+/* FILTER TABS */
+.ftabs { display: flex; gap: 5px; }
+.ftab {
+  padding: 5px 13px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid rgba(0,122,255,.2); background: transparent; color: var(--text2);
+  transition: all .15s; font-family:'Inter',sans-serif;
+}
+.ftab.active { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 2px 8px rgba(0,122,255,.3); }
+
+/* CHECKLIST LIST */
+.cl-scroll { max-height: 380px; overflow-y: auto; }
+.cl-scroll::-webkit-scrollbar { width: 4px; }
+.cl-scroll::-webkit-scrollbar-thumb { background: rgba(0,122,255,.2); border-radius: 10px; }
+.cl-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid rgba(0,0,0,.04); transition: background .1s; }
+.cl-row:hover { background: rgba(0,122,255,.03); }
+.chkbox { width: 22px; height: 22px; border-radius: 7px; border: 2px solid rgba(0,122,255,.3); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; background: #fff; transition: all .15s; }
+.chkbox.on { background: var(--green); border-color: var(--green); box-shadow: 0 2px 8px rgba(52,199,89,.35); }
+.chkbox .bi { font-size: 13px; color: #fff; display: none; }
+.chkbox.on .bi { display: block; }
+.rak-name { font-size: 13.5px; font-weight: 600; }
+.rak-meta { font-size: 11.5px; color: var(--text2); margin-top: 2px; }
+.cat-pill { font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 8px; }
+.pf { background: rgba(52,199,89,.12); color: #1A8C3B; }
+.pnf { background: rgba(0,122,255,.1); color: var(--blue); }
+.done-tag { font-size: 11px; font-weight: 600; color: var(--green); background: rgba(52,199,89,.1); padding: 3px 10px; border-radius: 20px; margin-left: auto; flex-shrink: 0; }
+
+/* PROGRESS RING CARDS */
+.prog-card { background: #fff; border-radius: var(--r); padding: 20px; border: 1px solid rgba(0,122,255,.08); box-shadow: 0 2px 14px rgba(0,0,0,.05); height: 100%; }
+.prog-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,122,255,.12); transition: all .18s; }
+.cat-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
+.ring-row { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+.big-pct { font-size: 26px; font-weight: 800; }
+.of-txt { font-size: 12.5px; color: var(--text2); }
+.pb-lbl { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+.pb-track { height: 6px; background: rgba(0,0,0,.06); border-radius: 10px; overflow: hidden; }
+.pb-fill { height: 100%; border-radius: 10px; transition: width .8s ease; }
+
+/* POPULASI */
+.pop-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid rgba(0,0,0,.04); }
+.pop-av { width: 36px; height: 36px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.pop-name { font-size: 13.5px; font-weight: 600; }
+.pop-sub { font-size: 11.5px; color: var(--text2); margin-top: 1px; }
+.pop-bar { height: 5px; background: rgba(0,0,0,.06); border-radius: 10px; overflow: hidden; margin-top: 5px; }
+.pop-fill { height: 100%; border-radius: 10px; background: var(--grad); transition: width .8s; }
+.pop-count { font-size: 18px; font-weight: 800; color: var(--blue); min-width: 26px; text-align: right; }
+
+/* EMPTY STATE */
+.empty { padding: 36px 20px; text-align: center; }
+.empty .bi { font-size: 34px; color: rgba(0,122,255,.2); display: block; margin-bottom: 8px; }
+.empty p { color: var(--text2); font-size: 13px; }
+
+/* SECTION TITLE */
+.sec-title { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text2); margin-bottom: 13px; }
+
+/* ADMIN LIST */
+.al-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 13px; background: #fff; border-radius: 10px; margin-bottom: 6px; border: 1px solid rgba(0,0,0,.06); font-size: 13px; }
+
+/* PASSWORD OVERLAY */
+.pw-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+.pw-overlay.show { display: flex; }
+.pw-box { background: #fff; border-radius: 22px; padding: 32px 28px; width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,.18); text-align: center; }
+.pw-icon { width: 56px; height: 56px; background: var(--grad); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 22px; color: #fff; box-shadow: 0 5px 16px rgba(0,122,255,.35); }
+.pw-box h5 { font-weight: 700; margin-bottom: 4px; }
+.pw-box p  { font-size: 12.5px; color: var(--text2); margin-bottom: 18px; }
+.pw-err { color: var(--red); font-size: 12px; margin-top: 7px; display: none; }
+
+/* MODAL */
+.modal-ios .modal-content { border-radius: 20px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,.15); overflow: hidden; }
+.modal-ios .modal-header { background: var(--grad); color: #fff; border: none; padding: 18px 22px; }
+.modal-ios .modal-title { font-weight: 700; font-size: 16px; }
+.modal-ios .btn-close { filter: brightness(0) invert(1); opacity: .8; }
+.modal-ios .modal-body { padding: 22px; background: #FAFCFF; }
+.atab-wrap { display: flex; gap: 6px; margin-bottom: 18px; }
+.atab { flex: 1; padding: 9px; border-radius: 11px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid rgba(0,122,255,.2); background: #fff; color: var(--text2); transition: all .15s; font-family:'Inter',sans-serif; }
+.atab.active { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 3px 10px rgba(0,122,255,.3); }
+
+/* TOAST */
+.toast-c { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 11px 18px; border-radius: 13px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 22px rgba(0,0,0,.18); z-index: 9999; opacity: 0; transform: translateY(10px); transition: all .22s; display: flex; align-items: center; gap: 8px; pointer-events: none; }
+.toast-c.show { opacity: 1; transform: translateY(0); }
+.toast-c.ok .bi { color: var(--green); }
+.toast-c.err .bi { color: var(--red); }
+
+
+/* LOADING BAR */
+.global-loading {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
+  height: 3px; background: rgba(0,122,255,.15);
+}
+.loading-bar {
+  height: 100%; width: 40%;
+  background: var(--grad);
+  animation: loadbar 1.2s ease-in-out infinite;
+  border-radius: 0 3px 3px 0;
+}
+@keyframes loadbar {
+  0%   { margin-left: -40%; }
+  100% { margin-left: 100%; }
+}
+/* CONFIG BANNER */
+.config-banner {
+  display: none; align-items: center; gap: 12px;
+  background: linear-gradient(135deg,#FFF3CD,#FFF8E1);
+  border: 1.5px solid #FFD700; border-radius: 14px;
+  padding: 13px 18px; margin-bottom: 18px; font-size: 13px;
+}
+.config-banner .bi { font-size: 20px; color: #FF9500; flex-shrink: 0; }
+.config-banner strong { display: block; font-size: 13px; color: #7A5C00; }
+.config-banner span { font-size: 12px; color: #9A7A00; }
+.config-banner .btn-cfg { margin-left: auto; flex-shrink: 0; background: var(--grad); color: #fff; border: none; border-radius: 9px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+/* ── MOBILE ── */
+.hamburger {
+  display: none; position: fixed; top: 14px; left: 14px; z-index: 400;
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--grad); border: none; cursor: pointer;
+  align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,122,255,.35);
+  color: #fff; font-size: 18px; transition: opacity .15s;
+}
+.hamburger:hover { opacity: .88; }
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.4); z-index: 190;
+  backdrop-filter: blur(3px);
+}
+.sidebar-backdrop.show { display: block; }
+
+@media(max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    z-index: 300; width: 260px;
+  }
+  .sidebar.open { transform: translateX(0); box-shadow: 6px 0 32px rgba(0,0,0,.18); }
+  .hamburger { display: flex; }
+  .main { margin-left: 0; padding: 16px 14px 90px; }
+  .topbar { padding-left: 52px; }
+  .bottom-nav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 350;
+    background: rgba(255,255,255,.97); backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(0,122,255,.1);
+    box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+    padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+  }
+  .bn-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px; padding: 6px 4px; cursor: pointer;
+    border: none; background: none; color: var(--gray);
+    font-family: 'Inter', sans-serif; transition: color .15s;
+    position: relative;
+  }
+  .bn-item .bi { font-size: 21px; }
+  .bn-item span { font-size: 10px; font-weight: 600; }
+  .bn-item.active { color: var(--blue); }
+  .bn-badge {
+    position: absolute; top: 2px; right: calc(50% - 20px);
+    background: var(--red); color: #fff; font-size: 9px; font-weight: 700;
+    min-width: 16px; height: 16px; border-radius: 20px;
+    display: flex; align-items: center; justify-content: center; padding: 0 4px;
+  }
+}
+@media(min-width: 769px) {
+  .bottom-nav { display: none; }
+  .hamburger { display: none; }
+  .sidebar-backdrop { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- GLOBAL LOADING -->
+<div class="global-loading" id="global-loading"><div class="loading-bar"></div></div>
+
+<!-- HAMBURGER -->
+<button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()">
+  <i class="bi bi-list" id="hamburger-icon"></i>
+</button>
+
+<!-- SIDEBAR BACKDROP -->
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="s-logo">
+    <div class="icon"><i class="bi bi-box-seam-fill"></i></div>
+    <h6>RakBersih</h6>
+    <small>Monitoring Kebersihan Rak</small>
+  </div>
+  <nav class="mt-1">
+    <div class="s-section">Menu</div>
+    <div class="s-item active" id="nav-home" onclick="goPage('home');closeSidebar()"><i class="bi bi-house-fill"></i> Entry Kebersihan</div>
+    <div class="s-item" id="nav-dashboard" onclick="goPage('dashboard');closeSidebar()"><i class="bi bi-grid-1x2-fill"></i> Dashboard</div>
+    <div class="s-item" id="nav-checklist" onclick="goPage('checklist');closeSidebar()">
+      <i class="bi bi-check2-square"></i> Status Rak
+      <span class="s-badge" id="badge-pending">0</span>
+    </div>
+    <div class="s-item" id="nav-populasi" onclick="goPage('populasi');closeSidebar()"><i class="bi bi-people-fill"></i> Populasi Kerja</div>
+    <div class="s-section">Pengaturan</div>
+    <div class="s-item" onclick="closeSidebar();openAdmin()"><i class="bi bi-shield-lock-fill"></i> Menu Admin</div>
+  </nav>
+  <div class="s-footer">
+    <i class="bi bi-circle-fill" style="color:var(--green);font-size:7px"></i>
+    Sistem Aktif &nbsp;·&nbsp; <span id="mini-date"></span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div style="font-size:11.5px;color:var(--text2);font-weight:500;margin-bottom:2px">Selamat datang 👋</div>
+      <h4 id="page-title">Entry Kebersihan</h4>
+    </div>
+    <div class="date-pill"><i class="bi bi-calendar3 me-1"></i><span id="top-date"></span></div>
+  </div>
+
+  <!-- PAGE: HOME (Entry) -->
+  <div class="page active" id="page-home">
+
+    <!-- Entry Form Card -->
+    <!-- Config banner (shown when URL not set) -->
+    <div class="config-banner" id="config-banner">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <div><strong>Google Sheets belum terhubung</strong><span>Masuk Menu Admin → tab Pengaturan URL untuk memasukkan URL Apps Script</span></div>
+      <button class="btn-cfg" onclick="closeSidebar();openAdmin()"><i class="bi bi-gear-fill me-1"></i>Atur Sekarang</button>
+    </div>
+
+    <div class="entry-card">
+      <div class="entry-head">
+        <h5><i class="bi bi-plus-circle-fill me-2"></i>Catat Pengerjaan Kebersihan</h5>
+        <p>Pilih rak, nama pelaksana, dan tanggal lalu klik Simpan</p>
+      </div>
+      <div class="entry-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="lbl">Pilih Rak</label>
+            <select class="ios-select" id="e-rak"></select>
+          </div>
+          <div class="col-md-3">
+            <label class="lbl">Pelaksana</label>
+            <select class="ios-select" id="e-pelaksana"></select>
+          </div>
+          <div class="col-md-3">
+            <label class="lbl">Tanggal</label>
+            <input type="date" class="ios-input" id="e-tanggal">
+          </div>
+          <div class="col-md-3">
+            <button class="btn-ios w-100" id="btn-entry" onclick="doEntry()">
+              <i class="bi bi-check2-circle me-1"></i> Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today summary mini -->
+    <div class="sec-title">Pengerjaan Hari Ini</div>
+    <div class="card-ios mb-3">
+      <div class="cl-scroll" id="home-today-list"></div>
+    </div>
+
+  </div>
+
+  <!-- PAGE: DASHBOARD -->
+  <div class="page" id="page-dashboard">
+    <div class="hero">
+      <h3>Monitoring Kebersihan Rak</h3>
+      <p>Pantau progres kebersihan rak food &amp; non-food secara real-time</p>
+      <div class="hero-stats">
+        <div><div class="h-stat-v" id="h-total">0</div><div class="h-stat-l">Total Rak</div></div>
+        <div><div class="h-stat-v" id="h-done">0</div><div class="h-stat-l">Sudah Dibersihkan</div></div>
+        <div><div class="h-stat-v" id="h-pct">0%</div><div class="h-stat-l">Progress Total</div></div>
+        <div><div class="h-stat-v" id="h-pel">0</div><div class="h-stat-l">Total Pelaksana</div></div>
+      </div>
+    </div>
+    <div class="sec-title">Progress Kategori</div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="prog-card">
+          <span class="cat-badge pf"><i class="bi bi-basket2-fill"></i> Food</span>
+          <div style="font-weight:700;font-size:15px;margin-bottom:3px">Rak Food</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px" id="food-sub">0 dari 0 rak</div>
+          <div class="ring-row">
+            <svg width="70" height="70" viewBox="0 0 70 70">
+              <circle cx="35" cy="35" r="29" fill="none" stroke="#E8F5E9" stroke-width="7"/>
+              <circle id="ring-food" cx="35" cy="35" r="29" fill="none" stroke="#34C759" stroke-width="7"
+                stroke-linecap="round" stroke-dasharray="182.2" stroke-dashoffset="182.2"
+                transform="rotate(-90 35 35)" style="transition:stroke-dashoffset .8s ease"/>
+            </svg>
+            <div><div class="big-pct" id="food-pct">0%</div><div class="of-txt" id="food-of">0 / 0 rak</div></div>
+          </div>
+          <div class="pb-lbl"><span>Food</span><span id="food-pct2">0%</span></div>
+          <div class="pb-track"><div class="pb-fill" id="bar-food" style="width:0%;background:linear-gradient(90deg,#34C759,#30D158)"></div></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="prog-card">
+          <span class="cat-badge pnf"><i class="bi bi-bag-fill"></i> Non Food</span>
+          <div style="font-weight:700;font-size:15px;margin-bottom:3px">Rak Non Food</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px" id="nf-sub">0 dari 0 rak</div>
+          <div class="ring-row">
+            <svg width="70" height="70" viewBox="0 0 70 70">
+              <circle cx="35" cy="35" r="29" fill="none" stroke="#EBF4FF" stroke-width="7"/>
+              <circle id="ring-nf" cx="35" cy="35" r="29" fill="none" stroke="#007AFF" stroke-width="7"
+                stroke-linecap="round" stroke-dasharray="182.2" stroke-dashoffset="182.2"
+                transform="rotate(-90 35 35)" style="transition:stroke-dashoffset .8s ease"/>
+            </svg>
+            <div><div class="big-pct" id="nf-pct">0%</div><div class="of-txt" id="nf-of">0 / 0 rak</div></div>
+          </div>
+          <div class="pb-lbl"><span>Non Food</span><span id="nf-pct2">0%</span></div>
+          <div class="pb-track"><div class="pb-fill" id="bar-nf" style="width:0%;background:var(--grad)"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec-title">Top Pelaksana Hari Ini</div>
+    <div class="card-ios" id="dash-pop"></div>
+  </div>
+
+  <!-- PAGE: CHECKLIST (Status Rak) -->
+  <div class="page" id="page-checklist">
+    <div class="card-ios">
+      <div class="card-head">
+        <h6><i class="bi bi-list-check me-2" style="color:var(--blue)"></i>Status Kebersihan Rak</h6>
+        <div class="ftabs">
+          <button class="ftab active" onclick="setFilter('all',this)">Semua</button>
+          <button class="ftab" onclick="setFilter('food',this)">Food</button>
+          <button class="ftab" onclick="setFilter('nonfood',this)">Non Food</button>
+        </div>
+      </div>
+      <div class="cl-scroll" id="cl-list"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: POPULASI -->
+  <div class="page" id="page-populasi">
+    <div class="card-ios">
+      <div class="card-head">
+        <h6><i class="bi bi-bar-chart-fill me-2" style="color:var(--blue)"></i>Populasi Pengerjaan per Nama</h6>
+        <span style="font-size:12px;color:var(--text2)" id="pop-total-lbl"></span>
+      </div>
+      <div id="pop-list"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ADMIN MODAL -->
+<div class="modal fade modal-ios" id="adminModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-shield-check-fill me-2"></i>Menu Admin</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="atab-wrap">
+          <button class="atab active" onclick="aTab('rak',this)"><i class="bi bi-box-seam me-1"></i>Kelola Rak</button>
+          <button class="atab" onclick="aTab('nama',this)"><i class="bi bi-person me-1"></i>Kelola Nama</button>
+          <button class="atab" onclick="aTab('reset',this)"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset Data</button>
+          <button class="atab" onclick="aTab('url',this)"><i class="bi bi-link-45deg me-1"></i>URL Sheets</button>
+        </div>
+        <!-- Rak -->
+        <div id="atab-rak">
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+            <div style="flex:1;min-width:140px">
+              <label class="lbl">Nama Rak</label>
+              <input type="text" class="ios-input" id="a-rak-nm" placeholder="Contoh: Rak A1" style="width:100%" onkeydown="if(event.key==='Enter')addRak()">
+            </div>
+            <div style="min-width:110px">
+              <label class="lbl">Kategori</label>
+              <select class="ios-select" id="a-rak-cat" style="width:100%;min-width:110px">
+                <option value="food">Food</option>
+                <option value="nonfood">Non Food</option>
+              </select>
+            </div>
+            <div>
+              <button class="btn-ios btn-ios-sm" id="btn-add-rak" onclick="addRak()" style="white-space:nowrap;height:38px">
+                <i class="bi bi-plus-lg me-1"></i>Tambah Rak
+              </button>
+            </div>
+          </div>
+          <div id="a-rak-list"></div>
+        </div>
+        <!-- Nama -->
+        <div id="atab-nama" style="display:none">
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+            <div style="flex:1;min-width:180px">
+              <label class="lbl">Nama Pelaksana</label>
+              <input type="text" class="ios-input" id="a-nama-nm" placeholder="Contoh: Budi Santoso" style="width:100%" onkeydown="if(event.key==='Enter')addNama()">
+            </div>
+            <div>
+              <button class="btn-ios btn-ios-sm" id="btn-add-nama" onclick="addNama()" style="white-space:nowrap;height:38px">
+                <i class="bi bi-plus-lg me-1"></i>Tambah Nama
+              </button>
+            </div>
+          </div>
+          <div id="a-nama-list"></div>
+        </div>
+        <!-- Reset -->
+        <div id="atab-reset" style="display:none;text-align:center;padding:20px 0">
+          <div style="width:60px;height:60px;background:rgba(255,59,48,.1);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px;color:var(--red)"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <h6 style="font-weight:700;margin-bottom:6px">Reset Data Checklist</h6>
+          <p style="font-size:12.5px;color:var(--text2);margin-bottom:18px">Semua data checklist akan dihapus. Data rak &amp; nama tetap.</p>
+          <button class="btn-ios" style="background:linear-gradient(135deg,#FF3B30,#FF6B6B)" onclick="doReset()"><i class="bi bi-trash3 me-2"></i>Reset Semua Checklist</button>
+        </div>
+        <!-- URL Config Tab -->
+        <div id="atab-url" style="display:none">
+          <div style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <div style="width:40px;height:40px;background:var(--grad-soft);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--blue)"><i class="bi bi-google"></i></div>
+              <div><div style="font-weight:700;font-size:14px">Koneksi Google Sheets</div><div style="font-size:12px;color:var(--text2)">Atur URL Apps Script sekali, berlaku di semua device</div></div>
+            </div>
+            <!-- Status URL aktif -->
+            <div id="url-source-info" style="background:#F0F6FF;border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text2);margin-bottom:14px;font-weight:500">
+              Memeriksa URL...
+            </div>
+            <label class="lbl">URL Apps Script (Web App)</label>
+            <input type="url" class="ios-input" id="cfg-url-input" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%;margin-bottom:10px">
+            <button class="btn-ios w-100" onclick="saveScriptUrl()" style="margin-bottom:16px"><i class="bi bi-save me-1"></i>Simpan & Hubungkan</button>
+            <div style="background:#F0F6FF;border-radius:12px;padding:14px 16px;font-size:12px;color:var(--text2);line-height:1.9">
+              <strong style="color:var(--text);display:block;margin-bottom:6px">💡 Cara permanen (berlaku semua device):</strong>
+              Buka file HTML → cari <code>SCRIPT_URL_HARDCODE</code> → ganti nilainya → simpan file.<br><br>
+              <strong style="color:var(--text);display:block;margin-bottom:6px">📋 Cara dapatkan URL Apps Script:</strong>
+              1. Buka Google Sheets → Extensions → Apps Script<br>
+              2. Paste kode dari <code>RakBersih_AppsScript.js</code><br>
+              3. Run fungsi <code>setupSheets()</code> sekali<br>
+              4. Deploy → New Deployment → Web App<br>
+              5. Execute as: <strong>Me</strong> · Access: <strong>Anyone</strong><br>
+              6. Copy URL → paste di kolom atas → Simpan
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD OVERLAY -->
+<div class="pw-overlay" id="pw-overlay">
+  <div class="pw-box">
+    <div class="pw-icon"><i class="bi bi-shield-lock-fill"></i></div>
+    <h5>Menu Admin</h5>
+    <p>Masukkan password untuk mengakses menu admin</p>
+    <div style="position:relative">
+      <input type="password" class="ios-input" id="pw-inp" placeholder="Password" onkeydown="if(event.key==='Enter')doPw()">
+      <button onclick="toggleEye()" style="position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);cursor:pointer"><i class="bi bi-eye-slash" id="pw-eye"></i></button>
+    </div>
+    <div class="pw-err" id="pw-err"><i class="bi bi-x-circle me-1"></i>Password salah</div>
+    <button class="btn-ios w-100 mt-3" onclick="doPw()">Masuk</button>
+    <button class="btn-outline w-100 mt-2" onclick="closePw()">Batal</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bn-item active" id="bn-home" onclick="goPage('home');updateBottomNav('home')">
+    <i class="bi bi-house-fill"></i><span>Entry</span>
+  </button>
+  <button class="bn-item" id="bn-dashboard" onclick="goPage('dashboard');updateBottomNav('dashboard')">
+    <i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
+  </button>
+  <button class="bn-item" id="bn-checklist" onclick="goPage('checklist');updateBottomNav('checklist')" style="position:relative">
+    <i class="bi bi-check2-square"></i><span>Status</span>
+    <span class="bn-badge" id="bn-badge" style="display:none">0</span>
+  </button>
+  <button class="bn-item" id="bn-populasi" onclick="goPage('populasi');updateBottomNav('populasi')">
+    <i class="bi bi-people-fill"></i><span>Populasi</span>
+  </button>
+  <button class="bn-item" onclick="closeSidebar();openAdmin()">
+    <i class="bi bi-shield-lock-fill"></i><span>Admin</span>
+  </button>
+</nav>
+
+<!-- TOAST -->
+<div class="toast-c" id="toast"><i class="bi bi-check-circle-fill"></i><span id="toast-msg"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ═══════════════════════════════════════
+//  ⚙️  KONFIGURASI — HARDCODE URL DI SINI
+//  Isi SCRIPT_URL dengan URL deployment Apps Script kamu.
+//  Setelah diisi dan file di-save, URL persisten di semua device.
+//  Bisa juga diisi via Menu Admin → URL Sheets (tersimpan di localStorage).
+// ═══════════════════════════════════════
+var SCRIPT_URL_HARDCODE = 'https://script.google.com/macros/s/AKfycbzMWdZ-yNFPcVqTzI3prqnWKP1CyaHKgwINiesZS3kL-qu79vnqdrUi_YtrqOuqYQDJ/exec'; // <-- GANTI INI
+
+var SCRIPT_URL = (function() {
+  // Prioritas: (1) hardcode di kode, (2) tersimpan di localStorage device
+  if (SCRIPT_URL_HARDCODE !== 'PASTE_URL_APPS_SCRIPT_DISINI') return SCRIPT_URL_HARDCODE;
+  try { return localStorage.getItem('rb_script_url') || 'PASTE_URL_APPS_SCRIPT_DISINI'; }
+  catch(e) { return 'PASTE_URL_APPS_SCRIPT_DISINI'; }
+})();
+
+// ═══════════════════════════════════════
+//  VARIABEL GLOBAL
+// ═══════════════════════════════════════
+var PASS           = 'admin123';
+var currentPage    = 'home';
+var clFilter       = 'all';
+var activeAdminTab = 'rak';
+var toastTimer     = null;
+var state          = { rak: [], nama: [], checklist: [] };
+var isLoading      = false;
+
+// ═══════════════════════════════════════
+//  API — GOOGLE SHEETS
+// ═══════════════════════════════════════
+function apiGet(params, cb) {
+  if (!SCRIPT_URL || SCRIPT_URL === 'PASTE_URL_APPS_SCRIPT_DISINI') {
+    cb(null, 'URL Apps Script belum diisi. Klik ikon ⚙️ di pojok kanan atas.');
+    return;
+  }
+  var url = SCRIPT_URL + '?' + Object.keys(params).map(function(k){
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  }).join('&');
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb(d, null); })
+    .catch(function(e){ cb(null, e.toString()); });
+}
+
+function apiPost(body, cb) {
+  if (!SCRIPT_URL || SCRIPT_URL === 'PASTE_URL_APPS_SCRIPT_DISINI') {
+    cb(null, 'URL Apps Script belum diisi.');
+    return;
+  }
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    
+    body: JSON.stringify(body)
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb(d, null); })
+    .catch(function(e){ cb(null, e.toString()); });
+}
+
+// ── Load semua data dari Sheets ──
+function loadFromSheets(cb) {
+  showGlobalLoading(true);
+  var done = 0;
+  var total = 3;
+  function check() { done++; if (done >= total) { showGlobalLoading(false); if(cb) cb(); } }
+
+  apiGet({ action: 'getRak' }, function(d, err) {
+    if (d && d.ok) {
+      state.rak = d.data.map(function(r) {
+        return {
+          id  : r.id       || r.ID       || '',
+          nama: r.nama     || r.NamaRak  || '',
+          cat : r.cat      || r.Kategori || ''
+        };
+      });
+    }
+    check();
+  });
+  apiGet({ action: 'getNama' }, function(d, err) {
+    if (d && d.ok) {
+      state.nama = d.data.map(function(n) {
+        return {
+          id  : n.id             || n.ID            || '',
+          nama: n.nama           || n.NamaPelaksana || ''
+        };
+      });
+    }
+    check();
+  });
+  apiGet({ action: 'getChecklist' }, function(d, err) {
+    if (d && d.ok) {
+      state.checklist = d.data.map(normalizeChecklist);
+    }
+    check();
+  });
+}
+
+// ═══════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════
+initDates();
+renderAll(); // render dulu pakai state kosong (cepat)
+if (SCRIPT_URL !== 'PASTE_URL_APPS_SCRIPT_DISINI') {
+  loadFromSheets(function() { renderAll(); });
+}
+
+function initDates() {
+  var now  = new Date();
+  var opts = { weekday:'long', day:'numeric', month:'long', year:'numeric' };
+  document.getElementById('top-date').textContent  = now.toLocaleDateString('id-ID', opts);
+  document.getElementById('mini-date').textContent = now.toLocaleDateString('id-ID', { day:'numeric', month:'short' });
+  document.getElementById('e-tanggal').value = todayStr();
+}
+
+// ── Global loading indicator ──
+function showGlobalLoading(show) {
+  isLoading = show;
+  var el = document.getElementById('global-loading');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+// ── Spinner pada tombol ──
+function btnLoading(btn, loading, label) {
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Menyimpan...'
+    : label;
+}
+
+// ═══════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════
+var PAGE_LABELS = { home:'Entry Kebersihan', dashboard:'Dashboard', checklist:'Status Rak', populasi:'Populasi Kerja' };
+
+function goPage(p) {
+  currentPage = p;
+  document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('page-' + p).classList.add('active');
+  document.querySelectorAll('.s-item[id^="nav-"]').forEach(function(el){ el.classList.remove('active'); });
+  var navEl = document.getElementById('nav-' + p);
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_LABELS[p] || p;
+  // Hanya render ulang dari state yang sudah ada — tidak fetch ulang
+  // (fetch hanya dilakukan saat boot, dan setelah setiap operasi write selesai)
+  renderAll();
+}
+
+// ═══════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════
+function renderAll() {
+  fillSelects();
+  renderHomeToday();
+  renderDashboard();
+  renderChecklist();
+  renderPopulasi();
+  renderAdminLists();
+  updateBadge();
+  checkUrlConfig();
+}
+
+// Tampilkan banner jika URL belum diisi
+function checkUrlConfig() {
+  var el = document.getElementById('config-banner');
+  if (!el) return;
+  el.style.display = (SCRIPT_URL === 'PASTE_URL_APPS_SCRIPT_DISINI') ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════
+//  FILL SELECTS
+// ═══════════════════════════════════════
+function fillSelects() {
+  var rakSel = document.getElementById('e-rak');
+  var pelSel = document.getElementById('e-pelaksana');
+  if (rakSel) {
+    rakSel.innerHTML = state.rak.length
+      ? state.rak.map(function(r){ return '<option value="'+r.id+'">['+( r.cat==='food'?'F':'NF' )+'] '+r.nama+'</option>'; }).join('')
+      : '<option value="">-- Tambah rak di Menu Admin --</option>';
+  }
+  if (pelSel) {
+    pelSel.innerHTML = state.nama.length
+      ? state.nama.map(function(n){ return '<option value="'+n.nama+'">'+n.nama+'</option>'; }).join('')
+      : '<option value="">-- Tambah nama di Menu Admin --</option>';
+  }
+}
+
+// ═══════════════════════════════════════
+//  ENTRY (HOME PAGE)
+// ═══════════════════════════════════════
+function doEntry() {
+  var rakId     = document.getElementById('e-rak').value;
+  var pelaksana = document.getElementById('e-pelaksana').value;
+  var tanggal   = document.getElementById('e-tanggal').value;
+  if (!rakId || !pelaksana || !tanggal) { toast('Lengkapi semua field!', 'err'); return; }
+  var rak = state.rak.find(function(r){ return r.id === rakId; });
+  if (!rak) { toast('Rak tidak ditemukan', 'err'); return; }
+
+  var btn = document.getElementById('btn-entry');
+  btnLoading(btn, true, '<i class="bi bi-check2-circle me-1"></i> Simpan');
+
+  apiPost({
+    action: 'addChecklist',
+    data: { rakId: rakId, rakNama: rak.nama, cat: rak.cat, pelaksana: pelaksana, tanggal: tanggal }
+  }, function(d, err) {
+    btnLoading(btn, false, '<i class="bi bi-check2-circle me-1"></i> Simpan');
+    if (err || !d || !d.ok) {
+      toast((d && d.msg) || err || 'Gagal menyimpan', 'err');
+      return;
+    }
+    // tambah ke state lokal langsung (optimistic)
+    state.checklist.push({ id: d.id, rakId: rakId, rakNama: rak.nama, cat: rak.cat, pelaksana: pelaksana, tanggal: tanggal, doneAt: new Date().toISOString() });
+    renderAll(); // optimistic update — status rak langsung terceklist
+    toast(rak.nama + ' — ' + pelaksana + ' ✓ Status otomatis diperbarui', 'ok');
+    // Sinkronisasi dengan Sheets (pastikan data konsisten)
+    refreshChecklist();
+  });
+}
+
+function renderHomeToday() {
+  var container = document.getElementById('home-today-list');
+  if (!container) return;
+  var today = todayStr();
+  var todayData = state.checklist.filter(function(c){
+    var tgl = (c.tanggal || c.Tanggal || '').toString().substring(0, 10);
+    return tgl === today;
+  });
+  if (!todayData.length) {
+    container.innerHTML = '<div class="empty"><i class="bi bi-clipboard-check"></i><p>Belum ada pengerjaan hari ini.<br>Gunakan form di atas untuk mencatat.</p></div>';
+    return;
+  }
+  var sorted = todayData.slice().sort(function(a,b){ return (b.doneAt||'') > (a.doneAt||'') ? 1 : -1; });
+  container.innerHTML = sorted.map(function(c) {
+    var cat = c.cat || '';
+    return '<div class="cl-row">'
+      + '<div class="chkbox on"><i class="bi bi-check-lg"></i></div>'
+      + '<div style="flex:1">'
+      +   '<div class="rak-name">'+(c.rakNama||'Rak')+' <span class="cat-pill '+(cat==='food'?'pf':'pnf')+'">'+(cat==='food'?'Food':'Non Food')+'</span></div>'
+      +   '<div class="rak-meta"><i class="bi bi-person-fill me-1"></i>'+c.pelaksana+' &nbsp;·&nbsp; <i class="bi bi-clock me-1"></i>'+fmtTime(c.doneAt)+'</div>'
+      + '</div>'
+      + '<button class="btn-del" onclick="delEntry(\'' + c.id + '\')"><i class="bi bi-trash3"></i></button>'
+      + '</div>';
+  }).join('');
+}
+
+// Refresh hanya data checklist dari Sheets (ringan, tanpa reload rak/nama)
+function refreshChecklist(cb) {
+  if (SCRIPT_URL === 'PASTE_URL_APPS_SCRIPT_DISINI') { if(cb) cb(); return; }
+  apiGet({ action: 'getChecklist' }, function(d, err) {
+    if (d && d.ok) {
+      state.checklist = d.data.map(normalizeChecklist);
+    }
+    renderAll();
+    if (cb) cb();
+  });
+}
+
+function normalizeChecklist(c) {
+  return {
+    id        : c.id        || c.ID        || '',
+    rakId     : c.rakId     || c.RakID     || '',
+    rakNama   : c.rakNama   || c.NamaRak   || '',
+    cat       : c.cat       || c.Kategori  || '',
+    pelaksana : c.pelaksana || c.Pelaksana || '',
+    tanggal   : (c.tanggal  || c.Tanggal   || '').toString().substring(0, 10),
+    doneAt    : c.doneAt    || c.WaktuEntry || ''
+  };
+}
+
+function delEntry(id) {
+  if (!confirm('Hapus catatan ini?')) return;
+  apiPost({ action: 'deleteChecklist', id: id }, function(d, err) {
+    if (err || !d || !d.ok) { toast('Gagal menghapus', 'err'); return; }
+    state.checklist = state.checklist.filter(function(c){ return c.id !== id; });
+    renderAll();
+    toast('Catatan dihapus', 'err');
+  });
+}
+
+// ═══════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════
+function renderDashboard() {
+  // Gunakan SEMUA data checklist (tidak filter tanggal)
+  // agar entry dengan tanggal berbeda tetap terhitung
+  var allDoneSet = getUniqueRakDone(null); // null = semua tanggal
+  var total      = state.rak.length;
+  var done       = allDoneSet.size;
+  var pct        = total ? Math.round(done / total * 100) : 0;
+  var pelSet     = new Set(state.checklist.map(function(c){ return c.pelaksana; }));
+
+  setText('h-total', total);
+  setText('h-done',  done);
+  setText('h-pct',   pct + '%');
+  setText('h-pel',   pelSet.size);
+
+  // Food
+  var foodRak  = state.rak.filter(function(r){ return r.cat === 'food'; });
+  var foodDone = foodRak.filter(function(r){ return allDoneSet.has(r.id); }).length;
+  var foodPct  = foodRak.length ? Math.round(foodDone / foodRak.length * 100) : 0;
+  setText('food-sub',  foodDone + ' dari ' + foodRak.length + ' rak selesai');
+  setText('food-pct',  foodPct + '%');
+  setText('food-of',   foodDone + ' / ' + foodRak.length + ' rak');
+  setText('food-pct2', foodPct + '%');
+  setWidth('bar-food', foodPct);
+  setRing('ring-food', foodPct, 182.2);
+
+  // Non Food
+  var nfRak  = state.rak.filter(function(r){ return r.cat === 'nonfood'; });
+  var nfDone = nfRak.filter(function(r){ return allDoneSet.has(r.id); }).length;
+  var nfPct  = nfRak.length ? Math.round(nfDone / nfRak.length * 100) : 0;
+  setText('nf-sub',  nfDone + ' dari ' + nfRak.length + ' rak selesai');
+  setText('nf-pct',  nfPct + '%');
+  setText('nf-of',   nfDone + ' / ' + nfRak.length + ' rak');
+  setText('nf-pct2', nfPct + '%');
+  setWidth('bar-nf', nfPct);
+  setRing('ring-nf', nfPct, 182.2);
+
+  renderDashPop();
+}
+
+function renderDashPop() {
+  var el = document.getElementById('dash-pop');
+  if (!el) return;
+  // Populasi semua data (sama dengan halaman Populasi)
+  var counts = countByPelaksana(null);
+  var sorted = objToSortedArr(counts);
+  if (!sorted.length) {
+    el.innerHTML = '<div class="empty"><i class="bi bi-people"></i><p>Belum ada data pengerjaan</p></div>';
+    return;
+  }
+  var max = sorted[0][1];
+  el.innerHTML = sorted.slice(0, 5).map(function(pair, i) {
+    return '<div class="pop-row">'
+      + '<div class="pop-av" style="background:' + avColor(i) + '">' + pair[0].charAt(0).toUpperCase() + '</div>'
+      + '<div style="flex:1"><div class="pop-name">' + pair[0] + '</div>'
+      + '<div class="pop-sub">' + pair[1] + ' rak</div>'
+      + '<div class="pop-bar"><div class="pop-fill" style="width:' + Math.round(pair[1] / max * 100) + '%"></div></div></div>'
+      + '<div class="pop-count">' + pair[1] + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+//  STATUS RAK
+// ═══════════════════════════════════════
+function setFilter(f, el) {
+  clFilter = f;
+  document.querySelectorAll('.ftab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  renderChecklist();
+}
+
+function renderChecklist() {
+  var container = document.getElementById('cl-list');
+  if (!container) return;
+  var filtered = clFilter === 'all' ? state.rak : state.rak.filter(function(r){ return r.cat === clFilter; });
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty"><i class="bi bi-box-seam"></i><p>Belum ada rak. Tambahkan di Menu Admin.</p></div>';
+    return;
+  }
+  container.innerHTML = filtered.map(function(r) {
+    // Cari entry terakhir untuk rak ini — TANPA filter tanggal
+    // Sehingga rak yang sudah pernah dibersihkan tetap terceklist
+    var entries = state.checklist.filter(function(c){ return c.rakId === r.id; });
+    entries.sort(function(a, b){ return (b.doneAt||'') > (a.doneAt||'') ? 1 : -1; });
+    var lastEntry = entries[0] || null;
+    var done = !!lastEntry;
+    return '<div class="cl-row">'
+      + '<div class="chkbox '+(done?'on':'')+'">'
+      +   '<i class="bi bi-check-lg"></i></div>'
+      + '<div style="flex:1">'
+      +   '<div class="rak-name">'+r.nama+' <span class="cat-pill '+(r.cat==='food'?'pf':'pnf')+'">'+(r.cat==='food'?'Food':'Non Food')+'</span></div>'
+      +   (lastEntry
+          ? '<div class="rak-meta"><i class="bi bi-person-fill me-1"></i>'+lastEntry.pelaksana
+            +' &nbsp;·&nbsp; <i class="bi bi-calendar3 me-1"></i>'+fmtDate(lastEntry.tanggal)+'</div>'
+          : '<div class="rak-meta" style="color:#bbb">Belum pernah dibersihkan</div>')
+      + '</div>'
+      + (done ? '<span class="done-tag"><i class="bi bi-check2 me-1"></i>Sudah Bersih</span>'
+              : '<span style="font-size:11px;color:#ccc;margin-left:auto;flex-shrink:0">Belum</span>')
+      + '</div>';
+  }).join('');
+}
+
+function toggleCl(rakId) {
+  var today = todayStr();
+  var exist = state.checklist.find(function(c){
+    var rid = c.rakId || c.RakID || '';
+    var tgl = (c.tanggal || c.Tanggal || '').toString().substring(0, 10);
+    return rid === rakId && tgl === today;
+  });
+  var rak   = state.rak.find(function(r){ return r.id===rakId; });
+  if (exist) {
+    // Hapus
+    apiPost({ action: 'deleteChecklist', id: exist.id }, function(d, err) {
+      if (err || !d || !d.ok) { toast('Gagal menghapus', 'err'); return; }
+      state.checklist = state.checklist.filter(function(c){ return c.id !== exist.id; });
+      renderAll(); toast('Centang dihapus', 'err');
+    });
+  } else {
+    // Tambah
+    var pelSel = document.getElementById('e-pelaksana');
+    var pel    = (pelSel && pelSel.value) ? pelSel.value : (state.nama[0] ? state.nama[0].nama : 'Unknown');
+    apiPost({
+      action: 'addChecklist',
+      data: { rakId: rakId, rakNama: rak ? rak.nama : rakId, cat: rak ? rak.cat : '', pelaksana: pel, tanggal: today }
+    }, function(d, err) {
+      if (err || !d || !d.ok) { toast((d&&d.msg)||'Gagal menyimpan', 'err'); return; }
+      state.checklist.push({ id: d.id, rakId: rakId, rakNama: rak?rak.nama:rakId, cat: rak?rak.cat:'', pelaksana: pel, tanggal: today, doneAt: new Date().toISOString() });
+      renderAll();
+      toast((rak?rak.nama:'Rak')+' ditandai selesai ✓', 'ok');
+      refreshChecklist();
+    });
+  }
+}
+
+// ═══════════════════════════════════════
+//  POPULASI
+// ═══════════════════════════════════════
+function renderPopulasi() {
+  var el = document.getElementById('pop-list');
+  if (!el) return;
+  var counts = countByPelaksana(null);
+  var sorted = objToSortedArr(counts);
+  var total  = sorted.reduce(function(s,p){ return s+p[1]; }, 0);
+  var lbl    = document.getElementById('pop-total-lbl');
+  if (lbl) lbl.textContent = 'Total: ' + total + ' pengerjaan';
+  if (!sorted.length) { el.innerHTML = '<div class="empty"><i class="bi bi-people"></i><p>Belum ada data pengerjaan</p></div>'; return; }
+  var max = sorted[0][1];
+  el.innerHTML = sorted.map(function(pair, i){
+    return '<div class="pop-row">'
+      + '<div class="pop-av" style="background:'+avColor(i)+'">'+pair[0].charAt(0).toUpperCase()+'</div>'
+      + '<div style="flex:1">'
+      +   '<div class="pop-name">'+pair[0]+'</div>'
+      +   '<div class="pop-sub">'+pair[1]+' rak dibersihkan</div>'
+      +   '<div class="pop-bar"><div class="pop-fill" style="width:'+Math.round(pair[1]/max*100)+'%"></div></div>'
+      + '</div>'
+      + '<div class="pop-count">'+pair[1]+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+//  ADMIN
+// ═══════════════════════════════════════
+function openAdmin() {
+  document.getElementById('pw-overlay').classList.add('show');
+  document.getElementById('pw-inp').value = '';
+  document.getElementById('pw-err').style.display = 'none';
+  setTimeout(function(){ document.getElementById('pw-inp').focus(); }, 100);
+}
+function closePw() { document.getElementById('pw-overlay').classList.remove('show'); }
+function doPw() {
+  if (document.getElementById('pw-inp').value === PASS) {
+    closePw();
+    new bootstrap.Modal(document.getElementById('adminModal')).show();
+    renderAdminLists();
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw-inp').value = '';
+    document.getElementById('pw-inp').focus();
+  }
+}
+function toggleEye() {
+  var inp = document.getElementById('pw-inp');
+  var eye = document.getElementById('pw-eye');
+  if (inp.type === 'password') { inp.type = 'text'; eye.className = 'bi bi-eye'; }
+  else { inp.type = 'password'; eye.className = 'bi bi-eye-slash'; }
+}
+
+function aTab(t, el) {
+  activeAdminTab = t;
+  document.querySelectorAll('.atab').forEach(function(e){ e.classList.remove('active'); });
+  el.classList.add('active');
+  ['rak','nama','reset','url'].forEach(function(id){
+    var el2 = document.getElementById('atab-'+id);
+    if(el2) el2.style.display = id===t ? 'block' : 'none';
+  });
+  if (t === 'url') syncUrlInput();
+}
+
+function renderAdminLists() {
+  var rEl = document.getElementById('a-rak-list');
+  if (rEl) {
+    rEl.innerHTML = state.rak.length
+      ? state.rak.map(function(r){
+          return '<div class="al-item">'
+            + r.nama+' <span class="cat-pill '+(r.cat==='food'?'pf':'pnf')+'">'+(r.cat==='food'?'Food':'Non Food')+'</span>'
+            + '<button class="btn-del" onclick="delRak(\'' + r.id + '\')"><i class="bi bi-trash3"></i></button>'
+            + '</div>';
+        }).join('')
+      : '<div class="empty"><i class="bi bi-box-seam"></i><p>Belum ada rak</p></div>';
+  }
+  var nEl = document.getElementById('a-nama-list');
+  if (nEl) {
+    nEl.innerHTML = state.nama.length
+      ? state.nama.map(function(n){
+          return '<div class="al-item">'
+            + '<i class="bi bi-person-circle me-2" style="color:var(--blue)"></i>'+n.nama
+            + '<button class="btn-del" onclick="delNama(\'' + n.id + '\')"><i class="bi bi-trash3"></i></button>'
+            + '</div>';
+        }).join('')
+      : '<div class="empty"><i class="bi bi-people"></i><p>Belum ada nama</p></div>';
+  }
+  // Tampilkan URL saat ini di tab pengaturan
+  var urlInput = document.getElementById('cfg-url-input');
+  if (urlInput) {
+    // Selalu baca dari localStorage agar tampil terbaru
+    var savedUrl = '';
+    try { savedUrl = localStorage.getItem('rb_script_url') || ''; } catch(e) {}
+    urlInput.value = savedUrl;
+  }
+}
+
+function addRak() {
+  var nm  = document.getElementById('a-rak-nm').value.trim();
+  var cat = document.getElementById('a-rak-cat').value;
+  if (!nm) { toast('Nama rak kosong', 'err'); return; }
+  var btn = document.getElementById('btn-add-rak');
+  btnLoading(btn, true, '<i class="bi bi-plus-lg me-1"></i>Tambah Rak');
+  apiPost({ action: 'addRak', data: { nama: nm, cat: cat } }, function(d, err) {
+    btnLoading(btn, false, '<i class="bi bi-plus-lg me-1"></i>Tambah Rak');
+    if (err || !d || !d.ok) { toast((d&&d.msg)||err||'Gagal', 'err'); return; }
+    state.rak.push({ id: d.id, nama: nm, cat: cat });
+    document.getElementById('a-rak-nm').value = '';
+    renderAll(); renderAdminLists();
+    toast('Rak "'+nm+'" ditambahkan ✓', 'ok');
+  });
+}
+function delRak(id) {
+  if (!confirm('Hapus rak ini? Data checklist terkait juga dihapus.')) return;
+  apiPost({ action: 'deleteRak', id: id }, function(d, err) {
+    if (err || !d || !d.ok) { toast('Gagal menghapus', 'err'); return; }
+    state.rak       = state.rak.filter(function(r){ return r.id!==id; });
+    state.checklist = state.checklist.filter(function(c){ return c.rakId!==id; });
+    renderAll(); renderAdminLists();
+    toast('Rak dihapus', 'err');
+  });
+}
+
+function addNama() {
+  var nm = document.getElementById('a-nama-nm').value.trim();
+  if (!nm) { toast('Nama kosong', 'err'); return; }
+  var btn = document.getElementById('btn-add-nama');
+  btnLoading(btn, true, '<i class="bi bi-plus-lg me-1"></i>Tambah Nama');
+  apiPost({ action: 'addNama', data: { nama: nm } }, function(d, err) {
+    btnLoading(btn, false, '<i class="bi bi-plus-lg me-1"></i>Tambah Nama');
+    if (err || !d || !d.ok) { toast((d&&d.msg)||err||'Gagal', 'err'); return; }
+    state.nama.push({ id: d.id, nama: nm });
+    document.getElementById('a-nama-nm').value = '';
+    renderAll(); renderAdminLists();
+    toast('"'+nm+'" ditambahkan ✓', 'ok');
+  });
+}
+function delNama(id) {
+  var n = state.nama.find(function(x){ return x.id===id; });
+  if (!confirm('Hapus "'+( n?n.nama:'nama ini' )+'"?')) return;
+  apiPost({ action: 'deleteNama', id: id }, function(d, err) {
+    if (err || !d || !d.ok) { toast('Gagal menghapus', 'err'); return; }
+    state.nama = state.nama.filter(function(x){ return x.id!==id; });
+    renderAll(); renderAdminLists();
+    toast('Nama dihapus', 'err');
+  });
+}
+
+function doReset() {
+  if (!confirm('Yakin reset SEMUA data checklist di Google Sheets?')) return;
+  apiPost({ action: 'resetChecklist' }, function(d, err) {
+    if (err || !d || !d.ok) { toast('Gagal reset', 'err'); return; }
+    state.checklist = [];
+    renderAll();
+    toast('Semua checklist direset', 'err');
+  });
+}
+
+// ── Simpan URL dari tab pengaturan ──
+function saveScriptUrl() {
+  var v = document.getElementById('cfg-url-input').value.trim();
+  if (!v || !v.startsWith('https://')) { toast('URL tidak valid', 'err'); return; }
+  SCRIPT_URL = v;
+  // Simpan ke localStorage agar persisten di device ini
+  try { localStorage.setItem('rb_script_url', v); } catch(e) {}
+  toast('URL disimpan! Memuat data dari Sheets...', 'ok');
+  checkUrlConfig();
+  loadFromSheets(function() { renderAll(); });
+}
+
+// ── Cek & isi input URL dari localStorage saat admin dibuka ──
+function syncUrlInput() {
+  var urlInput = document.getElementById('cfg-url-input');
+  if (!urlInput) return;
+  var saved = '';
+  try { saved = localStorage.getItem('rb_script_url') || ''; } catch(e) {}
+  if (SCRIPT_URL_HARDCODE !== 'PASTE_URL_APPS_SCRIPT_DISINI') saved = SCRIPT_URL_HARDCODE;
+  urlInput.value = saved;
+  // Tampilkan sumber URL saat ini
+  var srcEl = document.getElementById('url-source-info');
+  if (srcEl) {
+    if (SCRIPT_URL_HARDCODE !== 'PASTE_URL_APPS_SCRIPT_DISINI') {
+      srcEl.innerHTML = '<i class="bi bi-check-circle-fill me-1" style="color:var(--green)"></i>URL aktif: dari kode (hardcode) — berlaku di semua device';
+    } else if (saved) {
+      srcEl.innerHTML = '<i class="bi bi-check-circle-fill me-1" style="color:var(--blue)"></i>URL aktif: dari localStorage device ini';
+    } else {
+      srcEl.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1" style="color:var(--orange)"></i>Belum ada URL — isi di bawah ini';
+    }
+  }
+}
+
+function updateBadge() {
+  var today = todayStr();
+  var done  = getUniqueRakDone(today).size;
+  var pend  = Math.max(0, state.rak.length - done);
+  var el    = document.getElementById('badge-pending');
+  if (el) el.textContent = pend;
+  var bnb = document.getElementById('bn-badge');
+  if (bnb) { bnb.textContent = pend; bnb.style.display = pend > 0 ? 'flex' : 'none'; }
+}
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+function todayStr() {
+  var now = new Date();
+  var y   = now.getFullYear();
+  var m   = String(now.getMonth() + 1).padStart(2, '0');
+  var d   = String(now.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+function fmtDate(s) {
+  if (!s) return '';
+  var d = new Date(s);
+  return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+}
+function fmtTime(s) {
+  if (!s) return '';
+  var d = new Date(s);
+  return d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+}
+
+function setText(id, val) { var el=document.getElementById(id); if(el) el.textContent=val; }
+function setWidth(id, pct) { var el=document.getElementById(id); if(el) el.style.width=pct+'%'; }
+function setRing(id, pct, circ) { var el=document.getElementById(id); if(el) el.style.strokeDashoffset = circ-(pct/100*circ); }
+
+function getUniqueRakDone(dateStr) {
+  var s = new Set();
+  state.checklist.forEach(function(c){
+    var rid = c.rakId || '';
+    var tgl = (c.tanggal || '').toString().substring(0, 10);
+    // dateStr ada → filter hari itu saja (dashboard harian)
+    // dateStr null → semua record (status total)
+    if (rid && (!dateStr || tgl === dateStr)) s.add(rid);
+  });
+  return s;
+}
+function countByPelaksana(dateStr) {
+  var counts = {};
+  state.checklist.forEach(function(c){
+    if (dateStr && c.tanggal !== dateStr) return;
+    counts[c.pelaksana] = (counts[c.pelaksana]||0) + 1;
+  });
+  return counts;
+}
+function objToSortedArr(obj) {
+  return Object.keys(obj).map(function(k){ return [k,obj[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
+}
+
+var AV_COLORS = [
+  'linear-gradient(135deg,#007AFF,#5AC8FA)',
+  'linear-gradient(135deg,#34C759,#30D158)',
+  'linear-gradient(135deg,#FF9500,#FFCC00)',
+  'linear-gradient(135deg,#AF52DE,#BF5AF2)',
+  'linear-gradient(135deg,#FF3B30,#FF6B6B)',
+  'linear-gradient(135deg,#5AC8FA,#32ADE6)'
+];
+function avColor(i) { return AV_COLORS[i%AV_COLORS.length]; }
+
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  var ic = el.querySelector('.bi');
+  document.getElementById('toast-msg').textContent = msg;
+  el.className = 'toast-c '+(type||'ok');
+  ic.className = type==='ok' ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2800);
+}
+
+// ═══════════════════════════════════════
+//  MOBILE SIDEBAR TOGGLE
+// ═══════════════════════════════════════
+function toggleSidebar() {
+  var sb  = document.getElementById('sidebar');
+  var bd  = document.getElementById('sidebar-backdrop');
+  var ico = document.getElementById('hamburger-icon');
+  if (sb.classList.contains('open')) {
+    sb.classList.remove('open'); bd.classList.remove('show'); ico.className='bi bi-list';
+  } else {
+    sb.classList.add('open'); bd.classList.add('show'); ico.className='bi bi-x-lg';
+  }
+}
+function closeSidebar() {
+  var sb=document.getElementById('sidebar'), bd=document.getElementById('sidebar-backdrop'), ico=document.getElementById('hamburger-icon');
+  if(sb) sb.classList.remove('open');
+  if(bd) bd.classList.remove('show');
+  if(ico) ico.className='bi bi-list';
+}
+function updateBottomNav(page) {
+  ['home','dashboard','checklist','populasi'].forEach(function(p){
+    var el=document.getElementById('bn-'+p);
+    if(el) el.classList.toggle('active', p===page);
+  });
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSidebar(); });
+document.getElementById('pw-overlay').addEventListener('click', function(e){ if(e.target===this) closePw(); });
+</script>
+</body>
+</html>
