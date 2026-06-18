@@ -402,6 +402,40 @@
             color: #fff;
         }
 
+        /* ===== TABLE POPULASI - FREEZE KOLOM NAMA ===== */
+        .table-populasi-wrapper {
+            overflow-x: auto;
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table-populasi-wrapper table {
+            min-width: 800px; /* agar scroll horizontal terlihat */
+        }
+        #populasiTable thead th:first-child,
+        #populasiTable tbody td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: var(--surface-alt);
+            border-right: 1px solid var(--border);
+        }
+        #populasiTable tbody td:first-child {
+            background: var(--surface);
+            z-index: 1;
+        }
+        #populasiTable thead th:first-child {
+            z-index: 3; /* di atas body */
+        }
+        /* Agar header tetap di atas saat scroll vertikal */
+        #populasiTable thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        #populasiTable thead th:first-child {
+            z-index: 4;
+        }
+
         .table-ios {
             font-size: 0.82rem;
             border-collapse: collapse;
@@ -417,8 +451,6 @@
             border-bottom: 2px solid var(--border);
             white-space: nowrap;
             padding: 0.7rem 0.75rem;
-            position: sticky;
-            top: 0;
             cursor: pointer;
             user-select: none;
         }
@@ -586,7 +618,7 @@
                 <i class="fas fa-plus-circle"></i> Input
             </button>
             <button class="seg-btn" data-tab="populasi">
-                <i class="fas fa-users"></i> Populasi
+                <i class="fas fa-users"></i> Employee
             </button>
             <button class="seg-btn" data-tab="admin">
                 <i class="fas fa-sliders-h"></i> Target
@@ -755,7 +787,7 @@
             </div>
         </div>
 
-        <!-- ==================== TAB POPULASI ==================== -->
+        <!-- ==================== TAB EMPLOYEE (dulu Populasi) ==================== -->
         <div class="tab-pane-content" id="tab-populasi">
             <div class="card card-ios">
                 <div class="card-body">
@@ -783,10 +815,10 @@
                     <span class="section-icon me-2" style="background:var(--teal-light);color:var(--teal);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
                         <i class="fas fa-table"></i>
                     </span>
-                    Populasi Berdasarkan Nama
+                    Employee Summary
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height:500px;">
+                    <div class="table-populasi-wrapper">
                         <table class="table table-ios mb-0" id="populasiTable">
                             <thead>
                                 <tr>
@@ -908,7 +940,7 @@
     </div>
     <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
-    <!-- Modal PIN Admin -->
+    <!-- Modal PIN Admin (digunakan juga untuk delete) -->
     <div id="pinModal" style="display:none;position:fixed;inset:0;background:rgba(20,24,33,0.5);
         backdrop-filter:blur(6px);z-index:8000;align-items:center;justify-content:center;">
         <div style="background:#fff;border-radius:20px;padding:2rem;width:90%;max-width:340px;
@@ -918,9 +950,9 @@
                 color:var(--orange);font-size:1.3rem;margin-bottom:1rem;">
                 <i class="fas fa-lock"></i>
             </div>
-            <h6 style="font-weight:800;font-size:1rem;margin-bottom:0.25rem;">Verifikasi Admin</h6>
+            <h6 style="font-weight:800;font-size:1rem;margin-bottom:0.25rem;">Verifikasi</h6>
             <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:1.25rem;">
-                Masukkan PIN untuk menyimpan pengaturan target.
+                Masukkan PIN untuk melanjutkan.
             </p>
             <input type="password" id="adminPinInput" maxlength="8"
                 placeholder="Masukkan PIN"
@@ -1061,7 +1093,7 @@
                 return result;
             }
 
-            // ============ PIN MODAL ============
+            // ============ PIN MODAL (digunakan untuk admin dan delete) ============
             function openPinModal(onSuccess) {
                 _pendingAdminAction = onSuccess;
                 document.getElementById('adminPinInput').value = '';
@@ -1129,7 +1161,6 @@
             }
 
             // ===== Target Functions =====
-            // Target Harian
             function getDailyTarget(dateStr, key, targets) {
                 const date = new Date(dateStr + 'T00:00:00');
                 const year = date.getFullYear();
@@ -1155,7 +1186,6 @@
                 return daysInPeriod > 0 ? periodTarget / daysInPeriod : 0;
             }
 
-            // Target Periode
             function getPeriodTarget(dateStr, key, targets) {
                 const date = new Date(dateStr + 'T00:00:00');
                 const year = date.getFullYear();
@@ -1164,7 +1194,6 @@
                 const totalDays = getDaysInMonth(year, month);
 
                 if (key === 'spd' || key === 'std' || key === 'member') {
-                    // target harian × hari_ke (dari awal bulan)
                     const daily = totalDays > 0 ? (targets[key] || 0) / totalDays : 0;
                     return daily * day;
                 } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
@@ -1176,7 +1205,6 @@
                 }
             }
 
-            // Target Bulanan (Monthly)
             function getMonthlyTarget(dateStr, key, targets) {
                 const date = new Date(dateStr + 'T00:00:00');
                 const year = date.getFullYear();
@@ -1187,12 +1215,10 @@
                 if (key === 'spd' || key === 'std' || key === 'member') {
                     return targets[key] || 0;
                 } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
-                    // target bulanan = p1 + p2
                     const p1 = (targets[key] && targets[key].p1) || 0;
                     const p2 = (targets[key] && targets[key].p2) || 0;
                     return p1 + p2;
                 } else {
-                    // key = nama produk PSM → target bulanan = p1+p2+p3+p4
                     let total = 0;
                     ['p1','p2','p3','p4'].forEach(p => {
                         total += (targets.psm && targets.psm[p] && targets.psm[p][key]) || 0;
@@ -1202,14 +1228,14 @@
             }
 
             // ============ DASHBOARD RENDER ============
-            let currentView = 'daily'; // 'daily', 'period', 'monthly'
+            let currentView = 'daily';
             let currentDate = new Date().toISOString().split('T')[0];
 
             function getViewData() {
                 const today = new Date().toISOString().split('T')[0];
                 let dateStr = currentDate;
                 if (currentView === 'daily') {
-                    dateStr = today; // selalu hari ini untuk harian
+                    dateStr = today;
                 }
 
                 const date = new Date(dateStr + 'T00:00:00');
@@ -1221,51 +1247,15 @@
                 const sales = getSalesData();
                 const targets = getTargets();
 
-                // ---- FILTER ACTUAL ----
+                // Filter dasar (dari 1..day untuk semua, kecuali harian)
                 let filtered;
                 if (currentView === 'daily') {
-                    // hanya hari ini
                     filtered = sales.filter(s => {
                         if (!s || typeof s !== 'object') return false;
                         const d = new Date(s.tanggal);
                         return d.getFullYear() === year && d.getMonth() === month-1 && d.getDate() === day;
                     });
-                } else if (currentView === 'period') {
-                    // Sesuai aturan periode
-                    filtered = sales.filter(s => {
-                        if (!s || typeof s !== 'object') return false;
-                        const d = new Date(s.tanggal);
-                        if (d.getFullYear() !== year || d.getMonth() !== month-1) return false;
-                        const tanggal = d.getDate();
-                        // Tanpa periode: semua dari 1 s.d hari ini (sudah otomatis karena <= day)
-                        // 2-periode: p1=1-15, p2=16-31
-                        // 4-periode: p1=1-7, p2=8-15, p3=16-23, p4=24-31
-                        // Kita gunakan batas awal periode sesuai hari ini
-                        let startDay = 1;
-                        const twoP = getTwoPeriod(day);
-                        const fourP = getFourPeriod(day);
-                        if (twoP === 'p2') startDay = 16;
-                        if (fourP === 'p2') startDay = 8;
-                        else if (fourP === 'p3') startDay = 16;
-                        else if (fourP === 'p4') startDay = 24;
-                        // Untuk periode, kita ambil dari startDay sampai day (hari ini)
-                        // Karena aturan: untuk metrik dengan periode, data dari awal periode.
-                        // Tapi karena kita tidak tahu metrik mana yang berperiode, kita ambil semua dari startDay.
-                        // Namun untuk metrik tanpa periode (SPD/dll) seharusnya dari 1, tapi karena kita filter dari startDay,
-                        // maka data SPD akan terpotong. Jadi kita perlu pendekatan berbeda:
-                        // Kita filter berdasarkan tanggal, tapi nanti di agregasi kita pisahkan per metrik?
-                        // Solusi: kita ambil data dari 1 sampai day, lalu di agregasi kita filter per metrik.
-                        // Lebih mudah: filter dari 1 sampai day, dan di fungsi agregasi kita gunakan logika per metrik.
-                        // Saya pilih: filter dari 1 sampai day (seperti MTD) dan di agregasi kita hitung sesuai view.
-                        // Jadi kita gunakan filter dari 1 sampai day untuk semua view, lalu di agregasi kita sesuaikan.
-                        // Saya ubah pendekatan: untuk period, kita ambil dari 1 sampai day,
-                        // nanti di agregasi kita hitung hanya dari awal periode per metrik.
-                        // Tapi karena kita sudah filter dari 1..day, kita bisa lakukan di aggregasi.
-                        // Saya pilih cara: filter dari 1..day di semua view kecuali harian.
-                        return d.getFullYear() === year && d.getMonth() === month-1 && d.getDate() <= day;
-                    });
-                } else { // monthly
-                    // dari 1 sampai hari ini
+                } else {
                     filtered = sales.filter(s => {
                         if (!s || typeof s !== 'object') return false;
                         const d = new Date(s.tanggal);
@@ -1273,88 +1263,20 @@
                     });
                 }
 
-                // ---- AGREGASI ACTUAL (sesuai view) ----
-                // Untuk period, kita perlu membatasi data per metrik berdasarkan awal periode.
-                // Untuk monthly, semua dari 1.
-                // Harian hanya hari ini.
-                let agg = { spd:0, std:0, member:0, pwp:0, sergap:0, sueger:0, ceban:0, psm:0 };
+                // Aggregasi dengan filter periode
+                const agg = { spd:0, std:0, member:0, pwp:0, sergap:0, sueger:0, ceban:0, psm:0 };
                 let psmActual = {};
                 let totalPSMActual = 0;
 
-                filtered.forEach(s => {
-                    if (!s) return;
-                    const d = new Date(s.tanggal);
-                    const tgl = d.getDate();
-                    const include = (currentView === 'period') ? (() => {
-                        // Cek apakah tanggal ini termasuk dalam periode untuk metrik tertentu?
-                        // Karena kita tidak tahu metrik mana, kita ambil semua data dari 1..day,
-                        // lalu di agregasi kita hanya akan menjumlahkan yang sesuai periode.
-                        // Tapi untuk agregasi kita perlu tahu batas periode.
-                        // Untuk simpel, kita ambil semua, nanti di target kita sesuaikan.
-                        // Tapi actual untuk period harus sesuai aturan.
-                        // Kita perlu filter di sini: jika metrik berperiode, batasi.
-                        // Untuk mempermudah, kita ambil semua data, dan nanti di aggregasi kita hanya pakai yang sesuai.
-                        // Namun karena kita sudah punya data per tanggal, kita bisa di aggregasi nanti.
-                        // Saya akan ambil semua dari 1..day, dan di bawah kita hitung sesuai aturan.
-                        return true;
-                    })() : true;
-
-                    if (include) {
-                        // Tambahkan ke agg (nanti kita filter ulang di perhitungan target)
-                        // Untuk actual, kita akan hitung ulang di bawah dengan filter per metrik.
-                        // Jadi kita simpan dulu ke array, lalu kita proses ulang.
-                        // Lebih baik kita proses langsung di sini dengan filter per metrik.
-                        // Kita akan lakukan di bagian terpisah.
-                    }
-                });
-
-                // Karena kita perlu filter per metrik untuk period, kita lakukan aggregasi manual.
-                // Kita buat ulang aggregasi dengan filter tanggal sesuai aturan period.
-                const isPeriod = currentView === 'period';
-                const startDay = (() => {
-                    const twoP = getTwoPeriod(day);
-                    const fourP = getFourPeriod(day);
-                    let start = 1;
-                    if (twoP === 'p2') start = 16;
-                    if (fourP === 'p2') start = 8;
-                    else if (fourP === 'p3') start = 16;
-                    else if (fourP === 'p4') start = 24;
-                    return start;
-                })();
-
-                // Reset aggregasi
-                agg = { spd:0, std:0, member:0, pwp:0, sergap:0, sueger:0, ceban:0, psm:0 };
-                psmActual = {};
-                totalPSMActual = 0;
-
-                // Fungsi untuk mengecek apakah tanggal termasuk dalam periode view
-                const isInPeriod = (tgl) => {
-                    if (!isPeriod) return true; // monthly atau daily sudah di-filter sebelumnya
-                    // Untuk period, kita tentukan batas berdasarkan metrik, tapi karena kita tidak tahu,
-                    // kita gunakan aturan: data dari startDay sampai day.
-                    // Tapi untuk metrik tanpa periode (SPD/dll) kita tetap ambil dari 1.
-                    // Kita akan filter per metrik di bagian penjumlahan.
-                    // Untuk sementara, kita ambil semua data dari 1..day, nanti kita filter per metrik saat menjumlah.
-                    return true;
-                };
-
-                // Kita loop data yang sudah difilter (dari 1..day) dan kita jumlahkan dengan aturan period.
-                // Untuk period, kita perlu batasi per metrik.
-                // Cara: kita buat fungsi untuk menentukan apakah suatu tanggal termasuk untuk metrik tertentu.
                 const includeDateForMetric = (tgl, metricKey) => {
-                    if (!isPeriod) return true;
-                    // Metrik tanpa periode: selalu include (dari 1)
-                    if (['spd','std','member'].includes(metricKey)) {
-                        return true; // dari 1
-                    }
-                    // Metrik 2-periode
+                    if (currentView !== 'period') return true;
+                    if (['spd','std','member'].includes(metricKey)) return true;
                     if (['pwp','sergap','sueger','ceban'].includes(metricKey)) {
                         const p = getTwoPeriod(day);
                         if (p === 'p1') return tgl <= 15;
                         else return tgl >= 16;
                     }
-                    // Metrik PSM (key = produk)
-                    // Kita tidak tahu key-nya, kita gunakan periode 4
+                    // PSM product
                     const psmPeriode = getFourPeriod(day);
                     if (psmPeriode === 'p1') return tgl <= 7;
                     else if (psmPeriode === 'p2') return tgl >= 8 && tgl <= 15;
@@ -1362,12 +1284,9 @@
                     else return tgl >= 24;
                 };
 
-                // Loop filtered (yang sudah dari 1..day)
                 filtered.forEach(s => {
                     if (!s) return;
                     const tgl = new Date(s.tanggal).getDate();
-
-                    // SPD
                     if (includeDateForMetric(tgl, 'spd')) agg.spd += s.spd || 0;
                     if (includeDateForMetric(tgl, 'std')) agg.std += s.std || 0;
                     if (includeDateForMetric(tgl, 'member')) agg.member += s.member || 0;
@@ -1376,11 +1295,9 @@
                     if (includeDateForMetric(tgl, 'sueger')) agg.sueger += s.sueger || 0;
                     if (includeDateForMetric(tgl, 'ceban')) agg.ceban += s.ceban || 0;
 
-                    // PSM per produk
                     if (s.psm) {
                         Object.entries(s.psm).forEach(([prod, val]) => {
-                            // Untuk period, kita filter berdasarkan periode PSM produk (4-periode)
-                            if (!isPeriod || includeDateForMetric(tgl, prod)) {
+                            if (!currentView || includeDateForMetric(tgl, prod)) {
                                 psmActual[prod] = (psmActual[prod]||0) + (val || 0);
                                 totalPSMActual += (val || 0);
                             }
@@ -1388,12 +1305,7 @@
                     }
                 });
 
-                // Untuk daily, kita perlu memastikan hanya hari ini (sudah di filter)
-                if (currentView === 'daily') {
-                    // aggregasi sudah benar karena filtered hanya hari ini
-                }
-
-                // ---- TARGET ----
+                // Target
                 let targetValues = {};
                 const keys = ['spd','std','member','pwp','sergap','sueger','ceban'];
                 keys.forEach(k => {
@@ -1401,12 +1313,11 @@
                         targetValues[k] = getDailyTarget(dateStr, k, targets);
                     } else if (currentView === 'period') {
                         targetValues[k] = getPeriodTarget(dateStr, k, targets);
-                    } else { // monthly
+                    } else {
                         targetValues[k] = getMonthlyTarget(dateStr, k, targets);
                     }
                 });
 
-                // PSM target per produk & total
                 let psmTargets = {};
                 let totalPSMTarget = 0;
                 const psmProducts = getPSMProducts();
@@ -1425,8 +1336,6 @@
                     psmTargets[prod] = tgt;
                     totalPSMTarget += tgt;
                 });
-
-                // Untuk monthly, totalPSMTarget sudah dijumlahkan dari semua produk (target bulanan per produk)
 
                 return {
                     agg, targetValues, psmTargets, psmActual, psmList,
@@ -1501,7 +1410,7 @@
                     </div>`;
                 }).join('');
 
-                // PSM periode berjalan (detail per produk)
+                // PSM detail
                 const psmPeriode = getFourPeriod(day);
                 document.getElementById('psmPeriodeInfo').textContent = 'Periode ' + psmPeriode.toUpperCase() + ' ('+getDaysInFourPeriod(day, year, month)+' hari)';
                 const psmContainer = document.getElementById('psmDashboardDetail');
@@ -1636,22 +1545,31 @@
                     </tr>`;
                 }).join('');
             }
+
+            // ===== DELETE DENGAN VERIFIKASI PIN =====
             window.deleteEntry = async function(tanggal, nik) {
-                if (!confirm('Hapus entri ini?')) return;
-                try {
-                    showLoading('Menghapus data…');
-                    await deleteSaleFromSheet(tanggal, nik);
-                    hideLoading();
-                    refreshRecentEntries();
-                    refreshDashboard();
-                    showToast('🗑️ Entri dihapus.');
-                } catch(err) {
-                    hideLoading();
-                    showToast('❌ Gagal hapus: ' + err.message);
-                }
+                if (!confirm('Hapus entri ini? Data akan dihapus permanen.')) return;
+                openPinModal(async (pin) => {
+                    // verifikasi PIN (hardcoded 1234, sama dengan admin)
+                    if (pin !== '1234') {
+                        document.getElementById('pinError').textContent = 'PIN salah. Coba lagi.';
+                        return;
+                    }
+                    try {
+                        showLoading('Menghapus data…');
+                        await deleteSaleFromSheet(tanggal, nik);
+                        hideLoading();
+                        refreshRecentEntries();
+                        refreshDashboard();
+                        showToast('🗑️ Entri dihapus.');
+                    } catch(err) {
+                        hideLoading();
+                        showToast('❌ Gagal hapus: ' + err.message);
+                    }
+                });
             };
 
-            // ============ POPULASI ============
+            // ============ POPULASI (EMPLOYEE) ============
             function populateNamaFilter() {
                 const names = [...new Set(getSalesData().map(s => (s && (s.nama || s.nik)) || '—'))].sort();
                 const select = document.getElementById('filterNama');
@@ -1816,6 +1734,9 @@
                 });
 
                 openPinModal(async (pin) => {
+                    // PIN sudah diverifikasi di submitPin? sebenarnya openPinModal akan memanggil callback dengan pin
+                    // tapi kita juga perlu verifikasi pin di sini? openPinModal hanya meneruskan pin ke callback.
+                    // Di sini kita bisa langsung gunakan pin.
                     try {
                         showLoading('Menyimpan target…');
                         await saveAllAdminToSheet(pin, t, p);
