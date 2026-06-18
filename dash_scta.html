@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring Penjualan Toko</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* ===== SAMA SEPERTI SEBELUMNYA ===== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        :root {
+            --bg: #F0F2F8;
+            --surface: #FFFFFF;
+            --surface-alt: #F7F8FC;
+            --border: #E4E7F0;
+            --border-strong: #CDD2E0;
+            --text-primary: #141821;
+            --text-secondary: #6B7494;
+            --text-tertiary: #9BA3BF;
+            --blue: #3B7BF8;
+            --blue-light: #EBF1FF;
+            --blue-dark: #2460D6;
+            --green: #22C55E;
+            --green-light: #ECFDF5;
+            --orange: #F59E0B;
+            --orange-light: #FFFBEB;
+            --red: #EF4444;
+            --red-light: #FEF2F2;
+            --purple: #8B5CF6;
+            --purple-light: #F5F3FF;
+            --teal: #14B8A6;
+            --teal-light: #F0FDFA;
+            --indigo: #6366F1;
+            --indigo-light: #EEF2FF;
+            --pink: #EC4899;
+            --pink-light: #FDF2F8;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 7px;
+            --shadow-sm: 0 1px 3px rgba(20,24,33,0.06), 0 1px 2px rgba(20,24,33,0.04);
+            --shadow-md: 0 4px 16px rgba(20,24,33,0.08), 0 2px 6px rgba(20,24,33,0.04);
+            --shadow-lg: 0 12px 32px rgba(20,24,33,0.10), 0 4px 12px rgba(20,24,33,0.06);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: var(--font);
+            background-color: var(--bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-bottom: 48px;
+            min-height: 100vh;
+        }
+        .navbar-ios {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 200;
+            padding: 0.75rem 0;
+        }
+        .navbar-ios .navbar-brand {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.4px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .navbar-ios .brand-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--blue) 0%, var(--indigo) 100%);
+            border-radius: 9px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: #fff;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(59,123,248,0.35);
+        }
+        .navbar-ios .current-date {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            background: var(--surface-alt);
+            padding: 0.3rem 0.75rem;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+        }
+        .nav-wrapper {
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 56px;
+            z-index: 99;
+            padding: 0.6rem 1rem;
+        }
+        .segmented-control {
+            display: inline-flex;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 4px;
+            width: 100%;
+            max-width: 580px;
+            border: 1px solid var(--border);
+        }
+        .segmented-control .seg-btn {
+            flex: 1;
+            padding: 0.5rem 0.4rem;
+            border-radius: 9px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+            white-space: nowrap;
+            line-height: 1.3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .segmented-control .seg-btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.6);
+        }
+        .segmented-control .seg-btn.active {
+            background: var(--surface);
+            color: var(--blue);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+        }
+        .segmented-control .seg-btn i { font-size: 0.95rem; }
+
+        .view-toggle-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.25rem;
+            display: inline-flex;
+            margin-bottom: 1rem;
+        }
+        .view-toggle-wrapper .view-btn {
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+        .view-toggle-wrapper .view-btn.active {
+            background: var(--blue);
+            color: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+        .view-toggle-wrapper .view-btn:hover:not(.active) {
+            background: var(--surface-alt);
+        }
+
+        .card-ios {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s, border-color 0.2s;
+            overflow: hidden;
+        }
+        .card-ios:hover { box-shadow: var(--shadow-md); }
+        .card-ios .card-header {
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.875rem;
+            padding: 0.875rem 1.25rem;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+        }
+        .card-ios .card-header .header-badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--border);
+            padding: 0.2rem 0.6rem;
+            border-radius: 100px;
+        }
+        .card-ios .card-body { padding: 1.25rem; }
+
+        .summary-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem 0.75rem;
+            text-align: center;
+            height: 100%;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent-color, var(--blue));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .summary-card:hover::before { opacity: 1; }
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-strong);
+        }
+        .summary-card .s-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+        }
+        .summary-card .s-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+        .summary-card .s-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+        }
+        .summary-card .s-target {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 0.2rem;
+        }
+        .summary-card .s-progress {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 0.2rem;
+        }
+        .progress-sm {
+            height: 4px;
+            border-radius: 100px;
+            background: var(--bg);
+            margin-top: 0.4rem;
+            overflow: hidden;
+        }
+        .progress-sm .progress-fill-sm {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.5s;
+        }
+
+        .progress-item {
+            margin-bottom: 1rem;
+        }
+        .progress-item:last-child { margin-bottom: 0; }
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+        }
+        .progress-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .progress-stat {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .progress-track {
+            height: 7px;
+            border-radius: 100px;
+            background: var(--bg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+        }
+        .progress-pct-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 5px;
+            margin-left: 0.4rem;
+        }
+
+        .form-control-ios, .form-select.form-control-ios {
+            border-radius: var(--radius-xs);
+            border: 1.5px solid var(--border-strong);
+            padding: 0.55rem 0.85rem;
+            background: var(--surface);
+            font-size: 0.875rem;
+            font-family: var(--font);
+            color: var(--text-primary);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .form-control-ios:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(59,123,248,0.15);
+            background: var(--surface);
+            outline: none;
+        }
+        .form-label-ios {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+        .input-group-ios {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .input-group-ios .group-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-ios {
+            border-radius: 100px;
+            padding: 0.55rem 1.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: none;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all 0.18s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-ios-primary {
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(59,123,248,0.3);
+        }
+        .btn-ios-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(59,123,248,0.4);
+            color: #fff;
+        }
+        .btn-ios-primary:active { transform: translateY(0); }
+        .btn-ios-secondary {
+            background: var(--surface-alt);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-strong);
+        }
+        .btn-ios-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+        .btn-ios-danger {
+            background: var(--red-light);
+            color: var(--red);
+            border: 1.5px solid #FECACA;
+        }
+        .btn-ios-danger:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .table-ios {
+            font-size: 0.82rem;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .table-ios thead th {
+            background: var(--surface-alt);
+            font-weight: 700;
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-tertiary);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            padding: 0.7rem 0.75rem;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        .table-ios thead th:hover {
+            color: var(--blue);
+        }
+        .table-ios tbody td {
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            color: var(--text-primary);
+        }
+        .table-ios tbody tr:last-child td { border-bottom: none; }
+        .table-ios tbody tr:hover td { background: var(--blue-light); }
+
+        .accordion-ios .accordion-button {
+            font-weight: 600;
+            font-size: 0.875rem;
+            background: var(--surface);
+            box-shadow: none;
+            border: none;
+            color: var(--text-primary);
+        }
+        .accordion-ios .accordion-button:not(.collapsed) {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+        .accordion-ios .accordion-body { padding: 1rem 1.25rem; background: var(--surface-alt); }
+        .accordion-ios .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-xs) !important; margin-bottom: 0.5rem; overflow: hidden; }
+
+        .toast-ios {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(12px);
+            background: rgba(20,24,33,0.92);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 0.65rem 1.5rem;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            font-family: var(--font);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast-ios.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .tab-pane-content { display: none; }
+        .tab-pane-content.active { display: block; }
+
+        .psm-section {
+            background: linear-gradient(135deg, #F0F2F8 0%, #EBF1FF 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+        }
+
+        .text-blue { color: var(--blue) !important; }
+        .text-green { color: var(--green) !important; }
+        .text-orange { color: var(--orange) !important; }
+        .text-red { color: var(--red) !important; }
+        .text-purple { color: var(--purple) !important; }
+        .text-teal { color: var(--teal) !important; }
+        .text-indigo { color: var(--indigo) !important; }
+        .text-pink { color: var(--pink) !important; }
+
+        .badge-soft {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+        }
+        .badge-soft-blue { background: var(--blue-light); color: var(--blue); }
+        .badge-soft-green { background: var(--green-light); color: #16A34A; }
+        .badge-soft-orange { background: var(--orange-light); color: #D97706; }
+        .badge-soft-purple { background: var(--purple-light); color: var(--purple); }
+        .badge-soft-teal { background: var(--teal-light); color: var(--teal); }
+        .badge-soft-pink { background: var(--pink-light); color: var(--pink); }
+
+        @media (max-width: 576px) {
+            .summary-card { padding: 0.75rem 0.5rem; }
+            .summary-card .s-icon { width: 36px; height: 36px; font-size: 0.9rem; }
+            .summary-card .s-value { font-size: 1.35rem; }
+            .segmented-control .seg-btn { font-size: 0.7rem; padding: 0.45rem 0.2rem; }
+            .segmented-control .seg-btn i { font-size: 0.85rem; }
+            .navbar-ios .current-date { display: none; }
+            .view-toggle-wrapper .view-btn { font-size: 0.7rem; padding: 0.3rem 0.6rem; }
+        }
+
+        .divider-label {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        .divider-label::before, .divider-label::after {
+            content: ''; flex: 1;
+            height: 1px; background: var(--border);
+        }
+        .divider-label span {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+        }
+
+        .page-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .page-section-header .section-icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .page-section-header .section-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-ios sticky-top">
+        <div class="container-fluid px-3">
+            <span class="navbar-brand">
+                <span class="brand-icon"><i class="fas fa-store"></i></span>
+                Monitor Penjualan
+            </span>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <button onclick="refreshAllData()" title="Refresh data dari Sheets"
+                    style="background:var(--surface-alt);border:1px solid var(--border);
+                    border-radius:8px;padding:0.35rem 0.65rem;font-size:0.8rem;cursor:pointer;
+                    color:var(--text-secondary);font-family:var(--font);font-weight:600;
+                    transition:all 0.15s;" onmouseover="this.style.background='var(--border)'"
+                    onmouseout="this.style.background='var(--surface-alt)'">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <span class="current-date" id="currentDateDisplay"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Segmented Control -->
+    <div class="nav-wrapper d-flex justify-content-center">
+        <div class="segmented-control" id="segmentedNav">
+            <button class="seg-btn active" data-tab="dashboard">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </button>
+            <button class="seg-btn" data-tab="input">
+                <i class="fas fa-plus-circle"></i> Input
+            </button>
+            <button class="seg-btn" data-tab="populasi">
+                <i class="fas fa-users"></i> Populasi
+            </button>
+            <button class="seg-btn" data-tab="admin">
+                <i class="fas fa-sliders-h"></i> Target
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container py-3" style="max-width:960px;">
+
+        <!-- ==================== TAB DASHBOARD ==================== -->
+        <div class="tab-pane-content active" id="tab-dashboard">
+
+            <!-- View Toggle -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <div class="view-toggle-wrapper" id="viewToggle">
+                    <button class="view-btn active" data-view="daily">Harian</button>
+                    <button class="view-btn" data-view="period">Periode</button>
+                    <button class="view-btn" data-view="monthly">Bulanan</button>
+                </div>
+                <span class="badge-soft badge-soft-blue" id="viewPeriodLabel">Hari ini: ...</span>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="card card-ios">
+                <div class="card-header">
+                    <span class="section-icon me-2" style="background:var(--blue-light);color:var(--blue);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
+                        <i class="fas fa-chart-line"></i>
+                    </span>
+                    <span id="viewTitle">Ringkasan Harian</span>
+                    <span class="header-badge ms-auto" id="viewDateLabel"></span>
+                </div>
+                <div class="card-body" id="summaryContainer">
+                    <div class="row g-2" id="summaryCards">
+                        <!-- Diisi JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PSM Periode Berjalan -->
+            <div class="card card-ios">
+                <div class="card-header">
+                    <span class="section-icon me-2" style="background:var(--indigo-light);color:var(--indigo);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
+                        <i class="fas fa-cubes"></i>
+                    </span>
+                    PSM Periode Berjalan
+                    <span id="psmPeriodeInfo" class="badge-soft badge-soft-blue ms-2"></span>
+                </div>
+                <div class="card-body" id="psmDashboardDetail">
+                    <p class="text-muted small">Belum ada data PSM.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB INPUT ==================== -->
+        <div class="tab-pane-content" id="tab-input">
+            <div class="card card-ios">
+                <div class="card-header">
+                    <span class="section-icon me-2" style="background:var(--blue-light);color:var(--blue);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
+                        <i class="fas fa-edit"></i>
+                    </span>
+                    Form Input Penjualan Harian
+                </div>
+                <div class="card-body">
+                    <form id="formInputPenjualan" novalidate>
+                        <div class="input-group-ios mb-3">
+                            <div class="group-title">
+                                <i class="fas fa-id-card" style="color:var(--blue)"></i> Identitas
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label-ios">Tanggal</label>
+                                    <input type="date" class="form-control form-control-ios" id="inputTanggal" required>
+                                </div>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label-ios">Nama</label>
+                                    <input type="text" class="form-control form-control-ios" id="inputNama" placeholder="Nama pegawai" required>
+                                </div>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label-ios">NIK (opsional)</label>
+                                    <input type="text" class="form-control form-control-ios" id="inputNIK" placeholder="NIK (opsional)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Penjualan -->
+                        <div class="input-group-ios mb-3">
+                            <div class="group-title">
+                                <i class="fas fa-chart-bar" style="color:var(--green)"></i> Data Penjualan
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <label class="form-label-ios">SPD</label>
+                                    <input type="number" class="form-control form-control-ios" id="inputSPD" value="0" min="0">
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <label class="form-label-ios">STD</label>
+                                    <input type="number" class="form-control form-control-ios" id="inputSTD" value="0" min="0">
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <label class="form-label-ios">Member</label>
+                                    <input type="number" class="form-control form-control-ios" id="inputMember" value="0" min="0">
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <label class="form-label-ios">PWP</label>
+                                    <input type="number" class="form-control form-control-ios" id="inputPWP" value="0" min="0">
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <label class="form-label-ios">Sergap</label>
+                                    <input type="number" class="form-control form-control-ios" id="inputSergap" value="0" min="0">
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <label class="form-label-ios">Sueger</label>
+                                    <input type="number" class="form-control form-control-ios" id="inputSueger" value="0" min="0">
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <label class="form-label-ios">Ceban</label>
+                                    <input type="number" class="form-control form-control-ios" id="inputCeban" value="0" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PSM -->
+                        <div class="psm-section mb-3">
+                            <label class="form-label-ios">
+                                <i class="fas fa-cubes me-1" style="color:var(--indigo)"></i> PSM Produk
+                                <span id="psmPeriodeLabel" class="badge-soft badge-soft-blue ms-2">Periode: -</span>
+                            </label>
+                            <div id="psmInputFields" class="row g-2 mt-1">
+                                <p class="text-muted small">Pilih tanggal untuk melihat produk PSM.</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-ios btn-ios-primary">
+                                <i class="fas fa-save"></i> Simpan
+                            </button>
+                            <button type="button" class="btn btn-ios btn-ios-secondary" onclick="resetFormInput()">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Entries -->
+            <div class="card card-ios">
+                <div class="card-header">
+                    <span class="section-icon me-2" style="background:var(--surface-alt);color:var(--text-secondary);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
+                        <i class="fas fa-history"></i>
+                    </span>
+                    Entri Terbaru
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height:300px;">
+                        <table class="table table-ios mb-0">
+                            <thead>
+                                <tr><th>Tanggal</th><th>Nama</th><th>SPD</th><th>STD</th><th>Member</th><th>PWP</th><th>Sergap</th><th>Sueger</th><th>Ceban</th><th></th></tr>
+                            </thead>
+                            <tbody id="recentEntriesBody">
+                                <tr><td colspan="10" class="text-center text-muted">Belum ada data.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB POPULASI ==================== -->
+        <div class="tab-pane-content" id="tab-populasi">
+            <div class="card card-ios">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label-ios">Filter Nama</label>
+                            <select class="form-select form-control-ios" id="filterNama">
+                                <option value="">Semua Nama</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label-ios">Filter Bulan</label>
+                            <input type="month" class="form-control form-control-ios" id="filterBulanPopulasi">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-ios btn-ios-primary w-100" onclick="loadPopulasi()">
+                                <i class="fas fa-filter"></i> Terapkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-ios">
+                <div class="card-header">
+                    <span class="section-icon me-2" style="background:var(--teal-light);color:var(--teal);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
+                        <i class="fas fa-table"></i>
+                    </span>
+                    Populasi Berdasarkan Nama
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height:500px;">
+                        <table class="table table-ios mb-0" id="populasiTable">
+                            <thead>
+                                <tr>
+                                    <th data-sort="nama">Nama <i class="fas fa-sort"></i></th>
+                                    <th data-sort="spd">Total SPD</th>
+                                    <th data-sort="std">Total STD</th>
+                                    <th data-sort="member">Total Member</th>
+                                    <th data-sort="pwp">Total PWP</th>
+                                    <th data-sort="sergap">Total Sergap</th>
+                                    <th data-sort="sueger">Total Sueger</th>
+                                    <th data-sort="ceban">Total Ceban</th>
+                                    <th data-sort="psm">Total PSM</th>
+                                    <th data-sort="count">Jml Entri</th>
+                                </tr>
+                            </thead>
+                            <tbody id="populasiBody">
+                                <tr><td colspan="10" class="text-center text-muted">Pilih filter dan klik Terapkan.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB ADMIN TARGET ==================== -->
+        <div class="tab-pane-content" id="tab-admin">
+            <div class="card card-ios">
+                <div class="card-header">
+                    <span class="section-icon me-2" style="background:var(--orange-light);color:var(--orange);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
+                        <i class="fas fa-sliders-h"></i>
+                    </span>
+                    Pengaturan Target
+                </div>
+                <div class="card-body">
+                    <form id="formAdminTarget" novalidate>
+                        <!-- Bulanan -->
+                        <div class="divider-label"><span><i class="fas fa-calendar-check me-1"></i> Target Bulanan</span></div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-4">
+                                <label class="form-label-ios">Target SPD / Bulan</label>
+                                <input type="number" class="form-control form-control-ios" id="targetSPD" min="0">
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label-ios">Target STD / Bulan</label>
+                                <input type="number" class="form-control form-control-ios" id="targetSTD" min="0">
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label-ios">Target Member / Bulan</label>
+                                <input type="number" class="form-control form-control-ios" id="targetMember" min="0">
+                            </div>
+                        </div>
+
+                        <!-- 2 Periode -->
+                        <div class="divider-label"><span><i class="fas fa-calendar-alt me-1"></i> Target 2 Periode (1-15 & 16-31)</span></div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">PWP (1-15)</label><input type="number" class="form-control form-control-ios target-pwp-p1" min="0"></div>
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">PWP (16-31)</label><input type="number" class="form-control form-control-ios target-pwp-p2" min="0"></div>
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sergap (1-15)</label><input type="number" class="form-control form-control-ios target-sergap-p1" min="0"></div>
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sergap (16-31)</label><input type="number" class="form-control form-control-ios target-sergap-p2" min="0"></div>
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sueger (1-15)</label><input type="number" class="form-control form-control-ios target-sueger-p1" min="0"></div>
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sueger (16-31)</label><input type="number" class="form-control form-control-ios target-sueger-p2" min="0"></div>
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Ceban (1-15)</label><input type="number" class="form-control form-control-ios target-ceban-p1" min="0"></div>
+                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Ceban (16-31)</label><input type="number" class="form-control form-control-ios target-ceban-p2" min="0"></div>
+                        </div>
+
+                        <!-- PSM 4 Periode -->
+                        <div class="divider-label mt-2"><span><i class="fas fa-cubes me-1"></i> Target PSM – 4 Periode</span></div>
+                        <div class="accordion accordion-ios" id="accordionPSM">
+                            <div class="accordion-item border-0">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse1"><span class="badge bg-info me-2">P1</span> 1-7</button></h2>
+                                <div id="psmCollapse1" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
+                                    <div class="accordion-body"><div id="psmAdminP1" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p1')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse2"><span class="badge bg-info me-2">P2</span> 8-15</button></h2>
+                                <div id="psmCollapse2" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
+                                    <div class="accordion-body"><div id="psmAdminP2" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p2')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse3"><span class="badge bg-info me-2">P3</span> 16-23</button></h2>
+                                <div id="psmCollapse3" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
+                                    <div class="accordion-body"><div id="psmAdminP3" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p3')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse4"><span class="badge bg-info me-2">P4</span> 24-31</button></h2>
+                                <div id="psmCollapse4" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
+                                    <div class="accordion-body"><div id="psmAdminP4" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p4')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-ios btn-ios-primary mt-4">
+                            <i class="fas fa-save"></i> Simpan Semua Target
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-ios" id="toastNotification"></div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="
+        position:fixed;inset:0;background:rgba(255,255,255,0.88);
+        backdrop-filter:blur(8px);z-index:9000;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
+        <div style="width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--blue);
+            border-radius:50%;animation:spin 0.75s linear infinite;"></div>
+        <p style="font-family:var(--font);font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin:0;"
+            id="loadingText">Memuat data dari Google Sheets…</p>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+    <!-- Modal PIN Admin -->
+    <div id="pinModal" style="display:none;position:fixed;inset:0;background:rgba(20,24,33,0.5);
+        backdrop-filter:blur(6px);z-index:8000;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:20px;padding:2rem;width:90%;max-width:340px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
+            <div style="width:52px;height:52px;background:var(--orange-light);border-radius:14px;
+                display:inline-flex;align-items:center;justify-content:center;
+                color:var(--orange);font-size:1.3rem;margin-bottom:1rem;">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h6 style="font-weight:800;font-size:1rem;margin-bottom:0.25rem;">Verifikasi Admin</h6>
+            <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:1.25rem;">
+                Masukkan PIN untuk menyimpan pengaturan target.
+            </p>
+            <input type="password" id="adminPinInput" maxlength="8"
+                placeholder="Masukkan PIN"
+                style="width:100%;padding:0.65rem 1rem;border:1.5px solid var(--border-strong);
+                    border-radius:10px;font-size:1rem;text-align:center;letter-spacing:4px;
+                    font-family:var(--font);outline:none;margin-bottom:0.75rem;"
+                oninput="this.style.borderColor='var(--border-strong)'"
+            >
+            <p id="pinError" style="font-size:0.78rem;color:var(--red);min-height:1.2em;margin-bottom:0.75rem;"></p>
+            <div style="display:flex;gap:0.5rem;">
+                <button onclick="closePinModal()" style="flex:1;padding:0.6rem;border-radius:10px;
+                    background:var(--surface-alt);border:1.5px solid var(--border-strong);
+                    font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--font);">
+                    Batal
+                </button>
+                <button onclick="submitPin()" style="flex:1;padding:0.6rem;border-radius:10px;
+                    background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;border:none;
+                    font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--font);">
+                    Konfirmasi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============ KONFIGURASI ============
+            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyypuTu7IazF5PGExw55Bpt9SJ8kIW7SMnrqcvE94SDQr9lZi_NbnvLiz_YDw4xEZeR/exec'; // GANTI DENGAN URL ANDA
+
+            const CACHE_SALES        = 'gs_cache_sales';
+            const CACHE_TARGETS      = 'gs_cache_targets';
+            const CACHE_PSM_PRODUCTS = 'gs_cache_psm';
+            const CACHE_TTL          = 5 * 60 * 1000;
+
+            let _salesData    = null;
+            let _targets      = null;
+            let _psmProducts  = null;
+            let _adminPin     = '';
+            let _pendingAdminAction = null;
+
+            // Sorting state untuk populasi
+            let populasiSortColumn = 'nama';
+            let populasiSortOrder = 'asc';
+
+            // ============ API ============
+            async function apiCall(params) {
+                const url = new URL(APPS_SCRIPT_URL);
+                const isWrite = ['saveSale','deleteSale','saveTargets','savePSMProducts','saveAll'].includes(params.action);
+                if (!isWrite) {
+                    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : v));
+                    const res = await fetch(url.toString(), { redirect: 'follow' });
+                    return res.json();
+                } else {
+                    const res = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(params),
+                    });
+                    return res.json();
+                }
+            }
+
+            function setCache(key, data) {
+                try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_) {}
+            }
+            function getCache(key) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) return null;
+                    const { ts, data } = JSON.parse(raw);
+                    if (Date.now() - ts > CACHE_TTL) return null;
+                    return data;
+                } catch(_) { return null; }
+            }
+
+            function getSalesData()   { return _salesData    || []; }
+            function getTargets()     { return _targets      || buildDefaultTargets(); }
+            function getPSMProducts() { return _psmProducts  || { p1:[], p2:[], p3:[], p4:[] }; }
+
+            async function fetchAll(forceRefresh = false) {
+                if (!forceRefresh) {
+                    const cs = getCache(CACHE_SALES);
+                    const ct = getCache(CACHE_TARGETS);
+                    const cp = getCache(CACHE_PSM_PRODUCTS);
+                    if (cs && ct && cp) {
+                        _salesData   = cs;
+                        _targets     = ct;
+                        _psmProducts = cp;
+                        return;
+                    }
+                }
+                const result = await apiCall({ action: 'getAll' });
+                if (result.sales !== undefined) {
+                    _salesData   = result.sales   || [];
+                    _targets     = result.targets  || buildDefaultTargets();
+                    _psmProducts = result.psmProducts || { p1:[], p2:[], p3:[], p4:[] };
+                    setCache(CACHE_SALES,        _salesData);
+                    setCache(CACHE_TARGETS,      _targets);
+                    setCache(CACHE_PSM_PRODUCTS, _psmProducts);
+                } else {
+                    throw new Error(result.error || 'Gagal mengambil data dari server.');
+                }
+            }
+
+            function buildDefaultTargets() {
+                return {
+                    spd:0, std:0, member:0,
+                    pwp    : { p1:0, p2:0 },
+                    sergap : { p1:0, p2:0 },
+                    sueger : { p1:0, p2:0 },
+                    ceban  : { p1:0, p2:0 },
+                    psm    : { p1:{}, p2:{}, p3:{}, p4:{} },
+                };
+            }
+
+            async function saveSaleToSheet(entry) {
+                const result = await apiCall({ action: 'saveSale', data: entry });
+                if (!result.ok) throw new Error(result.error);
+                await fetchAll(true);
+                return result;
+            }
+
+            async function deleteSaleFromSheet(tanggal, nik) {
+                const result = await apiCall({ action: 'deleteSale', tanggal, nik });
+                if (!result.ok) throw new Error(result.error);
+                await fetchAll(true);
+                return result;
+            }
+
+            async function saveAllAdminToSheet(pin, targets, psmProducts) {
+                const result = await apiCall({ action: 'saveAll', pin, targets, psmProducts });
+                if (!result.ok) throw new Error(result.error);
+                _targets     = targets;
+                _psmProducts = psmProducts;
+                setCache(CACHE_TARGETS,      _targets);
+                setCache(CACHE_PSM_PRODUCTS, _psmProducts);
+                return result;
+            }
+
+            // ============ PIN MODAL ============
+            function openPinModal(onSuccess) {
+                _pendingAdminAction = onSuccess;
+                document.getElementById('adminPinInput').value = '';
+                document.getElementById('pinError').textContent = '';
+                document.getElementById('pinModal').style.display = 'flex';
+                setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
+            }
+            window.closePinModal = function() {
+                document.getElementById('pinModal').style.display = 'none';
+                _pendingAdminAction = null;
+            };
+            window.submitPin = async function() {
+                const pin = document.getElementById('adminPinInput').value;
+                if (!pin) { document.getElementById('pinError').textContent = 'PIN tidak boleh kosong.'; return; }
+                if (_pendingAdminAction) {
+                    const action = _pendingAdminAction;
+                    closePinModal();
+                    await action(pin);
+                }
+            };
+            document.getElementById('adminPinInput').addEventListener('keydown', e => {
+                if (e.key === 'Enter') window.submitPin();
+            });
+
+            function showLoading(text = 'Memuat data…') {
+                document.getElementById('loadingText').textContent = text;
+                document.getElementById('loadingOverlay').style.display = 'flex';
+            }
+            function hideLoading() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+
+            function showToast(msg) {
+                const toast = document.getElementById('toastNotification');
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
+            }
+
+            // ============ UTILITY: DATE & PERIOD ============
+            function getDaysInMonth(year, month) {
+                return new Date(year, month, 0).getDate();
+            }
+            function getTwoPeriod(day) {
+                return day <= 15 ? 'p1' : 'p2';
+            }
+            function getFourPeriod(day) {
+                if (day <= 7) return 'p1';
+                if (day <= 15) return 'p2';
+                if (day <= 23) return 'p3';
+                return 'p4';
+            }
+            function getDaysInTwoPeriod(day, year, month) {
+                const total = getDaysInMonth(year, month);
+                if (day <= 15) return 15;
+                else return total - 15;
+            }
+            function getDaysInFourPeriod(day, year, month) {
+                const total = getDaysInMonth(year, month);
+                if (day <= 7) return 7;
+                if (day <= 15) return 8;
+                if (day <= 23) return 8;
+                else return total - 23;
+            }
+
+            // ===== Target Functions =====
+            // Target Harian
+            function getDailyTarget(dateStr, key, targets) {
+                const date = new Date(dateStr + 'T00:00:00');
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const totalDays = getDaysInMonth(year, month);
+
+                let periodTarget = 0;
+                let daysInPeriod = 0;
+
+                if (key === 'spd' || key === 'std' || key === 'member') {
+                    periodTarget = targets[key] || 0;
+                    daysInPeriod = totalDays;
+                } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
+                    const p = getTwoPeriod(day);
+                    periodTarget = (targets[key] && targets[key][p]) || 0;
+                    daysInPeriod = (day <= 15) ? 15 : totalDays - 15;
+                } else {
+                    const p = getFourPeriod(day);
+                    periodTarget = (targets.psm && targets.psm[p] && targets.psm[p][key]) || 0;
+                    daysInPeriod = getDaysInFourPeriod(day, year, month);
+                }
+                return daysInPeriod > 0 ? periodTarget / daysInPeriod : 0;
+            }
+
+            // Target Periode
+            function getPeriodTarget(dateStr, key, targets) {
+                const date = new Date(dateStr + 'T00:00:00');
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const totalDays = getDaysInMonth(year, month);
+
+                if (key === 'spd' || key === 'std' || key === 'member') {
+                    // target harian × hari_ke (dari awal bulan)
+                    const daily = totalDays > 0 ? (targets[key] || 0) / totalDays : 0;
+                    return daily * day;
+                } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
+                    const p = getTwoPeriod(day);
+                    return (targets[key] && targets[key][p]) || 0;
+                } else {
+                    const p = getFourPeriod(day);
+                    return (targets.psm && targets.psm[p] && targets.psm[p][key]) || 0;
+                }
+            }
+
+            // Target Bulanan (Monthly)
+            function getMonthlyTarget(dateStr, key, targets) {
+                const date = new Date(dateStr + 'T00:00:00');
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const totalDays = getDaysInMonth(year, month);
+
+                if (key === 'spd' || key === 'std' || key === 'member') {
+                    return targets[key] || 0;
+                } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
+                    // target bulanan = p1 + p2
+                    const p1 = (targets[key] && targets[key].p1) || 0;
+                    const p2 = (targets[key] && targets[key].p2) || 0;
+                    return p1 + p2;
+                } else {
+                    // key = nama produk PSM → target bulanan = p1+p2+p3+p4
+                    let total = 0;
+                    ['p1','p2','p3','p4'].forEach(p => {
+                        total += (targets.psm && targets.psm[p] && targets.psm[p][key]) || 0;
+                    });
+                    return total;
+                }
+            }
+
+            // ============ DASHBOARD RENDER ============
+            let currentView = 'daily'; // 'daily', 'period', 'monthly'
+            let currentDate = new Date().toISOString().split('T')[0];
+
+            function getViewData() {
+                const today = new Date().toISOString().split('T')[0];
+                let dateStr = currentDate;
+                if (currentView === 'daily') {
+                    dateStr = today; // selalu hari ini untuk harian
+                }
+
+                const date = new Date(dateStr + 'T00:00:00');
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const totalDays = getDaysInMonth(year, month);
+
+                const sales = getSalesData();
+                const targets = getTargets();
+
+                // ---- FILTER ACTUAL ----
+                let filtered;
+                if (currentView === 'daily') {
+                    // hanya hari ini
+                    filtered = sales.filter(s => {
+                        if (!s || typeof s !== 'object') return false;
+                        const d = new Date(s.tanggal);
+                        return d.getFullYear() === year && d.getMonth() === month-1 && d.getDate() === day;
+                    });
+                } else if (currentView === 'period') {
+                    // Sesuai aturan periode
+                    filtered = sales.filter(s => {
+                        if (!s || typeof s !== 'object') return false;
+                        const d = new Date(s.tanggal);
+                        if (d.getFullYear() !== year || d.getMonth() !== month-1) return false;
+                        const tanggal = d.getDate();
+                        // Tanpa periode: semua dari 1 s.d hari ini (sudah otomatis karena <= day)
+                        // 2-periode: p1=1-15, p2=16-31
+                        // 4-periode: p1=1-7, p2=8-15, p3=16-23, p4=24-31
+                        // Kita gunakan batas awal periode sesuai hari ini
+                        let startDay = 1;
+                        const twoP = getTwoPeriod(day);
+                        const fourP = getFourPeriod(day);
+                        if (twoP === 'p2') startDay = 16;
+                        if (fourP === 'p2') startDay = 8;
+                        else if (fourP === 'p3') startDay = 16;
+                        else if (fourP === 'p4') startDay = 24;
+                        // Untuk periode, kita ambil dari startDay sampai day (hari ini)
+                        // Karena aturan: untuk metrik dengan periode, data dari awal periode.
+                        // Tapi karena kita tidak tahu metrik mana yang berperiode, kita ambil semua dari startDay.
+                        // Namun untuk metrik tanpa periode (SPD/dll) seharusnya dari 1, tapi karena kita filter dari startDay,
+                        // maka data SPD akan terpotong. Jadi kita perlu pendekatan berbeda:
+                        // Kita filter berdasarkan tanggal, tapi nanti di agregasi kita pisahkan per metrik?
+                        // Solusi: kita ambil data dari 1 sampai day, lalu di agregasi kita filter per metrik.
+                        // Lebih mudah: filter dari 1 sampai day, dan di fungsi agregasi kita gunakan logika per metrik.
+                        // Saya pilih: filter dari 1 sampai day (seperti MTD) dan di agregasi kita hitung sesuai view.
+                        // Jadi kita gunakan filter dari 1 sampai day untuk semua view, lalu di agregasi kita sesuaikan.
+                        // Saya ubah pendekatan: untuk period, kita ambil dari 1 sampai day,
+                        // nanti di agregasi kita hitung hanya dari awal periode per metrik.
+                        // Tapi karena kita sudah filter dari 1..day, kita bisa lakukan di aggregasi.
+                        // Saya pilih cara: filter dari 1..day di semua view kecuali harian.
+                        return d.getFullYear() === year && d.getMonth() === month-1 && d.getDate() <= day;
+                    });
+                } else { // monthly
+                    // dari 1 sampai hari ini
+                    filtered = sales.filter(s => {
+                        if (!s || typeof s !== 'object') return false;
+                        const d = new Date(s.tanggal);
+                        return d.getFullYear() === year && d.getMonth() === month-1 && d.getDate() <= day;
+                    });
+                }
+
+                // ---- AGREGASI ACTUAL (sesuai view) ----
+                // Untuk period, kita perlu membatasi data per metrik berdasarkan awal periode.
+                // Untuk monthly, semua dari 1.
+                // Harian hanya hari ini.
+                let agg = { spd:0, std:0, member:0, pwp:0, sergap:0, sueger:0, ceban:0, psm:0 };
+                let psmActual = {};
+                let totalPSMActual = 0;
+
+                filtered.forEach(s => {
+                    if (!s) return;
+                    const d = new Date(s.tanggal);
+                    const tgl = d.getDate();
+                    const include = (currentView === 'period') ? (() => {
+                        // Cek apakah tanggal ini termasuk dalam periode untuk metrik tertentu?
+                        // Karena kita tidak tahu metrik mana, kita ambil semua data dari 1..day,
+                        // lalu di agregasi kita hanya akan menjumlahkan yang sesuai periode.
+                        // Tapi untuk agregasi kita perlu tahu batas periode.
+                        // Untuk simpel, kita ambil semua, nanti di target kita sesuaikan.
+                        // Tapi actual untuk period harus sesuai aturan.
+                        // Kita perlu filter di sini: jika metrik berperiode, batasi.
+                        // Untuk mempermudah, kita ambil semua data, dan nanti di aggregasi kita hanya pakai yang sesuai.
+                        // Namun karena kita sudah punya data per tanggal, kita bisa di aggregasi nanti.
+                        // Saya akan ambil semua dari 1..day, dan di bawah kita hitung sesuai aturan.
+                        return true;
+                    })() : true;
+
+                    if (include) {
+                        // Tambahkan ke agg (nanti kita filter ulang di perhitungan target)
+                        // Untuk actual, kita akan hitung ulang di bawah dengan filter per metrik.
+                        // Jadi kita simpan dulu ke array, lalu kita proses ulang.
+                        // Lebih baik kita proses langsung di sini dengan filter per metrik.
+                        // Kita akan lakukan di bagian terpisah.
+                    }
+                });
+
+                // Karena kita perlu filter per metrik untuk period, kita lakukan aggregasi manual.
+                // Kita buat ulang aggregasi dengan filter tanggal sesuai aturan period.
+                const isPeriod = currentView === 'period';
+                const startDay = (() => {
+                    const twoP = getTwoPeriod(day);
+                    const fourP = getFourPeriod(day);
+                    let start = 1;
+                    if (twoP === 'p2') start = 16;
+                    if (fourP === 'p2') start = 8;
+                    else if (fourP === 'p3') start = 16;
+                    else if (fourP === 'p4') start = 24;
+                    return start;
+                })();
+
+                // Reset aggregasi
+                agg = { spd:0, std:0, member:0, pwp:0, sergap:0, sueger:0, ceban:0, psm:0 };
+                psmActual = {};
+                totalPSMActual = 0;
+
+                // Fungsi untuk mengecek apakah tanggal termasuk dalam periode view
+                const isInPeriod = (tgl) => {
+                    if (!isPeriod) return true; // monthly atau daily sudah di-filter sebelumnya
+                    // Untuk period, kita tentukan batas berdasarkan metrik, tapi karena kita tidak tahu,
+                    // kita gunakan aturan: data dari startDay sampai day.
+                    // Tapi untuk metrik tanpa periode (SPD/dll) kita tetap ambil dari 1.
+                    // Kita akan filter per metrik di bagian penjumlahan.
+                    // Untuk sementara, kita ambil semua data dari 1..day, nanti kita filter per metrik saat menjumlah.
+                    return true;
+                };
+
+                // Kita loop data yang sudah difilter (dari 1..day) dan kita jumlahkan dengan aturan period.
+                // Untuk period, kita perlu batasi per metrik.
+                // Cara: kita buat fungsi untuk menentukan apakah suatu tanggal termasuk untuk metrik tertentu.
+                const includeDateForMetric = (tgl, metricKey) => {
+                    if (!isPeriod) return true;
+                    // Metrik tanpa periode: selalu include (dari 1)
+                    if (['spd','std','member'].includes(metricKey)) {
+                        return true; // dari 1
+                    }
+                    // Metrik 2-periode
+                    if (['pwp','sergap','sueger','ceban'].includes(metricKey)) {
+                        const p = getTwoPeriod(day);
+                        if (p === 'p1') return tgl <= 15;
+                        else return tgl >= 16;
+                    }
+                    // Metrik PSM (key = produk)
+                    // Kita tidak tahu key-nya, kita gunakan periode 4
+                    const psmPeriode = getFourPeriod(day);
+                    if (psmPeriode === 'p1') return tgl <= 7;
+                    else if (psmPeriode === 'p2') return tgl >= 8 && tgl <= 15;
+                    else if (psmPeriode === 'p3') return tgl >= 16 && tgl <= 23;
+                    else return tgl >= 24;
+                };
+
+                // Loop filtered (yang sudah dari 1..day)
+                filtered.forEach(s => {
+                    if (!s) return;
+                    const tgl = new Date(s.tanggal).getDate();
+
+                    // SPD
+                    if (includeDateForMetric(tgl, 'spd')) agg.spd += s.spd || 0;
+                    if (includeDateForMetric(tgl, 'std')) agg.std += s.std || 0;
+                    if (includeDateForMetric(tgl, 'member')) agg.member += s.member || 0;
+                    if (includeDateForMetric(tgl, 'pwp')) agg.pwp += s.pwp || 0;
+                    if (includeDateForMetric(tgl, 'sergap')) agg.sergap += s.sergap || 0;
+                    if (includeDateForMetric(tgl, 'sueger')) agg.sueger += s.sueger || 0;
+                    if (includeDateForMetric(tgl, 'ceban')) agg.ceban += s.ceban || 0;
+
+                    // PSM per produk
+                    if (s.psm) {
+                        Object.entries(s.psm).forEach(([prod, val]) => {
+                            // Untuk period, kita filter berdasarkan periode PSM produk (4-periode)
+                            if (!isPeriod || includeDateForMetric(tgl, prod)) {
+                                psmActual[prod] = (psmActual[prod]||0) + (val || 0);
+                                totalPSMActual += (val || 0);
+                            }
+                        });
+                    }
+                });
+
+                // Untuk daily, kita perlu memastikan hanya hari ini (sudah di filter)
+                if (currentView === 'daily') {
+                    // aggregasi sudah benar karena filtered hanya hari ini
+                }
+
+                // ---- TARGET ----
+                let targetValues = {};
+                const keys = ['spd','std','member','pwp','sergap','sueger','ceban'];
+                keys.forEach(k => {
+                    if (currentView === 'daily') {
+                        targetValues[k] = getDailyTarget(dateStr, k, targets);
+                    } else if (currentView === 'period') {
+                        targetValues[k] = getPeriodTarget(dateStr, k, targets);
+                    } else { // monthly
+                        targetValues[k] = getMonthlyTarget(dateStr, k, targets);
+                    }
+                });
+
+                // PSM target per produk & total
+                let psmTargets = {};
+                let totalPSMTarget = 0;
+                const psmProducts = getPSMProducts();
+                const psmPeriode = getFourPeriod(day);
+                const psmList = psmProducts[psmPeriode] || [];
+
+                psmList.forEach(prod => {
+                    let tgt;
+                    if (currentView === 'daily') {
+                        tgt = getDailyTarget(dateStr, prod, targets);
+                    } else if (currentView === 'period') {
+                        tgt = getPeriodTarget(dateStr, prod, targets);
+                    } else {
+                        tgt = getMonthlyTarget(dateStr, prod, targets);
+                    }
+                    psmTargets[prod] = tgt;
+                    totalPSMTarget += tgt;
+                });
+
+                // Untuk monthly, totalPSMTarget sudah dijumlahkan dari semua produk (target bulanan per produk)
+
+                return {
+                    agg, targetValues, psmTargets, psmActual, psmList,
+                    totalPSMTarget, totalPSMActual,
+                    day, month, year, totalDays, dateStr
+                };
+            }
+
+            function refreshDashboard() {
+                const data = getViewData();
+                const {
+                    agg, targetValues, psmTargets, psmActual, psmList,
+                    totalPSMTarget, totalPSMActual,
+                    day, month, year, totalDays, dateStr
+                } = data;
+
+                const viewLabels = { daily: 'Harian', period: 'Periode', monthly: 'Bulanan' };
+                document.getElementById('viewTitle').textContent = 'Ringkasan ' + viewLabels[currentView];
+                const dateObj = new Date(dateStr + 'T00:00:00');
+                const dateLabel = dateObj.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+                document.getElementById('viewDateLabel').textContent = dateLabel;
+
+                let periodLabel = '';
+                if (currentView === 'daily') {
+                    periodLabel = 'Hari ini: ' + dateLabel;
+                } else if (currentView === 'period') {
+                    const p2 = getTwoPeriod(day);
+                    const p4 = getFourPeriod(day);
+                    periodLabel = `Periode ${p2.toUpperCase()} (${day<=15?'1-15':'16-'+totalDays}) · PSM ${p4.toUpperCase()}`;
+                } else {
+                    periodLabel = `Bulanan ${dateObj.toLocaleDateString('id-ID', {month:'long', year:'numeric'})}`;
+                }
+                document.getElementById('viewPeriodLabel').textContent = periodLabel;
+
+                const cardItems = [
+                    { key:'spd', label:'SPD', icon:'fa-chart-line', color:'var(--blue)', bg:'var(--blue-light)' },
+                    { key:'std', label:'STD', icon:'fa-receipt', color:'var(--teal)', bg:'var(--teal-light)' },
+                    { key:'member', label:'Member', icon:'fa-user-plus', color:'var(--pink)', bg:'var(--pink-light)' },
+                    { key:'pwp', label:'PWP', icon:'fa-box', color:'var(--green)', bg:'var(--green-light)' },
+                    { key:'sergap', label:'Sergap', icon:'fa-bolt', color:'var(--orange)', bg:'var(--orange-light)' },
+                    { key:'sueger', label:'Sueger', icon:'fa-glass-water', color:'var(--red)', bg:'var(--red-light)' },
+                    { key:'ceban', label:'Ceban', icon:'fa-coins', color:'var(--purple)', bg:'var(--purple-light)' },
+                    { key:'psm', label:'PSM', icon:'fa-cubes', color:'var(--indigo)', bg:'var(--indigo-light)' }
+                ];
+
+                const container = document.getElementById('summaryCards');
+                container.innerHTML = cardItems.map(item => {
+                    let actual, target;
+                    if (item.key === 'psm') {
+                        actual = totalPSMActual;
+                        target = totalPSMTarget;
+                    } else {
+                        actual = agg[item.key] || 0;
+                        target = targetValues[item.key] || 0;
+                    }
+                    const pct = target > 0 ? Math.min(Math.round((actual/target)*100), 100) : 0;
+                    const pctColor = pct >= 100 ? 'var(--green)' : pct >= 70 ? 'var(--blue)' : 'var(--orange)';
+                    const targetFormatted = Math.round(target).toLocaleString('id-ID');
+
+                    return `
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <div class="summary-card" style="--accent-color:${item.color}">
+                            <div class="s-icon" style="background:${item.bg}; color:${item.color};">
+                                <i class="fas ${item.icon}"></i>
+                            </div>
+                            <div class="s-value" style="color:${item.color}">${Math.round(actual).toLocaleString('id-ID')}</div>
+                            <div class="s-label">${item.label}</div>
+                            <div class="s-target">Target: ${targetFormatted}</div>
+                            <div class="s-progress" style="color:${pctColor}">${pct}%</div>
+                            <div class="progress-sm"><div class="progress-fill-sm" style="width:${pct}%; background:${pctColor};"></div></div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                // PSM periode berjalan (detail per produk)
+                const psmPeriode = getFourPeriod(day);
+                document.getElementById('psmPeriodeInfo').textContent = 'Periode ' + psmPeriode.toUpperCase() + ' ('+getDaysInFourPeriod(day, year, month)+' hari)';
+                const psmContainer = document.getElementById('psmDashboardDetail');
+                if (psmList.length === 0) {
+                    psmContainer.innerHTML = '<p class="text-muted small">Belum ada produk PSM untuk periode ini.</p>';
+                } else {
+                    psmContainer.innerHTML = psmList.map(prod => {
+                        const val = psmActual[prod] || 0;
+                        const tgt = psmTargets[prod] || 0;
+                        const pct = tgt > 0 ? Math.min(Math.round((val/tgt)*100), 100) : 0;
+                        const fillColor = pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--blue)' : 'var(--orange)';
+                        const badgeBg = pct >= 100 ? 'var(--green-light)' : pct >= 60 ? 'var(--blue-light)' : 'var(--orange-light)';
+                        const tgtFormatted = Math.round(tgt).toLocaleString('id-ID');
+                        return `
+                        <div class="progress-item">
+                            <div class="progress-meta">
+                                <span class="progress-name" style="font-size:0.78rem;">${prod}</span>
+                                <span class="progress-stat">${Math.round(val).toLocaleString('id-ID')} / ${tgtFormatted} <span class="progress-pct-badge" style="background:${badgeBg};color:${fillColor};">${pct}%</span></span>
+                            </div>
+                            <div class="progress-track" style="height:5px;">
+                                <div class="progress-fill" style="width:${pct}%; background:${fillColor};"></div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+
+            // ============ VIEW TOGGLE ============
+            document.getElementById('viewToggle').addEventListener('click', function(e) {
+                const btn = e.target.closest('.view-btn');
+                if (!btn) return;
+                const view = btn.dataset.view;
+                if (view === currentView) return;
+                document.querySelectorAll('#viewToggle .view-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentView = view;
+                refreshDashboard();
+            });
+
+            // ============ FORM INPUT ============
+            function refreshPSMInputFields() {
+                const tanggal = document.getElementById('inputTanggal').value;
+                const container = document.getElementById('psmInputFields');
+                const label = document.getElementById('psmPeriodeLabel');
+                if (!tanggal) {
+                    container.innerHTML = '<p class="text-muted small">Pilih tanggal terlebih dahulu.</p>';
+                    label.textContent = 'Periode: -';
+                    return;
+                }
+                const day = parseInt(tanggal.split('-')[2]);
+                const periode = getFourPeriod(day);
+                label.textContent = 'Periode: ' + periode.toUpperCase() + ' ('+getDaysInFourPeriod(day, new Date(tanggal).getFullYear(), new Date(tanggal).getMonth()+1)+' hari)';
+                const products = getPSMProducts()[periode] || [];
+                if (products.length === 0) {
+                    container.innerHTML = '<p class="text-danger small">Belum ada produk PSM untuk periode ini.</p>';
+                    return;
+                }
+                container.innerHTML = products.map(prod => `
+                    <div class="col-md-3 col-sm-4 col-6">
+                        <label class="form-label-ios small">${prod}</label>
+                        <input type="number" class="form-control form-control-ios psm-input" data-produk="${prod}" value="0" min="0">
+                    </div>
+                `).join('');
+            }
+            document.getElementById('inputTanggal').addEventListener('change', refreshPSMInputFields);
+
+            document.getElementById('formInputPenjualan').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const tanggal = document.getElementById('inputTanggal').value;
+                const nama = document.getElementById('inputNama').value.trim();
+                const nik = document.getElementById('inputNIK').value.trim() || nama;
+                if (!tanggal || !nama) { showToast('⚠️ Tanggal dan Nama wajib diisi!'); return; }
+                const entry = {
+                    tanggal,
+                    nik: nik,
+                    nama: nama,
+                    spd: +document.getElementById('inputSPD').value || 0,
+                    std: +document.getElementById('inputSTD').value || 0,
+                    member: +document.getElementById('inputMember').value || 0,
+                    pwp: +document.getElementById('inputPWP').value || 0,
+                    sergap: +document.getElementById('inputSergap').value || 0,
+                    sueger: +document.getElementById('inputSueger').value || 0,
+                    ceban: +document.getElementById('inputCeban').value || 0,
+                    psm: {}
+                };
+                document.querySelectorAll('.psm-input').forEach(inp => {
+                    entry.psm[inp.dataset.produk] = +inp.value || 0;
+                });
+                try {
+                    showLoading('Menyimpan data…');
+                    await saveSaleToSheet(entry);
+                    hideLoading();
+                    showToast('✅ Data berhasil disimpan!');
+                    resetFormInput();
+                    refreshRecentEntries();
+                    refreshDashboard();
+                } catch(err) {
+                    hideLoading();
+                    showToast('❌ Gagal menyimpan: ' + err.message);
+                }
+            });
+
+            function resetFormInput() {
+                document.getElementById('formInputPenjualan').reset();
+                document.getElementById('inputSPD').value = '0';
+                document.getElementById('inputSTD').value = '0';
+                document.getElementById('inputMember').value = '0';
+                document.getElementById('inputPWP').value = '0';
+                document.getElementById('inputSergap').value = '0';
+                document.getElementById('inputSueger').value = '0';
+                document.getElementById('inputCeban').value = '0';
+                document.getElementById('psmInputFields').innerHTML = '<p class="text-muted small">Pilih tanggal terlebih dahulu.</p>';
+                document.getElementById('psmPeriodeLabel').textContent = 'Periode: -';
+            }
+
+            function refreshRecentEntries() {
+                const tbody = document.getElementById('recentEntriesBody');
+                const sales = getSalesData().slice(-15).reverse();
+                if (sales.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Belum ada data.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = sales.map((s) => {
+                    if (!s) return '';
+                    const nama = s.nama || s.nik || '—';
+                    return `
+                    <tr>
+                        <td>${s.tanggal}</td><td><strong>${nama}</strong></td>
+                        <td>${s.spd||0}</td><td>${s.std||0}</td><td>${s.member||0}</td>
+                        <td>${s.pwp||0}</td><td>${s.sergap||0}</td><td>${s.sueger||0}</td><td>${s.ceban||0}</td>
+                        <td><button class="btn btn-ios btn-ios-danger btn-sm" style="padding:0.3rem 0.65rem;border-radius:7px;font-size:0.75rem;" onclick="deleteEntry('${s.tanggal}','${s.nik}')"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                }).join('');
+            }
+            window.deleteEntry = async function(tanggal, nik) {
+                if (!confirm('Hapus entri ini?')) return;
+                try {
+                    showLoading('Menghapus data…');
+                    await deleteSaleFromSheet(tanggal, nik);
+                    hideLoading();
+                    refreshRecentEntries();
+                    refreshDashboard();
+                    showToast('🗑️ Entri dihapus.');
+                } catch(err) {
+                    hideLoading();
+                    showToast('❌ Gagal hapus: ' + err.message);
+                }
+            };
+
+            // ============ POPULASI ============
+            function populateNamaFilter() {
+                const names = [...new Set(getSalesData().map(s => (s && (s.nama || s.nik)) || '—'))].sort();
+                const select = document.getElementById('filterNama');
+                select.innerHTML = '<option value="">Semua Nama</option>' + names.map(n => `<option>${n}</option>`).join('');
+                document.getElementById('filterBulanPopulasi').value = new Date().toISOString().slice(0,7);
+            }
+
+            window.loadPopulasi = function() {
+                const filterNama = document.getElementById('filterNama').value;
+                const filterBulan = document.getElementById('filterBulanPopulasi').value;
+                const sales = getSalesData();
+                let filtered = sales.filter(s => {
+                    if (!s) return false;
+                    const nama = s.nama || s.nik || '—';
+                    if (filterNama && nama !== filterNama) return false;
+                    if (filterBulan) {
+                        const [y,m] = filterBulan.split('-').map(Number);
+                        const d = new Date(s.tanggal);
+                        return d.getFullYear() === y && d.getMonth() === m-1;
+                    }
+                    return true;
+                });
+                const grouped = {};
+                filtered.forEach(s => {
+                    if (!s) return;
+                    const key = s.nama || s.nik || '—';
+                    if (!grouped[key]) grouped[key] = { spd:0,std:0,member:0,pwp:0,sergap:0,sueger:0,ceban:0,psm:0,count:0 };
+                    const g = grouped[key];
+                    g.spd += s.spd||0; g.std += s.std||0; g.member += s.member||0; g.pwp += s.pwp||0;
+                    g.sergap += s.sergap||0; g.sueger += s.sueger||0; g.ceban += s.ceban||0;
+                    if (s.psm) g.psm += Object.values(s.psm).reduce((a,b)=>a+(b||0),0);
+                    g.count++;
+                });
+
+                let entries = Object.entries(grouped);
+                const sortKey = populasiSortColumn;
+                entries.sort((a, b) => {
+                    let valA, valB;
+                    if (sortKey === 'nama') {
+                        valA = a[0].toLowerCase();
+                        valB = b[0].toLowerCase();
+                    } else {
+                        valA = a[1][sortKey] || 0;
+                        valB = b[1][sortKey] || 0;
+                    }
+                    if (valA < valB) return populasiSortOrder === 'asc' ? -1 : 1;
+                    if (valA > valB) return populasiSortOrder === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                const tbody = document.getElementById('populasiBody');
+                if (entries.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Tidak ada data.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = entries.map(([nama, data]) => `
+                    <tr>
+                        <td><strong>${nama}</strong></td>
+                        <td>${data.spd}</td><td>${data.std}</td><td>${data.member}</td>
+                        <td>${data.pwp}</td><td>${data.sergap}</td><td>${data.sueger}</td><td>${data.ceban}</td>
+                        <td>${data.psm}</td><td><span class="badge-soft badge-soft-blue">${data.count} entri</span></td>
+                    </tr>`).join('');
+
+                document.querySelectorAll('#populasiTable thead th[data-sort]').forEach(th => {
+                    const col = th.dataset.sort;
+                    const icon = th.querySelector('i');
+                    if (icon) {
+                        if (col === populasiSortColumn) {
+                            icon.className = populasiSortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+                        } else {
+                            icon.className = 'fas fa-sort';
+                        }
+                    }
+                });
+            };
+
+            // ============ ADMIN TARGET ============
+            function loadAdminTargets() {
+                const t = getTargets();
+                document.getElementById('targetSPD').value = t.spd||0;
+                document.getElementById('targetSTD').value = t.std||0;
+                document.getElementById('targetMember').value = t.member||0;
+                document.querySelector('.target-pwp-p1').value = t.pwp?.p1||0;
+                document.querySelector('.target-pwp-p2').value = t.pwp?.p2||0;
+                document.querySelector('.target-sergap-p1').value = t.sergap?.p1||0;
+                document.querySelector('.target-sergap-p2').value = t.sergap?.p2||0;
+                document.querySelector('.target-sueger-p1').value = t.sueger?.p1||0;
+                document.querySelector('.target-sueger-p2').value = t.sueger?.p2||0;
+                document.querySelector('.target-ceban-p1').value = t.ceban?.p1||0;
+                document.querySelector('.target-ceban-p2').value = t.ceban?.p2||0;
+                renderAllPSMAdminForms();
+            }
+
+            function renderAllPSMAdminForms() { ['p1','p2','p3','p4'].forEach(p => renderPSMAdminForm(p)); }
+            function renderPSMAdminForm(periode) {
+                const container = document.getElementById('psmAdmin' + periode.toUpperCase());
+                const products = getPSMProducts()[periode] || [];
+                const targets = getTargets().psm?.[periode] || {};
+                if (products.length === 0) {
+                    container.innerHTML = '<p class="text-muted small">Belum ada produk.</p>';
+                    return;
+                }
+                container.innerHTML = products.map((prod, idx) => `
+                    <div class="col-md-4 col-sm-6 d-flex align-items-center gap-2 mb-2" data-periode="${periode}" data-index="${idx}">
+                        <input type="text" class="form-control form-control-ios form-control-sm psm-prod-name" 
+                               data-periode="${periode}" data-index="${idx}" value="${prod}">
+                        <input type="number" class="form-control form-control-ios form-control-sm psm-prod-target" 
+                               data-periode="${periode}" data-index="${idx}" 
+                               value="${targets[prod]||0}" style="width:80px;">
+                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                onclick="removePSMProduct('${periode}',${idx})"><i class="fas fa-times"></i></button>
+                    </div>
+                `).join('');
+            }
+            window.addPSMProduct = function(periode) {
+                if (!_psmProducts) _psmProducts = { p1:[], p2:[], p3:[], p4:[] };
+                if (!_psmProducts[periode]) _psmProducts[periode] = [];
+                _psmProducts[periode].push('PSM ' + (_psmProducts[periode].length+1));
+                renderPSMAdminForm(periode);
+            };
+            window.removePSMProduct = function(periode, idx) {
+                if (!confirm('Hapus produk ini?')) return;
+                if (!_psmProducts || !_psmProducts[periode]) return;
+                _psmProducts[periode].splice(idx,1);
+                renderPSMAdminForm(periode);
+            };
+
+            document.getElementById('formAdminTarget').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const t = JSON.parse(JSON.stringify(getTargets()));
+                t.spd = +document.getElementById('targetSPD').value || 0;
+                t.std = +document.getElementById('targetSTD').value || 0;
+                t.member = +document.getElementById('targetMember').value || 0;
+                t.pwp    = { p1: +document.querySelector('.target-pwp-p1').value||0,    p2: +document.querySelector('.target-pwp-p2').value||0 };
+                t.sergap = { p1: +document.querySelector('.target-sergap-p1').value||0, p2: +document.querySelector('.target-sergap-p2').value||0 };
+                t.sueger = { p1: +document.querySelector('.target-sueger-p1').value||0, p2: +document.querySelector('.target-sueger-p2').value||0 };
+                t.ceban  = { p1: +document.querySelector('.target-ceban-p1').value||0,  p2: +document.querySelector('.target-ceban-p2').value||0 };
+
+                ['p1','p2','p3','p4'].forEach(per => { t.psm[per] = {}; });
+
+                const nameInputs = document.querySelectorAll('.psm-prod-name');
+                const p = JSON.parse(JSON.stringify(getPSMProducts()));
+                ['p1','p2','p3','p4'].forEach(per => { p[per] = []; });
+
+                nameInputs.forEach(nameInp => {
+                    const periode = nameInp.dataset.periode;
+                    const idx = parseInt(nameInp.dataset.index);
+                    const newName = nameInp.value.trim() || 'Produk ' + (idx+1);
+                    if (!p[periode]) p[periode] = [];
+                    p[periode][idx] = newName;
+
+                    const targetInp = document.querySelector(`.psm-prod-target[data-periode="${periode}"][data-index="${idx}"]`);
+                    if (targetInp) {
+                        const val = +targetInp.value || 0;
+                        t.psm[periode][newName] = val;
+                    }
+                });
+
+                ['p1','p2','p3','p4'].forEach(per => {
+                    p[per] = p[per].filter(Boolean);
+                });
+
+                openPinModal(async (pin) => {
+                    try {
+                        showLoading('Menyimpan target…');
+                        await saveAllAdminToSheet(pin, t, p);
+                        hideLoading();
+                        showToast('✅ Target berhasil disimpan!');
+                        refreshDashboard();
+                        loadAdminTargets();
+                    } catch(err) {
+                        hideLoading();
+                        const pinErr = document.getElementById('pinError');
+                        if (err.message.includes('PIN')) {
+                            document.getElementById('pinModal').style.display = 'flex';
+                            pinErr.textContent = err.message;
+                            document.getElementById('adminPinInput').style.borderColor = 'var(--red)';
+                        } else {
+                            showToast('❌ Gagal: ' + err.message);
+                        }
+                    }
+                });
+            });
+
+            // ============ TAB NAV ============
+            document.getElementById('segmentedNav').addEventListener('click', function(e) {
+                const btn = e.target.closest('[data-tab]');
+                if (!btn) return;
+                const tabId = btn.dataset.tab;
+                document.querySelectorAll('#segmentedNav .seg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.tab-pane-content').forEach(p => p.classList.remove('active'));
+                const target = document.getElementById('tab-' + tabId);
+                if (target) target.classList.add('active');
+                if (tabId === 'dashboard') refreshDashboard();
+                else if (tabId === 'populasi') { populateNamaFilter(); loadPopulasi(); }
+                else if (tabId === 'admin') loadAdminTargets();
+                else if (tabId === 'input') refreshRecentEntries();
+            });
+
+            // ============ EVENT LISTENER UNTUK SORTING ============
+            document.addEventListener('click', function(e) {
+                const th = e.target.closest('#populasiTable thead th[data-sort]');
+                if (!th) return;
+                const col = th.dataset.sort;
+                if (col === populasiSortColumn) {
+                    populasiSortOrder = (populasiSortOrder === 'asc') ? 'desc' : 'asc';
+                } else {
+                    populasiSortColumn = col;
+                    populasiSortOrder = 'asc';
+                }
+                loadPopulasi();
+            });
+
+            // ============ INIT ============
+            async function init() {
+                const today = new Date().toISOString().split('T')[0];
+                currentDate = today;
+                document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+                document.getElementById('inputTanggal').value = today;
+
+                showLoading('Memuat data dari Google Sheets…');
+                try {
+                    await fetchAll();
+                    hideLoading();
+                    refreshDashboard();
+                    refreshRecentEntries();
+                    populateNamaFilter();
+                    loadPopulasi();
+                    loadAdminTargets();
+                    refreshPSMInputFields();
+                    console.log('✅ Dashboard siap.');
+                } catch(err) {
+                    hideLoading();
+                    showToast('⚠️ Gagal muat data: ' + err.message);
+                    console.error(err);
+                }
+            }
+
+            window.refreshAllData = async function() {
+                showLoading('Memuat ulang data…');
+                try {
+                    await fetchAll(true);
+                    hideLoading();
+                    refreshDashboard();
+                    refreshRecentEntries();
+                    populateNamaFilter();
+                    loadPopulasi();
+                    loadAdminTargets();
+                    showToast('🔄 Data diperbarui.');
+                } catch(err) {
+                    hideLoading();
+                    showToast('❌ Gagal refresh: ' + err.message);
+                }
+            };
+
+            init();
+        })();
+    </script>
+</body>
+</html>
