@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAN-13 Inventory Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        /* Animasi untuk card */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .item-card {
+            animation: fadeInUp 0.3s ease-out forwards;
+            opacity: 0;
+        }
+        
+        /* Animasi untuk modal */
+        .modal-enter {
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* Animasi untuk input focus */
+        .input-focus {
+            transition: all 0.2s ease;
+        }
+        
+        .input-focus:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 pb-20">
+
+    <div class="max-w-md mx-auto p-4">
+        <header class="mb-6 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">EAN-13 STOCK</h1>
+            <button onclick="fetchAllData()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">Refresh</button>
+        </header>
+
+        <!-- SEARCH SECTION -->
+        <div class="mb-6 bg-white p-4 rounded-3xl shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-md">
+            <div class="flex items-center gap-2 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <h2 class="text-sm font-bold text-slate-600">CARI BARANG</h2>
+            </div>
+            
+            <div class="flex gap-2">
+                <div class="flex-1 relative">
+                    <input type="text" id="search-input" 
+                           placeholder="Ketik description, PLU, atau barcode..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl text-sm focus:border-blue-500 outline-none pr-10 input-focus transition-all"
+                           oninput="handleSearch()">
+                    <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors">
+                        ✕
+                    </button>
+                </div>
+                <button id="search-scan-btn" class="bg-slate-800 hover:bg-slate-900 text-white p-3 rounded-xl active:scale-95 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="search-scanner" class="hidden rounded-2xl overflow-hidden border-2 border-blue-500 mt-3 transition-all"></div>
+            
+            <div class="mt-3 flex flex-wrap gap-2">
+                <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-lg transition-all hover:bg-slate-200">• Cari berdasarkan nama barang</span>
+                <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-lg transition-all hover:bg-slate-200">• Cari berdasarkan kode PLU</span>
+                <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-lg transition-all hover:bg-slate-200">• Cari berdasarkan barcode</span>
+            </div>
+        </div>
+
+        <div id="item-container" class="space-y-4">
+            <!-- Items will be loaded here -->
+        </div>
+        
+        <!-- No results message -->
+        <div id="no-results" class="hidden text-center py-10 animate-fadeIn">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="font-bold text-slate-500">Barang tidak ditemukan</h3>
+                <p class="text-sm text-slate-400 mt-1">Coba gunakan kata kunci yang berbeda</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+        <div id="modal-content" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl transform transition-all duration-300">
+            <div class="flex justify-between items-center border-b pb-4">
+                <h2 class="text-xl font-black text-slate-800">Update Stock</h2>
+                <button id="close-modal-btn" class="text-slate-400 bg-slate-100 p-2 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors">✕</button>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Barcode EAN-13</label>
+                <div class="flex gap-2">
+                    <input type="text" id="m-barcode" class="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl font-mono text-sm focus:border-blue-500 outline-none input-focus transition-all" placeholder="Scan barcode...">
+                    <button id="modal-scan-btn" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl active:scale-95 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                    </button>
+                </div>
+                <div id="modal-scanner" class="hidden rounded-2xl overflow-hidden border-2 border-blue-500 mt-2 transition-all"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">PLU</label>
+                    <input type="text" id="m-plu" readonly class="w-full bg-slate-100 p-3 rounded-xl text-sm font-bold text-slate-600 outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Description</label>
+                    <input type="text" id="m-desc" readonly class="w-full bg-slate-100 p-3 rounded-xl text-sm font-bold text-slate-600 outline-none">
+                </div>
+            </div>
+
+            <!-- CURRENT VALUES -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nilai Saat Ini</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="text-center bg-slate-50 p-3 rounded-xl">
+                        <p class="text-[8px] text-slate-400 font-bold uppercase">Rak</p>
+                        <p id="current-rak" class="text-lg font-black text-slate-700">0</p>
+                    </div>
+                    <div class="text-center bg-slate-50 p-3 rounded-xl">
+                        <p class="text-[8px] text-slate-400 font-bold uppercase">Gudang</p>
+                        <p id="current-gudang" class="text-lg font-black text-slate-700">0</p>
+                    </div>
+                    <div class="text-center bg-slate-50 p-3 rounded-xl">
+                        <p class="text-[8px] text-slate-400 font-bold uppercase">Mako</p>
+                        <p id="current-mako" class="text-lg font-black text-slate-700">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SET VALUES -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Set Nilai Baru</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <input type="number" id="m-rak-set" oninput="calcNewTotal()" placeholder="Set Rak" 
+                           class="border-2 border-slate-100 p-3 rounded-xl text-center focus:border-blue-500 outline-none font-bold input-focus">
+                    <input type="number" id="m-gudang-set" oninput="calcNewTotal()" placeholder="Set Gdg" 
+                           class="border-2 border-slate-100 p-3 rounded-xl text-center focus:border-blue-500 outline-none font-bold input-focus">
+                    <input type="number" id="m-mako-set" oninput="calcNewTotal()" placeholder="Set Mko" 
+                           class="border-2 border-slate-100 p-3 rounded-xl text-center focus:border-blue-500 outline-none font-bold input-focus">
+                </div>
+            </div>
+
+            <!-- ADD VALUES -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                    <span>Tambah Nilai</span>
+                    <span class="text-[8px] text-blue-400">(akan ditambahkan ke nilai saat ini)</span>
+                </label>
+                <div class="grid grid-cols-3 gap-3">
+                    <input type="number" id="m-rak-add" oninput="calcNewTotal()" placeholder="+ Rak" 
+                           class="border-2 border-blue-100 p-3 rounded-xl text-center focus:border-blue-500 outline-none font-bold input-focus bg-blue-50">
+                    <input type="number" id="m-gudang-add" oninput="calcNewTotal()" placeholder="+ Gdg" 
+                           class="border-2 border-blue-100 p-3 rounded-xl text-center focus:border-blue-500 outline-none font-bold input-focus bg-blue-50">
+                    <input type="number" id="m-mako-add" oninput="calcNewTotal()" placeholder="+ Mko" 
+                           class="border-2 border-blue-100 p-3 rounded-xl text-center focus:border-blue-500 outline-none font-bold input-focus bg-blue-50">
+                </div>
+            </div>
+
+            <!-- NEW TOTAL PREVIEW -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-4 rounded-2xl flex justify-between items-center text-white shadow-lg shadow-blue-200 transition-all hover:shadow-xl">
+                <div>
+                    <span class="font-bold text-sm tracking-widest uppercase block">Nilai Baru</span>
+                    <span class="text-xs text-blue-200 block mt-1">(Set atau Tambah)</span>
+                </div>
+                <span id="m-new-total-view" class="text-3xl font-black italic">0</span>
+            </div>
+
+            <!-- DIFFERENCE PREVIEW -->
+            <div id="difference-preview" class="hidden bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl text-white text-sm">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold">Perubahan:</span>
+                    <span id="difference-amount" class="font-black text-lg">+0</span>
+                </div>
+                <div id="difference-detail" class="text-xs text-green-100 mt-1"></div>
+            </div>
+
+            <input type="hidden" id="m-row-index">
+            <button id="btn-save" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                SIMPAN PERUBAHAN
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx8LWiohWsHjNtyihuzeo-qe5SPkdMkguFnPqEdh5mtpg6Zl0G52FYcorxbvm7mjK63gA/exec";
+        let html5QrCode;
+        let isSaving = false;
+        let allData = [];
+        let currentSearchKeyword = "";
+        let searchTimeout;
+        let currentValues = { rak: 0, gudang: 0, mako: 0 };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal close button
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+            
+            // Save button
+            document.getElementById('btn-save').addEventListener('click', updateData);
+            
+            // Modal scan button
+            document.getElementById('modal-scan-btn').addEventListener('click', () => startScan('modal'));
+            
+            // Search scan button
+            document.getElementById('search-scan-btn').addEventListener('click', () => startScan('search'));
+            
+            // Search input event listeners
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', function(e) {
+                // Debounce untuk performa
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    handleSearch();
+                }, 300);
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+            
+            // Modal background click
+            document.getElementById('edit-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+            
+            // Escape key to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !document.getElementById('edit-modal').classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+            
+            // Initial load
+            fetchAllData();
+        });
+
+        async function fetchAllData() {
+            const container = document.getElementById('item-container');
+            container.innerHTML = '<div class="text-center py-20 font-bold text-slate-400 animate-pulse">Sinkronisasi Data...</div>';
+            
+            try {
+                const resp = await fetch(WEB_APP_URL);
+                const data = await resp.json();
+                
+                // Process data untuk memastikan semua field ada
+                allData = data.map(item => ({
+                    rowIndex: item.rowIndex || 0,
+                    barcode: item.barcode ? String(item.barcode) : '',
+                    plu: item.plu ? String(item.plu) : '',
+                    description: item.description ? String(item.description) : '',
+                    rak: Number(item.rak) || 0,
+                    gudang: Number(item.gudang) || 0,
+                    mako: Number(item.mako) || 0,
+                    total: Number(item.total) || 0
+                }));
+                
+                // Reset search
+                document.getElementById('search-input').value = '';
+                document.getElementById('clear-search').classList.add('hidden');
+                
+                // Render semua data dengan animasi
+                renderData(allData);
+            } catch (e) {
+                console.error('Fetch error:', e);
+                container.innerHTML = '<div class="bg-red-50 text-red-500 p-4 rounded-2xl text-center font-bold animate-pulse">Koneksi Error. Pastikan URL Script benar.</div>';
+            }
+        }
+
+        function renderData(data) {
+            const container = document.getElementById('item-container');
+            const noResults = document.getElementById('no-results');
+            
+            if (data.length === 0) {
+                container.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+            
+            noResults.classList.add('hidden');
+            container.innerHTML = '';
+            
+            // Tambahkan delay untuk animasi bertahap
+            data.forEach((item, index) => {
+                setTimeout(() => {
+                    const canvasId = `ean-${Date.now()}-${index}`;
+                    const card = document.createElement('div');
+                    card.className = "item-card bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col space-y-4 hover:shadow-md hover:border-slate-300 transition-all duration-300";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <span class="bg-blue-50 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest transition-all hover:bg-blue-100">${item.plu || 'N/A'}</span>
+                                <h3 class="font-black text-slate-800 text-lg uppercase leading-tight mt-1 transition-all hover:text-slate-900">${item.description}</h3>
+                            </div>
+                            <button onclick='openEdit(${JSON.stringify(item)})' class="edit-btn bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold active:scale-90 transition-all duration-200 shadow-sm hover:shadow">Edit</button>
+                        </div>
+                        
+                        <div class="bg-slate-50 rounded-2xl p-4 flex flex-col items-center justify-center transition-all hover:bg-slate-100">
+                            ${item.barcode ? `<svg id="${canvasId}"></svg>` : '<p class="text-red-400 font-bold text-[10px] italic py-2">Barcode Belum Terdaftar</p>'}
+                            <p class="font-mono text-sm font-bold tracking-[0.3em] text-slate-500 mt-1">${item.barcode || ''}</p>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-2 text-center border-t pt-4">
+                            <div class="transition-all hover:bg-slate-50 p-1 rounded-lg"><p class="text-[8px] text-slate-400 font-bold uppercase">Rak</p><p class="font-bold text-slate-700">${item.rak || 0}</p></div>
+                            <div class="transition-all hover:bg-slate-50 p-1 rounded-lg"><p class="text-[8px] text-slate-400 font-bold uppercase">Gudang</p><p class="font-bold text-slate-700">${item.gudang || 0}</p></div>
+                            <div class="transition-all hover:bg-slate-50 p-1 rounded-lg"><p class="text-[8px] text-slate-400 font-bold uppercase">Mako</p><p class="font-bold text-slate-700">${item.mako || 0}</p></div>
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg py-1 transition-all hover:from-blue-700 hover:to-blue-800"><p class="text-[8px] text-blue-200 font-bold uppercase">Total</p><p class="font-black text-white">${item.total || 0}</p></div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+
+                    // Render barcode jika ada
+                    if (item.barcode && item.barcode.trim() !== '') {
+                        setTimeout(() => {
+                            try {
+                                // Coba format EAN13
+                                JsBarcode(`#${canvasId}`, item.barcode, {
+                                    format: "EAN13",
+                                    width: 1.5,
+                                    height: 40,
+                                    displayValue: false,
+                                    margin: 0
+                                });
+                            } catch(e) {
+                                // Fallback ke CODE128
+                                try {
+                                    JsBarcode(`#${canvasId}`, item.barcode, { 
+                                        format: "CODE128", 
+                                        width: 1.2, 
+                                        height: 40, 
+                                        displayValue: false 
+                                    });
+                                } catch(err) {
+                                    console.error('Barcode rendering error:', err);
+                                }
+                            }
+                        }, 100);
+                    }
+                }, index * 50); // Delay bertahap untuk animasi
+            });
+        }
+
+        function handleSearch() {
+            const searchInput = document.getElementById('search-input');
+            const clearBtn = document.getElementById('clear-search');
+            const keyword = searchInput.value.trim();
+            
+            currentSearchKeyword = keyword;
+            
+            // Toggle clear button
+            if (keyword.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            
+            // Jika kosong, tampilkan semua data
+            if (keyword.length === 0) {
+                renderData(allData);
+                return;
+            }
+            
+            // Filter data dengan error handling yang lebih baik
+            const filteredData = allData.filter(item => {
+                try {
+                    const keywordLower = keyword.toLowerCase();
+                    
+                    // Cari di description
+                    const descMatch = item.description && 
+                        item.description.toString().toLowerCase().includes(keywordLower);
+                    
+                    // Cari di PLU (angka)
+                    const pluMatch = item.plu && 
+                        item.plu.toString().includes(keyword);
+                    
+                    // Cari di barcode (angka)
+                    const barcodeMatch = item.barcode && 
+                        item.barcode.toString().includes(keyword);
+                    
+                    return descMatch || pluMatch || barcodeMatch;
+                } catch (error) {
+                    console.error('Search error for item:', item, error);
+                    return false;
+                }
+            });
+            
+            renderData(filteredData);
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('clear-search').classList.add('hidden');
+            currentSearchKeyword = '';
+            renderData(allData);
+        }
+
+        function startScan(type) {
+            const scannerId = type === 'search' ? 'search-scanner' : 'modal-scanner';
+            const scanner = document.getElementById(scannerId);
+            
+            if (scanner.classList.contains('hidden')) {
+                scanner.classList.remove('hidden');
+                
+                // Stop any existing scanner
+                if (html5QrCode && html5QrCode.isScanning) {
+                    html5QrCode.stop();
+                }
+                
+                html5QrCode = new Html5Qrcode(scannerId);
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    { 
+                        fps: 15, 
+                        qrbox: { width: 250, height: 120 } 
+                    }, 
+                    (text) => {
+                        if (type === 'search') {
+                            // Untuk pencarian: isi search input dan langsung search
+                            document.getElementById('search-input').value = text;
+                            handleSearch();
+                        } else {
+                            // Untuk modal: isi barcode field
+                            document.getElementById('m-barcode').value = text;
+                        }
+                        
+                        // Stop scanner setelah berhasil scan
+                        if (html5QrCode && html5QrCode.isScanning) {
+                            html5QrCode.stop().then(() => {
+                                scanner.classList.add('hidden');
+                            }).catch(err => {
+                                console.log("Scanner stop error:", err);
+                                scanner.classList.add('hidden');
+                            });
+                        }
+                    },
+                    (error) => {
+                        // Ignore scanning errors
+                    }
+                ).catch(err => {
+                    alert("Kamera tidak ditemukan atau izin ditolak");
+                    scanner.classList.add('hidden');
+                });
+            } else {
+                scanner.classList.add('hidden');
+                if (html5QrCode && html5QrCode.isScanning) {
+                    html5QrCode.stop().catch(err => console.log("Scanner already stopped"));
+                }
+            }
+        }
+
+        function openEdit(item) {
+            // Reset semua input
+            document.getElementById('m-barcode').value = item.barcode || "";
+            document.getElementById('m-plu').value = item.plu || "";
+            document.getElementById('m-desc').value = item.description || "";
+            document.getElementById('m-row-index').value = item.rowIndex || 0;
+            
+            // Set current values
+            currentValues = {
+                rak: item.rak || 0,
+                gudang: item.gudang || 0,
+                mako: item.mako || 0
+            };
+            
+            // Tampilkan current values
+            document.getElementById('current-rak').textContent = currentValues.rak;
+            document.getElementById('current-gudang').textContent = currentValues.gudang;
+            document.getElementById('current-mako').textContent = currentValues.mako;
+            
+            // Reset input fields
+            document.getElementById('m-rak-set').value = '';
+            document.getElementById('m-gudang-set').value = '';
+            document.getElementById('m-mako-set').value = '';
+            document.getElementById('m-rak-add').value = '';
+            document.getElementById('m-gudang-add').value = '';
+            document.getElementById('m-mako-add').value = '';
+            
+            // Reset button state
+            const btn = document.getElementById('btn-save');
+            btn.disabled = false;
+            btn.innerHTML = "SIMPAN PERUBAHAN";
+            isSaving = false;
+            
+            // Hitung total awal
+            calcNewTotal();
+            
+            // Tampilkan modal dengan animasi
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Tambahkan animasi untuk modal content
+            setTimeout(() => {
+                document.getElementById('modal-content').classList.add('modal-enter');
+            }, 10);
+            
+            // Focus ke input pertama
+            setTimeout(() => {
+                document.getElementById('m-rak-set').focus();
+            }, 300);
+        }
+
+        function closeModal() {
+            if (isSaving) return;
+            
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    console.log("QR Scanner stopped");
+                }).catch(err => {
+                    console.log("QR Scanner stop error:", err);
+                });
+            }
+            
+            // Hide all scanners
+            document.getElementById('modal-scanner').classList.add('hidden');
+            document.getElementById('search-scanner').classList.add('hidden');
+            
+            // Remove modal animation class
+            document.getElementById('modal-content').classList.remove('modal-enter');
+            
+            document.getElementById('edit-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function calcNewTotal() {
+            // Get set values
+            const setRak = parseInt(document.getElementById('m-rak-set').value) || 0;
+            const setGudang = parseInt(document.getElementById('m-gudang-set').value) || 0;
+            const setMako = parseInt(document.getElementById('m-mako-set').value) || 0;
+            
+            // Get add values
+            const addRak = parseInt(document.getElementById('m-rak-add').value) || 0;
+            const addGudang = parseInt(document.getElementById('m-gudang-add').value) || 0;
+            const addMako = parseInt(document.getElementById('m-mako-add').value) || 0;
+            
+            // Calculate final values
+            let finalRak, finalGudang, finalMako;
+            
+            // Jika ada nilai di SET, gunakan SET. Jika tidak, gunakan CURRENT + ADD
+            finalRak = setRak > 0 ? setRak : currentValues.rak + addRak;
+            finalGudang = setGudang > 0 ? setGudang : currentValues.gudang + addGudang;
+            finalMako = setMako > 0 ? setMako : currentValues.mako + addMako;
+            
+            // Calculate totals
+            const newTotal = finalRak + finalGudang + finalMako;
+            const currentTotal = currentValues.rak + currentValues.gudang + currentValues.mako;
+            const difference = newTotal - currentTotal;
+            
+            // Update display
+            document.getElementById('m-new-total-view').textContent = newTotal;
+            
+            // Update difference preview
+            const diffPreview = document.getElementById('difference-preview');
+            const diffAmount = document.getElementById('difference-amount');
+            const diffDetail = document.getElementById('difference-detail');
+            
+            if (difference !== 0) {
+                diffPreview.classList.remove('hidden');
+                diffAmount.textContent = difference > 0 ? `+${difference}` : `${difference}`;
+                
+                // Detail perubahan
+                const detailParts = [];
+                if (setRak > 0 || addRak !== 0) {
+                    const rakDiff = finalRak - currentValues.rak;
+                    detailParts.push(`Rak: ${rakDiff > 0 ? '+' : ''}${rakDiff}`);
+                }
+                if (setGudang > 0 || addGudang !== 0) {
+                    const gudangDiff = finalGudang - currentValues.gudang;
+                    detailParts.push(`Gudang: ${gudangDiff > 0 ? '+' : ''}${gudangDiff}`);
+                }
+                if (setMako > 0 || addMako !== 0) {
+                    const makoDiff = finalMako - currentValues.mako;
+                    detailParts.push(`Mako: ${makoDiff > 0 ? '+' : ''}${makoDiff}`);
+                }
+                
+                diffDetail.textContent = detailParts.join(' • ');
+            } else {
+                diffPreview.classList.add('hidden');
+            }
+        }
+
+        async function updateData() {
+            if (isSaving) return;
+            
+            const btn = document.getElementById('btn-save');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-pulse">MENYIMPAN...</span>';
+            isSaving = true;
+            
+            // Calculate final values (same as calcNewTotal)
+            const setRak = parseInt(document.getElementById('m-rak-set').value) || 0;
+            const setGudang = parseInt(document.getElementById('m-gudang-set').value) || 0;
+            const setMako = parseInt(document.getElementById('m-mako-set').value) || 0;
+            
+            const addRak = parseInt(document.getElementById('m-rak-add').value) || 0;
+            const addGudang = parseInt(document.getElementById('m-gudang-add').value) || 0;
+            const addMako = parseInt(document.getElementById('m-mako-add').value) || 0;
+            
+            let finalRak = setRak > 0 ? setRak : currentValues.rak + addRak;
+            let finalGudang = setGudang > 0 ? setGudang : currentValues.gudang + addGudang;
+            let finalMako = setMako > 0 ? setMako : currentValues.mako + addMako;
+            
+            const payload = {
+                barcode: document.getElementById('m-barcode').value || "",
+                plu: document.getElementById('m-plu').value || "",
+                description: document.getElementById('m-desc').value || "",
+                rak: finalRak,
+                gudang: finalGudang,
+                mako: finalMako,
+                total: finalRak + finalGudang + finalMako,
+                rowIndex: parseInt(document.getElementById('m-row-index').value) || 0
+            };
+            
+            console.log('Sending payload:', payload);
+            
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    const result = await response.text();
+                    console.log('Server response:', result);
+                    
+                    // Success animation
+                    btn.innerHTML = '<span class="text-green-300">✓ BERHASIL!</span>';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                        isSaving = false;
+                        
+                        closeModal();
+                        
+                        // Refresh data dan pertahankan pencarian jika ada
+                        fetchAllData().then(() => {
+                            if (currentSearchKeyword) {
+                                document.getElementById('search-input').value = currentSearchKeyword;
+                                handleSearch();
+                            }
+                        });
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('Update error:', error);
+                
+                // Error animation
+                btn.innerHTML = '<span class="text-red-300">✗ GAGAL!</span>';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    isSaving = false;
+                    alert("Gagal menyimpan data. Error: " + error.message);
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
