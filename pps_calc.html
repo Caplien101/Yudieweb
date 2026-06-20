@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PPS Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* iOS system palette – light */
+  --bg:          #f2f2f7;
+  --bg2:         #ffffff;
+  --bg3:         #e5e5ea;
+  --sep:         rgba(60,60,67,.18);
+  --sep-strong:  rgba(60,60,67,.3);
+  --text:        #000000;
+  --text2:       rgba(60,60,67,.6);
+  --text3:       rgba(60,60,67,.3);
+  --fill:        rgba(120,120,128,.12);
+  --fill2:       rgba(120,120,128,.08);
+  --blue:        #007aff;
+  --green:       #34c759;
+  --red:         #ff3b30;
+  --orange:      #ff9500;
+  --indigo:      #5856d6;
+  --teal:        #32ade6;
+  --r-sm:        10px;
+  --r-md:        14px;
+  --r-lg:        18px;
+  --sans:        'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  min-height:100vh;
+  padding: env(safe-area-inset-top,0) 0 60px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ─── Page Header (iOS large title style) ─── */
+.page-nav{
+  padding: 20px 20px 0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.app-icon{
+  width:44px;height:44px;
+  border-radius:12px;
+  background:linear-gradient(145deg,var(--indigo),var(--blue));
+  display:grid;place-items:center;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+.large-title{
+  font-size:clamp(1.5rem,5vw,1.95rem);
+  font-weight:800;
+  letter-spacing:-.03em;
+  line-height:1;
+}
+.large-subtitle{
+  font-size:.78rem;
+  color:var(--text2);
+  margin-top:3px;
+  font-weight:400;
+}
+
+/* ─── Section wrapper ─── */
+.section{padding:0 16px;margin-top:28px;}
+.section-label{
+  font-size:.72rem;
+  font-weight:600;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--text2);
+  padding:0 6px;
+  margin-bottom:8px;
+}
+
+/* ─── iOS Grouped Card ─── */
+.ios-card{
+  background:var(--bg2);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+}
+
+/* ─── KPI Strip ─── */
+.kpi-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  background:var(--sep);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+}
+.kpi-cell{
+  background:var(--bg2);
+  padding:16px 12px;
+  text-align:center;
+}
+.kpi-label{
+  font-size:.65rem;
+  font-weight:600;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--text2);
+  margin-bottom:6px;
+}
+.kpi-val{
+  font-size:1.65rem;
+  font-weight:700;
+  letter-spacing:-.03em;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+#totalScore{color:var(--blue)}
+#targetView{color:var(--text)}
+#gapView   {color:var(--orange)}
+
+/* ─── Progress card ─── */
+.prog-card{
+  background:var(--bg2);
+  border-radius:var(--r-lg);
+  padding:18px 16px;
+}
+.prog-meta{
+  display:flex;
+  justify-content:space-between;
+  font-size:.75rem;
+  color:var(--text2);
+  margin-bottom:10px;
+  font-weight:500;
+}
+.prog-meta #progressPct{color:var(--text);font-weight:700}
+.prog-track{
+  height:8px;
+  background:var(--fill);
+  border-radius:999px;
+  overflow:hidden;
+}
+#progressBar{
+  height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--teal));
+  border-radius:999px;
+  width:0%;
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:12px;
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:600;
+}
+.pill-green{background:rgba(48,209,88,.15);color:var(--green);}
+.pill-red  {background:rgba(255,69,58,.12); color:var(--red);}
+
+/* ─── Table rows (iOS inset list style) ─── */
+.ind-row{
+  display:flex;
+  align-items:center;
+  padding:12px 16px;
+  gap:10px;
+  border-top:1px solid var(--sep);
+}
+.ind-row:first-child{border-top:none;}
+.ind-name{
+  width:62px;
+  font-size:.85rem;
+  font-weight:700;
+  flex-shrink:0;
+}
+.ind-weight{
+  width:38px;
+  font-size:.72rem;
+  color:var(--text2);
+  flex-shrink:0;
+}
+.ind-input-wrap{
+  display:flex;
+  gap:8px;
+  flex:1;
+  min-width:0;
+}
+.ind-input-group{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  flex:1;
+  min-width:0;
+}
+.ind-input-group span{
+  font-size:.6rem;
+  font-weight:600;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+.ind-input-group input{
+  background:var(--fill);
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:.88rem;
+  font-weight:500;
+  padding:7px 10px;
+  width:100%;
+  outline:none;
+  transition:border-color .15s,background .15s;
+  font-variant-numeric:tabular-nums;
+}
+.ind-input-group input::placeholder{color:var(--text3)}
+.ind-input-group input:focus{
+  border-color:var(--blue);
+  background:rgba(10,132,255,.1);
+}
+.ind-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:4px;
+  flex-shrink:0;
+  width:72px;
+}
+.ach-badge{
+  font-size:.72rem;
+  font-weight:700;
+  padding:3px 8px;
+  border-radius:8px;
+  font-variant-numeric:tabular-nums;
+}
+.ach-under{background:rgba(255,69,58,.15); color:var(--red);}
+.ach-ok   {background:rgba(48,209,88,.15); color:var(--green);}
+.ach-over {background:rgba(10,132,255,.15);color:var(--blue);}
+.score-val{
+  font-size:.8rem;
+  color:var(--text2);
+  font-variant-numeric:tabular-nums;
+  font-weight:500;
+}
+
+/* ─── Config row ─── */
+.cfg-row{
+  display:flex;
+  align-items:center;
+  padding:14px 16px;
+  gap:14px;
+  border-top:1px solid var(--sep);
+}
+.cfg-row:first-child{border-top:none;}
+.cfg-label{
+  font-size:.85rem;
+  font-weight:500;
+  flex:1;
+  color:var(--text);
+}
+.cfg-row input[type="number"]{
+  background:var(--fill);
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:.9rem;
+  font-weight:600;
+  padding:8px 12px;
+  width:100px;
+  outline:none;
+  text-align:right;
+  transition:border-color .15s;
+  font-variant-numeric:tabular-nums;
+}
+.cfg-row input[type="number"]:focus{border-color:var(--blue);}
+.cfg-row select{
+  background:var(--fill);
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:.85rem;
+  font-weight:500;
+  padding:8px 12px;
+  flex:1;
+  outline:none;
+  transition:border-color .15s;
+  -webkit-appearance:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(60,60,67,.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  padding-right:32px;
+}
+.cfg-row select:focus{border-color:var(--blue);}
+.cfg-row select option{background:#ffffff;}
+
+/* ─── iOS-style buttons ─── */
+.btn-row{
+  display:flex;
+  gap:10px;
+  padding:12px 16px;
+  border-top:1px solid var(--sep);
+}
+.ios-btn{
+  flex:1;
+  padding:13px;
+  border-radius:var(--r-md);
+  border:none;
+  font-family:var(--sans);
+  font-size:.9rem;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  transition:opacity .15s,transform .1s;
+  -webkit-tap-highlight-color:transparent;
+}
+.ios-btn:active{opacity:.7;transform:scale(.97);}
+.btn-blue  {background:var(--blue);color:#fff;}
+.btn-fill  {background:var(--fill);color:var(--text);}
+.btn-green {background:var(--green);color:#fff;}
+
+/* ─── Simulate btn row ─── */
+.sim-btn-row{
+  padding:12px 16px;
+  border-top:1px solid var(--sep);
+}
+.sim-btn-row .ios-btn{width:100%;}
+
+/* ─── Info result box ─── */
+.result-box{
+  margin:0 16px 16px;
+  padding:14px 16px;
+  border-radius:var(--r-md);
+  font-size:.82rem;
+  line-height:1.75;
+  background:rgba(10,132,255,.1);
+  border:1px solid rgba(10,132,255,.2);
+}
+.result-box.green-box{
+  background:rgba(48,209,88,.08);
+  border-color:rgba(48,209,88,.2);
+}
+.result-box.warn-box{
+  background:rgba(255,159,10,.08);
+  border-color:rgba(255,159,10,.2);
+  color:var(--orange);
+}
+.result-box b{color:var(--text);font-weight:700;}
+.result-box .big-qty{
+  display:block;
+  font-size:2rem;
+  font-weight:800;
+  letter-spacing:-.03em;
+  color:var(--blue);
+  margin-top:6px;
+  font-variant-numeric:tabular-nums;
+}
+.result-box hr{border:none;border-top:1px solid var(--sep);margin:8px 0;}
+
+/* ─── Responsive ─── */
+@media(max-width:480px){
+  .kpi-val{font-size:1.25rem;}
+  .large-title{font-size:1.5rem;}
+  .ind-right{width:66px;}
+}
+
+/* ─── Table header (top of indicator section) ─── */
+.ind-thead{
+  display:flex;
+  padding:8px 16px;
+  font-size:.62rem;
+  font-weight:600;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--text3);
+  gap:10px;
+}
+.ind-thead .h-name{width:62px;flex-shrink:0;}
+.ind-thead .h-wgt {width:38px;flex-shrink:0;}
+.ind-thead .h-inp {flex:1;}
+.ind-thead .h-r   {width:72px;flex-shrink:0;text-align:right;}
+</style>
+</head>
+<body>
+
+<!-- Page Header -->
+<div class="page-nav">
+  <div class="app-icon"><i class="bi bi-calculator-fill" style="color:#fff"></i></div>
+  <div>
+    <div class="large-title">PPS Calculator</div>
+    <div class="large-subtitle">Simulasi pencapaian indikator kinerja</div>
+  </div>
+</div>
+
+<!-- KPI Strip -->
+<div class="section">
+  <div class="kpi-row">
+    <div class="kpi-cell">
+      <div class="kpi-label">Total Score</div>
+      <div id="totalScore" class="kpi-val">0.00</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Target</div>
+      <div id="targetView" class="kpi-val">100</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Selisih</div>
+      <div id="gapView" class="kpi-val">0.00</div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="section">
+  <div class="prog-card">
+    <div class="prog-meta">
+      <span>Pencapaian</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="prog-track"><div id="progressBar"></div></div>
+    <div id="statusArea"></div>
+  </div>
+</div>
+
+<!-- Data Indikator -->
+<div class="section">
+  <div class="section-label">Data Indikator</div>
+  <div class="ios-card">
+    <div class="ind-thead">
+      <span class="h-name">Nama</span>
+      <span class="h-wgt">Bobot</span>
+      <span class="h-inp">Target &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Actual</span>
+      <span class="h-r">Ach / Score</span>
+    </div>
+    <div id="tbody"></div>
+  </div>
+</div>
+
+<!-- Konfigurasi (di bawah indikator) -->
+<div class="section">
+  <div class="section-label">Konfigurasi</div>
+  <div class="ios-card">
+    <div class="cfg-row">
+      <span class="cfg-label">Target Score</span>
+      <input type="number" id="targetScore" value="100">
+    </div>
+    <div class="btn-row">
+      <button class="ios-btn btn-blue" onclick="calculateAll()">
+        <i class="bi bi-lightning-charge-fill"></i> Hitung
+      </button>
+      <button class="ios-btn btn-fill" onclick="resetForm()">
+        <i class="bi bi-arrow-clockwise"></i> Reset
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Simulasi Indikator -->
+<div class="section">
+  <div class="section-label">Simulasi Indikator</div>
+  <div class="ios-card">
+    <div class="cfg-row">
+      <span class="cfg-label">Pilih Indikator</span>
+      <select id="indicatorSelect" style="width:130px;flex:unset;">
+        <option value="apc">APC</option>
+        <option value="psm">PSM</option>
+        <option value="pwp">PWP</option>
+        <option value="sergap">Sergap</option>
+      </select>
+    </div>
+    <div class="sim-btn-row">
+      <button class="ios-btn btn-green" onclick="simulateOne()">
+        <i class="bi bi-play-fill"></i> Hitung Kebutuhan
+      </button>
+    </div>
+  </div>
+  <div id="simulation" style="margin-top:10px;"></div>
+</div>
+
+<!-- Rekomendasi -->
+<div class="section">
+  <div class="section-label">Rekomendasi Terbaik</div>
+  <div id="recommendation"></div>
+</div>
+
+<script>
+const weights={apc:25,psm:20,pwp:25,sergap:30};
+const labels={apc:'APC',psm:'PSM',pwp:'PWP',sergap:'Sergap'};
+let ach={},targets={},actuals={},totalScore=0;
+
+const tbody=document.getElementById('tbody');
+Object.keys(weights).forEach(k=>{
+  tbody.innerHTML+=`
+  <div class="ind-row">
+    <div class="ind-name">${labels[k]}</div>
+    <div class="ind-weight">${weights[k]}%</div>
+    <div class="ind-input-wrap">
+      <div class="ind-input-group">
+        <span>Target</span>
+        <input type="number" id="t_${k}" placeholder="0">
+      </div>
+      <div class="ind-input-group">
+        <span>Actual</span>
+        <input type="number" id="a_${k}" placeholder="0">
+      </div>
+    </div>
+    <div class="ind-right">
+      <span id="ach_${k}" class="ach-badge ach-under">0%</span>
+      <span id="score_${k}" class="score-val">0.00</span>
+    </div>
+  </div>`;
+});
+
+function calculateAll(){
+  totalScore=0;
+  for(const k in weights){
+    targets[k]=Number(document.getElementById('t_'+k).value)||0;
+    actuals[k]=Number(document.getElementById('a_'+k).value)||0;
+    ach[k]=targets[k]>0?(actuals[k]/targets[k])*100:0;
+    let score=ach[k]*(weights[k]/100);
+    totalScore+=score;
+    let cls=ach[k]<100?'ach-under':ach[k]===100?'ach-ok':'ach-over';
+    document.getElementById('ach_'+k).className=`ach-badge ${cls}`;
+    document.getElementById('ach_'+k).innerText=ach[k].toFixed(2)+'%';
+    document.getElementById('score_'+k).innerText=score.toFixed(2);
+  }
+  const target=Number(document.getElementById('targetScore').value)||100;
+  const gap=(target-totalScore);
+  document.getElementById('totalScore').innerText=totalScore.toFixed(2);
+  document.getElementById('targetView').innerText=target.toFixed(2);
+
+  const gapEl=document.getElementById('gapView');
+  gapEl.innerText=gap.toFixed(2);
+  gapEl.style.color=gap<=0?'var(--green)':'var(--orange)';
+
+  let pct=Math.max(0,(totalScore/target)*100);
+  const barPct=Math.min(pct,100);
+  document.getElementById('progressBar').style.width=barPct+'%';
+  document.getElementById('progressPct').innerText=barPct.toFixed(1)+'%';
+
+  if(totalScore>=target){
+    document.getElementById('statusArea').innerHTML='<span class="status-pill pill-green"><i class="bi bi-checkmark-circle-fill"></i><i class="bi bi-check-circle-fill"></i> Target tercapai</span>';
+  }else{
+    document.getElementById('statusArea').innerHTML=`<span class="status-pill pill-red"><i class="bi bi-exclamation-circle-fill"></i> Kurang ${gap.toFixed(2)} poin</span>`;
+  }
+  recommend();
+}
+
+function simulateOne(){
+  const key=document.getElementById('indicatorSelect').value;
+  const target=Number(document.getElementById('targetScore').value)||100;
+  const gap=target-totalScore;
+  if(gap<=0){
+    document.getElementById('simulation').innerHTML='<div class="result-box green-box">Target sudah tercapai. Simulasi tetap dapat digunakan sebagai referensi.</div>';
+    return;
+  }
+  const addAch=gap/(weights[key]/100);
+  const neededAch=ach[key]+addAch;
+  const requiredQty=Math.ceil((neededAch/100)*targets[key]);
+  const addQty=Math.max(0,requiredQty-actuals[key]);
+  document.getElementById('simulation').innerHTML=`
+  <div class="result-box">
+    <div>Achievement saat ini: <b>${ach[key].toFixed(2)}%</b></div>
+    <div>Achievement dibutuhkan: <b>${neededAch.toFixed(2)}%</b></div>
+    <hr>
+    <div>Qty minimum yang harus dicapai: <b>${requiredQty}</b></div>
+    <span class="big-qty">+${addQty} Qty</span>
+  </div>`;
+}
+
+function recommend(){
+  const target=Number(document.getElementById('targetScore').value)||100;
+  const gap=target-totalScore;
+  if(gap<=0){
+    document.getElementById('recommendation').innerHTML='<div class="result-box green-box">Semua target telah tercapai.</div>';
+    return;
+  }
+  let best=null;
+  for(const k in weights){
+    if(!targets[k]) continue;
+    const addAch=gap/(weights[k]/100);
+    const needAch=ach[k]+addAch;
+    const qty=Math.ceil((needAch/100)*targets[k]);
+    const addQty=Math.max(0,qty-actuals[k]);
+    if(best===null||addQty<best.addQty){best={k,addQty,qty,needAch};}
+  }
+  if(!best){
+    document.getElementById('recommendation').innerHTML='<div class="result-box warn-box">Isi data indikator terlebih dahulu.</div>';
+    return;
+  }
+  document.getElementById('recommendation').innerHTML=`
+  <div class="result-box">
+    <div><b>${labels[best.k]}</b> — indikator paling efisien untuk dikejar</div>
+    <hr>
+    <div>Achievement target: <b>${best.needAch.toFixed(2)}%</b></div>
+    <div>Qty minimum: <b>${best.qty}</b></div>
+    <span class="big-qty">+${best.addQty} Qty</span>
+  </div>`;
+}
+
+function resetForm(){
+  document.querySelectorAll('input').forEach(i=>{if(i.id!=='targetScore')i.value='';});
+  location.reload();
+}
+</script>
+</body>
+</html>
