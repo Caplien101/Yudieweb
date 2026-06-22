@@ -222,7 +222,46 @@ input[type=date].ios-field{width:152px;font-weight:500;color:var(--blue);}
 #toast i{font-size:15px;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ── Spinner ── */
+/* ── Best Estimate Banner ── */
+.be-banner{
+  border-radius:var(--r);overflow:hidden;
+  box-shadow:var(--sh);margin-top:0;
+}
+.be-header{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 16px 12px;
+}
+.be-header-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;color:#fff;flex-shrink:0;
+}
+.be-header-meta{flex:1;}
+.be-header-title{font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.be-header-sub{font-size:12px;margin-top:1px;opacity:.7;}
+.be-value{font-size:26px;font-weight:800;letter-spacing:-.8px;line-height:1;}
+.be-body{
+  background:var(--card);
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-top:.5px solid var(--sep);
+}
+.be-stat{
+  padding:12px 14px;
+  border-right:.5px solid var(--sep);
+}
+.be-stat:last-child{border-right:none;}
+.be-stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--lbl3);margin-bottom:4px;}
+.be-stat-val{font-size:16px;font-weight:800;letter-spacing:-.4px;}
+.be-stat-sub{font-size:11px;color:var(--lbl3);margin-top:2px;}
+.be-formula{
+  background:var(--fill);
+  padding:10px 16px;
+  font-size:11.5px;color:var(--lbl3);
+  display:flex;align-items:center;gap:6px;
+  border-top:.5px solid var(--sep);
+}
+.be-formula i{font-size:12px;flex-shrink:0;}
+
 .spin{animation:spin .8s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
@@ -234,7 +273,7 @@ input[type=date].ios-field{width:152px;font-weight:500;color:var(--blue);}
   <div class="nav-inner">
     <div class="nav-brand">
       <div class="nav-brand-icon"><i class="bi bi-shop"></i></div>
-      <span class="nav-brand-text" id="storeName">SAT SCTA</span>
+      <span class="nav-brand-text" id="storeName">SAT SCTA CG20</span>
     </div>
     <div class="nav-right">
       <div class="sync-indicator offline" id="syncStatus">
@@ -329,6 +368,8 @@ input[type=date].ios-field{width:152px;font-weight:500;color:var(--blue);}
   </div>
   <div class="sec-label">Rekapitulasi</div>
   <div id="hist-summary"></div>
+  <div id="hist-be-label"></div>
+  <div id="hist-best-estimate"></div>
   <div class="sec-label">Data Harian</div>
   <div id="history-list"></div>
 </div>
@@ -514,7 +555,7 @@ let cache = {
    (menghindari CORS sepenuhnya,
     semua operasi lewat GET)
 ════════════════════════════ */
-let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8-LAINdvPfPZ0txmoFx_9E3MXJ4qcJDKelzfzr3L0_YztsohmNGz8OHDRPtnZzC0u/exec';
+let SCRIPT_URL = localStorage.getItem('mm_script_url') || '';
 
 // Persist targets in localStorage so they survive refresh
 function persistTargets() {
@@ -833,7 +874,7 @@ function renderHistory(){
       <div class="log-hdr">
         <div class="log-hdr-icon"><i class="bi bi-calendar-check"></i></div>
         <div><div class="log-date">${fmtDate(r.date)}</div>${updInfo?`<div class="log-meta">${updInfo}</div>`:''}</div>
-        <button class="log-del" onclick="deleteRecord('${r.date}')"><i class="bi bi-trash3"></i></button>
+        
       </div>
       <div class="log-body"><div class="chip-grid">
         ${mkChip('SPD',  fN(r.spd),              r.spd,  dSpd,           false,'var(--blue)')}
@@ -847,8 +888,9 @@ function renderHistory(){
   }).join('');
 }
 
-function renderHistSummary(recs,t,wd){
-  const el=$('hist-summary'); if(!recs.length){el.innerHTML='';return;}
+function renderHistSummary(recs, t, wd){
+  const el=$('hist-summary');
+  if(!recs.length){ el.innerHTML=''; $('hist-best-estimate').innerHTML=''; return; }
   const sum=key=>recs.reduce((a,r)=>a+(r[key]??0),0);
   const avg=key=>{const v=recs.map(r=>r[key]).filter(x=>x!=null&&!isNaN(x));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
   const spdSum=sum('spd'),stdSum=sum('std'),apcAvg=avg('apc'),gmAvg=avg('gm'),oosAvg=avg('oos'),nsbSum=sum('nsb');
@@ -879,6 +921,110 @@ function renderHistSummary(recs,t,wd){
       ${shM('NSB',nsbSum,tNsb,false,nsbSum<0?'var(--red)':'var(--indigo)')}
     </div>
   </div>`;
+  renderBestEstimate(recs, t, wd);
+  // Show label only when banner is rendered
+  const beLabel = $('hist-be-label');
+  if (beLabel) beLabel.innerHTML = recs.length && t.spd != null
+    ? '<div class="sec-label">Best Estimate SPD</div>' : '';
+}
+
+function renderBestEstimate(recs, t, wd) {
+  const el = $('hist-best-estimate');
+  if (!el) return;
+
+  const tSpd  = t.spd  != null ? +t.spd  : null;
+  const spdSum = recs.reduce((a, r) => a + (r.spd ?? 0), 0);
+
+  // Sisa hari kerja = total hari kerja - jumlah hari yang sudah diinput
+  const daysUsed    = recs.length;
+  const daysLeft    = Math.max(0, wd - daysUsed);
+
+  // Sembunyikan banner kalau target SPD belum diset atau tidak ada sisa hari
+  if (tSpd === null) { el.innerHTML = ''; return; }
+
+  // Best estimate SPD harian yang dibutuhkan
+  const gap = tSpd - spdSum;
+  const beValue = daysLeft > 0 ? gap / daysLeft : null;
+
+  // Status
+  const achieved  = spdSum >= tSpd;
+  const onTrack   = beValue !== null && beValue <= (tSpd / wd) * 1.15; // ≤115% target harian
+  const tight     = beValue !== null && beValue > (tSpd / wd) * 1.15 && beValue <= (tSpd / wd) * 1.4;
+  const hardToCatch = beValue !== null && beValue > (tSpd / wd) * 1.4;
+
+  let bgGrad, iconBg, icon, statusLabel, statusSub;
+  if (achieved) {
+    bgGrad   = 'linear-gradient(135deg,#34C759,#30D158)';
+    iconBg   = 'rgba(255,255,255,.25)';
+    icon     = 'bi-trophy-fill';
+    statusLabel = 'Target Tercapai! 🎉';
+    statusSub   = `Aktual melampaui target ${MNS[histMon]} ${histYear}`;
+  } else if (daysLeft === 0) {
+    bgGrad   = 'linear-gradient(135deg,#FF3B30,#FF453A)';
+    iconBg   = 'rgba(255,255,255,.2)';
+    icon     = 'bi-x-circle-fill';
+    statusLabel = 'Hari Kerja Habis';
+    statusSub   = `Target tidak tercapai di ${MNS[histMon]} ${histYear}`;
+  } else if (onTrack) {
+    bgGrad   = 'linear-gradient(135deg,#007AFF,#5856D6)';
+    iconBg   = 'rgba(255,255,255,.2)';
+    icon     = 'bi-graph-up-arrow';
+    statusLabel = 'On Track';
+    statusSub   = `Pertahankan ritme ini untuk capai target`;
+  } else if (tight) {
+    bgGrad   = 'linear-gradient(135deg,#FF9500,#FF6B00)';
+    iconBg   = 'rgba(255,255,255,.2)';
+    icon     = 'bi-exclamation-triangle-fill';
+    statusLabel = 'Perlu Akselerasi';
+    statusSub   = `SPD harian perlu ditingkatkan`;
+  } else {
+    bgGrad   = 'linear-gradient(135deg,#FF3B30,#FF453A)';
+    iconBg   = 'rgba(255,255,255,.2)';
+    icon     = 'bi-fire';
+    statusLabel = 'Gap Besar';
+    statusSub   = `Butuh upaya ekstra untuk kejar target`;
+  }
+
+  const dailyTgt = tSpd / wd;
+  const pctDone  = Math.min(100, (spdSum / tSpd) * 100);
+
+  el.innerHTML = `
+    <div class="be-banner" style="margin-top:0;">
+      <div class="be-header" style="background:${bgGrad};color:#fff;">
+        <div class="be-header-icon" style="background:${iconBg};">
+          <i class="bi ${icon}"></i>
+        </div>
+        <div class="be-header-meta">
+          <div class="be-header-title">${statusLabel}</div>
+          <div class="be-header-sub">${statusSub}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;font-weight:600;opacity:.75;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Best Estimate</div>
+          <div class="be-value">${achieved ? '✓' : beValue !== null ? fN(beValue, 1) : '—'}</div>
+          ${!achieved && beValue !== null ? '<div style="font-size:11px;opacity:.8;margin-top:2px;">per hari kerja</div>' : ''}
+        </div>
+      </div>
+
+      <div class="be-body">
+        <div class="be-stat">
+          <div class="be-stat-label">Aktual SPD</div>
+          <div class="be-stat-val" style="color:var(--blue);">${fN(spdSum, 0)}</div>
+          <div class="be-stat-sub">${pctDone.toFixed(1)}% dari target</div>
+        </div>
+        <div class="be-stat">
+          <div class="be-stat-label">Sisa Gap</div>
+          <div class="be-stat-val" style="color:${gap<=0?'var(--green)':'var(--red)'};">${gap<=0?'0':fN(gap,0)}</div>
+          <div class="be-stat-sub">dari target ${fN(tSpd,0)}</div>
+        </div>
+        <div class="be-stat">
+          <div class="be-stat-label">Sisa Hari Kerja</div>
+          <div class="be-stat-val" style="color:${daysLeft<=3?'var(--red)':daysLeft<=7?'var(--orange)':'var(--lbl)'};">${daysLeft}</div>
+          <div class="be-stat-sub">dari ${wd} hari kerja</div>
+        </div>
+      </div>
+
+      
+    </div>`;
 }
 
 function mkChip(label,val,actual,tgt,lb,color){
@@ -935,13 +1081,50 @@ function renderCompare(){
   const el=$('compare-area');
   if(!recs.length){el.innerHTML=emptyState('bi-bar-chart-line','Tidak Ada Data',`Belum ada data untuk ${MN[cmpMon]} ${cmpYear}.`);return;}
   if(cmpView==='daily'){
-    const todayRec=recs.find(r=>r.date===today())||recs[0];
-    const cards=META.map(m=>{
-      const act=todayRec[m.key];
-      const tgt=m.sum?t[m.key]!=null?+t[m.key]/wd:null:t[m.key]!=null?+t[m.key]:null;
-      return cmpCard(m,act,tgt,'÷'+wd+' hari kerja');
+    // Harian = average semua hari yang sudah diinput (bukan data hari terakhir)
+    // Pengecualian NSB: tetap sum bulanan (actual & target)
+    const daysIn = recs.length;
+    const avg = key => {
+      const v = recs.map(r => r[key]).filter(x => x != null && !isNaN(x));
+      return v.length ? v.reduce((a,b) => a+b, 0) / v.length : null;
+    };
+    const sum = key => recs.reduce((a,r) => a + (r[key] ?? 0), 0);
+
+    const latestDate = recs[0].date; // recs sorted desc
+    const firstDate  = recs[recs.length-1].date;
+
+    const cards = META.map(m => {
+      let act, tgt, src;
+      let dec;
+      if (m.key === 'nsb') {
+        // NSB: sum aktual bulan, target bulanan penuh, 0 desimal
+        act = sum('nsb');
+        tgt = t.nsb != null ? +t.nsb : null;
+        src = 'Akumulasi bulan';
+        dec = 0;
+      } else if (m.sum) {
+        // SPD & STD: average per hari vs target harian (bulanan ÷ hari kerja), 1 desimal
+        act = avg(m.key);
+        tgt = t[m.key] != null ? +t[m.key] / wd : null;
+        src = 'Rata-rata harian';
+        dec = 1;
+      } else {
+        // APC, GM%, OOS: average vs target harian langsung
+        act = avg(m.key);
+        tgt = t[m.key] != null ? +t[m.key] : null;
+        src = 'Rata-rata harian';
+        dec = 1;
+      }
+      return cmpCard(m, act, tgt, src, dec);
     }).join('');
-    el.innerHTML=`<div class="sec-label" style="margin-top:14px;">Data vs Target Harian</div><div class="cmp-grid">${cards}</div><div class="period-info"><i class="bi bi-calendar-day"></i>${fmtDate(recs[0].date)}</div>`;
+
+    const rangeLabel = firstDate === latestDate
+      ? fmtDate(latestDate)
+      : fmtDate(firstDate) + ' – ' + fmtDate(latestDate);
+
+    el.innerHTML = `<div class="sec-label" style="margin-top:14px;">Rata-rata Harian vs Target Harian</div>
+      <div class="cmp-grid">${cards}</div>
+      <div class="period-info"><i class="bi bi-calendar-day"></i>${daysIn} hari data · ${rangeLabel}</div>`;
   } else {
     const sum=key=>recs.reduce((a,r)=>a+(r[key]??0),0);
     const avg=key=>{const v=recs.map(r=>r[key]).filter(x=>x!=null&&!isNaN(x));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
@@ -954,8 +1137,10 @@ function renderCompare(){
   }
 }
 
-function cmpCard(m,act,tgt,src){
-  const dispAct=act==null?'—':(m.isPct?fP(act):fN(act,m.sum?0:1));
+function cmpCard(m,act,tgt,src,dec){
+  // dec: override decimal places; default 0 for sum metrics, 1 for avg metrics
+  const d = dec !== undefined ? dec : (m.sum ? 0 : 1);
+  const dispAct=act==null?'—':(m.isPct?fP(act):fN(act,d));
   const dispTgt=tgt==null?'Belum diset':(m.isPct?fP(tgt):fN(tgt,0));
   let barPct=0,bc='neu',bi='dash-circle',bt='—';
   if(act!=null&&tgt!=null&&tgt!==0){
