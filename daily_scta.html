@@ -366,7 +366,7 @@ input[type=date].ios-field{width:152px;font-weight:500;color:var(--blue);}
     </div>
     <button class="mnav-btn" onclick="shiftHistoryMonth(1)"><i class="bi bi-chevron-right"></i></button>
   </div>
-  <div class="sec-label">Rekapitulasi</div>
+  <div class="sec-label">Month To Date</div>
   <div id="hist-summary"></div>
   <div id="hist-be-label"></div>
   <div id="hist-best-estimate"></div>
@@ -413,12 +413,12 @@ input[type=date].ios-field{width:152px;font-weight:500;color:var(--blue);}
     </div>
     <div class="ios-row">
       <div class="row-icon" style="background:var(--blue);"><i class="bi bi-currency-dollar"></i></div>
-      <div class="row-meta"><div class="row-name">Target SPD Bulanan</div><div class="row-sub">Total Sales bulan ini</div></div>
+      <div class="row-meta"><div class="row-name">Target Net sales</div><div class="row-sub">Total Sales bulan ini</div></div>
       <input class="ios-field" type="number" id="tgt-spd" placeholder="0" min="0" step="1"/>
     </div>
     <div class="ios-row">
       <div class="row-icon" style="background:var(--green);"><i class="bi bi-receipt"></i></div>
-      <div class="row-meta"><div class="row-name">Target STD Bulanan</div><div class="row-sub">Total Struk bulan ini</div></div>
+      <div class="row-meta"><div class="row-name">Target STD</div><div class="row-sub">Total Struk bulan ini</div></div>
       <input class="ios-field" type="number" id="tgt-std" placeholder="0" min="0" step="1"/>
     </div>
     <div class="ios-row">
@@ -438,7 +438,7 @@ input[type=date].ios-field{width:152px;font-weight:500;color:var(--blue);}
     </div>
     <div class="ios-row">
       <div class="row-icon" style="background:var(--indigo);"><i class="bi bi-arrow-left-right"></i></div>
-      <div class="row-meta"><div class="row-name">Target NSB Bulanan</div><div class="row-sub">Net Sales Balance</div></div>
+      <div class="row-meta"><div class="row-name">Target NSB</div><div class="row-sub">Net Sales Balance</div></div>
       <input class="ios-field" type="number" id="tgt-nsb" placeholder="0" step="1"/>
     </div>
   </div>
@@ -555,7 +555,7 @@ let cache = {
    (menghindari CORS sepenuhnya,
     semua operasi lewat GET)
 ════════════════════════════ */
-let SCRIPT_URL = localStorage.getItem('mm_script_url') || '';
+let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw8-LAINdvPfPZ0txmoFx_9E3MXJ4qcJDKelzfzr3L0_YztsohmNGz8OHDRPtnZzC0u/exec';
 
 // Persist targets in localStorage so they survive refresh
 function persistTargets() {
@@ -727,7 +727,7 @@ async function connectAndSetup() {
     const res = await apiGet({ action:'setup' });
     setSynced();
     updateSetupStatus();
-    showToast('ok','✅ '+res.message);
+    showToast('ok',''+res.message);
   } catch(e) { setError(e.message); showToast('err','Gagal: '+e.message); }
 }
 
@@ -913,7 +913,7 @@ function renderHistSummary(recs, t, wd){
         <i class="bi bi-${hit?'check-circle-fill':'x-circle-fill'}"></i> ${pct}% Target</span>`:''}
     </div>
     <div class="sh-grid">
-      ${shM('SPD',spdSum,tSpd,false,'var(--blue)')}
+      ${shM('Net Sales',spdSum,tSpd,false,'var(--blue)')}
       ${shM('STD',stdSum,tStd,false,'var(--green)')}
       ${shM('APC',apcAvg,t.apc!=null?+t.apc:null,false,'var(--teal)')}
       ${shM('GM%',gmAvg,t.gm!=null?+t.gm:null,false,'var(--purple)')}
@@ -1007,7 +1007,7 @@ function renderBestEstimate(recs, t, wd) {
 
       <div class="be-body">
         <div class="be-stat">
-          <div class="be-stat-label">Aktual SPD</div>
+          <div class="be-stat-label">Aktual Net Sales</div>
           <div class="be-stat-val" style="color:var(--blue);">${fN(spdSum, 0)}</div>
           <div class="be-stat-sub">${pctDone.toFixed(1)}% dari target</div>
         </div>
