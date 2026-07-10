@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Gudang</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --accent:#2563eb;
+    --accent-dark:#1d4ed8;
+    --danger:#dc2626;
+    --success:#16a34a;
+    --text:#1f2430;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding-bottom:60px;
+  }
+  .topbar{
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    color:#fff;
+    padding:22px 0 60px;
+    border-radius:0 0 28px 28px;
+    box-shadow:0 6px 18px rgba(37,99,235,.25);
+  }
+  .topbar h1{font-size:1.4rem;font-weight:700;margin:0;}
+  .topbar p{margin:2px 0 0;opacity:.85;font-size:.85rem;}
+  .container-narrow{max-width:820px;margin:0 auto;padding:0 16px;}
+  .btn-topbar{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.35);
+    color:#fff;
+  }
+  .btn-topbar:hover{background:rgba(255,255,255,.25);color:#fff;}
+
+  .scan-card{
+    margin-top:-42px;
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+    padding:18px;
+    border:1px solid var(--border);
+  }
+  .scan-input-wrap{position:relative;}
+  .scan-input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.2rem;}
+  #scanInput{
+    padding:14px 14px 14px 42px;
+    font-size:1.15rem;
+    border-radius:12px;
+    border:2px solid var(--border);
+  }
+  #scanInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.15);}
+
+  .sync-bar{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 14px;
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .sync-status{
+    font-size:.8rem;
+    color:var(--muted);
+  }
+  .sync-status.is-error{color:var(--danger);}
+  .sync-status.is-ok{color:var(--success);}
+  .sync-actions{display:flex;gap:8px;flex:0 0 auto;}
+
+  .card-soft{
+    background:var(--card);
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    padding:18px;
+    margin-top:16px;
+  }
+  .badge-stock{font-size:1rem;padding:.5em .8em;border-radius:10px;}
+  .stat-pill{
+    background:#eef2ff;
+    color:var(--accent-dark);
+    border-radius:10px;
+    padding:8px 12px;
+    font-size:.85rem;
+    font-weight:600;
+  }
+  table.table thead th{font-size:.78rem;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);}
+  table.table td{vertical-align:middle;font-size:.92rem;}
+  .btn-primary{background:var(--accent);border-color:var(--accent);}
+  .btn-primary:hover{background:var(--accent-dark);border-color:var(--accent-dark);}
+  .btn-icon{padding:.3rem .55rem;}
+  .not-found-icon{font-size:2.2rem;color:#f59e0b;}
+  .found-icon{font-size:2.2rem;color:var(--success);}
+  .qty-box{max-width:110px;}
+  .footer-note{text-align:center;color:var(--muted);font-size:.78rem;margin-top:30px;}
+  .empty-state{text-align:center;color:var(--muted);padding:30px 10px;}
+  .empty-state i{font-size:2rem;display:block;margin-bottom:8px;}
+  #cameraReader{border-radius:12px;overflow:hidden;background:#000;min-height:220px;display:flex;align-items:center;justify-content:center;}
+  #cameraReader video{width:100%;max-height:340px;object-fit:cover;border-radius:12px;}
+
+  /* deskripsi panjang di tabel desktop: potong rapi + tooltip lewat title attr */
+  td.desc-cell{
+    max-width:320px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* kartu produk untuk tampilan smartphone - satu baris, tap untuk aksi */
+  .product-card-mobile{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 14px;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    transition:background .12s ease;
+  }
+  .product-card-mobile:active{
+    background:#eef2ff;
+  }
+  .product-card-mobile .pc-plu{
+    flex:0 0 auto;
+    font-weight:700;
+    font-size:.78rem;
+    color:var(--accent-dark);
+    background:#eef2ff;
+    padding:3px 9px;
+    border-radius:8px;
+    white-space:nowrap;
+  }
+  .product-card-mobile .pc-desc-oneline{
+    flex:1 1 auto;
+    min-width:0;
+    font-size:.9rem;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .product-card-mobile .pc-qty{
+    flex:0 0 auto;
+    font-weight:700;
+    font-size:.9rem;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  .product-card-mobile .pc-qty small{
+    font-weight:500;
+    color:var(--muted);
+    font-size:.68rem;
+  }
+  .product-card-mobile .pc-chevron{
+    flex:0 0 auto;
+    color:var(--muted);
+    font-size:.9rem;
+  }
+  .pending-dot{
+    display:inline-block;
+    width:7px;height:7px;
+    border-radius:50%;
+    background:#f59e0b;
+    margin-right:6px;
+  }
+  @keyframes icon-spin-rotate{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  .icon-spin{ animation: icon-spin-rotate .8s linear infinite; display:inline-block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container-narrow d-flex justify-content-between align-items-center">
+    <div>
+      <h1><i class="bi bi-box-seam-fill"></i> Inventory Gudang</h1>
+      
+    </div>
+    <button class="btn btn-topbar btn-sm" id="btnOpenSettings" title="Pengaturan">
+      <i class="bi bi-gear-fill"></i>
+    </button>
+  </div>
+</div>
+
+<div class="container-narrow">
+
+  <!-- SCAN CARD -->
+  <div class="scan-card">
+    <form id="scanForm" autocomplete="off">
+      <label class="form-label fw-semibold mb-1">Scan / ketik barcode</label>
+      <div class="d-flex gap-2">
+        <div class="scan-input-wrap flex-grow-1">
+          <i class="bi bi-upc-scan"></i>
+          <input type="text" id="scanInput" class="form-control" placeholder="Tembak barcode di sini lalu Enter..." autofocus>
+        </div>
+        <button type="button" class="btn btn-primary" id="btnScanCamera" title="Scan pakai kamera">
+          <i class="bi bi-camera-fill"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary" id="btnManualSearch" title="Cari tanpa barcode (mis. produk UMKM / barcode rusak)">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+      
+    </form>
+  </div>
+
+  <!-- SYNC BAR -->
+  <div class="sync-bar">
+    <div class="sync-status" id="syncStatusText">Memuat...</div>
+    <div class="sync-actions">
+      <button class="btn btn-sm btn-outline-secondary" id="btnRefreshSheet" title="Ambil data terbaru dari Sheet">
+        <i class="bi bi-arrow-clockwise" id="refreshIcon"></i>
+      </button>
+      <button class="btn btn-sm btn-primary position-relative" id="btnSendUpdate">
+        <span id="btnSendUpdateContent"><i class="bi bi-cloud-upload"></i> Kirim Update</span>
+        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle d-none" id="pendingBadge">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- INVENTORY LIST -->
+  <div class="card-soft">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <h5 class="mb-0"><i class="bi bi-list-ul"></i> Daftar Produk</h5>
+      <div class="d-flex gap-2 align-items-center">
+        <span class="stat-pill" id="statTotalItem">0 item</span>
+        <span class="stat-pill" id="statTotalQty">0 qty</span>
+      </div>
+    </div>
+    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Cari barcode / PLU / deskripsi...">
+
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Barcode</th>
+            <th>PLU</th>
+            <th>Deskripsi</th>
+            <th class="text-end">Qty</th>
+            <th class="text-end">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Kartu untuk layar smartphone -->
+    <div id="inventoryCardsMobile" class="d-md-none"></div>
+
+    <div id="emptyState" class="empty-state d-none">
+      <i class="bi bi-inbox"></i>
+      Belum ada data produk. Scan barcode untuk mulai menambahkan.
+    </div>
+  </div>
+
+  <div class="footer-note">Perubahan disimpan dulu di perangkat ini, baru dikirim ke Google Sheet saat kamu tekan "Kirim Update".</div>
+</div>
+
+<!-- MODAL HASIL SCAN -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="resultModalTitle">Hasil Scan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="resultModalBody">
+        <!-- diisi dinamis lewat JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KAMERA -->
+<div class="modal fade" id="cameraModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-camera-fill"></i> Scan Kamera</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="cameraReader">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+        </div>
+        <div id="cameraError" class="alert alert-danger mt-2 d-none small"></div>
+        <div class="form-text mt-2">Arahkan kamera ke barcode. Pastikan izin kamera browser sudah diaktifkan.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CARI MANUAL (tanpa barcode) -->
+<div class="modal fade" id="manualSearchModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-search"></i> Cari Produk Tanpa Barcode</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="manualSearchInput" class="form-control mb-3" placeholder="Ketik PLU atau nama produk...">
+        <div id="manualSearchResults" class="list-group"></div>
+        <div id="manualSearchEmpty" class="empty-state d-none">
+          <i class="bi bi-inbox"></i>
+          Tidak ditemukan di Master Produk. Kalau ini produk baru, tutup pencarian ini lalu tambahkan lewat kotak scan (barcode boleh diisi manual, mis. kode internal UMKM).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ACTION SHEET (tap kartu mobile) -->
+<div class="modal fade" id="actionSheetModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="actionSheetTitle">Pilih Aksi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-muted small mb-3" id="actionSheetSubtitle"></div>
+        <div class="d-grid gap-2">
+          <button class="btn btn-outline-secondary text-start" id="actionSheetEditBtn">
+            <i class="bi bi-pencil me-2"></i> Edit Produk
+          </button>
+          <button class="btn btn-outline-danger text-start" id="actionSheetDeleteBtn">
+            <i class="bi bi-trash me-2"></i> Hapus Produk
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
+          <input type="hidden" id="editOriginalBarcode">
+          <div class="mb-2">
+            <label class="form-label">Barcode</label>
+            <input type="text" id="editBarcode" class="form-control" readonly disabled>
+            <div class="form-text">Barcode tidak bisa diubah di sini karena dipakai sebagai kunci sinkronisasi ke Google Sheet.</div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">PLU</label>
+            <input type="text" id="editPlu" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Deskripsi</label>
+            <input type="text" id="editDescription" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Qty</label>
+            <input type="number" id="editQty" class="form-control" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-danger me-auto" id="btnDeleteFromModal"><i class="bi bi-trash"></i> Hapus</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button class="btn btn-primary" id="btnSaveEdit">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PENGATURAN -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-gear-fill"></i> Pengaturan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label fw-semibold">Koneksi Google Sheet</label>
+        <div class="form-text mb-1">URL Web App sudah diatur langsung di kode (hardcode). Kalau perlu ganti, edit variabel <code>GAS_WEB_APP_URL</code> di bagian atas script.</div>
+        <input type="text" id="settingsUrlInput" class="form-control mb-3" readonly>
+
+        <hr>
+        <label class="form-label fw-semibold">Backup lokal (opsional)</label>
+        <div class="d-flex gap-2 mb-3">
+          <button class="btn btn-sm btn-outline-secondary flex-fill" id="btnExport"><i class="bi bi-download"></i> Export JSON</button>
+          <button class="btn btn-sm btn-outline-secondary flex-fill" id="btnImportTrigger"><i class="bi bi-upload"></i> Import JSON</button>
+          <input type="file" id="importFile" accept="application/json" class="d-none">
+        </div>
+
+        <hr>
+        <button class="btn btn-sm btn-outline-danger w-100" id="btnResetLocal"><i class="bi bi-exclamation-triangle"></i> Reset semua data lokal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  const LS_MASTER = "inv_cache_master";
+  const LS_INVENTORY = "inv_cache_inventory";
+  const LS_PENDING = "inv_pending_changes";
+  // ============================================================
+  // GANTI URL DI BAWAH INI dengan URL Web App Apps Script kamu
+  // (dari Deploy > Manage deployments, bentuknya diakhiri /exec)
+  // ============================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzIguNWHQmKtEdUST8vanrIefpa0EsjTAFP-M6OgQ4TrdrRS7yqKTyDa_xSIQcjdgt0/exec";
+
+  const LS_GAS_URL = "inv_gas_url";
+  const LS_PENDING_DELETES = "inv_pending_deletes";
+  const LS_LAST_SYNC = "inv_last_sync";
+
+  const scanInput = document.getElementById("scanInput");
+  const tableBody = document.getElementById("inventoryTableBody");
+  const cardsMobile = document.getElementById("inventoryCardsMobile");
+  const emptyState = document.getElementById("emptyState");
+  const searchInput = document.getElementById("searchInput");
+  const statTotalItem = document.getElementById("statTotalItem");
+  const statTotalQty = document.getElementById("statTotalQty");
+  const resultModalBody = document.getElementById("resultModalBody");
+  const resultModalTitle = document.getElementById("resultModalTitle");
+  const syncStatusText = document.getElementById("syncStatusText");
+  const pendingBadge = document.getElementById("pendingBadge");
+  const cameraErrorBox = document.getElementById("cameraError");
+
+  let editModal, resultModal, cameraModal, actionSheetModal, settingsModal, manualSearchModal;
+  let videoStream = null;
+  let detectionTimer = null;
+  let cameraStarting = false;
+  let actionSheetBarcode = null;
+
+  // ---------- helpers umum ----------
+  function esc(str){
+    return String(str ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function formatNumber(n){
+    n = Number(n) || 0;
+    return n.toLocaleString("id-ID");
+  }
+
+  // Barcode dari database tidak mencantumkan 1 digit terakhir (check digit),
+  // jadi hasil scan harus dipotong 1 digit di belakang sebelum dicocokkan.
+  function normalizeBarcode(raw){
+    const clean = String(raw || "").trim();
+    return clean.length > 1 ? clean.slice(0, -1) : clean;
+  }
+
+  // ---------- penyimpanan lokal: cache sheet + antrian pending ----------
+  function loadMasterCache(){
+    try{ return JSON.parse(localStorage.getItem(LS_MASTER)) || []; }catch(e){ return []; }
+  }
+  function saveMasterCache(arr){ localStorage.setItem(LS_MASTER, JSON.stringify(arr)); }
+
+  function loadInventoryCache(){
+    try{ return JSON.parse(localStorage.getItem(LS_INVENTORY)) || []; }catch(e){ return []; }
+  }
+  function saveInventoryCache(arr){ localStorage.setItem(LS_INVENTORY, JSON.stringify(arr)); }
+
+  function loadPending(){
+    try{ return JSON.parse(localStorage.getItem(LS_PENDING)) || {}; }catch(e){ return {}; }
+  }
+  function savePending(obj){ localStorage.setItem(LS_PENDING, JSON.stringify(obj)); }
+
+  function loadPendingDeletes(){
+    try{ return JSON.parse(localStorage.getItem(LS_PENDING_DELETES)) || []; }catch(e){ return []; }
+  }
+  function savePendingDeletes(arr){ localStorage.setItem(LS_PENDING_DELETES, JSON.stringify(arr)); }
+
+  function addPendingDelete(barcode){
+    const arr = loadPendingDeletes();
+    if(!arr.includes(barcode)) arr.push(barcode);
+    savePendingDeletes(arr);
+  }
+  function removePendingDelete(barcode){
+    const arr = loadPendingDeletes().filter(b => b !== barcode);
+    savePendingDeletes(arr);
+  }
+
+  function upsertPendingChange(barcode, updates){
+    const pending = loadPending();
+    const existing = pending[barcode] || {};
+    pending[barcode] = Object.assign({}, existing, updates);
+    savePending(pending);
+    // kalau barcode ini sebelumnya ditandai untuk dihapus lalu di-scan/edit lagi,
+    // batalkan penghapusannya supaya tidak konflik saat sinkron
+    removePendingDelete(barcode);
+    updatePendingBadge();
+  }
+
+  function getGasUrl(){
+    const url = GAS_WEB_APP_URL.trim();
+    if(!url || url.indexOf("PASTE_URL") === 0) return "";
+    return url;
+  }
+
+  // ---------- data efektif (cache sheet + pending overlay) ----------
+  function getMasterRecord(barcode){
+    return loadMasterCache().find(m => m.barcode === barcode);
+  }
+
+  // gabungan master cache + pending, supaya produk yang baru ditambahkan
+  // (belum sempat "Kirim Update") tetap dianggap "terdaftar" saat discan lagi
+  function getEffectiveMasterRecord(barcode){
+    const pending = loadPending()[barcode];
+    if(pending && (pending.isNew || pending.masterChanged)){
+      return { barcode: pending.barcode, plu: pending.plu, description: pending.description };
+    }
+    return getMasterRecord(barcode);
+  }
+
+  function getEffectiveInventoryList(){
+    const inv = loadInventoryCache();
+    const pending = loadPending();
+    const deletes = new Set(loadPendingDeletes());
+    const map = new Map();
+    inv.forEach(p => map.set(p.barcode, Object.assign({}, p)));
+    Object.values(pending).forEach(p => {
+      map.set(p.barcode, { barcode: p.barcode, plu: p.plu, description: p.description, qty: Number(p.qty)||0 });
+    });
+    deletes.forEach(barcode => map.delete(barcode));
+    return Array.from(map.values());
+  }
+
+  // daftar Master Produk (bukan Data Inventory) + pending -> dipakai untuk cari manual
+  // supaya produk yang belum pernah punya qty (tanpa barcode terbaca) tetap bisa ditemukan
+  function getEffectiveMasterList(){
+    const master = loadMasterCache();
+    const pending = loadPending();
+    const map = new Map();
+    master.forEach(m => map.set(m.barcode, Object.assign({}, m)));
+    Object.values(pending).forEach(p => {
+      if(p.isNew || p.masterChanged){
+        map.set(p.barcode, { barcode: p.barcode, plu: p.plu, description: p.description });
+      }
+    });
+    return Array.from(map.values());
+  }
+
+  function findEffectiveProduct(barcode){
+    return getEffectiveInventoryList().find(p => p.barcode === barcode);
+  }
+
+  // pencarian gabungan: cek Data Inventory dulu, kalau tidak ada tapi barcode
+  // terdaftar di Master Produk, tetap dianggap "ditemukan" dengan qty 0.
+  // Dipakai di scan DAN di tombol tambah/kurangi supaya konsisten.
+  function resolveProduct(barcode){
+    const invProduct = findEffectiveProduct(barcode);
+    if(invProduct) return invProduct;
+
+    const master = getEffectiveMasterRecord(barcode);
+    if(master) return { barcode, plu: master.plu, description: master.description, qty: 0 };
+
+    return null;
+  }
+
+  // ---------- render: tabel + kartu daftar produk ----------
+  function renderTable(filter){
+    const list = getEffectiveInventoryList();
+    const pending = loadPending();
+    const q = (filter || "").trim().toLowerCase();
+
+    const filtered = q ? list.filter(p =>
+      p.barcode.toLowerCase().includes(q) ||
+      p.plu.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q)
+    ) : list;
+
+    tableBody.innerHTML = "";
+    cardsMobile.innerHTML = "";
+
+    if(filtered.length === 0){
+      emptyState.classList.remove("d-none");
+    } else {
+      emptyState.classList.add("d-none");
+
+      filtered.forEach(p => {
+        const isPending = !!pending[p.barcode];
+        const dot = isPending ? '<span class="pending-dot" title="Belum dikirim"></span>' : '';
+
+        // baris tabel (desktop/tablet)
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><code>${esc(p.barcode)}</code></td>
+          <td>${dot}${esc(p.plu)}</td>
+          <td class="desc-cell" title="${esc(p.description)}">${esc(p.description)}</td>
+          <td class="text-end fw-semibold">${formatNumber(p.qty)}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-secondary btn-icon me-1 btn-edit-row" data-barcode="${esc(p.barcode)}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger btn-icon btn-delete-row" data-barcode="${esc(p.barcode)}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>`;
+        tableBody.appendChild(tr);
+
+        // kartu (smartphone) — satu baris: PLU, deskripsi, qty. Tap kartu untuk pilih aksi.
+        const card = document.createElement("div");
+        card.className = "product-card-mobile";
+        card.dataset.barcode = p.barcode;
+        card.innerHTML = `
+          <span class="pc-plu">${dot}${esc(p.plu)}</span>
+          <span class="pc-desc-oneline">${esc(p.description)}</span>
+          <span class="pc-qty">${formatNumber(p.qty)} <small></small></span>
+          <i class="bi bi-chevron-right pc-chevron"></i>`;
+        cardsMobile.appendChild(card);
+      });
+    }
+
+    statTotalItem.textContent = `${list.length} item`;
+    statTotalQty.textContent = `${formatNumber(list.reduce((s,p)=>s+(Number(p.qty)||0),0))} qty`;
+  }
+
+  // ---------- render: scan result (found) ----------
+  function renderFound(product){
+    resultModalTitle.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Produk Ditemukan`;
+    resultModalBody.innerHTML = `
+      <div class="d-flex align-items-start gap-3">
+        <i class="bi bi-check-circle-fill found-icon"></i>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between flex-wrap gap-2">
+            <div>
+              <h5 class="mb-0">${esc(product.description)}</h5>
+              <div class="text-muted small">PLU: ${esc(product.plu)} &middot; Barcode: <code>${esc(product.barcode)}</code></div>
+            </div>
+            <span class="badge bg-primary-subtle text-primary-emphasis badge-stock">
+              Stok: ${formatNumber(product.qty)}
+            </span>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col-auto">
+              <div class="input-group">
+                <input type="number" id="adjustQty" class="form-control qty-box" value="1" min="1">
+                <button class="btn btn-success" id="btnAddStock"><i class="bi bi-plus-lg"></i> Tambah</button>
+                <button class="btn btn-outline-danger" id="btnReduceStock"><i class="bi bi-dash-lg"></i> Kurangi</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    document.getElementById("btnAddStock").addEventListener("click", () => adjustStock(product.barcode, +1));
+    document.getElementById("btnReduceStock").addEventListener("click", () => adjustStock(product.barcode, -1));
+
+    resultModal.show();
+  }
+
+  // ---------- render: scan result (not found -> add form) ----------
+  function renderNotFound(barcode){
+    resultModalTitle.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Barcode Belum Terdaftar`;
+    resultModalBody.innerHTML = `
+      <div class="d-flex align-items-start gap-3">
+        <i class="bi bi-exclamation-triangle-fill not-found-icon"></i>
+        <div class="flex-grow-1">
+          <div class="text-muted small mb-3">Barcode: <code>${esc(barcode)}</code> — produk belum ada di Master Produk. Lengkapi data di bawah.</div>
+          <form id="addForm" class="row g-2">
+            <div class="col-12 col-sm-3">
+              <label class="form-label small mb-1">PLU</label>
+              <input type="text" id="newPlu" class="form-control" required>
+            </div>
+            <div class="col-12 col-sm-5">
+              <label class="form-label small mb-1">Deskripsi</label>
+              <input type="text" id="newDescription" class="form-control" required>
+            </div>
+            <div class="col-8 col-sm-2">
+              <label class="form-label small mb-1">Qty</label>
+              <input type="number" id="newQty" class="form-control" value="0" required>
+            </div>
+            <div class="col-4 col-sm-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>`;
+
+    document.getElementById("addForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      const plu = document.getElementById("newPlu").value.trim();
+      const description = document.getElementById("newDescription").value.trim();
+      const qty = Number(document.getElementById("newQty").value) || 0;
+
+      if(!plu || !description) return;
+
+      // produk baru -> belum ada di Master Produk, jadi saat sync harus masuk ke Master + Data Inventory
+      upsertPendingChange(barcode, { barcode, plu, description, qty, isNew: true, masterChanged: true });
+      renderTable(searchInput.value);
+      renderFound({ barcode, plu, description, qty });
+    });
+
+    resultModal.show();
+    setTimeout(() => {
+      const field = document.getElementById("newPlu");
+      if(field) field.focus();
+    }, 300);
+  }
+
+  // ---------- stock adjust dari modal hasil scan ----------
+  function adjustStock(barcode, direction){
+    const amount = Number(document.getElementById("adjustQty").value) || 0;
+    if(amount <= 0) return;
+
+    const product = resolveProduct(barcode);
+    if(!product) return;
+
+    const newQty = Math.max(0, (Number(product.qty) || 0) + (direction * amount));
+    applyQtyChange(barcode, product.plu, product.description, newQty);
+
+    renderTable(searchInput.value);
+    renderFound(resolveProduct(barcode));
+  }
+
+  function applyQtyChange(barcode, plu, description, newQty){
+    // hanya qty yang berubah -> isNew/masterChanged TIDAK diset di sini,
+    // supaya kalau barcode ini sebelumnya sudah pending sebagai produk baru,
+    // status isNew tetap terjaga (upsertPendingChange melakukan merge, bukan overwrite penuh).
+    upsertPendingChange(barcode, { barcode, plu, description, qty: newQty });
+  }
+
+  // ---------- scan handling ----------
+  document.getElementById("scanForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    handleScan(scanInput.value);
+  });
+
+  function handleScan(rawValue){
+    const raw = String(rawValue || "").trim();
+    if(!raw) return;
+
+    const barcode = normalizeBarcode(raw);
+    const product = resolveProduct(barcode);
+
+    if(product){
+      renderFound(product);
+    } else {
+      renderNotFound(barcode);
+    }
+
+    scanInput.value = "";
+  }
+
+  document.getElementById("resultModal").addEventListener("hidden.bs.modal", function(){
+    scanInput.focus();
+  });
+
+  // ---------- scan via kamera smartphone (native BarcodeDetector) ----------
+  const cameraModalEl = document.getElementById("cameraModal");
+
+  document.getElementById("btnScanCamera").addEventListener("click", function(){
+    cameraModal.show();
+  });
+
+  // ---------- cari manual (tanpa barcode) - untuk produk rusak/UMKM ----------
+  document.getElementById("btnManualSearch").addEventListener("click", function(){
+    document.getElementById("manualSearchInput").value = "";
+    renderManualSearchResults("");
+    manualSearchModal.show();
+    setTimeout(() => document.getElementById("manualSearchInput").focus(), 300);
+  });
+
+  document.getElementById("manualSearchInput").addEventListener("input", function(){
+    renderManualSearchResults(this.value);
+  });
+
+  function renderManualSearchResults(query){
+    const q = query.trim().toLowerCase();
+    const list = getEffectiveMasterList();
+    const filtered = q ? list.filter(m =>
+      m.plu.toLowerCase().includes(q) ||
+      m.description.toLowerCase().includes(q) ||
+      m.barcode.toLowerCase().includes(q)
+    ) : list;
+
+    const container = document.getElementById("manualSearchResults");
+    const emptyBox = document.getElementById("manualSearchEmpty");
+    container.innerHTML = "";
+
+    if(filtered.length === 0){
+      emptyBox.classList.remove("d-none");
+      return;
+    }
+    emptyBox.classList.add("d-none");
+
+    filtered.slice(0, 50).forEach(m => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "list-group-item list-group-item-action";
+      item.innerHTML = `
+        <div class="fw-semibold">${esc(m.plu)} — ${esc(m.description)}</div>
+        <div class="text-muted small">Barcode: ${esc(m.barcode)}</div>`;
+      item.addEventListener("click", function(){
+        manualSearchModal.hide();
+        const product = resolveProduct(m.barcode);
+        if(product) renderFound(product);
+      });
+      container.appendChild(item);
+    });
+  }
+
+  cameraModalEl.addEventListener("shown.bs.modal", startCameraScanner);
+  cameraModalEl.addEventListener("hidden.bs.modal", stopCameraScanner);
+
+  function startCameraScanner(){
+    if(cameraStarting) return;
+    cameraStarting = true;
+    cameraErrorBox.classList.add("d-none");
+
+    if(!("BarcodeDetector" in window)){
+      cameraErrorBox.textContent = "Browser ini tidak mendukung pemindaian kamera bawaan. Gunakan Chrome/Edge versi terbaru di Android, atau ketik/tempel barcode secara manual.";
+      cameraErrorBox.classList.remove("d-none");
+      cameraStarting = false;
+      return;
+    }
+
+    const preferredFormats = ["ean_13","ean_8","code_128","code_39","upc_a","upc_e","codabar","qr_code"];
+
+    (async function(){
+      try{
+        let formats = preferredFormats;
+        if(typeof BarcodeDetector.getSupportedFormats === "function"){
+          const supported = await BarcodeDetector.getSupportedFormats();
+          const filtered = preferredFormats.filter(f => supported.includes(f));
+          formats = filtered.length ? filtered : supported;
+        }
+
+        const detector = new BarcodeDetector({ formats });
+
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false
+        });
+
+        const videoEl = document.getElementById("cameraVideo");
+        videoEl.srcObject = videoStream;
+        await videoEl.play();
+
+        detectionTimer = setInterval(async () => {
+          if(!videoEl.videoWidth) return;
+          try{
+            const barcodes = await detector.detect(videoEl);
+            if(barcodes && barcodes.length > 0){
+              const value = barcodes[0].rawValue;
+              cameraModal.hide();
+              handleScan(value);
+            }
+          }catch(e){ /* frame gagal dibaca, coba lagi di frame berikutnya */ }
+        }, 350);
+
+        cameraStarting = false;
+      }catch(err){
+        cameraStarting = false;
+        let msg = "Tidak bisa mengakses kamera.";
+        if(err && err.name === "NotAllowedError") msg = "Izin kamera ditolak. Aktifkan izin kamera untuk situs ini di pengaturan browser.";
+        else if(err && err.name === "NotFoundError") msg = "Kamera tidak ditemukan di perangkat ini.";
+        else if(err && err.message) msg += " (" + err.message + ")";
+        cameraErrorBox.textContent = msg;
+        cameraErrorBox.classList.remove("d-none");
+      }
+    })();
+  }
+
+  function stopCameraScanner(){
+    if(detectionTimer){
+      clearInterval(detectionTimer);
+      detectionTimer = null;
+    }
+    if(videoStream){
+      videoStream.getTracks().forEach(track => track.stop());
+      videoStream = null;
+    }
+    const videoEl = document.getElementById("cameraVideo");
+    if(videoEl) videoEl.srcObject = null;
+  }
+
+  // ---------- table row actions (edit / delete) - tampilan desktop ----------
+  function handleRowActionClick(e){
+    const editBtn = e.target.closest(".btn-edit-row");
+    const delBtn = e.target.closest(".btn-delete-row");
+
+    if(editBtn){
+      openEditModal(editBtn.dataset.barcode);
+    } else if(delBtn){
+      deleteProduct(delBtn.dataset.barcode);
+    }
+  }
+  tableBody.addEventListener("click", handleRowActionClick);
+
+  // ---------- tap kartu (mobile) -> action sheet pilih Edit / Hapus ----------
+  cardsMobile.addEventListener("click", function(e){
+    const card = e.target.closest(".product-card-mobile");
+    if(!card) return;
+    openActionSheet(card.dataset.barcode);
+  });
+
+  function openActionSheet(barcode){
+    const product = findEffectiveProduct(barcode);
+    if(!product) return;
+
+    actionSheetBarcode = barcode;
+    document.getElementById("actionSheetTitle").textContent = "PLU " + product.plu;
+    document.getElementById("actionSheetSubtitle").textContent = product.description;
+    actionSheetModal.show();
+  }
+
+  document.getElementById("actionSheetEditBtn").addEventListener("click", function(){
+    actionSheetModal.hide();
+    if(actionSheetBarcode) openEditModal(actionSheetBarcode);
+  });
+
+  document.getElementById("actionSheetDeleteBtn").addEventListener("click", function(){
+    actionSheetModal.hide();
+    if(actionSheetBarcode) deleteProduct(actionSheetBarcode);
+  });
+
+  // ---------- edit modal ----------
+  function openEditModal(barcode){
+    const product = findEffectiveProduct(barcode);
+    if(!product) return;
+
+    document.getElementById("editOriginalBarcode").value = product.barcode;
+    document.getElementById("editBarcode").value = product.barcode;
+    document.getElementById("editPlu").value = product.plu;
+    document.getElementById("editDescription").value = product.description;
+    document.getElementById("editQty").value = product.qty;
+
+    editModal.show();
+  }
+
+  document.getElementById("btnSaveEdit").addEventListener("click", function(){
+    const barcode = document.getElementById("editOriginalBarcode").value;
+    const plu = document.getElementById("editPlu").value.trim();
+    const description = document.getElementById("editDescription").value.trim();
+    const qty = Number(document.getElementById("editQty").value) || 0;
+
+    if(!plu || !description) return;
+
+    const master = getEffectiveMasterRecord(barcode);
+    const pendingBefore = loadPending()[barcode];
+    const isNew = (pendingBefore && pendingBefore.isNew) || !master;
+    const masterChanged = isNew || !master || master.plu !== plu || master.description !== description;
+
+    upsertPendingChange(barcode, { barcode, plu, description, qty, isNew, masterChanged });
+    renderTable(searchInput.value);
+    editModal.hide();
+  });
+
+  document.getElementById("btnDeleteFromModal").addEventListener("click", function(){
+    const barcode = document.getElementById("editOriginalBarcode").value;
+    editModal.hide();
+    deleteProduct(barcode);
+  });
+
+  function deleteProduct(barcode){
+    const wasSynced = loadInventoryCache().some(p => p.barcode === barcode);
+    const confirmMsg = wasSynced
+      ? "Hapus produk " + barcode + " dari Data Inventory?\n\nBaris ini akan ikut terhapus di Google Sheet saat kamu tekan \"Kirim Update\". Data di Master Produk TIDAK dihapus, jadi produk ini masih bisa discan lagi nanti (qty mulai dari 0)."
+      : "Hapus produk " + barcode + " dari daftar?";
+    if(!confirm(confirmMsg)) return;
+
+    // batalkan perubahan pending (add/edit qty) yang belum sempat terkirim untuk barcode ini
+    const pending = loadPending();
+    delete pending[barcode];
+    savePending(pending);
+
+    // hanya perlu antre hapus ke Sheet kalau barisnya memang sudah pernah tersinkron
+    if(wasSynced){
+      addPendingDelete(barcode);
+    } else {
+      removePendingDelete(barcode);
+    }
+
+    updatePendingBadge();
+    renderTable(searchInput.value);
+  }
+
+  // ---------- search ----------
+  searchInput.addEventListener("input", function(){
+    renderTable(this.value);
+  });
+
+  // ---------- sinkronisasi Google Sheet ----------
+  function updateSyncStatus(html, isError){
+    syncStatusText.innerHTML = html;
+    syncStatusText.classList.remove("is-error", "is-ok");
+    if(isError) syncStatusText.classList.add("is-error");
+  }
+
+  function spinnerHtml(text){
+    return `<span class="spinner-border spinner-border-sm me-1" role="status"></span>${esc(text)}`;
+  }
+
+  function updatePendingBadge(){
+    const count = Object.keys(loadPending()).length + loadPendingDeletes().length;
+    if(count > 0){
+      pendingBadge.textContent = count;
+      pendingBadge.classList.remove("d-none");
+    } else {
+      pendingBadge.classList.add("d-none");
+    }
+  }
+
+  function formatSyncTime(){
+    const iso = localStorage.getItem(LS_LAST_SYNC);
+    if(!iso) return "-";
+    const d = new Date(iso);
+    return d.toLocaleString("id-ID", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" });
+  }
+
+  function normalizeMasterRow(row){
+    return {
+      barcode: String(row.Barcode ?? row.barcode ?? "").trim(),
+      plu: String(row.PLU ?? row.plu ?? "").trim(),
+      description: String(row.Description ?? row.description ?? "").trim()
+    };
+  }
+  function normalizeInventoryRow(row){
+    return {
+      barcode: String(row.Barcode ?? row.barcode ?? "").trim(),
+      plu: String(row.PLU ?? row.plu ?? "").trim(),
+      description: String(row.Description ?? row.description ?? "").trim(),
+      qty: Number(row.Qty ?? row.qty ?? 0) || 0
+    };
+  }
+
+  async function fetchFromSheet(){
+    const url = getGasUrl();
+    if(!url){
+      updateSyncStatus(esc("URL GAS belum diisi di kode (GAS_WEB_APP_URL)."), true);
+      return;
+    }
+
+    const refreshBtn = document.getElementById("btnRefreshSheet");
+    const refreshIcon = document.getElementById("refreshIcon");
+    refreshBtn.disabled = true;
+    refreshIcon.classList.add("icon-spin");
+    updateSyncStatus(spinnerHtml("Mengambil data dari Google Sheet..."));
+
+    try{
+      const sep = url.includes("?") ? "&" : "?";
+      const res = await fetch(url + sep + "action=getData");
+      const data = await res.json();
+      if(!data.success) throw new Error(data.error || "Gagal mengambil data");
+
+      const master = (data.master || []).map(normalizeMasterRow).filter(m => m.barcode);
+      const inventory = (data.inventory || []).map(normalizeInventoryRow).filter(p => p.barcode);
+
+      saveMasterCache(master);
+      saveInventoryCache(inventory);
+      localStorage.setItem(LS_LAST_SYNC, new Date().toISOString());
+
+      renderTable(searchInput.value);
+      updateSyncStatus('<i class="bi bi-check-circle-fill me-1"></i>Data tersinkron. Terakhir: ' + esc(formatSyncTime()), false);
+    }catch(err){
+      updateSyncStatus('<i class="bi bi-x-circle-fill me-1"></i>Gagal mengambil data: ' + esc(err.message), true);
+    }finally{
+      refreshBtn.disabled = false;
+      refreshIcon.classList.remove("icon-spin");
+    }
+  }
+
+  async function sendUpdates(){
+    const url = getGasUrl();
+    if(!url){
+      updateSyncStatus(esc("URL GAS belum diisi di kode (GAS_WEB_APP_URL)."), true);
+      return;
+    }
+
+    const pending = loadPending();
+    const changes = Object.values(pending);
+    const deletes = loadPendingDeletes();
+    const totalCount = changes.length + deletes.length;
+
+    if(totalCount === 0){
+      updateSyncStatus(esc("Tidak ada perubahan untuk dikirim."));
+      return;
+    }
+
+    const sendBtn = document.getElementById("btnSendUpdate");
+    const sendContent = document.getElementById("btnSendUpdateContent");
+    const originalContentHtml = sendContent.innerHTML;
+
+    sendBtn.disabled = true;
+    sendContent.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span>Mengirim...`;
+    updateSyncStatus(spinnerHtml("Mengirim " + totalCount + " perubahan..."));
+
+    try{
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ changes, deletes })
+      });
+      const data = await res.json();
+      if(!data.success && data.errors && data.errors.length){
+        throw new Error(data.errors.join("; "));
+      }
+      if(!data.success && !data.error) throw new Error("Gagal mengirim data");
+      if(data.error) throw new Error(data.error);
+
+      mergeChangesIntoCache(changes);
+      mergeDeletesIntoCache(deletes);
+      savePending({});
+      savePendingDeletes([]);
+      updatePendingBadge();
+      renderTable(searchInput.value);
+      updateSyncStatus('<i class="bi bi-check-circle-fill me-1"></i>Berhasil kirim ' + totalCount + ' perubahan.', false);
+    }catch(err){
+      updateSyncStatus('<i class="bi bi-x-circle-fill me-1"></i>Gagal mengirim: ' + esc(err.message), true);
+    }finally{
+      sendBtn.disabled = false;
+      sendContent.innerHTML = originalContentHtml;
+    }
+  }
+
+  function mergeDeletesIntoCache(deletes){
+    if(!deletes || deletes.length === 0) return;
+    const deleteSet = new Set(deletes);
+    const inventory = loadInventoryCache().filter(p => !deleteSet.has(p.barcode));
+    saveInventoryCache(inventory);
+  }
+
+  function mergeChangesIntoCache(changes){
+    const master = loadMasterCache();
+    const inventory = loadInventoryCache();
+
+    changes.forEach(c => {
+      if(c.isNew || c.masterChanged){
+        const idx = master.findIndex(m => m.barcode === c.barcode);
+        const rec = { barcode: c.barcode, plu: c.plu, description: c.description };
+        if(idx === -1) master.push(rec); else master[idx] = rec;
+      }
+      const idx2 = inventory.findIndex(p => p.barcode === c.barcode);
+      const rec2 = { barcode: c.barcode, plu: c.plu, description: c.description, qty: c.qty };
+      if(idx2 === -1) inventory.push(rec2); else inventory[idx2] = rec2;
+    });
+
+    saveMasterCache(master);
+    saveInventoryCache(inventory);
+  }
+
+  document.getElementById("btnRefreshSheet").addEventListener("click", () => fetchFromSheet());
+  document.getElementById("btnSendUpdate").addEventListener("click", () => sendUpdates());
+
+  // ---------- pengaturan ----------
+  document.getElementById("btnOpenSettings").addEventListener("click", function(){
+    document.getElementById("settingsUrlInput").value = getGasUrl() || "(belum diisi - edit GAS_WEB_APP_URL di kode)";
+    settingsModal.show();
+  });
+
+  document.getElementById("btnResetLocal").addEventListener("click", function(){
+    if(!confirm("Ini akan menghapus SEMUA data lokal (cache + perubahan belum dikirim) di perangkat ini. Lanjutkan?")) return;
+    localStorage.removeItem(LS_MASTER);
+    localStorage.removeItem(LS_INVENTORY);
+    localStorage.removeItem(LS_PENDING);
+    localStorage.removeItem(LS_PENDING_DELETES);
+    localStorage.removeItem(LS_LAST_SYNC);
+    updatePendingBadge();
+    renderTable("");
+    updateSyncStatus(esc("Data lokal direset."));
+    settingsModal.hide();
+  });
+
+  // ---------- export / import backup JSON (cache inventory efektif) ----------
+  document.getElementById("btnExport").addEventListener("click", function(){
+    const list = getEffectiveInventoryList();
+    const blob = new Blob([JSON.stringify(list, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "inventory-gudang-" + new Date().toISOString().slice(0,10) + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("btnImportTrigger").addEventListener("click", function(){
+    document.getElementById("importFile").click();
+  });
+
+  document.getElementById("importFile").addEventListener("change", function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        const data = JSON.parse(evt.target.result);
+        if(!Array.isArray(data)) throw new Error("Format tidak valid");
+        saveInventoryCache(data);
+        renderTable(searchInput.value);
+        alert("Import berhasil: " + data.length + " produk dimuat ke cache lokal.");
+      }catch(err){
+        alert("Gagal import file: " + err.message);
+      }
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+
+  // ---------- init ----------
+  document.addEventListener("DOMContentLoaded", function(){
+    editModal = new bootstrap.Modal(document.getElementById("editModal"));
+    resultModal = new bootstrap.Modal(document.getElementById("resultModal"));
+    cameraModal = new bootstrap.Modal(document.getElementById("cameraModal"));
+    actionSheetModal = new bootstrap.Modal(document.getElementById("actionSheetModal"));
+    settingsModal = new bootstrap.Modal(document.getElementById("settingsModal"));
+    manualSearchModal = new bootstrap.Modal(document.getElementById("manualSearchModal"));
+
+    renderTable("");
+    updatePendingBadge();
+
+    if(getGasUrl()){
+      fetchFromSheet();
+    } else {
+      updateSyncStatus(esc("URL GAS belum diisi di kode. Edit variabel GAS_WEB_APP_URL di script."), true);
+    }
+
+    scanInput.focus();
+  });
+})();
+</script>
+</body>
+</html>
