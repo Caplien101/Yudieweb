@@ -140,6 +140,23 @@
   .badge.st-ok{background:var(--ok);}
   .badge.st-expired{background:var(--danger-dark);}
 
+  .ret-preview{font-size:11.5px;color:var(--muted);margin-top:5px;font-weight:600;}
+  .ret-preview.set{color:var(--blue);}
+
+  .retur-alert{
+    display:flex;align-items:center;gap:8px;background:#fff4e5;border:1px solid #f0cf9a;
+    color:#8a5a10;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:700;
+  }
+  .retur-alert.danger{background:#fdf1ef;border-color:#f0c8c3;color:var(--danger-dark);}
+  .retur-alert i{font-size:16px;flex-shrink:0;}
+
+  .ret-line{font-weight:700;display:flex;align-items:center;gap:5px;}
+  .ret-line i{font-size:11.5px;}
+  .ret-line.st-ok{color:var(--muted);font-weight:500;}
+  .ret-line.st-warn{color:var(--warn);}
+  .ret-line.st-danger{color:var(--danger);}
+  .ret-line.st-expired{color:var(--danger-dark);}
+
   .item-bottom{display:flex;justify-content:flex-end;align-items:center;}
   .item-actions{display:flex;gap:6px;}
   .icon-btn{
@@ -247,9 +264,9 @@
   </div>
   <div class="summary" id="summaryExpired">
     <div class="sum-card"><b id="sumTotal">0</b><span>Total Item</span></div>
-    <div class="sum-card"><b id="sumExpired">0</b><span>Sudah Expired</span></div>
-    <div class="sum-card"><b id="sumDanger">0</b><span>&le; 7 Hari</span></div>
-    <div class="sum-card"><b id="sumWarn">0</b><span>&le; 30 Hari</span></div>
+    <div class="sum-card"><b id="sumExpired">0</b><span>Lewat Retur</span></div>
+    <div class="sum-card"><b id="sumDanger">0</b><span>&le; 7 Hr Retur</span></div>
+    <div class="sum-card"><b id="sumWarn">0</b><span>&le; 30 Hr Retur</span></div>
   </div>
   <div class="tabnav">
     <button class="active" data-tab="expired"><i class="bi bi-box-seam"></i> Cek Expired</button>
@@ -268,6 +285,11 @@
       <button id="retryBtn">Coba Lagi</button>
     </div>
 
+    <div class="retur-alert" id="returAlert" style="display:none;">
+      <i class="bi bi-truck"></i>
+      <span id="returAlertText"></span>
+    </div>
+
     <div class="toolbar">
       <div class="search-wrap">
         <i class="bi bi-search"></i>
@@ -278,7 +300,7 @@
 
     <div class="chips" id="statusChips">
       <div class="chip active" data-status="all">Semua</div>
-      <div class="chip c-danger" data-status="expired">Expired</div>
+      <div class="chip c-danger" data-status="expired">Lewat Retur</div>
       <div class="chip c-danger" data-status="danger">&le; 7 Hari</div>
       <div class="chip c-warn" data-status="warn">&le; 30 Hari</div>
       <div class="chip c-ok" data-status="ok">Aman</div>
@@ -366,6 +388,11 @@
           <label>Tgl Expired</label>
           <input type="date" id="fExp" required>
         </div>
+        <div class="full">
+          <label>RH (Return Hari)</label>
+          <input type="number" id="fRH" min="0" placeholder="Cth: 30" value="30" required>
+          <div id="fRetPreview" class="ret-preview"></div>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;margin-top:14px;" id="saveBtn">
         <i class="bi bi-check-lg"></i> Simpan
@@ -430,7 +457,7 @@
    GANTI URL DI BAWAH INI dengan URL Web App Apps Script (/exec)
    Lihat file Code.gs untuk cara deploy.
    ============================================================ */
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwsQgr2MXoEP63qEW4oN19PeL_q7Qu2Sup1ht_5mLz2tSxOCS-MuyOEqVikC4FOLn03/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycby9Jv-YjqOhFTVyocH9-Udeznixn2zXfpx3eOElv5kg5MxoWWGinCLGXPWXRKFNlmcm/exec';
 
 let items = [];
 let statusFilter = 'all';
@@ -523,7 +550,7 @@ async function loadData(){
   try{
     const result = await apiGet();
     if(!result.success) throw new Error(result.error || 'Gagal memuat');
-    items = result.items.map(i => ({...i, qty: Number(i.qty)}));
+    items = result.items.map(i => ({...i, qty: Number(i.qty), rh: Number(i.rh) || 0}));
     setSyncStatus('ok', 'Tersambung');
     render();
   }catch(err){
@@ -539,18 +566,33 @@ function daysUntil(dateStr){
   return Math.round((exp - today) / 86400000);
 }
 
-function getStatus(dateStr){
-  const d = daysUntil(dateStr);
-  if(d < 0) return 'expired';
+// Tanggal wajib retur = Tgl Expired dikurangi RH (Return Hari).
+// Cth: expired 10 Agu 2026, RH 30 -> harus ditarik & diretur 10 Jul 2026.
+function addDays(dateStr, days){
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+}
+
+function returDate(item){
+  return addDays(item.exp, -(Number(item.rh) || 0));
+}
+
+// Status utama (badge, warna kartu, filter, ringkasan) sekarang dihitung dari
+// BATAS RETUR (tanggal wajib tarik), bukan dari tanggal expired — karena
+// barang harus sudah ditarik dari rak sebelum tanggal expired benar-benar terjadi.
+function getStatus(item){
+  const d = daysUntil(returDate(item));
+  if(d < 0) return 'expired';  // sudah lewat batas retur
   if(d <= 7) return 'danger';
   if(d <= 30) return 'warn';
   return 'ok';
 }
 
 function statusLabel(status, days){
-  if(status === 'expired') return `Expired ${Math.abs(days)} hr lalu`;
-  if(days === 0) return 'Expired hari ini';
-  return `${days} hari lagi`;
+  if(status === 'expired') return `Lewat batas retur ${Math.abs(days)} hr`;
+  if(days === 0) return 'Batas retur hari ini';
+  return `Retur H-${days}`;
 }
 
 function statusIcon(status){
@@ -581,7 +623,7 @@ function escapeHtml(str){
 function updateSummary(){
   let expired=0, danger=0, warn=0;
   items.forEach(i => {
-    const s = getStatus(i.exp);
+    const s = getStatus(i);
     if(s === 'expired') expired++;
     else if(s === 'danger') danger++;
     else if(s === 'warn') warn++;
@@ -592,6 +634,27 @@ function updateSummary(){
   $('#sumWarn').textContent = warn;
 }
 
+function updateReturAlert(){
+  const banner = $('#returAlert');
+  let lewat = 0, segeraOrToday = 0;
+  items.forEach(i => {
+    const d = daysUntil(returDate(i));
+    if(d < 0) lewat++;
+    else if(d === 0) segeraOrToday++;
+  });
+  const totalDue = lewat + segeraOrToday;
+  if(totalDue === 0){
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = 'flex';
+  banner.classList.toggle('danger', lewat > 0);
+  const parts = [];
+  if(lewat > 0) parts.push(`${lewat} produk TERLAMBAT retur`);
+  if(segeraOrToday > 0) parts.push(`${segeraOrToday} produk wajib retur hari ini`);
+  $('#returAlertText').textContent = parts.join(' · ') + ' — segera tarik & kembalikan ke supplier.';
+}
+
 function render(){
   updateRackOptions();
   updateSummary();
@@ -599,15 +662,17 @@ function render(){
   const search = $('#searchBox').value.trim().toLowerCase();
   const rackVal = rackFilter.value;
 
+  updateReturAlert();
+
   let filtered = items.filter(i => {
     if(rackVal && i.rak !== rackVal) return false;
     if(search && !i.desc.toLowerCase().includes(search)) return false;
-    const s = getStatus(i.exp);
+    const s = getStatus(i);
     if(statusFilter !== 'all' && s !== statusFilter) return false;
     return true;
   });
 
-  filtered.sort((a,b) => new Date(a.exp) - new Date(b.exp));
+  filtered.sort((a,b) => new Date(returDate(a)) - new Date(returDate(b)));
 
   if(filtered.length === 0){
     listContainer.innerHTML = `<div class="empty"><i class="bi bi-inbox"></i>Belum ada produk yang cocok.<br>Tambahkan produk mendekati expired di sini.</div>`;
@@ -619,14 +684,15 @@ function render(){
 
   listContainer.innerHTML = Object.keys(groups).sort().map(rak => {
     const rows = groups[rak].map(i => {
-      const s = getStatus(i.exp);
-      const d = daysUntil(i.exp);
+      const s = getStatus(i);
+      const d = daysUntil(returDate(i));
       return `
       <div class="item st-${s}">
         <div class="item-top">
           <div>
             <div class="item-desc">${escapeHtml(i.desc)}</div>
             <div class="item-meta">Qty: ${i.qty} · Exp: ${fmtDate(i.exp)}</div>
+            <div class="item-meta ret-line st-${s}"><i class="bi bi-truck"></i> Retur: ${fmtDate(returDate(i))} (RH ${i.rh} hr)</div>
           </div>
           <div class="badge st-${s}"><i class="bi ${statusIcon(s)}"></i>${statusLabel(s, d)}</div>
         </div>
@@ -650,8 +716,24 @@ function openModal(){
   $('#itemForm').reset();
   $('#editId').value = '';
   $('#modalTitle').textContent = 'Tambah Produk';
+  updateRetPreview();
   modalBg.classList.add('open');
 }
+
+function updateRetPreview(){
+  const exp = $('#fExp').value;
+  const rh = parseInt($('#fRH').value, 10);
+  const preview = $('#fRetPreview');
+  if(exp && !isNaN(rh)){
+    preview.textContent = `Harus ditarik & diretur ke supplier: ${fmtDate(addDays(exp, -rh))}`;
+    preview.classList.add('set');
+  } else {
+    preview.textContent = 'Isi Tgl Expired & RH untuk melihat tanggal wajib retur.';
+    preview.classList.remove('set');
+  }
+}
+$('#fExp').addEventListener('input', updateRetPreview);
+$('#fRH').addEventListener('input', updateRetPreview);
 function closeModal(){ modalBg.classList.remove('open'); }
 
 $('#openAddBtn').addEventListener('click', openModal);
@@ -666,7 +748,8 @@ $('#itemForm').addEventListener('submit', async e => {
     rak: $('#fRak').value.trim(),
     desc: $('#fDesc').value.trim(),
     qty: parseInt($('#fQty').value, 10),
-    exp: $('#fExp').value
+    exp: $('#fExp').value,
+    rh: parseInt($('#fRH').value, 10) || 0
   };
   const saveBtn = $('#saveBtn');
   saveBtn.disabled = true;
@@ -706,7 +789,9 @@ window.editItem = function(id){
   $('#fDesc').value = item.desc;
   $('#fQty').value = item.qty;
   $('#fExp').value = item.exp;
+  $('#fRH').value = item.rh || 0;
   $('#modalTitle').textContent = 'Edit Produk';
+  updateRetPreview();
   modalBg.classList.add('open');
 };
 
@@ -742,12 +827,12 @@ document.querySelectorAll('#statusChips .chip').forEach(chip => {
 
 $('#exportBtn').addEventListener('click', () => {
   if(items.length === 0){ showToast('Belum ada data untuk diexport', true); return; }
-  const rows = [['Rak','Deskripsi','Qty','Tanggal Expired','Status','Sisa Hari']];
-  items.slice().sort((a,b)=> new Date(a.exp)-new Date(b.exp)).forEach(i => {
-    const s = getStatus(i.exp);
-    const d = daysUntil(i.exp);
-    const labelMap = {expired:'Expired', danger:'Mendesak (<=7 hr)', warn:'Waspada (<=30 hr)', ok:'Aman'};
-    rows.push([i.rak, i.desc, i.qty, i.exp, labelMap[s], d]);
+  const rows = [['Rak','Deskripsi','Qty','Tanggal Expired','RH','Tanggal Wajib Retur','Status Retur','Sisa Hari ke Retur']];
+  items.slice().sort((a,b)=> new Date(returDate(a))-new Date(returDate(b))).forEach(i => {
+    const s = getStatus(i);
+    const d = daysUntil(returDate(i));
+    const labelMap = {expired:'Lewat Retur', danger:'Mendesak (<=7 hr)', warn:'Waspada (<=30 hr)', ok:'Aman'};
+    rows.push([i.rak, i.desc, i.qty, i.exp, i.rh || 0, returDate(i), labelMap[s], d]);
   });
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
