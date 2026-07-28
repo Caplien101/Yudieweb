@@ -1,1837 +1,2304 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Monitoring Penjualan Toko</title>
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoring Fokus Marketing • Alfamart</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        /* ===== SAMA SEPERTI SEBELUMNYA ===== */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        :root {
-            --bg: #F0F2F8;
-            --surface: #FFFFFF;
-            --surface-alt: #F7F8FC;
-            --border: #E4E7F0;
-            --border-strong: #CDD2E0;
-            --text-primary: #141821;
-            --text-secondary: #6B7494;
-            --text-tertiary: #9BA3BF;
-            --blue: #3B7BF8;
-            --blue-light: #EBF1FF;
-            --blue-dark: #2460D6;
-            --green: #22C55E;
-            --green-light: #ECFDF5;
-            --orange: #F59E0B;
-            --orange-light: #FFFBEB;
-            --red: #EF4444;
-            --red-light: #FEF2F2;
-            --purple: #8B5CF6;
-            --purple-light: #F5F3FF;
-            --teal: #14B8A6;
-            --teal-light: #F0FDFA;
-            --indigo: #6366F1;
-            --indigo-light: #EEF2FF;
-            --pink: #EC4899;
-            --pink-light: #FDF2F8;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --radius-xs: 7px;
-            --shadow-sm: 0 1px 3px rgba(20,24,33,0.06), 0 1px 2px rgba(20,24,33,0.04);
-            --shadow-md: 0 4px 16px rgba(20,24,33,0.08), 0 2px 6px rgba(20,24,33,0.04);
-            --shadow-lg: 0 12px 32px rgba(20,24,33,0.10), 0 4px 12px rgba(20,24,33,0.06);
-            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: var(--font);
-            background-color: var(--bg);
-            color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            padding-bottom: 48px;
-            min-height: 100vh;
-        }
-        .navbar-ios {
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            z-index: 200;
-            padding: 0.75rem 0;
-        }
-        .navbar-ios .navbar-brand {
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: -0.4px;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .navbar-ios .brand-icon {
-            width: 32px; height: 32px;
-            background: linear-gradient(135deg, var(--blue) 0%, var(--indigo) 100%);
-            border-radius: 9px;
-            display: inline-flex; align-items: center; justify-content: center;
-            color: #fff;
-            font-size: 0.85rem;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(59,123,248,0.35);
-        }
-        .navbar-ios .current-date {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            background: var(--surface-alt);
-            padding: 0.3rem 0.75rem;
-            border-radius: 100px;
-            border: 1px solid var(--border);
-        }
-        .nav-wrapper {
-            background: rgba(255,255,255,0.88);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 56px;
-            z-index: 99;
-            padding: 0.6rem 1rem;
-        }
-        .segmented-control {
-            display: inline-flex;
-            background: var(--bg);
-            border-radius: 12px;
-            padding: 4px;
-            width: 100%;
-            max-width: 580px;
-            border: 1px solid var(--border);
-        }
-        .segmented-control .seg-btn {
-            flex: 1;
-            padding: 0.5rem 0.4rem;
-            border-radius: 9px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-            white-space: nowrap;
-            line-height: 1.3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-        }
-        .segmented-control .seg-btn:hover:not(.active) {
-            color: var(--text-primary);
-            background: rgba(255,255,255,0.6);
-        }
-        .segmented-control .seg-btn.active {
-            background: var(--surface);
-            color: var(--blue);
-            box-shadow: var(--shadow-sm);
-            font-weight: 700;
-        }
-        .segmented-control .seg-btn i { font-size: 0.95rem; }
+      :root {
+        --af-red: #da291c;
+        --af-red-dark: #a81f14;
+        --af-yellow: #ffc72c;
+        --af-blue: #003da5;
+        --af-blue-dark: #00246b;
+        --bg: #f3f5fa;
+        --ink: #1f2430;
+        --muted: #6b7280;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        font-family: "Inter", sans-serif;
+        color: var(--ink);
+        padding-bottom: 3rem;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      .brand,
+      .font-disp {
+        font-family: "Poppins", sans-serif;
+      }
+      a {
+        text-decoration: none;
+      }
 
-        .view-toggle-wrapper {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0.25rem;
-            display: inline-flex;
-            margin-bottom: 1rem;
-        }
-        .view-toggle-wrapper .view-btn {
-            padding: 0.4rem 1rem;
-            border-radius: 8px;
-            border: none;
-            background: transparent;
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.15s;
-            font-family: var(--font);
-        }
-        .view-toggle-wrapper .view-btn.active {
-            background: var(--blue);
-            color: #fff;
-            box-shadow: var(--shadow-sm);
-        }
-        .view-toggle-wrapper .view-btn:hover:not(.active) {
-            background: var(--surface-alt);
-        }
+      .navbar-af {
+        background: linear-gradient(
+          100deg,
+          var(--af-red) 0%,
+          var(--af-red-dark) 65%
+        );
+        box-shadow: 0 4px 16px rgba(218, 41, 28, 0.25);
+      }
+      .navbar-af .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--af-yellow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--af-red-dark);
+        font-weight: 800;
+        font-family: "Poppins";
+        font-size: 1.1rem;
+      }
+      .navbar-af .brand-title {
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+      .navbar-af .brand-sub {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.72rem;
+      }
 
-        .card-ios {
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 1rem;
-            transition: box-shadow 0.2s, border-color 0.2s;
-            overflow: hidden;
-        }
-        .card-ios:hover { box-shadow: var(--shadow-md); }
-        .card-ios .card-header {
-            background: var(--surface-alt);
-            border-bottom: 1px solid var(--border);
-            font-weight: 700;
-            font-size: 0.875rem;
-            padding: 0.875rem 1.25rem;
-            color: var(--text-primary);
-            letter-spacing: -0.2px;
-            display: flex;
-            align-items: center;
-        }
-        .card-ios .card-header .header-badge {
-            margin-left: auto;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            background: var(--border);
-            padding: 0.2rem 0.6rem;
-            border-radius: 100px;
-        }
-        .card-ios .card-body { padding: 1.25rem; }
+      .tabs-wrap {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg);
+        padding-top: 0.75rem;
+        padding-bottom: 0.5rem;
+      }
+      .nav-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.4rem;
+        padding-bottom: 0.25rem;
+      }
+      .nav-pills::-webkit-scrollbar {
+        height: 6px;
+      }
+      .nav-pills::-webkit-scrollbar-thumb {
+        background: #c9cfda;
+        border-radius: 6px;
+      }
+      .nav-pills .nav-link {
+        color: var(--af-blue);
+        font-weight: 600;
+        border-radius: 999px;
+        white-space: nowrap;
+        font-size: 0.88rem;
+        border: 1.5px solid #e2e6ef;
+        background: #fff;
+      }
+      .nav-pills .nav-link i {
+        margin-right: 0.35rem;
+      }
+      .nav-pills .nav-link.active {
+        background: var(--af-blue);
+        color: #fff;
+        border-color: var(--af-blue);
+        box-shadow: 0 3px 10px rgba(0, 61, 165, 0.25);
+      }
 
-        .summary-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 1rem 0.75rem;
-            text-align: center;
-            height: 100%;
-            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-            position: relative;
-            overflow: hidden;
-        }
-        .summary-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: var(--accent-color, var(--blue));
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .summary-card:hover::before { opacity: 1; }
-        .summary-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--border-strong);
-        }
-        .summary-card .s-icon {
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center; justify-content: center;
-            font-size: 1rem;
-            margin-bottom: 0.4rem;
-        }
-        .summary-card .s-value {
-            font-size: 1.6rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            line-height: 1;
-            margin-bottom: 0.2rem;
-        }
-        .summary-card .s-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-tertiary);
-            font-weight: 600;
-        }
-        .summary-card .s-target {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-top: 0.2rem;
-        }
-        .summary-card .s-progress {
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-top: 0.2rem;
-        }
-        .progress-sm {
-            height: 4px;
-            border-radius: 100px;
-            background: var(--bg);
-            margin-top: 0.4rem;
-            overflow: hidden;
-        }
-        .progress-sm .progress-fill-sm {
-            height: 100%;
-            border-radius: 100px;
-            transition: width 0.5s;
-        }
+      .card-af {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 14px rgba(20, 30, 60, 0.06);
+        margin-bottom: 1.25rem;
+        background: #fff;
+      }
+      .card-af .card-header {
+        border-radius: 16px 16px 0 0 !important;
+        font-weight: 700;
+        font-family: "Poppins";
+        font-size: 1rem;
+        border: none;
+        padding: 0.85rem 1.1rem;
+      }
+      .header-red {
+        background: var(--af-red);
+        color: #fff;
+      }
+      .header-blue {
+        background: var(--af-blue);
+        color: #fff;
+      }
+      .header-yellow {
+        background: var(--af-yellow);
+        color: #4a3800;
+      }
+      .card-af .card-body {
+        padding: 1.15rem;
+      }
 
-        .progress-item {
-            margin-bottom: 1rem;
-        }
-        .progress-item:last-child { margin-bottom: 0; }
-        .progress-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 6px;
-        }
-        .progress-name {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .progress-stat {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        .progress-track {
-            height: 7px;
-            border-radius: 100px;
-            background: var(--bg);
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-        .progress-fill {
-            height: 100%;
-            border-radius: 100px;
-            transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
-        }
-        .progress-pct-badge {
-            font-size: 0.65rem;
-            font-weight: 700;
-            padding: 0.1rem 0.4rem;
-            border-radius: 5px;
-            margin-left: 0.4rem;
-        }
+      .stat-card {
+        border-radius: 16px;
+        color: #fff;
+        padding: 1rem 1.15rem;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+      .stat-card i.bg-icon {
+        position: absolute;
+        right: -0.4rem;
+        bottom: -0.6rem;
+        font-size: 3.6rem;
+        opacity: 0.18;
+      }
+      .stat-card .lbl {
+        font-size: 0.78rem;
+        opacity: 0.92;
+        font-weight: 600;
+      }
+      .stat-card .num {
+        font-family: "Poppins";
+        font-weight: 800;
+        font-size: 1.7rem;
+        line-height: 1.15;
+      }
+      .stat-red {
+        background: linear-gradient(135deg, var(--af-red), var(--af-red-dark));
+      }
+      .stat-blue {
+        background: linear-gradient(
+          135deg,
+          var(--af-blue),
+          var(--af-blue-dark)
+        );
+      }
+      .stat-yellow {
+        background: linear-gradient(135deg, #ffce43, #e8a400);
+        color: #3a2c00;
+      }
+      .stat-dark {
+        background: linear-gradient(135deg, #2c3345, #161b26);
+      }
 
-        .form-control-ios, .form-select.form-control-ios {
-            border-radius: var(--radius-xs);
-            border: 1.5px solid var(--border-strong);
-            padding: 0.55rem 0.85rem;
-            background: var(--surface);
-            font-size: 0.875rem;
-            font-family: var(--font);
-            color: var(--text-primary);
-            transition: border-color 0.15s, box-shadow 0.15s;
+      .table-responsive {
+        border-radius: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: 0 2px 10px rgba(20, 30, 60, 0.05);
+      }
+      table {
+        min-width: 640px;
+      }
+      table thead th {
+        background: var(--af-blue);
+        color: #fff;
+        font-family: "Poppins";
+        font-weight: 600;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      table tbody td {
+        font-size: 0.86rem;
+        vertical-align: middle;
+      }
+      .table-total {
+        background: #fff6da !important;
+        font-weight: 700;
+      }
+
+      .badge-pct {
+        font-family: "Poppins";
+        font-weight: 700;
+        font-size: 0.72rem;
+      }
+      .section {
+        animation: fadein 0.25s ease;
+      }
+      @keyframes fadein {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
         }
-        .form-control-ios:focus {
-            border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(59,123,248,0.15);
-            background: var(--surface);
-            outline: none;
+        to {
+          opacity: 1;
+          transform: none;
         }
-        .form-label-ios {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            margin-bottom: 0.35rem;
-            display: block;
+      }
+
+      .chip-produk {
+        background: #eef2fc;
+        border: 1px solid #dbe2f5;
+        border-radius: 10px;
+        padding: 0.5rem 0.65rem;
+        font-size: 0.8rem;
+      }
+      .chip-produk .tgt {
+        color: var(--af-blue);
+        font-weight: 700;
+      }
+      .form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #42485a;
+      }
+      .form-control,
+      .form-select {
+        border-radius: 10px;
+        border-color: #dbe0eb;
+      }
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--af-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 61, 165, 0.12);
+      }
+      .btn-af-red {
+        background: var(--af-red);
+        border-color: var(--af-red);
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+      }
+      .btn-af-red:hover {
+        background: var(--af-red-dark);
+        border-color: var(--af-red-dark);
+        color: #fff;
+      }
+      .btn-af-blue {
+        background: var(--af-blue);
+        border-color: var(--af-blue);
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+      }
+      .btn-af-blue:hover {
+        background: var(--af-blue-dark);
+        border-color: var(--af-blue-dark);
+        color: #fff;
+      }
+      .btn-outline-af {
+        border: 1.5px solid var(--af-blue);
+        color: var(--af-blue);
+        border-radius: 10px;
+        font-weight: 600;
+      }
+      .btn-outline-af:hover {
+        background: var(--af-blue);
+        color: #fff;
+      }
+
+      .subtab .nav-link {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--af-blue);
+      }
+      .subtab .nav-link.active {
+        background: var(--af-yellow);
+        color: #4a3800;
+      }
+
+      .empty-hint {
+        border: 1.5px dashed #cbd3e3;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--muted);
+      }
+      .eyebrow {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--af-red);
+      }
+      footer.af-footer {
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-align: center;
+        margin-top: 2rem;
+      }
+      .psm-row-manual input {
+        background: #fffbea;
+      }
+      @media (max-width: 576px) {
+        .stat-card .num {
+          font-size: 1.4rem;
         }
-        .input-group-ios {
-            background: var(--surface-alt);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .input-group-ios .group-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-tertiary);
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
+        .navbar-af .brand-sub {
+          display: none;
         }
 
-        .btn-ios {
-            border-radius: 100px;
-            padding: 0.55rem 1.4rem;
-            font-weight: 600;
-            font-size: 0.85rem;
-            border: none;
-            font-family: var(--font);
-            cursor: pointer;
-            transition: all 0.18s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
+        /* Tabel lebih ramping di layar kecil, tapi tetap rapi & rata teksnya */
+        .table-responsive {
+          border-radius: 10px;
         }
-        .btn-ios-primary {
-            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(59,123,248,0.3);
+        table {
+          min-width: 0;
+          width: 100%;
+          table-layout: auto;
         }
-        .btn-ios-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(59,123,248,0.4);
-            color: #fff;
+        table thead th {
+          font-size: 0.64rem;
+          padding: 0.4rem 0.3rem;
+          white-space: normal;
+          line-height: 1.2;
+          text-align: center;
+          vertical-align: middle;
         }
-        .btn-ios-primary:active { transform: translateY(0); }
-        .btn-ios-secondary {
-            background: var(--surface-alt);
-            color: var(--text-primary);
-            border: 1.5px solid var(--border-strong);
-        }
-        .btn-ios-secondary:hover {
-            background: var(--border);
-            color: var(--text-primary);
-        }
-        .btn-ios-danger {
-            background: var(--red-light);
-            color: var(--red);
-            border: 1.5px solid #FECACA;
-        }
-        .btn-ios-danger:hover {
-            background: var(--red);
-            color: #fff;
+        table tbody td {
+          font-size: 0.72rem;
+          padding: 0.38rem 0.3rem;
+          text-align: center;
+          white-space: normal;
+          word-break: break-word;
+          vertical-align: middle;
         }
 
-        /* ===== TABLE POPULASI - FREEZE KOLOM NAMA ===== */
-        .table-populasi-wrapper {
-            overflow-x: auto;
-            max-width: 100%;
-            -webkit-overflow-scrolling: touch;
+        /* Kolom identitas (NIK/Tanggal/Produk/Parameter) rata kiri, kolom angka/status tetap rata tengah */
+        table th:first-child,
+        table td:first-child {
+          text-align: left;
         }
-        .table-populasi-wrapper table {
-            min-width: 800px; /* agar scroll horizontal terlihat */
+        #dashTable th:nth-child(2),
+        #dashTable td:nth-child(2),
+        #dashTable th:nth-child(3),
+        #dashTable td:nth-child(3),
+        #rpTable th:nth-child(2),
+        #rpTable td:nth-child(2),
+        #pnTable th:nth-child(2),
+        #pnTable td:nth-child(2),
+        #pnTable th:nth-child(3),
+        #pnTable td:nth-child(3) {
+          text-align: left;
         }
-        #populasiTable thead th:first-child,
-        #populasiTable tbody td:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 2;
-            background: var(--surface-alt);
-            border-right: 1px solid var(--border);
-        }
-        #populasiTable tbody td:first-child {
-            background: var(--surface);
-            z-index: 1;
-        }
-        #populasiTable thead th:first-child {
-            z-index: 3; /* di atas body */
-        }
-        /* Agar header tetap di atas saat scroll vertikal */
-        #populasiTable thead th {
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        #populasiTable thead th:first-child {
-            z-index: 4;
+        #blTable thead tr:first-child th:nth-child(2),
+        #blTable tbody td:nth-child(2) {
+          text-align: left;
         }
 
-        .table-ios {
-            font-size: 0.82rem;
-            border-collapse: collapse;
-            width: 100%;
+        .badge-pct {
+          font-size: 0.64rem;
+          padding: 0.28rem 0.5rem;
         }
-        .table-ios thead th {
-            background: var(--surface-alt);
-            font-weight: 700;
-            font-size: 0.66rem;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            color: var(--text-tertiary);
-            border-bottom: 2px solid var(--border);
-            white-space: nowrap;
-            padding: 0.7rem 0.75rem;
-            cursor: pointer;
-            user-select: none;
+        .card-af .card-header {
+          font-size: 0.85rem;
+          padding: 0.65rem 0.85rem;
         }
-        .table-ios thead th:hover {
-            color: var(--blue);
-        }
-        .table-ios tbody td {
-            padding: 0.65rem 0.75rem;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-            color: var(--text-primary);
-        }
-        .table-ios tbody tr:last-child td { border-bottom: none; }
-        .table-ios tbody tr:hover td { background: var(--blue-light); }
-
-        .accordion-ios .accordion-button {
-            font-weight: 600;
-            font-size: 0.875rem;
-            background: var(--surface);
-            box-shadow: none;
-            border: none;
-            color: var(--text-primary);
-        }
-        .accordion-ios .accordion-button:not(.collapsed) {
-            background: var(--blue-light);
-            color: var(--blue);
-        }
-        .accordion-ios .accordion-body { padding: 1rem 1.25rem; background: var(--surface-alt); }
-        .accordion-ios .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-xs) !important; margin-bottom: 0.5rem; overflow: hidden; }
-
-        .toast-ios {
-            position: fixed;
-            bottom: 28px;
-            left: 50%;
-            transform: translateX(-50%) translateY(12px);
-            background: rgba(20,24,33,0.92);
-            backdrop-filter: blur(12px);
-            color: #fff;
-            padding: 0.65rem 1.5rem;
-            border-radius: 100px;
-            font-weight: 600;
-            font-size: 0.82rem;
-            font-family: var(--font);
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.25s, transform 0.25s;
-            pointer-events: none;
-            white-space: nowrap;
-            box-shadow: var(--shadow-lg);
-        }
-        .toast-ios.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .tab-pane-content { display: none; }
-        .tab-pane-content.active { display: block; }
-
-        .psm-section {
-            background: linear-gradient(135deg, #F0F2F8 0%, #EBF1FF 100%);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 1rem;
-        }
-
-        .text-blue { color: var(--blue) !important; }
-        .text-green { color: var(--green) !important; }
-        .text-orange { color: var(--orange) !important; }
-        .text-red { color: var(--red) !important; }
-        .text-purple { color: var(--purple) !important; }
-        .text-teal { color: var(--teal) !important; }
-        .text-indigo { color: var(--indigo) !important; }
-        .text-pink { color: var(--pink) !important; }
-
-        .badge-soft {
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.25rem 0.6rem;
-            border-radius: 100px;
-        }
-        .badge-soft-blue { background: var(--blue-light); color: var(--blue); }
-        .badge-soft-green { background: var(--green-light); color: #16A34A; }
-        .badge-soft-orange { background: var(--orange-light); color: #D97706; }
-        .badge-soft-purple { background: var(--purple-light); color: var(--purple); }
-        .badge-soft-teal { background: var(--teal-light); color: var(--teal); }
-        .badge-soft-pink { background: var(--pink-light); color: var(--pink); }
-
-        @media (max-width: 576px) {
-            .summary-card { padding: 0.75rem 0.5rem; }
-            .summary-card .s-icon { width: 36px; height: 36px; font-size: 0.9rem; }
-            .summary-card .s-value { font-size: 1.35rem; }
-            .segmented-control .seg-btn { font-size: 0.7rem; padding: 0.45rem 0.2rem; }
-            .segmented-control .seg-btn i { font-size: 0.85rem; }
-            .navbar-ios .current-date { display: none; }
-            .view-toggle-wrapper .view-btn { font-size: 0.7rem; padding: 0.3rem 0.6rem; }
-        }
-
-        .divider-label {
-            display: flex; align-items: center; gap: 0.75rem;
-            margin: 1rem 0;
-        }
-        .divider-label::before, .divider-label::after {
-            content: ''; flex: 1;
-            height: 1px; background: var(--border);
-        }
-        .divider-label span {
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.7px;
-            color: var(--text-tertiary);
-            white-space: nowrap;
-        }
-
-        .page-section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .page-section-header .section-icon {
-            width: 28px; height: 28px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem;
-            flex-shrink: 0;
-        }
-        .page-section-header .section-title {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div
+      id="loadingOverlay"
+      class="d-none"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.75rem;
+      "
+    >
+      <div
+        class="spinner-border"
+        style="color: var(--af-red); width: 3rem; height: 3rem"
+        role="status"
+      ></div>
+      <div
+        style="
+          font-family: &quot;Poppins&quot;;
+          font-weight: 600;
+          color: var(--af-blue);
+        "
+      >
+        Menghubungkan ke Google Sheet...
+      </div>
+    </div>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-ios sticky-top">
-        <div class="container-fluid px-3">
-            <span class="navbar-brand">
-                <span class="brand-icon"><i class="fas fa-store"></i></span>
-                Monitor Penjualan
-            </span>
-            <div style="display:flex;align-items:center;gap:0.5rem;">
-                <button onclick="refreshAllData()" title="Refresh data dari Sheets"
-                    style="background:var(--surface-alt);border:1px solid var(--border);
-                    border-radius:8px;padding:0.35rem 0.65rem;font-size:0.8rem;cursor:pointer;
-                    color:var(--text-secondary);font-family:var(--font);font-weight:600;
-                    transition:all 0.15s;" onmouseover="this.style.background='var(--border)'"
-                    onmouseout="this.style.background='var(--surface-alt)'">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-                <span class="current-date" id="currentDateDisplay"></span>
-            </div>
+    <div
+      id="configWarning"
+      class="d-none alert alert-danger m-3 mb-0"
+      style="border-radius: 12px"
+    ></div>
+
+    <nav class="navbar navbar-af navbar-expand px-3 py-2 mb-2">
+      <div class="d-flex align-items-center gap-2">
+        <div class="brand-mark"><i class="bi bi-star-fill"></i></div>
+        <div>
+          <div class="brand-title" style="line-height: 1.1">
+            Fokus Marketing Monitoring
+          </div>
+          <div class="brand-sub">Alfamart • SPBU Cut Mutia</div>
         </div>
+      </div>
+      <div class="ms-auto d-none d-sm-block">
+        <span
+          class="badge rounded-pill"
+          style="background: var(--af-yellow); color: #4a3800; font-weight: 700"
+          id="todayBadge"
+          ><i class="bi bi-calendar3 me-1"></i
+        ></span>
+      </div>
     </nav>
 
-    <!-- Segmented Control -->
-    <div class="nav-wrapper d-flex justify-content-center">
-        <div class="segmented-control" id="segmentedNav">
-            <button class="seg-btn active" data-tab="dashboard">
-                <i class="fas fa-chart-pie"></i> Dashboard
+    <div class="container-fluid px-3 px-md-4">
+      <div class="tabs-wrap">
+        <ul class="nav nav-pills" id="mainTabs">
+          <li class="nav-item">
+            <button class="nav-link active" data-sec="dashboard">
+              <i class="bi bi-speedometer2"></i>Dashboard
             </button>
-            <button class="seg-btn" data-tab="input">
-                <i class="fas fa-plus-circle"></i> Input
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="entry">
+              <i class="bi bi-pencil-square"></i>Entry Data
             </button>
-            <button class="seg-btn" data-tab="populasi">
-                <i class="fas fa-users"></i> Employee
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="periode">
+              <i class="bi bi-bar-chart-line"></i>Rekap Periode
             </button>
-            <button class="seg-btn" data-tab="admin">
-                <i class="fas fa-sliders-h"></i> Target
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="psm">
+              <i class="bi bi-boxes"></i>Rekap PSM
             </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="bulanan">
+              <i class="bi bi-calendar-month"></i>Rekap Bulanan
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="target">
+              <i class="bi bi-bullseye"></i>Target
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="karyawan">
+              <i class="bi bi-people"></i>Karyawan
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ================= DASHBOARD ================= -->
+      <div id="sec-dashboard" class="section">
+        <div class="eyebrow">Hari ini</div>
+        <h4 class="mb-3">Rekap Entry Hari Ini</h4>
+        <div class="row g-3 mb-3" id="dashStats"></div>
+
+        <div class="card-af">
+          <div
+            class="card-header header-blue d-flex justify-content-between align-items-center flex-wrap gap-2"
+          >
+            <span><i class="bi bi-list-check me-2"></i>Entry Transaksi</span>
+            <input
+              type="date"
+              id="dashDateFilter"
+              class="form-control form-control-sm"
+              style="width: auto"
+            />
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="dashTable">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>NIK</th>
+                    <th>Nama</th>
+                    <th>PWP</th>
+                    <th>Sergap</th>
+                    <th>Sueger</th>
+                    <th>Ceban</th>
+                    <th>New Member</th>
+                    <th>PSM</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Main Content -->
-    <div class="container py-3" style="max-width:960px;">
-
-        <!-- ==================== TAB DASHBOARD ==================== -->
-        <div class="tab-pane-content active" id="tab-dashboard">
-
-            <!-- View Toggle -->
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                <div class="view-toggle-wrapper" id="viewToggle">
-                    <button class="view-btn active" data-view="daily">Harian</button>
-                    <button class="view-btn" data-view="period">Periode</button>
-                    <button class="view-btn" data-view="monthly">Bulanan</button>
-                </div>
-                <span class="badge-soft badge-soft-blue" id="viewPeriodLabel">Hari ini: ...</span>
+      <!-- ================= ENTRY DATA ================= -->
+      <div id="sec-entry" class="section d-none">
+        <div class="eyebrow">Input harian</div>
+        <h4 class="mb-3">Form Entry Data</h4>
+        <div class="card-af">
+          <div class="card-header header-red">
+            <i class="bi bi-pencil-square me-2"></i>Entry Transaksi Karyawan
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-3">
+                <label class="form-label">Tanggal</label>
+                <input type="date" class="form-control" id="f_tanggal" />
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label">NIK</label>
+                <select class="form-select" id="f_nik">
+                  <option value="">— pilih NIK —</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Nama Karyawan</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="f_nama"
+                  readonly
+                  placeholder="Otomatis terisi"
+                />
+              </div>
+            </div>
+            <hr />
+            <div class="row g-3">
+              <div class="col-6 col-md-2">
+                <label class="form-label">PWP</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_pwp"
+                  value="0"
+                />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Sergap</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_sergap"
+                  value="0"
+                />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Sueger</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_sueger"
+                  value="0"
+                />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Ceban</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_ceban"
+                  value="0"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">New Member</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_newmember"
+                  value="0"
+                />
+              </div>
             </div>
 
-            <!-- Summary Cards -->
-            <div class="card card-ios">
-                <div class="card-header">
-                    <span class="section-icon me-2" style="background:var(--blue-light);color:var(--blue);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
-                        <i class="fas fa-chart-line"></i>
-                    </span>
-                    <span id="viewTitle">Ringkasan Harian</span>
-                    <span class="header-badge ms-auto" id="viewDateLabel"></span>
-                </div>
-                <div class="card-body" id="summaryContainer">
-                    <div class="row g-2" id="summaryCards">
-                        <!-- Diisi JS -->
-                    </div>
-                </div>
+            <hr />
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label mb-0"
+                ><i class="bi bi-box-seam me-1"></i>PSM (sesuai minggu
+                berjalan)</label
+              >
+              <button
+                class="btn btn-sm btn-outline-af"
+                onclick="addManualPsmEntryRow()"
+              >
+                <i class="bi bi-plus-lg"></i> Tambah Produk Lain
+              </button>
             </div>
+            <div id="psmEntryInfo" class="mb-2"></div>
+            <div id="psmEntryRows"></div>
 
-            <!-- PSM Periode Berjalan -->
-            <div class="card card-ios">
-                <div class="card-header">
-                    <span class="section-icon me-2" style="background:var(--indigo-light);color:var(--indigo);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
-                        <i class="fas fa-cubes"></i>
-                    </span>
-                    PSM Periode Berjalan
-                    <span id="psmPeriodeInfo" class="badge-soft badge-soft-blue ms-2"></span>
-                </div>
-                <div class="card-body" id="psmDashboardDetail">
-                    <p class="text-muted small">Belum ada data PSM.</p>
-                </div>
+            <div class="d-flex gap-2 mt-4">
+              <button class="btn btn-af-red px-4" onclick="submitEntry()">
+                <i class="bi bi-check2-circle me-1"></i>Simpan Entry
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                onclick="resetEntryForm()"
+              >
+                Reset
+              </button>
             </div>
+          </div>
         </div>
+      </div>
 
-        <!-- ==================== TAB INPUT ==================== -->
-        <div class="tab-pane-content" id="tab-input">
-            <div class="card card-ios">
-                <div class="card-header">
-                    <span class="section-icon me-2" style="background:var(--blue-light);color:var(--blue);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
-                        <i class="fas fa-edit"></i>
-                    </span>
-                    Form Input Penjualan Harian
-                </div>
-                <div class="card-body">
-                    <form id="formInputPenjualan" novalidate>
-                        <div class="input-group-ios mb-3">
-                            <div class="group-title">
-                                <i class="fas fa-id-card" style="color:var(--blue)"></i> Identitas
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-4 col-sm-6">
-                                    <label class="form-label-ios">Tanggal</label>
-                                    <input type="date" class="form-control form-control-ios" id="inputTanggal" required>
-                                </div>
-                                <div class="col-md-4 col-sm-6">
-                                    <label class="form-label-ios">Nama</label>
-                                    <input type="text" class="form-control form-control-ios" id="inputNama" placeholder="Nama pegawai" required>
-                                </div>
-                                <div class="col-md-4 col-sm-6">
-                                    <label class="form-label-ios">NIK (opsional)</label>
-                                    <input type="text" class="form-control form-control-ios" id="inputNIK" placeholder="NIK (opsional)">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Data Penjualan -->
-                        <div class="input-group-ios mb-3">
-                            <div class="group-title">
-                                <i class="fas fa-chart-bar" style="color:var(--green)"></i> Data Penjualan
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-2 col-sm-4 col-6">
-                                    <label class="form-label-ios">SPD</label>
-                                    <input type="number" class="form-control form-control-ios" id="inputSPD" value="0" min="0">
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-6">
-                                    <label class="form-label-ios">STD</label>
-                                    <input type="number" class="form-control form-control-ios" id="inputSTD" value="0" min="0">
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-6">
-                                    <label class="form-label-ios">Member</label>
-                                    <input type="number" class="form-control form-control-ios" id="inputMember" value="0" min="0">
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-6">
-                                    <label class="form-label-ios">PWP</label>
-                                    <input type="number" class="form-control form-control-ios" id="inputPWP" value="0" min="0">
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-6">
-                                    <label class="form-label-ios">Sergap</label>
-                                    <input type="number" class="form-control form-control-ios" id="inputSergap" value="0" min="0">
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-6">
-                                    <label class="form-label-ios">Sueger</label>
-                                    <input type="number" class="form-control form-control-ios" id="inputSueger" value="0" min="0">
-                                </div>
-                                <div class="col-md-2 col-sm-4 col-6">
-                                    <label class="form-label-ios">Ceban</label>
-                                    <input type="number" class="form-control form-control-ios" id="inputCeban" value="0" min="0">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- PSM -->
-                        <div class="psm-section mb-3">
-                            <label class="form-label-ios">
-                                <i class="fas fa-cubes me-1" style="color:var(--indigo)"></i> PSM Produk
-                                <span id="psmPeriodeLabel" class="badge-soft badge-soft-blue ms-2">Periode: -</span>
-                            </label>
-                            <div id="psmInputFields" class="row g-2 mt-1">
-                                <p class="text-muted small">Pilih tanggal untuk melihat produk PSM.</p>
-                            </div>
-                        </div>
-
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" class="btn btn-ios btn-ios-primary">
-                                <i class="fas fa-save"></i> Simpan
-                            </button>
-                            <button type="button" class="btn btn-ios btn-ios-secondary" onclick="resetFormInput()">
-                                <i class="fas fa-redo"></i> Reset
-                            </button>
-                        </div>
-                    </form>
-                </div>
+      <!-- ================= REKAP PERIODE ================= -->
+      <div id="sec-periode" class="section d-none">
+        <div class="eyebrow">Capaian per periode</div>
+        <h4 class="mb-3">Rekap Data Per Periode</h4>
+        <div class="card-af">
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-md-3">
+                <label class="form-label">Parameter</label>
+                <select
+                  class="form-select"
+                  id="rp_param"
+                  onchange="onRpParamChange()"
+                >
+                  <option value="pwp">PWP</option>
+                  <option value="sergap">Sergap</option>
+                  <option value="sueger">Sueger</option>
+                  <option value="ceban">Ceban</option>
+                  <option value="newmember">New Member</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Bulan</label>
+                <input type="month" class="form-control" id="rp_bulan" />
+              </div>
+              <div class="col-6 col-md-3" id="rp_periode_wrap">
+                <label class="form-label">Periode</label>
+                <select class="form-select" id="rp_periode">
+                  <option value="1">Periode 1 (1–15)</option>
+                  <option value="2">Periode 2 (16–akhir)</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-3">
+                <button
+                  class="btn btn-af-blue w-100"
+                  onclick="renderRekapPeriode()"
+                >
+                  <i class="bi bi-search me-1"></i>Tampilkan
+                </button>
+              </div>
             </div>
-
-            <!-- Recent Entries -->
-            <div class="card card-ios">
-                <div class="card-header">
-                    <span class="section-icon me-2" style="background:var(--surface-alt);color:var(--text-secondary);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
-                        <i class="fas fa-history"></i>
-                    </span>
-                    Entri Terbaru
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height:300px;">
-                        <table class="table table-ios mb-0">
-                            <thead>
-                                <tr><th>Tanggal</th><th>Nama</th><th>SPD</th><th>STD</th><th>Member</th><th>PWP</th><th>Sergap</th><th>Sueger</th><th>Ceban</th><th></th></tr>
-                            </thead>
-                            <tbody id="recentEntriesBody">
-                                <tr><td colspan="10" class="text-center text-muted">Belum ada data.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-
-        <!-- ==================== TAB EMPLOYEE (dulu Populasi) ==================== -->
-        <div class="tab-pane-content" id="tab-populasi">
-            <div class="card card-ios">
-                <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-5">
-                            <label class="form-label-ios">Filter Nama</label>
-                            <select class="form-select form-control-ios" id="filterNama">
-                                <option value="">Semua Nama</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label-ios">Filter Bulan</label>
-                            <input type="month" class="form-control form-control-ios" id="filterBulanPopulasi">
-                        </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-ios btn-ios-primary w-100" onclick="loadPopulasi()">
-                                <i class="fas fa-filter"></i> Terapkan
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <div class="row g-3 mb-3" id="rpStats"></div>
+        <div class="card-af">
+          <div class="card-header header-blue">
+            <i class="bi bi-table me-2"></i>Detail per Karyawan
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="rpTable">
+                <thead>
+                  <tr>
+                    <th>NIK</th>
+                    <th>Nama</th>
+                    <th>Capaian</th>
+                    <th>Target</th>
+                    <th>%</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
-            <div class="card card-ios">
-                <div class="card-header">
-                    <span class="section-icon me-2" style="background:var(--teal-light);color:var(--teal);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
-                        <i class="fas fa-table"></i>
-                    </span>
-                    Employee Summary
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-populasi-wrapper">
-                        <table class="table table-ios mb-0" id="populasiTable">
-                            <thead>
-                                <tr>
-                                    <th data-sort="nama">Nama <i class="fas fa-sort"></i></th>
-                                    <th data-sort="spd">Total SPD</th>
-                                    <th data-sort="std">Total STD</th>
-                                    <th data-sort="member">Total Member</th>
-                                    <th data-sort="pwp">Total PWP</th>
-                                    <th data-sort="sergap">Total Sergap</th>
-                                    <th data-sort="sueger">Total Sueger</th>
-                                    <th data-sort="ceban">Total Ceban</th>
-                                    <th data-sort="psm">Total PSM</th>
-                                    <th data-sort="count">Jml Entri</th>
-                                </tr>
-                            </thead>
-                            <tbody id="populasiBody">
-                                <tr><td colspan="10" class="text-center text-muted">Pilih filter dan klik Terapkan.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- ==================== TAB ADMIN TARGET ==================== -->
-        <div class="tab-pane-content" id="tab-admin">
-            <div class="card card-ios">
-                <div class="card-header">
-                    <span class="section-icon me-2" style="background:var(--orange-light);color:var(--orange);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;">
-                        <i class="fas fa-sliders-h"></i>
-                    </span>
-                    Pengaturan Target
-                </div>
-                <div class="card-body">
-                    <form id="formAdminTarget" novalidate>
-                        <!-- Bulanan -->
-                        <div class="divider-label"><span><i class="fas fa-calendar-check me-1"></i> Target Bulanan</span></div>
-                        <div class="row g-3 mb-4">
-                            <div class="col-sm-4">
-                                <label class="form-label-ios">Target SPD / Bulan</label>
-                                <input type="number" class="form-control form-control-ios" id="targetSPD" min="0">
-                            </div>
-                            <div class="col-sm-4">
-                                <label class="form-label-ios">Target STD / Bulan</label>
-                                <input type="number" class="form-control form-control-ios" id="targetSTD" min="0">
-                            </div>
-                            <div class="col-sm-4">
-                                <label class="form-label-ios">Target Member / Bulan</label>
-                                <input type="number" class="form-control form-control-ios" id="targetMember" min="0">
-                            </div>
-                        </div>
-
-                        <!-- 2 Periode -->
-                        <div class="divider-label"><span><i class="fas fa-calendar-alt me-1"></i> Target 2 Periode (1-15 & 16-31)</span></div>
-                        <div class="row g-3 mb-4">
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">PWP (1-15)</label><input type="number" class="form-control form-control-ios target-pwp-p1" min="0"></div>
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">PWP (16-31)</label><input type="number" class="form-control form-control-ios target-pwp-p2" min="0"></div>
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sergap (1-15)</label><input type="number" class="form-control form-control-ios target-sergap-p1" min="0"></div>
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sergap (16-31)</label><input type="number" class="form-control form-control-ios target-sergap-p2" min="0"></div>
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sueger (1-15)</label><input type="number" class="form-control form-control-ios target-sueger-p1" min="0"></div>
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Sueger (16-31)</label><input type="number" class="form-control form-control-ios target-sueger-p2" min="0"></div>
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Ceban (1-15)</label><input type="number" class="form-control form-control-ios target-ceban-p1" min="0"></div>
-                            <div class="col-sm-6 col-md-3"><label class="form-label-ios">Ceban (16-31)</label><input type="number" class="form-control form-control-ios target-ceban-p2" min="0"></div>
-                        </div>
-
-                        <!-- PSM 4 Periode -->
-                        <div class="divider-label mt-2"><span><i class="fas fa-cubes me-1"></i> Target PSM – 4 Periode</span></div>
-                        <div class="accordion accordion-ios" id="accordionPSM">
-                            <div class="accordion-item border-0">
-                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse1"><span class="badge bg-info me-2">P1</span> 1-7</button></h2>
-                                <div id="psmCollapse1" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
-                                    <div class="accordion-body"><div id="psmAdminP1" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p1')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
-                                </div>
-                            </div>
-                            <div class="accordion-item border-0">
-                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse2"><span class="badge bg-info me-2">P2</span> 8-15</button></h2>
-                                <div id="psmCollapse2" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
-                                    <div class="accordion-body"><div id="psmAdminP2" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p2')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
-                                </div>
-                            </div>
-                            <div class="accordion-item border-0">
-                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse3"><span class="badge bg-info me-2">P3</span> 16-23</button></h2>
-                                <div id="psmCollapse3" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
-                                    <div class="accordion-body"><div id="psmAdminP3" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p3')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
-                                </div>
-                            </div>
-                            <div class="accordion-item border-0">
-                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psmCollapse4"><span class="badge bg-info me-2">P4</span> 24-31</button></h2>
-                                <div id="psmCollapse4" class="accordion-collapse collapse" data-bs-parent="#accordionPSM">
-                                    <div class="accordion-body"><div id="psmAdminP4" class="row g-2"></div><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addPSMProduct('p4')"><i class="fas fa-plus me-1"></i>Tambah</button></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-ios btn-ios-primary mt-4">
-                            <i class="fas fa-save"></i> Simpan Semua Target
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast -->
-    <div class="toast-ios" id="toastNotification"></div>
-
-    <!-- Bootstrap Bundle JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" style="
-        position:fixed;inset:0;background:rgba(255,255,255,0.88);
-        backdrop-filter:blur(8px);z-index:9000;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
-        <div style="width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--blue);
-            border-radius:50%;animation:spin 0.75s linear infinite;"></div>
-        <p style="font-family:var(--font);font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin:0;"
-            id="loadingText">Memuat data dari Google Sheets…</p>
-    </div>
-    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
-    <!-- Modal PIN Admin (digunakan juga untuk delete) -->
-    <div id="pinModal" style="display:none;position:fixed;inset:0;background:rgba(20,24,33,0.5);
-        backdrop-filter:blur(6px);z-index:8000;align-items:center;justify-content:center;">
-        <div style="background:#fff;border-radius:20px;padding:2rem;width:90%;max-width:340px;
-            box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
-            <div style="width:52px;height:52px;background:var(--orange-light);border-radius:14px;
-                display:inline-flex;align-items:center;justify-content:center;
-                color:var(--orange);font-size:1.3rem;margin-bottom:1rem;">
-                <i class="fas fa-lock"></i>
-            </div>
-            <h6 style="font-weight:800;font-size:1rem;margin-bottom:0.25rem;">Verifikasi</h6>
-            <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:1.25rem;">
-                Masukkan PIN untuk melanjutkan.
-            </p>
-            <input type="password" id="adminPinInput" maxlength="8"
-                placeholder="Masukkan PIN"
-                style="width:100%;padding:0.65rem 1rem;border:1.5px solid var(--border-strong);
-                    border-radius:10px;font-size:1rem;text-align:center;letter-spacing:4px;
-                    font-family:var(--font);outline:none;margin-bottom:0.75rem;"
-                oninput="this.style.borderColor='var(--border-strong)'"
+      <!-- ================= REKAP PSM ================= -->
+      <div id="sec-psm" class="section d-none">
+        <div class="eyebrow">Product Sales Monitoring</div>
+        <h4 class="mb-3">Rekap Data PSM</h4>
+        <ul class="nav subtab nav-pills mb-3">
+          <li class="nav-item">
+            <button
+              class="nav-link active"
+              data-psmtab="week"
+              onclick="switchPsmTab('week')"
             >
-            <p id="pinError" style="font-size:0.78rem;color:var(--red);min-height:1.2em;margin-bottom:0.75rem;"></p>
-            <div style="display:flex;gap:0.5rem;">
-                <button onclick="closePinModal()" style="flex:1;padding:0.6rem;border-radius:10px;
-                    background:var(--surface-alt);border:1.5px solid var(--border-strong);
-                    font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--font);">
-                    Batal
-                </button>
-                <button onclick="submitPin()" style="flex:1;padding:0.6rem;border-radius:10px;
-                    background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;border:none;
-                    font-weight:600;font-size:0.85rem;cursor:pointer;font-family:var(--font);">
-                    Konfirmasi
-                </button>
+              <i class="bi bi-calendar-week me-1"></i>Per Minggu
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              data-psmtab="nik"
+              onclick="switchPsmTab('nik')"
+            >
+              <i class="bi bi-person-badge me-1"></i>Per NIK per Produk
+            </button>
+          </li>
+        </ul>
+
+        <div id="psmTabWeek">
+          <div class="card-af">
+            <div class="card-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Bulan</label>
+                  <input type="month" class="form-control" id="pw_bulan" />
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Minggu</label>
+                  <select class="form-select" id="pw_week">
+                    <option value="1">Week 1 (1–7)</option>
+                    <option value="2">Week 2 (8–15)</option>
+                    <option value="3">Week 3 (16–23)</option>
+                    <option value="4">Week 4 (24–akhir)</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <button
+                    class="btn btn-af-blue w-100"
+                    onclick="renderRekapPsmWeek()"
+                  >
+                    <i class="bi bi-search me-1"></i>Tampilkan
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+          <div class="card-af">
+            <div class="card-header header-yellow">
+              <i class="bi bi-boxes me-2"></i>Capaian PSM per Karyawan
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped mb-0" id="pwTable">
+                  <thead>
+                    <tr>
+                      <th>Produk</th>
+                      <th>Total Jual</th>
+                      <th>Target</th>
+                      <th>Pencapaian</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div id="psmTabNik" class="d-none">
+          <div class="card-af">
+            <div class="card-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Bulan</label>
+                  <input type="month" class="form-control" id="pn_bulan" />
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Minggu</label>
+                  <select class="form-select" id="pn_week">
+                    <option value="1">Week 1 (1–7)</option>
+                    <option value="2">Week 2 (8–15)</option>
+                    <option value="3">Week 3 (16–23)</option>
+                    <option value="4">Week 4 (24–akhir)</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <button
+                    class="btn btn-af-blue w-100"
+                    onclick="renderRekapPsmNikActive()"
+                  >
+                    <i class="bi bi-search me-1"></i>Tampilkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mb-3">
+            <button
+              class="btn btn-sm btn-af-blue"
+              id="pnModeBtnProduk"
+              onclick="setPsmNikMode('produk')"
+            >
+              <i class="bi bi-list-ul me-1"></i>Per Produk
+            </button>
+            <button
+              class="btn btn-sm btn-outline-af"
+              id="pnModeBtnTotal"
+              onclick="setPsmNikMode('total')"
+            >
+              <i class="bi bi-person-check me-1"></i>Total PSM NIK
+            </button>
+          </div>
+
+          <div class="card-af" id="pnCardProduk">
+            <div class="card-header header-yellow">
+              <i class="bi bi-person-badge me-2"></i>Capaian PSM per NIK per
+              Produk
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped mb-0" id="pnTable">
+                  <thead>
+                    <tr>
+                      <th>NIK</th>
+                      <th>Nama</th>
+                      <th>Produk</th>
+                      <th>Target</th>
+                      <th>Actual</th>
+                      <th
+                        style="cursor: pointer; user-select: none"
+                        onclick="sortPsmNikByPencapaian()"
+                        title="Urutkan dari besar ke kecil"
+                      >
+                        Persen <i class="bi bi-sort-down"></i>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-af d-none" id="pnCardTotal">
+            <div class="card-header header-yellow">
+              <i class="bi bi-person-check me-2"></i>Total Penjualan PSM per NIK
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped mb-0" id="pnTotalTable">
+                  <thead>
+                    <tr>
+                      <th>NIK</th>
+                      <th>Nama</th>
+                      <th>Target</th>
+                      <th>Total Jual</th>
+                      <th
+                        style="cursor: pointer; user-select: none"
+                        onclick="sortPsmNikTotalByPencapaian()"
+                        title="Urutkan dari besar ke kecil"
+                      >
+                        Pencapaian <i class="bi bi-sort-down"></i>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= REKAP BULANAN ================= -->
+      <div id="sec-bulanan" class="section d-none">
+        <div class="eyebrow">Ringkasan bulanan</div>
+        <h4 class="mb-3">Rekap Data Per Bulan</h4>
+        <div class="card-af">
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-6 col-md-4">
+                <label class="form-label">Bulan</label>
+                <input type="month" class="form-control" id="bl_bulan" />
+              </div>
+              <div class="col-12 col-md-3">
+                <button
+                  class="btn btn-af-blue w-100"
+                  onclick="renderRekapBulanan()"
+                >
+                  <i class="bi bi-search me-1"></i>Tampilkan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-af">
+          <div class="card-header header-blue">
+            <i class="bi bi-calendar-month me-2"></i>Total Capaian Bulanan per
+            Karyawan
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="blTable">
+                <thead>
+                  <tr>
+                    <th rowspan="2">NIK</th>
+                    <th rowspan="2">Nama</th>
+                    <th colspan="2">PWP</th>
+                    <th colspan="2">Sergap</th>
+                    <th colspan="2">Sueger</th>
+                    <th colspan="2">Ceban</th>
+                    <th colspan="2">New Member</th>
+                    <th colspan="2">PSM</th>
+                  </tr>
+                  <tr>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TARGET ================= -->
+      <div id="sec-target" class="section d-none">
+        <div class="eyebrow">Pengaturan</div>
+        <h4 class="mb-3">Form Entry Target</h4>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="card-af">
+              <div class="card-header header-red">
+                <i class="bi bi-bullseye me-2"></i>Atur Target
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Parameter</label>
+                    <select
+                      class="form-select"
+                      id="tg_param"
+                      onchange="onTargetParamChange()"
+                    >
+                      <option value="pwp">PWP</option>
+                      <option value="sergap">Sergap</option>
+                      <option value="sueger">Sueger</option>
+                      <option value="ceban">Ceban</option>
+                      <option value="newmember">New Member</option>
+                      <option value="psm">PSM</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Bulan</label>
+                    <input
+                      type="month"
+                      class="form-control"
+                      id="tg_bulan"
+                      onchange="onTargetParamChange()"
+                    />
+                  </div>
+                </div>
+
+                <div id="tg_biasa_wrap" class="row g-3 mt-1">
+                  <div class="col-6">
+                    <label class="form-label">Target Periode 1 (1–15)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      class="form-control"
+                      id="tg_p1"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label"
+                      >Target Periode 2 (16–akhir)</label
+                    >
+                    <input
+                      type="number"
+                      min="0"
+                      class="form-control"
+                      id="tg_p2"
+                    />
+                  </div>
+                </div>
+
+                <div id="tg_newmember_wrap" class="row g-3 mt-1 d-none">
+                  <div class="col-12">
+                    <label class="form-label"
+                      >Target New Member (1 bulan penuh)</label
+                    >
+                    <input
+                      type="number"
+                      min="0"
+                      class="form-control"
+                      id="tg_nm"
+                    />
+                  </div>
+                </div>
+
+                <div id="tg_psm_wrap" class="d-none mt-1">
+                  <label class="form-label">Minggu</label>
+                  <select
+                    class="form-select mb-3"
+                    id="tg_psm_week"
+                    onchange="loadPsmDraftForWeek()"
+                  >
+                    <option value="1">Week 1 (1–7)</option>
+                    <option value="2">Week 2 (8–15)</option>
+                    <option value="3">Week 3 (16–23)</option>
+                    <option value="4">Week 4 (24–akhir)</option>
+                  </select>
+                  <label class="form-label"
+                    >Produk &amp; Target Minggu Ini</label
+                  >
+                  <div id="psmTargetRows"></div>
+                  <button
+                    class="btn btn-sm btn-outline-af mt-1"
+                    onclick="addPsmDraftRow()"
+                  >
+                    <i class="bi bi-plus-lg"></i> Tambah Produk
+                  </button>
+                </div>
+
+                <button
+                  class="btn btn-af-red px-4 mt-4"
+                  onclick="saveTargetForm()"
+                >
+                  <i class="bi bi-save me-1"></i>Simpan Target
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card-af">
+              <div class="card-header header-blue">
+                <i class="bi bi-list-check me-2"></i>Target Bulan Terpilih
+              </div>
+              <div class="card-body">
+                <div id="targetSummary"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= KARYAWAN ================= -->
+      <div id="sec-karyawan" class="section d-none">
+        <div class="eyebrow">Master data</div>
+        <h4 class="mb-3">Form Entry NIK &amp; Nama Karyawan</h4>
+        <div class="row g-3">
+          <div class="col-12 col-lg-5">
+            <div class="card-af">
+              <div class="card-header header-red">
+                <i class="bi bi-person-plus me-2"></i>Tambah Karyawan
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">NIK</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="k_nik"
+                    placeholder="Contoh: 4501202301"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Nama</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="k_nama"
+                    placeholder="Nama lengkap karyawan"
+                  />
+                </div>
+                <button class="btn btn-af-red w-100" onclick="addKaryawan()">
+                  <i class="bi bi-check2-circle me-1"></i>Simpan
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-7">
+            <div class="card-af">
+              <div
+                class="card-header header-blue d-flex justify-content-between align-items-center"
+              >
+                <span><i class="bi bi-people me-2"></i>Daftar Karyawan</span>
+                <input
+                  type="text"
+                  id="k_search"
+                  class="form-control form-control-sm"
+                  style="width: 180px"
+                  placeholder="Cari nama/NIK..."
+                  oninput="renderKaryawanTable()"
+                />
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-striped mb-0">
+                    <thead>
+                      <tr>
+                        <th>NIK</th>
+                        <th>Nama</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="karyawanTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <footer class="af-footer">
+      Fokus Marketing Monitoring — Alfamart · data tersimpan otomatis
+    </footer>
+
+    <div
+      class="toast-container position-fixed bottom-0 end-0 p-3"
+      style="z-index: 1080"
+    >
+      <div
+        id="appToast"
+        class="toast align-items-center text-white border-0"
+        role="alert"
+      >
+        <div class="d-flex">
+          <div class="toast-body" id="appToastBody">Tersimpan</div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script>
-        (function() {
-            // ============ KONFIGURASI ============
-            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyypuTu7IazF5PGExw55Bpt9SJ8kIW7SMnrqcvE94SDQr9lZi_NbnvLiz_YDw4xEZeR/exec'; // GANTI DENGAN URL ANDA
+      /* ============ STATE ============ */
+      let employees = []; // [{nik,nama}]
+      let entries = []; // [{id,tanggal,nik,nama,pwp,sergap,sueger,ceban,newmember,psm:[{produk,qty}]}]
+      let targets = {
+        pwp: {},
+        sergap: {},
+        sueger: {},
+        ceban: {},
+        newmember: {},
+        psm: {},
+      };
+      let psmNikRows = []; // cache baris tabel Capaian PSM per NIK per Produk (untuk fitur sort)
+      let psmNikEmptyMsg = "";
 
-            const CACHE_SALES        = 'gs_cache_sales';
-            const CACHE_TARGETS      = 'gs_cache_targets';
-            const CACHE_PSM_PRODUCTS = 'gs_cache_psm';
-            const CACHE_TTL          = 5 * 60 * 1000;
+      const PARAM_LABEL = {
+        pwp: "PWP",
+        sergap: "Sergap",
+        sueger: "Sueger",
+        ceban: "Ceban",
+        newmember: "New Member",
+      };
 
-            let _salesData    = null;
-            let _targets      = null;
-            let _psmProducts  = null;
-            let _adminPin     = '';
-            let _pendingAdminAction = null;
+      /* ============ KONEKSI GOOGLE SHEET (via Google Apps Script Web App) ============ */
+      /* PENTING: ganti URL di bawah ini dengan URL Web App hasil deploy Apps Script Anda.
+   Lihat file Code.gs & panduan deploy yang disertakan terpisah. */
+      const APPS_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbxjZmhDHiUqQY6WWlCtLAffTD6n1Pzx4Jegh2mhQFolpX3SQ0vuVQuTpdIDiJq0ip-qbw/exec";
 
-            // Sorting state untuk populasi
-            let populasiSortColumn = 'nama';
-            let populasiSortOrder = 'asc';
+      function isApiConfigured() {
+        return (
+          APPS_SCRIPT_URL &&
+          APPS_SCRIPT_URL.indexOf("https://script.google.com") === 0
+        );
+      }
 
-            // ============ API ============
-            async function apiCall(params) {
-                const url = new URL(APPS_SCRIPT_URL);
-                const isWrite = ['saveSale','deleteSale','saveTargets','savePSMProducts','saveAll'].includes(params.action);
-                if (!isWrite) {
-                    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : v));
-                    const res = await fetch(url.toString(), { redirect: 'follow' });
-                    return res.json();
-                } else {
-                    const res = await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        redirect: 'follow',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify(params),
-                    });
-                    return res.json();
-                }
+      async function apiGetAll() {
+        if (!isApiConfigured())
+          throw new Error(
+            "APPS_SCRIPT_URL belum diisi. Buka Code.gs, deploy sebagai Web App, lalu tempel URL-nya di bagian atas <script>.",
+          );
+        const res = await fetch(APPS_SCRIPT_URL + "?action=getAll");
+        if (!res.ok)
+          throw new Error(
+            "Gagal menghubungi Google Sheet (HTTP " + res.status + ")",
+          );
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        return data;
+      }
+      async function apiPost(action, payload) {
+        if (!isApiConfigured())
+          throw new Error(
+            "APPS_SCRIPT_URL belum diisi. Buka Code.gs, deploy sebagai Web App, lalu tempel URL-nya di bagian atas <script>.",
+          );
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // hindari CORS preflight
+          body: JSON.stringify(Object.assign({ action: action }, payload)),
+        });
+        if (!res.ok)
+          throw new Error(
+            "Gagal menghubungi Google Sheet (HTTP " + res.status + ")",
+          );
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        return data;
+      }
+      async function refreshAllFromServer() {
+        const data = await apiGetAll();
+        employees = data.employees || [];
+        entries = data.entries || [];
+        targets = data.targets || {
+          pwp: {},
+          sergap: {},
+          sueger: {},
+          ceban: {},
+          newmember: {},
+          psm: {},
+        };
+      }
+      function setLoading(isLoading) {
+        const el = document.getElementById("loadingOverlay");
+        if (el) el.classList.toggle("d-none", !isLoading);
+      }
+
+      /* ============ DATE HELPERS ============ */
+      function pad2(n) {
+        return n.toString().padStart(2, "0");
+      }
+      function todayISO() {
+        const d = new Date();
+        return (
+          d.getFullYear() +
+          "-" +
+          pad2(d.getMonth() + 1) +
+          "-" +
+          pad2(d.getDate())
+        );
+      }
+      function todayMonth() {
+        return todayISO().slice(0, 7);
+      }
+      function monthKey(dateStr) {
+        return dateStr ? dateStr.slice(0, 7) : "";
+      }
+      function dayOf(dateStr) {
+        return +dateStr.slice(8, 10);
+      }
+      function periodeOf(dateStr) {
+        return dayOf(dateStr) <= 15 ? 1 : 2;
+      }
+      function weekOf(dateStr) {
+        const d = dayOf(dateStr);
+        if (d <= 7) return 1;
+        if (d <= 15) return 2;
+        if (d <= 23) return 3;
+        return 4;
+      }
+      function daysInMonth(mKey) {
+        if (!mKey) return 30;
+        const [y, m] = mKey.split("-").map(Number);
+        return new Date(y, m, 0).getDate();
+      }
+      function periodeLabel(mKey, p) {
+        const last = daysInMonth(mKey);
+        return p == 1 ? "1–15" : "16–" + last;
+      }
+      function weekLabel(mKey, w) {
+        const last = daysInMonth(mKey);
+        const map = { 1: "1–7", 2: "8–15", 3: "16–23", 4: "24–" + last };
+        return map[w];
+      }
+      function fmtTanggalID(dateStr) {
+        if (!dateStr) return "-";
+        const bln = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "Mei",
+          "Jun",
+          "Jul",
+          "Agu",
+          "Sep",
+          "Okt",
+          "Nov",
+          "Des",
+        ];
+        const [y, m, d] = dateStr.split("-").map(Number);
+        return d + " " + bln[m - 1] + " " + y;
+      }
+
+      /* ============ MISC HELPERS ============ */
+      function escapeHtml(s) {
+        return (s ?? "").toString().replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function pctOf(actual, target) {
+        target = +target || 0;
+        actual = +actual || 0;
+        if (target <= 0) return actual > 0 ? 100 : 0;
+        return Math.round((actual / target) * 1000) / 10;
+      }
+      function statusBadgeClass(p) {
+        if (p >= 100) return "bg-success";
+        if (p >= 70) return "bg-warning text-dark";
+        return "bg-danger";
+      }
+      function statusText(p) {
+        if (p >= 100) return "Tercapai";
+        if (p >= 70) return "Mendekati";
+        return "Kurang";
+      }
+      function empName(nik) {
+        const e = employees.find((x) => x.nik === nik);
+        return e ? e.nama : "(tidak dikenal)";
+      }
+      function showToast(msg, isError) {
+        const t = document.getElementById("appToast");
+        document.getElementById("appToastBody").textContent = msg;
+        t.className =
+          "toast align-items-center text-white border-0 " +
+          (isError ? "bg-danger" : "bg-success");
+        bootstrap.Toast.getOrCreateInstance(t, { delay: 2200 }).show();
+      }
+
+      /* ============ NAV ============ */
+      document.getElementById("mainTabs").addEventListener("click", (e) => {
+        const btn = e.target.closest(".nav-link");
+        if (!btn) return;
+        document
+          .querySelectorAll("#mainTabs .nav-link")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.add("d-none"));
+        document
+          .getElementById("sec-" + btn.dataset.sec)
+          .classList.remove("d-none");
+        if (btn.dataset.sec === "dashboard") renderDashboard();
+        if (btn.dataset.sec === "karyawan") renderKaryawanTable();
+        if (btn.dataset.sec === "target") {
+          renderTargetSummary();
+        }
+      });
+
+      /* ================= ENTRY DATA ================= */
+      function populateNikSelect() {
+        const sel = document.getElementById("f_nik");
+        const cur = sel.value;
+        sel.innerHTML =
+          '<option value="">— pilih NIK —</option>' +
+          employees
+            .slice()
+            .sort((a, b) => a.nik.localeCompare(b.nik))
+            .map(
+              (e) =>
+                `<option value="${escapeHtml(e.nik)}">${escapeHtml(e.nik)} — ${escapeHtml(e.nama)}</option>`,
+            )
+            .join("");
+        if (cur) sel.value = cur;
+      }
+      document.getElementById("f_nik").addEventListener("change", function () {
+        document.getElementById("f_nama").value = this.value
+          ? empName(this.value)
+          : "";
+      });
+      document
+        .getElementById("f_tanggal")
+        .addEventListener("change", onTanggalEntryChange);
+
+      let psmEntryDraft = [];
+      let gEntryMonth = "",
+        gEntryWeek = null;
+
+      function onTanggalEntryChange() {
+        const tgl = document.getElementById("f_tanggal").value;
+        if (!tgl) return;
+        gEntryMonth = monthKey(tgl);
+        gEntryWeek = weekOf(tgl);
+        const list =
+          (targets.psm[gEntryMonth] && targets.psm[gEntryMonth][gEntryWeek]) ||
+          [];
+        psmEntryDraft = list.map((r) => ({
+          produk: r.produk,
+          target: r.target,
+          qty: 0,
+          manual: false,
+        }));
+        renderPsmEntryRows();
+      }
+      function renderPsmEntryRows() {
+        const info = document.getElementById("psmEntryInfo");
+        info.innerHTML = gEntryMonth
+          ? `<span class="badge rounded-pill" style="background:var(--af-blue);">Minggu ${gEntryWeek} · ${weekLabel(gEntryMonth, gEntryWeek)}</span>`
+          : "";
+        const wrap = document.getElementById("psmEntryRows");
+        if (psmEntryDraft.length === 0) {
+          wrap.innerHTML = `<div class="empty-hint"><i class="bi bi-info-circle me-1"></i>Target PSM untuk minggu ini belum diatur. Silakan atur di tab <b>Target</b>, atau tambahkan produk manual.</div>`;
+          return;
+        }
+        wrap.innerHTML = psmEntryDraft
+          .map((r, i) => {
+            if (r.manual) {
+              return `<div class="row g-2 mb-2 align-items-center psm-row-manual">
+        <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nama produk" value="${escapeHtml(r.produk)}" oninput="psmEntryDraft[${i}].produk=this.value"></div>
+        <div class="col-4"><input type="number" min="0" class="form-control form-control-sm" placeholder="Qty" value="${r.qty}" oninput="psmEntryDraft[${i}].qty=parseFloat(this.value)||0"></div>
+        <div class="col-2"><button class="btn btn-sm btn-outline-danger w-100" onclick="removePsmEntryRow(${i})"><i class="bi bi-trash"></i></button></div>
+      </div>`;
             }
+            return `<div class="row g-2 mb-2 align-items-center">
+      <div class="col-7"><div class="chip-produk">${escapeHtml(r.produk)} <span class="tgt">(target ${r.target})</span></div></div>
+      <div class="col-5"><input type="number" min="0" class="form-control form-control-sm" placeholder="Qty" value="${r.qty}" oninput="psmEntryDraft[${i}].qty=parseFloat(this.value)||0"></div>
+    </div>`;
+          })
+          .join("");
+      }
+      function addManualPsmEntryRow() {
+        if (!document.getElementById("f_tanggal").value) {
+          showToast("Isi tanggal terlebih dahulu", true);
+          return;
+        }
+        psmEntryDraft.push({ produk: "", target: 0, qty: 0, manual: true });
+        renderPsmEntryRows();
+      }
+      function removePsmEntryRow(i) {
+        psmEntryDraft.splice(i, 1);
+        renderPsmEntryRows();
+      }
 
-            function setCache(key, data) {
-                try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_) {}
-            }
-            function getCache(key) {
-                try {
-                    const raw = localStorage.getItem(key);
-                    if (!raw) return null;
-                    const { ts, data } = JSON.parse(raw);
-                    if (Date.now() - ts > CACHE_TTL) return null;
-                    return data;
-                } catch(_) { return null; }
-            }
+      function resetEntryForm() {
+        document.getElementById("f_nik").value = "";
+        document.getElementById("f_nama").value = "";
+        ["f_pwp", "f_sergap", "f_sueger", "f_ceban", "f_newmember"].forEach(
+          (id) => (document.getElementById(id).value = 0),
+        );
+        psmEntryDraft = [];
+        document.getElementById("psmEntryRows").innerHTML = "";
+        document.getElementById("psmEntryInfo").innerHTML = "";
+      }
 
-            function getSalesData()   { return _salesData    || []; }
-            function getTargets()     { return _targets      || buildDefaultTargets(); }
-            function getPSMProducts() { return _psmProducts  || { p1:[], p2:[], p3:[], p4:[] }; }
+      async function submitEntry() {
+        const tanggal = document.getElementById("f_tanggal").value;
+        const nik = document.getElementById("f_nik").value;
+        if (!tanggal) {
+          showToast("Tanggal wajib diisi", true);
+          return;
+        }
+        if (!nik) {
+          showToast("NIK wajib dipilih", true);
+          return;
+        }
+        const entry = {
+          id: crypto.randomUUID
+            ? crypto.randomUUID()
+            : "e" + Date.now() + Math.random().toString(36).slice(2, 7),
+          tanggal,
+          nik,
+          nama: empName(nik),
+          pwp: +document.getElementById("f_pwp").value || 0,
+          sergap: +document.getElementById("f_sergap").value || 0,
+          sueger: +document.getElementById("f_sueger").value || 0,
+          ceban: +document.getElementById("f_ceban").value || 0,
+          newmember: +document.getElementById("f_newmember").value || 0,
+          psm: psmEntryDraft
+            .filter((r) => r.produk && r.produk.trim() !== "")
+            .map((r) => ({ produk: r.produk.trim(), qty: +r.qty || 0 })),
+        };
+        try {
+          setLoading(true);
+          await apiPost("addEntry", { entry });
+          await refreshAllFromServer();
+          showToast("Entry berhasil disimpan ke Google Sheet");
+          const keepDate = tanggal;
+          resetEntryForm();
+          document.getElementById("f_tanggal").value = keepDate;
+          onTanggalEntryChange();
+          renderDashboard();
+        } catch (err) {
+          showToast("Gagal menyimpan: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
 
-            async function fetchAll(forceRefresh = false) {
-                if (!forceRefresh) {
-                    const cs = getCache(CACHE_SALES);
-                    const ct = getCache(CACHE_TARGETS);
-                    const cp = getCache(CACHE_PSM_PRODUCTS);
-                    if (cs && ct && cp) {
-                        _salesData   = cs;
-                        _targets     = ct;
-                        _psmProducts = cp;
-                        return;
-                    }
-                }
-                const result = await apiCall({ action: 'getAll' });
-                if (result.sales !== undefined) {
-                    _salesData   = result.sales   || [];
-                    _targets     = result.targets  || buildDefaultTargets();
-                    _psmProducts = result.psmProducts || { p1:[], p2:[], p3:[], p4:[] };
-                    setCache(CACHE_SALES,        _salesData);
-                    setCache(CACHE_TARGETS,      _targets);
-                    setCache(CACHE_PSM_PRODUCTS, _psmProducts);
-                } else {
-                    throw new Error(result.error || 'Gagal mengambil data dari server.');
-                }
-            }
+      async function deleteEntry(id) {
+        if (!confirm("Hapus entry ini?")) return;
+        try {
+          setLoading(true);
+          await apiPost("deleteEntry", { id });
+          await refreshAllFromServer();
+          renderDashboard();
+          showToast("Entry dihapus dari Google Sheet");
+        } catch (err) {
+          showToast("Gagal menghapus: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
 
-            function buildDefaultTargets() {
-                return {
-                    spd:0, std:0, member:0,
-                    pwp    : { p1:0, p2:0 },
-                    sergap : { p1:0, p2:0 },
-                    sueger : { p1:0, p2:0 },
-                    ceban  : { p1:0, p2:0 },
-                    psm    : { p1:{}, p2:{}, p3:{}, p4:{} },
-                };
-            }
+      /* ================= DASHBOARD ================= */
+      function renderDashboard() {
+        document.getElementById("todayBadge").innerHTML =
+          '<i class="bi bi-calendar3 me-1"></i>' + fmtTanggalID(todayISO());
+        const dateFilter = document.getElementById("dashDateFilter");
+        if (!dateFilter.value) dateFilter.value = todayISO();
+        const tgl = dateFilter.value;
+        const todays = entries.filter((e) => e.tanggal === tgl);
 
-            async function saveSaleToSheet(entry) {
-                const result = await apiCall({ action: 'saveSale', data: entry });
-                if (!result.ok) throw new Error(result.error);
-                await fetchAll(true);
-                return result;
-            }
+        const sum = (f) => todays.reduce((a, e) => a + (e[f] || 0), 0);
+        const psmTotal = todays.reduce(
+          (a, e) => a + (e.psm || []).reduce((s, p) => s + (+p.qty || 0), 0),
+          0,
+        );
 
-            async function deleteSaleFromSheet(tanggal, nik) {
-                const result = await apiCall({ action: 'deleteSale', tanggal, nik });
-                if (!result.ok) throw new Error(result.error);
-                await fetchAll(true);
-                return result;
-            }
+        document.getElementById("dashStats").innerHTML = `
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-red"><i class="bi bi-clipboard-data bg-icon"></i><div class="lbl">Jumlah Entry</div><div class="num">${todays.length}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-blue"><i class="bi bi-gift bg-icon"></i><div class="lbl">PWP</div><div class="num">${sum("pwp")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-yellow"><i class="bi bi-lightning-charge bg-icon"></i><div class="lbl">Sergap</div><div class="num">${sum("sergap")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-dark"><i class="bi bi-cup-straw bg-icon"></i><div class="lbl">Sueger</div><div class="num">${sum("sueger")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-red"><i class="bi bi-cash-coin bg-icon"></i><div class="lbl">Ceban</div><div class="num">${sum("ceban")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-blue"><i class="bi bi-person-plus bg-icon"></i><div class="lbl">New Member</div><div class="num">${sum("newmember")}</div></div></div>
+  `;
 
-            async function saveAllAdminToSheet(pin, targets, psmProducts) {
-                const result = await apiCall({ action: 'saveAll', pin, targets, psmProducts });
-                if (!result.ok) throw new Error(result.error);
-                _targets     = targets;
-                _psmProducts = psmProducts;
-                setCache(CACHE_TARGETS,      _targets);
-                setCache(CACHE_PSM_PRODUCTS, _psmProducts);
-                return result;
-            }
+        const tbody = document.querySelector("#dashTable tbody");
+        if (todays.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4">Belum ada entry pada tanggal ini</td></tr>`;
+        } else {
+          tbody.innerHTML = todays
+            .map((e) => {
+              const psmQty = (e.psm || []).reduce(
+                (s, p) => s + (+p.qty || 0),
+                0,
+              );
+              return `<tr>
+        <td>${fmtTanggalID(e.tanggal)}</td><td>${escapeHtml(e.nik)}</td><td>${escapeHtml(e.nama)}</td>
+        <td>${e.pwp}</td><td>${e.sergap}</td><td>${e.sueger}</td><td>${e.ceban}</td><td>${e.newmember}</td><td>${psmQty}</td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="deleteEntry('${e.id}')"><i class="bi bi-trash"></i></button></td>
+      </tr>`;
+            })
+            .join("");
+        }
+        const total = document.createElement("tr"); // psm total row appended separately not needed
+        document.getElementById("psmEntryRows"); // no-op keep
+        document.getElementById("dashStats").insertAdjacentHTML(
+          "beforeend",
+          `
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-yellow"><i class="bi bi-boxes bg-icon"></i><div class="lbl">Total PSM (qty)</div><div class="num">${psmTotal}</div></div></div>
+  `,
+        );
+      }
+      document
+        .getElementById("dashDateFilter")
+        .addEventListener("change", renderDashboard);
 
-            // ============ PIN MODAL (digunakan untuk admin dan delete) ============
-            function openPinModal(onSuccess) {
-                _pendingAdminAction = onSuccess;
-                document.getElementById('adminPinInput').value = '';
-                document.getElementById('pinError').textContent = '';
-                document.getElementById('pinModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
-            }
-            window.closePinModal = function() {
-                document.getElementById('pinModal').style.display = 'none';
-                _pendingAdminAction = null;
-            };
-            window.submitPin = async function() {
-                const pin = document.getElementById('adminPinInput').value;
-                if (!pin) { document.getElementById('pinError').textContent = 'PIN tidak boleh kosong.'; return; }
-                if (_pendingAdminAction) {
-                    const action = _pendingAdminAction;
-                    closePinModal();
-                    await action(pin);
-                }
-            };
-            document.getElementById('adminPinInput').addEventListener('keydown', e => {
-                if (e.key === 'Enter') window.submitPin();
+      /* ================= KARYAWAN ================= */
+      async function addKaryawan() {
+        const nik = document.getElementById("k_nik").value.trim();
+        const nama = document.getElementById("k_nama").value.trim();
+        if (!nik || !nama) {
+          showToast("NIK dan Nama wajib diisi", true);
+          return;
+        }
+        if (employees.some((e) => e.nik === nik)) {
+          showToast("NIK sudah terdaftar", true);
+          return;
+        }
+        try {
+          setLoading(true);
+          await apiPost("addEmployee", { nik, nama });
+          await refreshAllFromServer();
+          document.getElementById("k_nik").value = "";
+          document.getElementById("k_nama").value = "";
+          renderKaryawanTable();
+          populateNikSelect();
+          showToast("Karyawan ditambahkan ke Google Sheet");
+        } catch (err) {
+          showToast("Gagal menyimpan: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+      async function deleteKaryawan(nik) {
+        if (
+          !confirm(
+            "Hapus karyawan NIK " + nik + "? Data entry lama tetap tersimpan.",
+          )
+        )
+          return;
+        try {
+          setLoading(true);
+          await apiPost("deleteEmployee", { nik });
+          await refreshAllFromServer();
+          renderKaryawanTable();
+          populateNikSelect();
+          showToast("Karyawan dihapus");
+        } catch (err) {
+          showToast("Gagal menghapus: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+      function renderKaryawanTable() {
+        const q = (
+          document.getElementById("k_search").value || ""
+        ).toLowerCase();
+        const tbody = document.getElementById("karyawanTbody");
+        const list = employees
+          .filter(
+            (e) =>
+              e.nik.toLowerCase().includes(q) ||
+              e.nama.toLowerCase().includes(q),
+          )
+          .sort((a, b) => a.nama.localeCompare(b.nama));
+        tbody.innerHTML = list.length
+          ? list
+              .map(
+                (e) => `
+    <tr><td>${escapeHtml(e.nik)}</td><td>${escapeHtml(e.nama)}</td>
+    <td class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="deleteKaryawan('${escapeHtml(e.nik)}')"><i class="bi bi-trash"></i></button></td></tr>
+  `,
+              )
+              .join("")
+          : `<tr><td colspan="3" class="text-center text-muted py-3">Belum ada karyawan</td></tr>`;
+      }
+
+      /* ================= TARGET ================= */
+      function onTargetParamChange() {
+        const param = document.getElementById("tg_param").value;
+        const bulan = document.getElementById("tg_bulan").value;
+        document
+          .getElementById("tg_biasa_wrap")
+          .classList.toggle(
+            "d-none",
+            !["pwp", "sergap", "sueger", "ceban"].includes(param),
+          );
+        document
+          .getElementById("tg_newmember_wrap")
+          .classList.toggle("d-none", param !== "newmember");
+        document
+          .getElementById("tg_psm_wrap")
+          .classList.toggle("d-none", param !== "psm");
+
+        if (["pwp", "sergap", "sueger", "ceban"].includes(param) && bulan) {
+          const t = targets[param][bulan] || {};
+          document.getElementById("tg_p1").value = t[1] ?? "";
+          document.getElementById("tg_p2").value = t[2] ?? "";
+        }
+        if (param === "newmember" && bulan) {
+          document.getElementById("tg_nm").value =
+            targets.newmember[bulan] ?? "";
+        }
+        if (param === "psm") {
+          loadPsmDraftForWeek();
+        }
+        renderTargetSummary();
+      }
+      document
+        .getElementById("tg_bulan")
+        .addEventListener("change", renderTargetSummary);
+
+      let psmTargetDraft = [];
+      function loadPsmDraftForWeek() {
+        const bulan = document.getElementById("tg_bulan").value;
+        const week = +document.getElementById("tg_psm_week").value;
+        const existing =
+          (bulan && targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        psmTargetDraft = existing.length
+          ? existing.map((r) => ({ produk: r.produk, target: r.target }))
+          : [{ produk: "", target: 0 }];
+        renderPsmTargetRows();
+      }
+      function renderPsmTargetRows() {
+        document.getElementById("psmTargetRows").innerHTML = psmTargetDraft
+          .map(
+            (r, i) => `
+    <div class="row g-2 mb-2 align-items-center">
+      <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nama produk" value="${escapeHtml(r.produk)}" oninput="psmTargetDraft[${i}].produk=this.value"></div>
+      <div class="col-4"><input type="number" min="0" class="form-control form-control-sm" placeholder="Target" value="${r.target}" oninput="psmTargetDraft[${i}].target=parseFloat(this.value)||0"></div>
+      <div class="col-2"><button class="btn btn-sm btn-outline-danger w-100" onclick="removePsmDraftRow(${i})"><i class="bi bi-trash"></i></button></div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+      function addPsmDraftRow() {
+        psmTargetDraft.push({ produk: "", target: 0 });
+        renderPsmTargetRows();
+      }
+      function removePsmDraftRow(i) {
+        psmTargetDraft.splice(i, 1);
+        if (psmTargetDraft.length === 0)
+          psmTargetDraft.push({ produk: "", target: 0 });
+        renderPsmTargetRows();
+      }
+
+      async function saveTargetForm() {
+        const param = document.getElementById("tg_param").value;
+        const bulan = document.getElementById("tg_bulan").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        let payload;
+        if (["pwp", "sergap", "sueger", "ceban"].includes(param)) {
+          const p1 = +document.getElementById("tg_p1").value || 0;
+          const p2 = +document.getElementById("tg_p2").value || 0;
+          payload = { parameter: param, bulan, p1, p2 };
+        } else if (param === "newmember") {
+          payload = {
+            parameter: "newmember",
+            bulan,
+            value: +document.getElementById("tg_nm").value || 0,
+          };
+        } else if (param === "psm") {
+          const week = +document.getElementById("tg_psm_week").value;
+          const rows = psmTargetDraft
+            .filter((r) => r.produk && r.produk.trim() !== "")
+            .map((r) => ({ produk: r.produk.trim(), target: +r.target || 0 }));
+          payload = { parameter: "psm", bulan, week, rows };
+        }
+        try {
+          setLoading(true);
+          await apiPost("saveTarget", { target: payload });
+          await refreshAllFromServer();
+          showToast("Target berhasil disimpan ke Google Sheet");
+          renderTargetSummary();
+        } catch (err) {
+          showToast("Gagal menyimpan target: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      function renderTargetSummary() {
+        const bulan = document.getElementById("tg_bulan").value;
+        const el = document.getElementById("targetSummary");
+        if (!bulan) {
+          el.innerHTML = `<div class="empty-hint">Pilih bulan pada form di sebelah kiri untuk melihat ringkasan target.</div>`;
+          return;
+        }
+
+        let html = `<div class="table-responsive mb-3"><table class="table table-sm">
+    <thead><tr><th>Parameter</th><th>Periode 1</th><th>Periode 2 / Bulanan</th></tr></thead><tbody>`;
+        ["pwp", "sergap", "sueger", "ceban"].forEach((p) => {
+          const t = targets[p][bulan] || {};
+          html += `<tr><td>${PARAM_LABEL[p]}</td><td>${t[1] ?? "-"}</td><td>${t[2] ?? "-"}</td></tr>`;
+        });
+        html += `<tr><td>New Member</td><td colspan="2">${targets.newmember[bulan] ?? "-"}</td></tr>`;
+        html += `</tbody></table></div>`;
+
+        html += `<div class="fw-semibold mb-2" style="font-family:'Poppins';">Target PSM per Minggu</div>`;
+        for (let w = 1; w <= 4; w++) {
+          const rows = (targets.psm[bulan] && targets.psm[bulan][w]) || [];
+          html += `<div class="mb-2"><span class="badge rounded-pill mb-1" style="background:var(--af-blue);">Week ${w} (${weekLabel(bulan, w)})</span>`;
+          if (rows.length === 0) {
+            html += `<div class="text-muted small ms-1">Belum diatur</div>`;
+          } else {
+            html +=
+              '<div class="d-flex flex-wrap gap-2 mt-1">' +
+              rows
+                .map(
+                  (r) =>
+                    `<div class="chip-produk">${escapeHtml(r.produk)} <span class="tgt">(${r.target})</span></div>`,
+                )
+                .join("") +
+              "</div>";
+          }
+          html += `</div>`;
+        }
+        el.innerHTML = html;
+      }
+
+      /* ================= REKAP PERIODE ================= */
+      function onRpParamChange() {
+        const param = document.getElementById("rp_param").value;
+        document
+          .getElementById("rp_periode_wrap")
+          .classList.toggle("d-none", param === "newmember");
+      }
+      function renderRekapPeriode() {
+        const param = document.getElementById("rp_param").value;
+        const bulan = document.getElementById("rp_bulan").value;
+        const periode = +document.getElementById("rp_periode").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        const isNewMember = param === "newmember";
+        const filtered = entries.filter(
+          (e) =>
+            monthKey(e.tanggal) === bulan &&
+            (isNewMember || periodeOf(e.tanggal) === periode),
+        );
+
+        const perNik = {};
+        filtered.forEach((e) => {
+          perNik[e.nik] = perNik[e.nik] || { nama: e.nama, val: 0 };
+          perNik[e.nik].val += e[param] || 0;
+        });
+
+        const targetVal = isNewMember
+          ? targets.newmember[bulan] || 0
+          : (targets[param][bulan] || {})[periode] || 0;
+
+        const rows = Object.keys(perNik)
+          .map((nik) => ({ nik, nama: perNik[nik].nama, val: perNik[nik].val }))
+          .sort((a, b) => b.val - a.val);
+        const totalActual = rows.reduce((a, r) => a + r.val, 0);
+        const totalTarget = targetVal;
+        const totalPct = pctOf(totalActual, totalTarget);
+
+        document.getElementById("rpStats").innerHTML = `
+    <div class="col-6 col-md-3"><div class="stat-card stat-red"><i class="bi bi-graph-up-arrow bg-icon"></i><div class="lbl">Total Capaian</div><div class="num">${totalActual}</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card stat-blue"><i class="bi bi-bullseye bg-icon"></i><div class="lbl">Total Target</div><div class="num">${totalTarget}</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card stat-yellow"><i class="bi bi-percent bg-icon"></i><div class="lbl">% Capaian</div><div class="num">${totalPct}%</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card stat-dark"><i class="bi bi-people bg-icon"></i><div class="lbl">Karyawan Aktif</div><div class="num">${rows.length}</div></div></div>
+  `;
+
+        const tbody = document.querySelector("#rpTable tbody");
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Belum ada data untuk filter ini</td></tr>`;
+        } else {
+          tbody.innerHTML = rows
+            .map((r) => {
+              const p = pctOf(r.val, targetVal);
+              return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td><td>${r.val}</td><td>${targetVal}</td>
+        <td><span class="badge badge-pct ${statusBadgeClass(p)}">${p}%</span></td>
+        <td><span class="badge badge-pct ${statusBadgeClass(p)}">${statusText(p)}</span></td></tr>`;
+            })
+            .join("");
+        }
+      }
+
+      /* ================= REKAP PSM ================= */
+      function switchPsmTab(tab) {
+        document
+          .querySelectorAll("[data-psmtab]")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelector(`[data-psmtab="${tab}"]`)
+          .classList.add("active");
+        document
+          .getElementById("psmTabWeek")
+          .classList.toggle("d-none", tab !== "week");
+        document
+          .getElementById("psmTabNik")
+          .classList.toggle("d-none", tab !== "nik");
+      }
+
+      function renderRekapPsmWeek() {
+        const bulan = document.getElementById("pw_bulan").value;
+        const week = +document.getElementById("pw_week").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        const produkList =
+          (targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        const filtered = entries.filter(
+          (e) => monthKey(e.tanggal) === bulan && weekOf(e.tanggal) === week,
+        );
+
+        // Total qty terjual per produk, gabungan seluruh karyawan (populasi per NIK ada di tab "Per NIK per Produk")
+        const totalByProduk = {};
+        filtered.forEach((e) => {
+          (e.psm || []).forEach((p) => {
+            totalByProduk[p.produk] =
+              (totalByProduk[p.produk] || 0) + (+p.qty || 0);
+          });
+        });
+
+        const targetByProduk = {};
+        produkList.forEach((p) => {
+          targetByProduk[p.produk] = +p.target || 0;
+        });
+
+        // Produk dari target + produk manual (di luar target) yang muncul di entry
+        const produkNames = [
+          ...new Set([
+            ...produkList.map((p) => p.produk),
+            ...Object.keys(totalByProduk),
+          ]),
+        ];
+
+        const tbody = document.querySelector("#pwTable tbody");
+        if (produkNames.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Belum ada data PSM untuk minggu ini</td></tr>`;
+          return;
+        }
+
+        let totalJualAll = 0,
+          totalTargetAll = 0;
+        const rowsHtml = produkNames
+          .map((produk) => {
+            const totalJual = totalByProduk[produk] || 0;
+            const target = targetByProduk[produk] || 0;
+            totalJualAll += totalJual;
+            totalTargetAll += target;
+            const p = pctOf(totalJual, target);
+            return `<tr><td>${escapeHtml(produk)}</td><td>${totalJual}</td><td>${target}</td>
+      <td><span class="badge badge-pct ${statusBadgeClass(p)}">${p}%</span></td></tr>`;
+          })
+          .join("");
+
+        const pTotal = pctOf(totalJualAll, totalTargetAll);
+        tbody.innerHTML =
+          rowsHtml +
+          `<tr class="table-total"><td>Total</td><td>${totalJualAll}</td><td>${totalTargetAll}</td>
+    <td><span class="badge badge-pct ${statusBadgeClass(pTotal)}">${pTotal}%</span></td></tr>`;
+      }
+
+      function renderRekapPsmNik() {
+        const bulan = document.getElementById("pn_bulan").value;
+        const week = +document.getElementById("pn_week").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        const filtered = entries.filter(
+          (e) => monthKey(e.tanggal) === bulan && weekOf(e.tanggal) === week,
+        );
+
+        // Total qty per nik|produk untuk minggu terpilih (dijumlahkan lintas hari)
+        const actualMap = {};
+        const namaByNik = {};
+        filtered.forEach((e) => {
+          namaByNik[e.nik] = e.nama;
+          (e.psm || []).forEach((p) => {
+            if (!p.produk) return;
+            const key = e.nik + "|" + p.produk;
+            actualMap[key] = (actualMap[key] || 0) + (+p.qty || 0);
+          });
+        });
+
+        const produkList =
+          (targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        const produkNames = produkList.map((p) => p.produk);
+        const targetByProduk = {};
+        produkList.forEach((p) => {
+          targetByProduk[p.produk] = Math.ceil((+p.target || 0) / 2);
+        });
+
+        // Sertakan juga produk manual (di luar target) yang muncul di entry
+        const extraProduk = [
+          ...new Set(
+            filtered.flatMap((e) => (e.psm || []).map((p) => p.produk)),
+          ),
+        ].filter((p) => !produkNames.includes(p));
+        const allProduk = [...produkNames, ...extraProduk];
+
+        // Karyawan yang relevan: gabungan (union) seluruh karyawan terdaftar + NIK manapun yang
+        // muncul di data entry minggu ini (walau tidak/belum terdaftar), supaya total per-NIK
+        // selalu konsisten dengan total "Per Minggu"
+        const nikSet = new Set(employees.map((e) => e.nik));
+        Object.keys(namaByNik).forEach((nik) => nikSet.add(nik));
+        const nikList = [...nikSet].sort((a, b) =>
+          (empName(a) || namaByNik[a] || "").localeCompare(
+            empName(b) || namaByNik[b] || "",
+          ),
+        );
+
+        const rows = [];
+        nikList.forEach((nik) => {
+          const nama = namaByNik[nik] || empName(nik);
+          allProduk.forEach((produk) => {
+            const actual = actualMap[nik + "|" + produk] || 0;
+            const target = targetByProduk[produk] || 0;
+            if (target === 0 && actual === 0) return; // sembunyikan baris kosong total
+            rows.push({
+              nik,
+              nama,
+              produk,
+              target,
+              actual,
+              pct: pctOf(actual, target),
             });
+          });
+        });
 
-            function showLoading(text = 'Memuat data…') {
-                document.getElementById('loadingText').textContent = text;
-                document.getElementById('loadingOverlay').style.display = 'flex';
-            }
-            function hideLoading() {
-                document.getElementById('loadingOverlay').style.display = 'none';
-            }
+        psmNikRows = rows;
+        psmNikEmptyMsg =
+          allProduk.length === 0
+            ? "Target PSM minggu ini belum diatur dan belum ada data entry"
+            : rows.length === 0
+              ? "Belum ada data PSM untuk minggu ini"
+              : "";
+        renderPsmNikTbody();
+      }
 
-            function showToast(msg) {
-                const toast = document.getElementById('toastNotification');
-                toast.textContent = msg;
-                toast.classList.add('show');
-                clearTimeout(toast._timeout);
-                toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
-            }
+      function renderPsmNikTbody() {
+        const tbody = document.querySelector("#pnTable tbody");
+        if (psmNikEmptyMsg) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${psmNikEmptyMsg}</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = psmNikRows
+          .map((r) => {
+            return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td><td>${escapeHtml(r.produk)}</td>
+      <td>${r.target}</td><td>${r.actual}</td>
+      <td><span class="badge badge-pct ${statusBadgeClass(r.pct)}">${r.pct}%</span></td></tr>`;
+          })
+          .join("");
+      }
 
-            // ============ UTILITY: DATE & PERIOD ============
-            function getDaysInMonth(year, month) {
-                return new Date(year, month, 0).getDate();
-            }
-            function getTwoPeriod(day) {
-                return day <= 15 ? 'p1' : 'p2';
-            }
-            function getFourPeriod(day) {
-                if (day <= 7) return 'p1';
-                if (day <= 15) return 'p2';
-                if (day <= 23) return 'p3';
-                return 'p4';
-            }
-            function getDaysInTwoPeriod(day, year, month) {
-                const total = getDaysInMonth(year, month);
-                if (day <= 15) return 15;
-                else return total - 15;
-            }
-            function getDaysInFourPeriod(day, year, month) {
-                const total = getDaysInMonth(year, month);
-                if (day <= 7) return 7;
-                if (day <= 15) return 8;
-                if (day <= 23) return 8;
-                else return total - 23;
-            }
+      function sortPsmNikByPencapaian() {
+        psmNikRows.sort((a, b) => b.pct - a.pct);
+        renderPsmNikTbody();
+      }
 
-            // ===== Target Functions =====
-            function getDailyTarget(dateStr, key, targets) {
-                const date = new Date(dateStr + 'T00:00:00');
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const totalDays = getDaysInMonth(year, month);
+      /* ---- Toggle: Per Produk vs Total PSM NIK ---- */
+      let psmNikMode = "produk"; // 'produk' | 'total'
+      let psmNikTotalRows = []; // cache baris tabel Total PSM per NIK (untuk fitur sort)
+      let psmNikTotalEmptyMsg = "";
 
-                let periodTarget = 0;
-                let daysInPeriod = 0;
+      function setPsmNikMode(mode) {
+        psmNikMode = mode;
+        document
+          .getElementById("pnModeBtnProduk")
+          .classList.toggle("btn-af-blue", mode === "produk");
+        document
+          .getElementById("pnModeBtnProduk")
+          .classList.toggle("btn-outline-af", mode !== "produk");
+        document
+          .getElementById("pnModeBtnTotal")
+          .classList.toggle("btn-af-blue", mode === "total");
+        document
+          .getElementById("pnModeBtnTotal")
+          .classList.toggle("btn-outline-af", mode !== "total");
+        document
+          .getElementById("pnCardProduk")
+          .classList.toggle("d-none", mode !== "produk");
+        document
+          .getElementById("pnCardTotal")
+          .classList.toggle("d-none", mode !== "total");
+        renderRekapPsmNikActive();
+      }
 
-                if (key === 'spd' || key === 'std' || key === 'member') {
-                    periodTarget = targets[key] || 0;
-                    daysInPeriod = totalDays;
-                } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
-                    const p = getTwoPeriod(day);
-                    periodTarget = (targets[key] && targets[key][p]) || 0;
-                    daysInPeriod = (day <= 15) ? 15 : totalDays - 15;
-                } else {
-                    const p = getFourPeriod(day);
-                    periodTarget = (targets.psm && targets.psm[p] && targets.psm[p][key]) || 0;
-                    daysInPeriod = getDaysInFourPeriod(day, year, month);
-                }
-                return daysInPeriod > 0 ? periodTarget / daysInPeriod : 0;
-            }
+      function renderRekapPsmNikActive() {
+        if (psmNikMode === "total") {
+          renderRekapPsmNikTotal();
+        } else {
+          renderRekapPsmNik();
+        }
+      }
 
-            function getPeriodTarget(dateStr, key, targets) {
-                const date = new Date(dateStr + 'T00:00:00');
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const totalDays = getDaysInMonth(year, month);
+      function renderRekapPsmNikTotal() {
+        const bulan = document.getElementById("pn_bulan").value;
+        const week = +document.getElementById("pn_week").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
 
-                if (key === 'spd' || key === 'std' || key === 'member') {
-                    const daily = totalDays > 0 ? (targets[key] || 0) / totalDays : 0;
-                    return daily * day;
-                } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
-                    const p = getTwoPeriod(day);
-                    return (targets[key] && targets[key][p]) || 0;
-                } else {
-                    const p = getFourPeriod(day);
-                    return (targets.psm && targets.psm[p] && targets.psm[p][key]) || 0;
-                }
-            }
+        const filtered = entries.filter(
+          (e) => monthKey(e.tanggal) === bulan && weekOf(e.tanggal) === week,
+        );
 
-            function getMonthlyTarget(dateStr, key, targets) {
-                const date = new Date(dateStr + 'T00:00:00');
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const totalDays = getDaysInMonth(year, month);
+        // Total qty seluruh produk PSM per NIK untuk minggu terpilih
+        const actualByNik = {};
+        const namaByNik = {};
+        filtered.forEach((e) => {
+          namaByNik[e.nik] = e.nama;
+          const sumQty = (e.psm || []).reduce((s, p) => s + (+p.qty || 0), 0);
+          actualByNik[e.nik] = (actualByNik[e.nik] || 0) + sumQty;
+        });
 
-                if (key === 'spd' || key === 'std' || key === 'member') {
-                    return targets[key] || 0;
-                } else if (['pwp','sergap','sueger','ceban'].includes(key)) {
-                    const p1 = (targets[key] && targets[key].p1) || 0;
-                    const p2 = (targets[key] && targets[key].p2) || 0;
-                    return p1 + p2;
-                } else {
-                    let total = 0;
-                    ['p1','p2','p3','p4'].forEach(p => {
-                        total += (targets.psm && targets.psm[p] && targets.psm[p][key]) || 0;
-                    });
-                    return total;
-                }
-            }
+        // Target: jumlahkan seluruh target produk pada minggu ini, lalu bagi 2
+        const produkList =
+          (targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        let totalTargetAll = 0;
+        produkList.forEach((p) => {
+          totalTargetAll += +p.target || 0;
+        });
+        const targetPerNik = Math.ceil(totalTargetAll / 2);
 
-            // ============ DASHBOARD RENDER ============
-            let currentView = 'daily';
-            let currentDate = new Date().toISOString().split('T')[0];
+        // Karyawan yang relevan: gabungan (union) seluruh karyawan terdaftar + NIK manapun
+        // yang muncul di data entry minggu ini (walau tidak/belum terdaftar)
+        const nikSet = new Set(employees.map((e) => e.nik));
+        Object.keys(namaByNik).forEach((nik) => nikSet.add(nik));
+        const nikList = [...nikSet].sort((a, b) =>
+          (empName(a) || namaByNik[a] || "").localeCompare(
+            empName(b) || namaByNik[b] || "",
+          ),
+        );
 
-            function getViewData() {
-                const today = new Date().toISOString().split('T')[0];
-                let dateStr = currentDate;
-                if (currentView === 'daily') {
-                    dateStr = today;
-                }
+        const rows = nikList.map((nik) => {
+          const nama = namaByNik[nik] || empName(nik);
+          const actual = actualByNik[nik] || 0;
+          return {
+            nik,
+            nama,
+            target: targetPerNik,
+            actual,
+            pct: pctOf(actual, targetPerNik),
+          };
+        });
 
-                const date = new Date(dateStr + 'T00:00:00');
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const totalDays = getDaysInMonth(year, month);
+        psmNikTotalRows = rows;
+        psmNikTotalEmptyMsg =
+          produkList.length === 0
+            ? "Target PSM minggu ini belum diatur"
+            : rows.length === 0
+              ? "Belum ada data PSM untuk minggu ini"
+              : "";
+        renderPsmNikTotalTbody();
+      }
 
-                const sales = getSalesData();
-                const targets = getTargets();
+      function renderPsmNikTotalTbody() {
+        const tbody = document.querySelector("#pnTotalTable tbody");
+        if (psmNikTotalEmptyMsg) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">${psmNikTotalEmptyMsg}</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = psmNikTotalRows
+          .map((r) => {
+            return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td>
+      <td>${r.target}</td><td>${r.actual}</td>
+      <td><span class="badge badge-pct ${statusBadgeClass(r.pct)}">${r.pct}%</span></td></tr>`;
+          })
+          .join("");
+      }
 
-                // Filter dasar (dari 1..day untuk semua, kecuali harian)
-                let filtered;
-                if (currentView === 'daily') {
-                    filtered = sales.filter(s => {
-                        if (!s || typeof s !== 'object') return false;
-                        const d = new Date(s.tanggal);
-                        return d.getFullYear() === year && d.getMonth() === month-1 && d.getDate() === day;
-                    });
-                } else {
-                    filtered = sales.filter(s => {
-                        if (!s || typeof s !== 'object') return false;
-                        const d = new Date(s.tanggal);
-                        return d.getFullYear() === year && d.getMonth() === month-1 && d.getDate() <= day;
-                    });
-                }
+      function sortPsmNikTotalByPencapaian() {
+        psmNikTotalRows.sort((a, b) => b.pct - a.pct);
+        renderPsmNikTotalTbody();
+      }
 
-                // Aggregasi dengan filter periode
-                const agg = { spd:0, std:0, member:0, pwp:0, sergap:0, sueger:0, ceban:0, psm:0 };
-                let psmActual = {};
-                let totalPSMActual = 0;
+      /* ================= REKAP BULANAN ================= */
+      function renderRekapBulanan() {
+        const bulan = document.getElementById("bl_bulan").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+        const filtered = entries.filter((e) => monthKey(e.tanggal) === bulan);
 
-                const includeDateForMetric = (tgl, metricKey) => {
-                    if (currentView !== 'period') return true;
-                    if (['spd','std','member'].includes(metricKey)) return true;
-                    if (['pwp','sergap','sueger','ceban'].includes(metricKey)) {
-                        const p = getTwoPeriod(day);
-                        if (p === 'p1') return tgl <= 15;
-                        else return tgl >= 16;
-                    }
-                    // PSM product
-                    const psmPeriode = getFourPeriod(day);
-                    if (psmPeriode === 'p1') return tgl <= 7;
-                    else if (psmPeriode === 'p2') return tgl >= 8 && tgl <= 15;
-                    else if (psmPeriode === 'p3') return tgl >= 16 && tgl <= 23;
-                    else return tgl >= 24;
-                };
+        const perNik = {};
+        filtered.forEach((e) => {
+          perNik[e.nik] = perNik[e.nik] || {
+            nama: e.nama,
+            pwp: 0,
+            sergap: 0,
+            sueger: 0,
+            ceban: 0,
+            newmember: 0,
+            psm: 0,
+          };
+          perNik[e.nik].pwp += e.pwp || 0;
+          perNik[e.nik].sergap += e.sergap || 0;
+          perNik[e.nik].sueger += e.sueger || 0;
+          perNik[e.nik].ceban += e.ceban || 0;
+          perNik[e.nik].newmember += e.newmember || 0;
+          perNik[e.nik].psm += (e.psm || []).reduce(
+            (s, p) => s + (+p.qty || 0),
+            0,
+          );
+        });
 
-                filtered.forEach(s => {
-                    if (!s) return;
-                    const tgl = new Date(s.tanggal).getDate();
-                    if (includeDateForMetric(tgl, 'spd')) agg.spd += s.spd || 0;
-                    if (includeDateForMetric(tgl, 'std')) agg.std += s.std || 0;
-                    if (includeDateForMetric(tgl, 'member')) agg.member += s.member || 0;
-                    if (includeDateForMetric(tgl, 'pwp')) agg.pwp += s.pwp || 0;
-                    if (includeDateForMetric(tgl, 'sergap')) agg.sergap += s.sergap || 0;
-                    if (includeDateForMetric(tgl, 'sueger')) agg.sueger += s.sueger || 0;
-                    if (includeDateForMetric(tgl, 'ceban')) agg.ceban += s.ceban || 0;
-
-                    if (s.psm) {
-                        Object.entries(s.psm).forEach(([prod, val]) => {
-                            if (!currentView || includeDateForMetric(tgl, prod)) {
-                                psmActual[prod] = (psmActual[prod]||0) + (val || 0);
-                                totalPSMActual += (val || 0);
-                            }
-                        });
-                    }
-                });
-
-                // Target
-                let targetValues = {};
-                const keys = ['spd','std','member','pwp','sergap','sueger','ceban'];
-                keys.forEach(k => {
-                    if (currentView === 'daily') {
-                        targetValues[k] = getDailyTarget(dateStr, k, targets);
-                    } else if (currentView === 'period') {
-                        targetValues[k] = getPeriodTarget(dateStr, k, targets);
-                    } else {
-                        targetValues[k] = getMonthlyTarget(dateStr, k, targets);
-                    }
-                });
-
-                let psmTargets = {};
-                let totalPSMTarget = 0;
-                const psmProducts = getPSMProducts();
-                const psmPeriode = getFourPeriod(day);
-                const psmList = psmProducts[psmPeriode] || [];
-
-                psmList.forEach(prod => {
-                    let tgt;
-                    if (currentView === 'daily') {
-                        tgt = getDailyTarget(dateStr, prod, targets);
-                    } else if (currentView === 'period') {
-                        tgt = getPeriodTarget(dateStr, prod, targets);
-                    } else {
-                        tgt = getMonthlyTarget(dateStr, prod, targets);
-                    }
-                    psmTargets[prod] = tgt;
-                    totalPSMTarget += tgt;
-                });
-
-                return {
-                    agg, targetValues, psmTargets, psmActual, psmList,
-                    totalPSMTarget, totalPSMActual,
-                    day, month, year, totalDays, dateStr
-                };
-            }
-
-            function refreshDashboard() {
-                const data = getViewData();
-                const {
-                    agg, targetValues, psmTargets, psmActual, psmList,
-                    totalPSMTarget, totalPSMActual,
-                    day, month, year, totalDays, dateStr
-                } = data;
-
-                const viewLabels = { daily: 'Harian', period: 'Periode', monthly: 'Bulanan' };
-                document.getElementById('viewTitle').textContent = 'Ringkasan ' + viewLabels[currentView];
-                const dateObj = new Date(dateStr + 'T00:00:00');
-                const dateLabel = dateObj.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
-                document.getElementById('viewDateLabel').textContent = dateLabel;
-
-                let periodLabel = '';
-                if (currentView === 'daily') {
-                    periodLabel = 'Hari ini: ' + dateLabel;
-                } else if (currentView === 'period') {
-                    const p2 = getTwoPeriod(day);
-                    const p4 = getFourPeriod(day);
-                    periodLabel = `Periode ${p2.toUpperCase()} (${day<=15?'1-15':'16-'+totalDays}) · PSM ${p4.toUpperCase()}`;
-                } else {
-                    periodLabel = `Bulanan ${dateObj.toLocaleDateString('id-ID', {month:'long', year:'numeric'})}`;
-                }
-                document.getElementById('viewPeriodLabel').textContent = periodLabel;
-
-                const cardItems = [
-                    { key:'spd', label:'SPD', icon:'fa-chart-line', color:'var(--blue)', bg:'var(--blue-light)' },
-                    { key:'std', label:'STD', icon:'fa-receipt', color:'var(--teal)', bg:'var(--teal-light)' },
-                    { key:'member', label:'Member', icon:'fa-user-plus', color:'var(--pink)', bg:'var(--pink-light)' },
-                    { key:'pwp', label:'PWP', icon:'fa-box', color:'var(--green)', bg:'var(--green-light)' },
-                    { key:'sergap', label:'Sergap', icon:'fa-bolt', color:'var(--orange)', bg:'var(--orange-light)' },
-                    { key:'sueger', label:'Sueger', icon:'fa-glass-water', color:'var(--red)', bg:'var(--red-light)' },
-                    { key:'ceban', label:'Ceban', icon:'fa-coins', color:'var(--purple)', bg:'var(--purple-light)' },
-                    { key:'psm', label:'PSM', icon:'fa-cubes', color:'var(--indigo)', bg:'var(--indigo-light)' }
-                ];
-
-                const container = document.getElementById('summaryCards');
-                container.innerHTML = cardItems.map(item => {
-                    let actual, target;
-                    if (item.key === 'psm') {
-                        actual = totalPSMActual;
-                        target = totalPSMTarget;
-                    } else {
-                        actual = agg[item.key] || 0;
-                        target = targetValues[item.key] || 0;
-                    }
-                    const pct = target > 0 ? Math.min(Math.round((actual/target)*100), 100) : 0;
-                    const pctColor = pct >= 100 ? 'var(--green)' : pct >= 70 ? 'var(--blue)' : 'var(--orange)';
-                    const targetFormatted = Math.round(target).toLocaleString('id-ID');
-
-                    return `
-                    <div class="col-6 col-md-3 col-lg-2">
-                        <div class="summary-card" style="--accent-color:${item.color}">
-                            <div class="s-icon" style="background:${item.bg}; color:${item.color};">
-                                <i class="fas ${item.icon}"></i>
-                            </div>
-                            <div class="s-value" style="color:${item.color}">${Math.round(actual).toLocaleString('id-ID')}</div>
-                            <div class="s-label">${item.label}</div>
-                            <div class="s-target">Target: ${targetFormatted}</div>
-                            <div class="s-progress" style="color:${pctColor}">${pct}%</div>
-                            <div class="progress-sm"><div class="progress-fill-sm" style="width:${pct}%; background:${pctColor};"></div></div>
-                        </div>
-                    </div>`;
-                }).join('');
-
-                // PSM detail
-                const psmPeriode = getFourPeriod(day);
-                document.getElementById('psmPeriodeInfo').textContent = 'Periode ' + psmPeriode.toUpperCase() + ' ('+getDaysInFourPeriod(day, year, month)+' hari)';
-                const psmContainer = document.getElementById('psmDashboardDetail');
-                if (psmList.length === 0) {
-                    psmContainer.innerHTML = '<p class="text-muted small">Belum ada produk PSM untuk periode ini.</p>';
-                } else {
-                    psmContainer.innerHTML = psmList.map(prod => {
-                        const val = psmActual[prod] || 0;
-                        const tgt = psmTargets[prod] || 0;
-                        const pct = tgt > 0 ? Math.min(Math.round((val/tgt)*100), 100) : 0;
-                        const fillColor = pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--blue)' : 'var(--orange)';
-                        const badgeBg = pct >= 100 ? 'var(--green-light)' : pct >= 60 ? 'var(--blue-light)' : 'var(--orange-light)';
-                        const tgtFormatted = Math.round(tgt).toLocaleString('id-ID');
-                        return `
-                        <div class="progress-item">
-                            <div class="progress-meta">
-                                <span class="progress-name" style="font-size:0.78rem;">${prod}</span>
-                                <span class="progress-stat">${Math.round(val).toLocaleString('id-ID')} / ${tgtFormatted} <span class="progress-pct-badge" style="background:${badgeBg};color:${fillColor};">${pct}%</span></span>
-                            </div>
-                            <div class="progress-track" style="height:5px;">
-                                <div class="progress-fill" style="width:${pct}%; background:${fillColor};"></div>
-                            </div>
-                        </div>`;
-                    }).join('');
-                }
-            }
-
-            // ============ VIEW TOGGLE ============
-            document.getElementById('viewToggle').addEventListener('click', function(e) {
-                const btn = e.target.closest('.view-btn');
-                if (!btn) return;
-                const view = btn.dataset.view;
-                if (view === currentView) return;
-                document.querySelectorAll('#viewToggle .view-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentView = view;
-                refreshDashboard();
+        const tPwp =
+          ((targets.pwp[bulan] || {})[1] || 0) +
+          ((targets.pwp[bulan] || {})[2] || 0);
+        const tSergap =
+          ((targets.sergap[bulan] || {})[1] || 0) +
+          ((targets.sergap[bulan] || {})[2] || 0);
+        const tSueger =
+          ((targets.sueger[bulan] || {})[1] || 0) +
+          ((targets.sueger[bulan] || {})[2] || 0);
+        const tCeban =
+          ((targets.ceban[bulan] || {})[1] || 0) +
+          ((targets.ceban[bulan] || {})[2] || 0);
+        const tNewmember = targets.newmember[bulan] || 0;
+        let tPsm = 0;
+        if (targets.psm[bulan]) {
+          [1, 2, 3, 4].forEach((w) => {
+            (targets.psm[bulan][w] || []).forEach((r) => {
+              tPsm += +r.target || 0;
             });
+          });
+        }
 
-            // ============ FORM INPUT ============
-            function refreshPSMInputFields() {
-                const tanggal = document.getElementById('inputTanggal').value;
-                const container = document.getElementById('psmInputFields');
-                const label = document.getElementById('psmPeriodeLabel');
-                if (!tanggal) {
-                    container.innerHTML = '<p class="text-muted small">Pilih tanggal terlebih dahulu.</p>';
-                    label.textContent = 'Periode: -';
-                    return;
-                }
-                const day = parseInt(tanggal.split('-')[2]);
-                const periode = getFourPeriod(day);
-                label.textContent = 'Periode: ' + periode.toUpperCase() + ' ('+getDaysInFourPeriod(day, new Date(tanggal).getFullYear(), new Date(tanggal).getMonth()+1)+' hari)';
-                const products = getPSMProducts()[periode] || [];
-                if (products.length === 0) {
-                    container.innerHTML = '<p class="text-danger small">Belum ada produk PSM untuk periode ini.</p>';
-                    return;
-                }
-                container.innerHTML = products.map(prod => `
-                    <div class="col-md-3 col-sm-4 col-6">
-                        <label class="form-label-ios small">${prod}</label>
-                        <input type="number" class="form-control form-control-ios psm-input" data-produk="${prod}" value="0" min="0">
-                    </div>
-                `).join('');
-            }
-            document.getElementById('inputTanggal').addEventListener('change', refreshPSMInputFields);
+        const rows = Object.keys(perNik)
+          .map((nik) => ({ nik, ...perNik[nik] }))
+          .sort((a, b) => a.nama.localeCompare(b.nama));
+        const tbody = document.querySelector("#blTable tbody");
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="14" class="text-center text-muted py-4">Belum ada data bulan ini</td></tr>`;
+        } else {
+          tbody.innerHTML = rows
+            .map((r) => {
+              const cell = (val, tgt) => {
+                const p = pctOf(val, tgt);
+                return `<td>${val}</td><td><span class="badge badge-pct ${statusBadgeClass(p)}">${p}%</span></td>`;
+              };
+              return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td>
+        ${cell(r.pwp, tPwp)}${cell(r.sergap, tSergap)}${cell(r.sueger, tSueger)}${cell(r.ceban, tCeban)}${cell(r.newmember, tNewmember)}${cell(r.psm, tPsm)}
+      </tr>`;
+            })
+            .join("");
+        }
+      }
 
-            document.getElementById('formInputPenjualan').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const tanggal = document.getElementById('inputTanggal').value;
-                const nama = document.getElementById('inputNama').value.trim();
-                const nik = document.getElementById('inputNIK').value.trim() || nama;
-                if (!tanggal || !nama) { showToast('⚠️ Tanggal dan Nama wajib diisi!'); return; }
-                const entry = {
-                    tanggal,
-                    nik: nik,
-                    nama: nama,
-                    spd: +document.getElementById('inputSPD').value || 0,
-                    std: +document.getElementById('inputSTD').value || 0,
-                    member: +document.getElementById('inputMember').value || 0,
-                    pwp: +document.getElementById('inputPWP').value || 0,
-                    sergap: +document.getElementById('inputSergap').value || 0,
-                    sueger: +document.getElementById('inputSueger').value || 0,
-                    ceban: +document.getElementById('inputCeban').value || 0,
-                    psm: {}
-                };
-                document.querySelectorAll('.psm-input').forEach(inp => {
-                    entry.psm[inp.dataset.produk] = +inp.value || 0;
-                });
-                try {
-                    showLoading('Menyimpan data…');
-                    await saveSaleToSheet(entry);
-                    hideLoading();
-                    showToast('✅ Data berhasil disimpan!');
-                    resetFormInput();
-                    refreshRecentEntries();
-                    refreshDashboard();
-                } catch(err) {
-                    hideLoading();
-                    showToast('❌ Gagal menyimpan: ' + err.message);
-                }
-            });
+      /* ================= INIT ================= */
+      function setDefaultDates() {
+        document.getElementById("f_tanggal").value = todayISO();
+        document.getElementById("dashDateFilter").value = todayISO();
+        ["rp_bulan", "pw_bulan", "pn_bulan", "bl_bulan", "tg_bulan"].forEach(
+          (id) => {
+            document.getElementById(id).value = todayMonth();
+          },
+        );
+      }
 
-            function resetFormInput() {
-                document.getElementById('formInputPenjualan').reset();
-                document.getElementById('inputSPD').value = '0';
-                document.getElementById('inputSTD').value = '0';
-                document.getElementById('inputMember').value = '0';
-                document.getElementById('inputPWP').value = '0';
-                document.getElementById('inputSergap').value = '0';
-                document.getElementById('inputSueger').value = '0';
-                document.getElementById('inputCeban').value = '0';
-                document.getElementById('psmInputFields').innerHTML = '<p class="text-muted small">Pilih tanggal terlebih dahulu.</p>';
-                document.getElementById('psmPeriodeLabel').textContent = 'Periode: -';
-            }
+      async function init() {
+        setLoading(true);
+        try {
+          await refreshAllFromServer();
+        } catch (err) {
+          showToast(err.message, true);
+          document.getElementById("configWarning").classList.remove("d-none");
+          document.getElementById("configWarning").textContent = err.message;
+        }
 
-            function refreshRecentEntries() {
-                const tbody = document.getElementById('recentEntriesBody');
-                const sales = getSalesData().slice(-15).reverse();
-                if (sales.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Belum ada data.</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = sales.map((s) => {
-                    if (!s) return '';
-                    const nama = s.nama || s.nik || '—';
-                    return `
-                    <tr>
-                        <td>${s.tanggal}</td><td><strong>${nama}</strong></td>
-                        <td>${s.spd||0}</td><td>${s.std||0}</td><td>${s.member||0}</td>
-                        <td>${s.pwp||0}</td><td>${s.sergap||0}</td><td>${s.sueger||0}</td><td>${s.ceban||0}</td>
-                        <td><button class="btn btn-ios btn-ios-danger btn-sm" style="padding:0.3rem 0.65rem;border-radius:7px;font-size:0.75rem;" onclick="deleteEntry('${s.tanggal}','${s.nik}')"><i class="fas fa-trash"></i></button></td>
-                    </tr>`;
-                }).join('');
-            }
-
-            // ===== DELETE DENGAN VERIFIKASI PIN =====
-            window.deleteEntry = async function(tanggal, nik) {
-                if (!confirm('Hapus entri ini? Data akan dihapus permanen.')) return;
-                openPinModal(async (pin) => {
-                    // verifikasi PIN (hardcoded 1234, sama dengan admin)
-                    if (pin !== '1234') {
-                        document.getElementById('pinError').textContent = 'PIN salah. Coba lagi.';
-                        return;
-                    }
-                    try {
-                        showLoading('Menghapus data…');
-                        await deleteSaleFromSheet(tanggal, nik);
-                        hideLoading();
-                        refreshRecentEntries();
-                        refreshDashboard();
-                        showToast('🗑️ Entri dihapus.');
-                    } catch(err) {
-                        hideLoading();
-                        showToast('❌ Gagal hapus: ' + err.message);
-                    }
-                });
-            };
-
-            // ============ POPULASI (EMPLOYEE) ============
-            function populateNamaFilter() {
-                const names = [...new Set(getSalesData().map(s => (s && (s.nama || s.nik)) || '—'))].sort();
-                const select = document.getElementById('filterNama');
-                select.innerHTML = '<option value="">Semua Nama</option>' + names.map(n => `<option>${n}</option>`).join('');
-                document.getElementById('filterBulanPopulasi').value = new Date().toISOString().slice(0,7);
-            }
-
-            window.loadPopulasi = function() {
-                const filterNama = document.getElementById('filterNama').value;
-                const filterBulan = document.getElementById('filterBulanPopulasi').value;
-                const sales = getSalesData();
-                let filtered = sales.filter(s => {
-                    if (!s) return false;
-                    const nama = s.nama || s.nik || '—';
-                    if (filterNama && nama !== filterNama) return false;
-                    if (filterBulan) {
-                        const [y,m] = filterBulan.split('-').map(Number);
-                        const d = new Date(s.tanggal);
-                        return d.getFullYear() === y && d.getMonth() === m-1;
-                    }
-                    return true;
-                });
-                const grouped = {};
-                filtered.forEach(s => {
-                    if (!s) return;
-                    const key = s.nama || s.nik || '—';
-                    if (!grouped[key]) grouped[key] = { spd:0,std:0,member:0,pwp:0,sergap:0,sueger:0,ceban:0,psm:0,count:0 };
-                    const g = grouped[key];
-                    g.spd += s.spd||0; g.std += s.std||0; g.member += s.member||0; g.pwp += s.pwp||0;
-                    g.sergap += s.sergap||0; g.sueger += s.sueger||0; g.ceban += s.ceban||0;
-                    if (s.psm) g.psm += Object.values(s.psm).reduce((a,b)=>a+(b||0),0);
-                    g.count++;
-                });
-
-                let entries = Object.entries(grouped);
-                const sortKey = populasiSortColumn;
-                entries.sort((a, b) => {
-                    let valA, valB;
-                    if (sortKey === 'nama') {
-                        valA = a[0].toLowerCase();
-                        valB = b[0].toLowerCase();
-                    } else {
-                        valA = a[1][sortKey] || 0;
-                        valB = b[1][sortKey] || 0;
-                    }
-                    if (valA < valB) return populasiSortOrder === 'asc' ? -1 : 1;
-                    if (valA > valB) return populasiSortOrder === 'asc' ? 1 : -1;
-                    return 0;
-                });
-
-                const tbody = document.getElementById('populasiBody');
-                if (entries.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Tidak ada data.</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = entries.map(([nama, data]) => `
-                    <tr>
-                        <td><strong>${nama}</strong></td>
-                        <td>${data.spd}</td><td>${data.std}</td><td>${data.member}</td>
-                        <td>${data.pwp}</td><td>${data.sergap}</td><td>${data.sueger}</td><td>${data.ceban}</td>
-                        <td>${data.psm}</td><td><span class="badge-soft badge-soft-blue">${data.count} entri</span></td>
-                    </tr>`).join('');
-
-                document.querySelectorAll('#populasiTable thead th[data-sort]').forEach(th => {
-                    const col = th.dataset.sort;
-                    const icon = th.querySelector('i');
-                    if (icon) {
-                        if (col === populasiSortColumn) {
-                            icon.className = populasiSortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
-                        } else {
-                            icon.className = 'fas fa-sort';
-                        }
-                    }
-                });
-            };
-
-            // ============ ADMIN TARGET ============
-            function loadAdminTargets() {
-                const t = getTargets();
-                document.getElementById('targetSPD').value = t.spd||0;
-                document.getElementById('targetSTD').value = t.std||0;
-                document.getElementById('targetMember').value = t.member||0;
-                document.querySelector('.target-pwp-p1').value = t.pwp?.p1||0;
-                document.querySelector('.target-pwp-p2').value = t.pwp?.p2||0;
-                document.querySelector('.target-sergap-p1').value = t.sergap?.p1||0;
-                document.querySelector('.target-sergap-p2').value = t.sergap?.p2||0;
-                document.querySelector('.target-sueger-p1').value = t.sueger?.p1||0;
-                document.querySelector('.target-sueger-p2').value = t.sueger?.p2||0;
-                document.querySelector('.target-ceban-p1').value = t.ceban?.p1||0;
-                document.querySelector('.target-ceban-p2').value = t.ceban?.p2||0;
-                renderAllPSMAdminForms();
-            }
-
-            function renderAllPSMAdminForms() { ['p1','p2','p3','p4'].forEach(p => renderPSMAdminForm(p)); }
-            function renderPSMAdminForm(periode) {
-                const container = document.getElementById('psmAdmin' + periode.toUpperCase());
-                const products = getPSMProducts()[periode] || [];
-                const targets = getTargets().psm?.[periode] || {};
-                if (products.length === 0) {
-                    container.innerHTML = '<p class="text-muted small">Belum ada produk.</p>';
-                    return;
-                }
-                container.innerHTML = products.map((prod, idx) => `
-                    <div class="col-md-4 col-sm-6 d-flex align-items-center gap-2 mb-2" data-periode="${periode}" data-index="${idx}">
-                        <input type="text" class="form-control form-control-ios form-control-sm psm-prod-name" 
-                               data-periode="${periode}" data-index="${idx}" value="${prod}">
-                        <input type="number" class="form-control form-control-ios form-control-sm psm-prod-target" 
-                               data-periode="${periode}" data-index="${idx}" 
-                               value="${targets[prod]||0}" style="width:80px;">
-                        <button type="button" class="btn btn-sm btn-outline-danger" 
-                                onclick="removePSMProduct('${periode}',${idx})"><i class="fas fa-times"></i></button>
-                    </div>
-                `).join('');
-            }
-            window.addPSMProduct = function(periode) {
-                if (!_psmProducts) _psmProducts = { p1:[], p2:[], p3:[], p4:[] };
-                if (!_psmProducts[periode]) _psmProducts[periode] = [];
-                _psmProducts[periode].push('PSM ' + (_psmProducts[periode].length+1));
-                renderPSMAdminForm(periode);
-            };
-            window.removePSMProduct = function(periode, idx) {
-                if (!confirm('Hapus produk ini?')) return;
-                if (!_psmProducts || !_psmProducts[periode]) return;
-                _psmProducts[periode].splice(idx,1);
-                renderPSMAdminForm(periode);
-            };
-
-            document.getElementById('formAdminTarget').addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const t = JSON.parse(JSON.stringify(getTargets()));
-                t.spd = +document.getElementById('targetSPD').value || 0;
-                t.std = +document.getElementById('targetSTD').value || 0;
-                t.member = +document.getElementById('targetMember').value || 0;
-                t.pwp    = { p1: +document.querySelector('.target-pwp-p1').value||0,    p2: +document.querySelector('.target-pwp-p2').value||0 };
-                t.sergap = { p1: +document.querySelector('.target-sergap-p1').value||0, p2: +document.querySelector('.target-sergap-p2').value||0 };
-                t.sueger = { p1: +document.querySelector('.target-sueger-p1').value||0, p2: +document.querySelector('.target-sueger-p2').value||0 };
-                t.ceban  = { p1: +document.querySelector('.target-ceban-p1').value||0,  p2: +document.querySelector('.target-ceban-p2').value||0 };
-
-                ['p1','p2','p3','p4'].forEach(per => { t.psm[per] = {}; });
-
-                const nameInputs = document.querySelectorAll('.psm-prod-name');
-                const p = JSON.parse(JSON.stringify(getPSMProducts()));
-                ['p1','p2','p3','p4'].forEach(per => { p[per] = []; });
-
-                nameInputs.forEach(nameInp => {
-                    const periode = nameInp.dataset.periode;
-                    const idx = parseInt(nameInp.dataset.index);
-                    const newName = nameInp.value.trim() || 'Produk ' + (idx+1);
-                    if (!p[periode]) p[periode] = [];
-                    p[periode][idx] = newName;
-
-                    const targetInp = document.querySelector(`.psm-prod-target[data-periode="${periode}"][data-index="${idx}"]`);
-                    if (targetInp) {
-                        const val = +targetInp.value || 0;
-                        t.psm[periode][newName] = val;
-                    }
-                });
-
-                ['p1','p2','p3','p4'].forEach(per => {
-                    p[per] = p[per].filter(Boolean);
-                });
-
-                openPinModal(async (pin) => {
-                    // PIN sudah diverifikasi di submitPin? sebenarnya openPinModal akan memanggil callback dengan pin
-                    // tapi kita juga perlu verifikasi pin di sini? openPinModal hanya meneruskan pin ke callback.
-                    // Di sini kita bisa langsung gunakan pin.
-                    try {
-                        showLoading('Menyimpan target…');
-                        await saveAllAdminToSheet(pin, t, p);
-                        hideLoading();
-                        showToast('✅ Target berhasil disimpan!');
-                        refreshDashboard();
-                        loadAdminTargets();
-                    } catch(err) {
-                        hideLoading();
-                        const pinErr = document.getElementById('pinError');
-                        if (err.message.includes('PIN')) {
-                            document.getElementById('pinModal').style.display = 'flex';
-                            pinErr.textContent = err.message;
-                            document.getElementById('adminPinInput').style.borderColor = 'var(--red)';
-                        } else {
-                            showToast('❌ Gagal: ' + err.message);
-                        }
-                    }
-                });
-            });
-
-            // ============ TAB NAV ============
-            document.getElementById('segmentedNav').addEventListener('click', function(e) {
-                const btn = e.target.closest('[data-tab]');
-                if (!btn) return;
-                const tabId = btn.dataset.tab;
-                document.querySelectorAll('#segmentedNav .seg-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.tab-pane-content').forEach(p => p.classList.remove('active'));
-                const target = document.getElementById('tab-' + tabId);
-                if (target) target.classList.add('active');
-                if (tabId === 'dashboard') refreshDashboard();
-                else if (tabId === 'populasi') { populateNamaFilter(); loadPopulasi(); }
-                else if (tabId === 'admin') loadAdminTargets();
-                else if (tabId === 'input') refreshRecentEntries();
-            });
-
-            // ============ EVENT LISTENER UNTUK SORTING ============
-            document.addEventListener('click', function(e) {
-                const th = e.target.closest('#populasiTable thead th[data-sort]');
-                if (!th) return;
-                const col = th.dataset.sort;
-                if (col === populasiSortColumn) {
-                    populasiSortOrder = (populasiSortOrder === 'asc') ? 'desc' : 'asc';
-                } else {
-                    populasiSortColumn = col;
-                    populasiSortOrder = 'asc';
-                }
-                loadPopulasi();
-            });
-
-            // ============ INIT ============
-            async function init() {
-                const today = new Date().toISOString().split('T')[0];
-                currentDate = today;
-                document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-                document.getElementById('inputTanggal').value = today;
-
-                showLoading('Memuat data dari Google Sheets…');
-                try {
-                    await fetchAll();
-                    hideLoading();
-                    refreshDashboard();
-                    refreshRecentEntries();
-                    populateNamaFilter();
-                    loadPopulasi();
-                    loadAdminTargets();
-                    refreshPSMInputFields();
-                    console.log('✅ Dashboard siap.');
-                } catch(err) {
-                    hideLoading();
-                    showToast('⚠️ Gagal muat data: ' + err.message);
-                    console.error(err);
-                }
-            }
-
-            window.refreshAllData = async function() {
-                showLoading('Memuat ulang data…');
-                try {
-                    await fetchAll(true);
-                    hideLoading();
-                    refreshDashboard();
-                    refreshRecentEntries();
-                    populateNamaFilter();
-                    loadPopulasi();
-                    loadAdminTargets();
-                    showToast('🔄 Data diperbarui.');
-                } catch(err) {
-                    hideLoading();
-                    showToast('❌ Gagal refresh: ' + err.message);
-                }
-            };
-
-            init();
-        })();
+        setDefaultDates();
+        populateNikSelect();
+        onTanggalEntryChange();
+        renderDashboard();
+        renderKaryawanTable();
+        onTargetParamChange();
+        document.getElementById("todayBadge").innerHTML =
+          '<i class="bi bi-calendar3 me-1"></i>' + fmtTanggalID(todayISO());
+        setLoading(false);
+      }
+      init();
     </script>
-</body>
+  </body>
 </html>
