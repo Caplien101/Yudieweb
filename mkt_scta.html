@@ -1,0 +1,2640 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoring Fokus Marketing • Alfamart</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --af-red: #da291c;
+        --af-red-dark: #a81f14;
+        --af-yellow: #ffc72c;
+        --af-blue: #003da5;
+        --af-blue-dark: #00246b;
+        --bg: #f3f5fa;
+        --ink: #1f2430;
+        --muted: #6b7280;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        font-family: "Inter", sans-serif;
+        color: var(--ink);
+        padding-bottom: 3rem;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      .brand,
+      .font-disp {
+        font-family: "Poppins", sans-serif;
+      }
+      a {
+        text-decoration: none;
+      }
+
+      .navbar-af {
+        background: linear-gradient(
+          100deg,
+          var(--af-red) 0%,
+          var(--af-red-dark) 65%
+        );
+        box-shadow: 0 4px 16px rgba(218, 41, 28, 0.25);
+      }
+      .navbar-af .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--af-yellow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--af-red-dark);
+        font-weight: 800;
+        font-family: "Poppins";
+        font-size: 1.1rem;
+      }
+      .navbar-af .brand-title {
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+      .navbar-af .brand-sub {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.72rem;
+      }
+
+      .tabs-wrap {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg);
+        padding-top: 0.75rem;
+        padding-bottom: 0.5rem;
+      }
+      .nav-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.4rem;
+        padding-bottom: 0.25rem;
+      }
+      .nav-pills::-webkit-scrollbar {
+        height: 6px;
+      }
+      .nav-pills::-webkit-scrollbar-thumb {
+        background: #c9cfda;
+        border-radius: 6px;
+      }
+      .nav-pills .nav-link {
+        color: var(--af-blue);
+        font-weight: 600;
+        border-radius: 999px;
+        white-space: nowrap;
+        font-size: 0.88rem;
+        border: 1.5px solid #e2e6ef;
+        background: #fff;
+      }
+      .nav-pills .nav-link i {
+        margin-right: 0.35rem;
+      }
+      .nav-pills .nav-link.active {
+        background: var(--af-blue);
+        color: #fff;
+        border-color: var(--af-blue);
+        box-shadow: 0 3px 10px rgba(0, 61, 165, 0.25);
+      }
+
+      .card-af {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 14px rgba(20, 30, 60, 0.06);
+        margin-bottom: 1.25rem;
+        background: #fff;
+      }
+      .card-af .card-header {
+        border-radius: 16px 16px 0 0 !important;
+        font-weight: 700;
+        font-family: "Poppins";
+        font-size: 1rem;
+        border: none;
+        padding: 0.85rem 1.1rem;
+      }
+      .header-red {
+        background: var(--af-red);
+        color: #fff;
+      }
+      .header-blue {
+        background: var(--af-blue);
+        color: #fff;
+      }
+      .header-yellow {
+        background: var(--af-yellow);
+        color: #4a3800;
+      }
+      .card-af .card-body {
+        padding: 1.15rem;
+      }
+
+      .stat-card {
+        border-radius: 16px;
+        color: #fff;
+        padding: 1rem 1.15rem;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+      .stat-card i.bg-icon {
+        position: absolute;
+        right: -0.4rem;
+        bottom: -0.6rem;
+        font-size: 3.6rem;
+        opacity: 0.18;
+      }
+      .stat-card .lbl {
+        font-size: 0.78rem;
+        opacity: 0.92;
+        font-weight: 600;
+      }
+      .stat-card .num {
+        font-family: "Poppins";
+        font-weight: 800;
+        font-size: 1.7rem;
+        line-height: 1.15;
+      }
+      .stat-red {
+        background: linear-gradient(135deg, var(--af-red), var(--af-red-dark));
+      }
+      .stat-blue {
+        background: linear-gradient(
+          135deg,
+          var(--af-blue),
+          var(--af-blue-dark)
+        );
+      }
+      .stat-yellow {
+        background: linear-gradient(135deg, #ffce43, #e8a400);
+        color: #3a2c00;
+      }
+      .stat-dark {
+        background: linear-gradient(135deg, #2c3345, #161b26);
+      }
+
+      .table-responsive {
+        border-radius: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: 0 2px 10px rgba(20, 30, 60, 0.05);
+      }
+      table {
+        min-width: 640px;
+      }
+      table thead th {
+        background: var(--af-blue);
+        color: #fff;
+        font-family: "Poppins";
+        font-weight: 600;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      table tbody td {
+        font-size: 0.86rem;
+        vertical-align: middle;
+      }
+      .table-total {
+        background: #fff6da !important;
+        font-weight: 700;
+      }
+
+      .badge-pct {
+        font-family: "Poppins";
+        font-weight: 700;
+        font-size: 0.72rem;
+      }
+      .section {
+        animation: fadein 0.25s ease;
+      }
+      @keyframes fadein {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .chip-produk {
+        background: #eef2fc;
+        border: 1px solid #dbe2f5;
+        border-radius: 10px;
+        padding: 0.5rem 0.65rem;
+        font-size: 0.8rem;
+      }
+      .chip-produk .tgt {
+        color: var(--af-blue);
+        font-weight: 700;
+      }
+      .form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #42485a;
+      }
+      .form-control,
+      .form-select {
+        border-radius: 10px;
+        border-color: #dbe0eb;
+      }
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--af-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 61, 165, 0.12);
+      }
+      .btn-af-red {
+        background: var(--af-red);
+        border-color: var(--af-red);
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+      }
+      .btn-af-red:hover {
+        background: var(--af-red-dark);
+        border-color: var(--af-red-dark);
+        color: #fff;
+      }
+      .btn-af-blue {
+        background: var(--af-blue);
+        border-color: var(--af-blue);
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+      }
+      .btn-af-blue:hover {
+        background: var(--af-blue-dark);
+        border-color: var(--af-blue-dark);
+        color: #fff;
+      }
+      .btn-outline-af {
+        border: 1.5px solid var(--af-blue);
+        color: var(--af-blue);
+        border-radius: 10px;
+        font-weight: 600;
+      }
+      .btn-outline-af:hover {
+        background: var(--af-blue);
+        color: #fff;
+      }
+
+      .subtab .nav-link {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--af-blue);
+      }
+      .subtab .nav-link.active {
+        background: var(--af-yellow);
+        color: #4a3800;
+      }
+
+      .empty-hint {
+        border: 1.5px dashed #cbd3e3;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--muted);
+      }
+      .eyebrow {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--af-red);
+      }
+      footer.af-footer {
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-align: center;
+        margin-top: 2rem;
+      }
+      .psm-row-manual input {
+        background: #fffbea;
+      }
+      @media (max-width: 576px) {
+        .stat-card .num {
+          font-size: 1.4rem;
+        }
+        .navbar-af .brand-sub {
+          display: none;
+        }
+
+        /* Tabel lebih ramping di layar kecil, tapi tetap rapi & rata teksnya */
+        .table-responsive {
+          border-radius: 10px;
+        }
+        table {
+          min-width: 0;
+          width: 100%;
+          table-layout: auto;
+        }
+        table thead th {
+          font-size: 0.64rem;
+          padding: 0.4rem 0.3rem;
+          white-space: normal;
+          line-height: 1.2;
+          text-align: center;
+          vertical-align: middle;
+        }
+        table tbody td {
+          font-size: 0.72rem;
+          padding: 0.38rem 0.3rem;
+          text-align: center;
+          white-space: normal;
+          word-break: break-word;
+          vertical-align: middle;
+        }
+
+        /* Kolom identitas (NIK/Tanggal/Produk/Parameter) rata kiri, kolom angka/status tetap rata tengah */
+        table th:first-child,
+        table td:first-child {
+          text-align: left;
+        }
+        #dashTable th:nth-child(2),
+        #dashTable td:nth-child(2),
+        #dashTable th:nth-child(3),
+        #dashTable td:nth-child(3),
+        #rpTable th:nth-child(2),
+        #rpTable td:nth-child(2),
+        #pnTable th:nth-child(2),
+        #pnTable td:nth-child(2),
+        #pnTable th:nth-child(3),
+        #pnTable td:nth-child(3) {
+          text-align: left;
+        }
+        #blTable thead tr:first-child th:nth-child(2),
+        #blTable tbody td:nth-child(2) {
+          text-align: left;
+        }
+
+        .badge-pct {
+          font-size: 0.64rem;
+          padding: 0.28rem 0.5rem;
+        }
+        .card-af .card-header {
+          font-size: 0.85rem;
+          padding: 0.65rem 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================= LOGIN SCREEN ================= -->
+    <div
+      id="loginScreen"
+      style="
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          135deg,
+          var(--af-blue) 0%,
+          var(--af-blue-dark) 100%
+        );
+        padding: 1rem;
+      "
+    >
+      <div
+        class="card-af"
+        style="width: 100%; max-width: 380px; padding: 2rem"
+      >
+        <div class="text-center mb-3">
+          <div
+            class="mx-auto mb-2"
+            style="
+              width: 52px;
+              height: 52px;
+              border-radius: 14px;
+              background: var(--af-yellow);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: var(--af-red-dark);
+              font-size: 1.4rem;
+            "
+          >
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <h5 class="mb-0" style="font-family: 'Poppins'; font-weight: 700">
+            Fokus Marketing Monitoring
+          </h5>
+          <div class="text-muted small">Alfamart • SPBU Cut Mutia</div>
+        </div>
+        <div id="loginError" class="alert alert-danger d-none py-2 small"></div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="login_username"
+            autocomplete="username"
+            placeholder="Masukkan username"
+            oninput="hideLoginError()"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="login_password"
+            autocomplete="current-password"
+            placeholder="Masukkan password"
+            oninput="hideLoginError()"
+            onkeydown="if(event.key==='Enter') doLogin()"
+          />
+        </div>
+        <div class="form-check mb-3">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="login_remember"
+            checked
+          />
+          <label class="form-check-label small" for="login_remember"
+            >Ingat saya di perangkat ini</label
+          >
+        </div>
+        <button
+          class="btn btn-af-blue w-100"
+          id="loginSubmitBtn"
+          onclick="doLogin()"
+        >
+          <span id="loginSubmitBtnLabel"
+            ><i class="bi bi-box-arrow-in-right me-1"></i>Masuk</span
+          >
+        </button>
+      </div>
+    </div>
+
+    <div id="appRoot" class="d-none">
+    <div
+      id="loadingOverlay"
+      class="d-none"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.75rem;
+      "
+    >
+      <div
+        class="spinner-border"
+        style="color: var(--af-red); width: 3rem; height: 3rem"
+        role="status"
+      ></div>
+      <div
+        style="
+          font-family: &quot;Poppins&quot;;
+          font-weight: 600;
+          color: var(--af-blue);
+        "
+      >
+        Menghubungkan ke Google Sheet...
+      </div>
+    </div>
+
+    <div
+      id="configWarning"
+      class="d-none alert alert-danger m-3 mb-0"
+      style="border-radius: 12px"
+    ></div>
+
+    <nav class="navbar navbar-af navbar-expand px-3 py-2 mb-2">
+      <div class="d-flex align-items-center gap-2">
+        <div class="brand-mark"><i class="bi bi-star-fill"></i></div>
+        <div>
+          <div class="brand-title" style="line-height: 1.1">
+            Fokus Marketing Monitoring
+          </div>
+          <div class="brand-sub">
+            Alfamart • SPBU Cut Mutia
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <span
+          class="badge rounded-pill d-none d-sm-inline-block"
+          style="background: #eef1f8; color: var(--af-blue-dark); font-weight: 600"
+          id="authUserBadge"
+        ></span>
+        <span
+          class="badge rounded-pill"
+          style="background: var(--af-yellow); color: #4a3800; font-weight: 700"
+          id="todayBadge"
+          ><i class="bi bi-calendar3 me-1"></i
+        ></span>
+        <button
+          class="btn btn-sm btn-outline-danger"
+          onclick="doLogout()"
+          title="Keluar"
+        >
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>
+    </nav>
+
+    <div class="container-fluid px-3 px-md-4">
+      <div class="tabs-wrap">
+        <ul class="nav nav-pills" id="mainTabs">
+          <li class="nav-item">
+            <button class="nav-link active" data-sec="dashboard">
+              <i class="bi bi-speedometer2"></i>Dashboard
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="entry">
+              <i class="bi bi-pencil-square"></i>Entry Data
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="periode">
+              <i class="bi bi-bar-chart-line"></i>Rekap Periode
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="psm">
+              <i class="bi bi-boxes"></i>Rekap PSM
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="bulanan">
+              <i class="bi bi-calendar-month"></i>Rekap Bulanan
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="target">
+              <i class="bi bi-bullseye"></i>Target
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-sec="karyawan">
+              <i class="bi bi-people"></i>Karyawan
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ================= DASHBOARD ================= -->
+      <div id="sec-dashboard" class="section">
+        <div class="eyebrow">Hari ini</div>
+        <h4 class="mb-3">Rekap Entry Hari Ini</h4>
+        <div class="row g-3 mb-3" id="dashStats"></div>
+
+        <div class="card-af">
+          <div
+            class="card-header header-blue d-flex justify-content-between align-items-center flex-wrap gap-2"
+          >
+            <span><i class="bi bi-list-check me-2"></i>Entry Transaksi</span>
+            <input
+              type="date"
+              id="dashDateFilter"
+              class="form-control form-control-sm"
+              style="width: auto"
+            />
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="dashTable">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>NIK</th>
+                    <th>Nama</th>
+                    <th>PWP</th>
+                    <th>Sergap</th>
+                    <th>Sueger</th>
+                    <th>Ceban</th>
+                    <th>New Member</th>
+                    <th>PSM</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ENTRY DATA ================= -->
+      <div id="sec-entry" class="section d-none">
+        <div class="eyebrow">Input harian</div>
+        <h4 class="mb-3">Form Entry Data</h4>
+        <div class="card-af">
+          <div class="card-header header-red">
+            <i class="bi bi-pencil-square me-2"></i>Entry Transaksi Karyawan
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-3">
+                <label class="form-label">Tanggal</label>
+                <input type="date" class="form-control" id="f_tanggal" />
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label">NIK</label>
+                <select class="form-select" id="f_nik">
+                  <option value="">— pilih NIK —</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Nama Karyawan</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="f_nama"
+                  readonly
+                  placeholder="Otomatis terisi"
+                />
+              </div>
+            </div>
+            <hr />
+            <div class="row g-3">
+              <div class="col-6 col-md-2">
+                <label class="form-label">PWP</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_pwp"
+                  value="0"
+                />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Sergap</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_sergap"
+                  value="0"
+                />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Sueger</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_sueger"
+                  value="0"
+                />
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Ceban</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_ceban"
+                  value="0"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">New Member</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  id="f_newmember"
+                  value="0"
+                />
+              </div>
+            </div>
+
+            <hr />
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label mb-0"
+                ><i class="bi bi-box-seam me-1"></i>PSM (sesuai minggu
+                berjalan)</label
+              >
+              <button
+                class="btn btn-sm btn-outline-af"
+                onclick="addManualPsmEntryRow()"
+              >
+                <i class="bi bi-plus-lg"></i> Tambah Produk Lain
+              </button>
+            </div>
+            <div id="psmEntryInfo" class="mb-2"></div>
+            <div id="psmEntryRows"></div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button class="btn btn-af-red px-4" onclick="submitEntry()">
+                <i class="bi bi-check2-circle me-1"></i>Simpan Entry
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                onclick="resetEntryForm()"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= REKAP PERIODE ================= -->
+      <div id="sec-periode" class="section d-none">
+        <div class="eyebrow">Capaian per periode</div>
+        <h4 class="mb-3">Rekap Data Per Periode</h4>
+        <div class="card-af">
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-md-3">
+                <label class="form-label">Parameter</label>
+                <select
+                  class="form-select"
+                  id="rp_param"
+                  onchange="onRpParamChange()"
+                >
+                  <option value="pwp">PWP</option>
+                  <option value="sergap">Sergap</option>
+                  <option value="sueger">Sueger</option>
+                  <option value="ceban">Ceban</option>
+                  <option value="newmember">New Member</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Bulan</label>
+                <input type="month" class="form-control" id="rp_bulan" />
+              </div>
+              <div class="col-6 col-md-3" id="rp_periode_wrap">
+                <label class="form-label">Periode</label>
+                <select class="form-select" id="rp_periode">
+                  <option value="1">Periode 1 (1–15)</option>
+                  <option value="2">Periode 2 (16–akhir)</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-3">
+                <button
+                  class="btn btn-af-blue w-100"
+                  onclick="renderRekapPeriode()"
+                >
+                  <i class="bi bi-search me-1"></i>Tampilkan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3 mb-3" id="rpStats"></div>
+        <div class="card-af">
+          <div class="card-header header-blue">
+            <i class="bi bi-table me-2"></i>Detail per Karyawan
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="rpTable">
+                <thead>
+                  <tr>
+                    <th>NIK</th>
+                    <th>Nama</th>
+                    <th>Capaian</th>
+                    <th>Target</th>
+                    <th>%</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= REKAP PSM ================= -->
+      <div id="sec-psm" class="section d-none">
+        <div class="eyebrow">Product Sales Monitoring</div>
+        <h4 class="mb-3">Rekap Data PSM</h4>
+        <ul class="nav subtab nav-pills mb-3">
+          <li class="nav-item">
+            <button
+              class="nav-link active"
+              data-psmtab="week"
+              onclick="switchPsmTab('week')"
+            >
+              <i class="bi bi-calendar-week me-1"></i>Per Minggu
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link"
+              data-psmtab="nik"
+              onclick="switchPsmTab('nik')"
+            >
+              <i class="bi bi-person-badge me-1"></i>Per NIK per Produk
+            </button>
+          </li>
+        </ul>
+
+        <div id="psmTabWeek">
+          <div class="card-af">
+            <div class="card-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Bulan</label>
+                  <input type="month" class="form-control" id="pw_bulan" />
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Minggu</label>
+                  <select class="form-select" id="pw_week">
+                    <option value="1">Week 1 (1–7)</option>
+                    <option value="2">Week 2 (8–15)</option>
+                    <option value="3">Week 3 (16–23)</option>
+                    <option value="4">Week 4 (24–akhir)</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <button
+                    class="btn btn-af-blue w-100"
+                    onclick="renderRekapPsmWeek()"
+                  >
+                    <i class="bi bi-search me-1"></i>Tampilkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-af">
+            <div class="card-header header-yellow">
+              <i class="bi bi-boxes me-2"></i>Capaian PSM per Karyawan
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped mb-0" id="pwTable">
+                  <thead>
+                    <tr>
+                      <th>Produk</th>
+                      <th>Total Jual</th>
+                      <th>Target</th>
+                      <th>Pencapaian</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="psmTabNik" class="d-none">
+          <div class="card-af">
+            <div class="card-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Bulan</label>
+                  <input type="month" class="form-control" id="pn_bulan" />
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Minggu</label>
+                  <select class="form-select" id="pn_week">
+                    <option value="1">Week 1 (1–7)</option>
+                    <option value="2">Week 2 (8–15)</option>
+                    <option value="3">Week 3 (16–23)</option>
+                    <option value="4">Week 4 (24–akhir)</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <button
+                    class="btn btn-af-blue w-100"
+                    onclick="renderRekapPsmNikActive()"
+                  >
+                    <i class="bi bi-search me-1"></i>Tampilkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mb-3">
+            <button
+              class="btn btn-sm btn-af-blue"
+              id="pnModeBtnProduk"
+              onclick="setPsmNikMode('produk')"
+            >
+              <i class="bi bi-list-ul me-1"></i>Per Produk
+            </button>
+            <button
+              class="btn btn-sm btn-outline-af"
+              id="pnModeBtnTotal"
+              onclick="setPsmNikMode('total')"
+            >
+              <i class="bi bi-person-check me-1"></i>Total PSM NIK
+            </button>
+          </div>
+
+          <div class="card-af" id="pnCardProduk">
+            <div class="card-header header-yellow">
+              <i class="bi bi-person-badge me-2"></i>Capaian PSM per NIK per
+              Produk
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped mb-0" id="pnTable">
+                  <thead>
+                    <tr>
+                      <th>NIK</th>
+                      <th>Nama</th>
+                      <th>Produk</th>
+                      <th>Target</th>
+                      <th>Actual</th>
+                      <th
+                        style="cursor: pointer; user-select: none"
+                        onclick="sortPsmNikByPencapaian()"
+                        title="Urutkan dari besar ke kecil"
+                      >
+                        Persen <i class="bi bi-sort-down"></i>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-af d-none" id="pnCardTotal">
+            <div class="card-header header-yellow">
+              <i class="bi bi-person-check me-2"></i>Total Penjualan PSM per
+              NIK
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped mb-0" id="pnTotalTable">
+                  <thead>
+                    <tr>
+                      <th>NIK</th>
+                      <th>Nama</th>
+                      <th>Target</th>
+                      <th>Total Jual</th>
+                      <th
+                        style="cursor: pointer; user-select: none"
+                        onclick="sortPsmNikTotalByPencapaian()"
+                        title="Urutkan dari besar ke kecil"
+                      >
+                        Pencapaian <i class="bi bi-sort-down"></i>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= REKAP BULANAN ================= -->
+      <div id="sec-bulanan" class="section d-none">
+        <div class="eyebrow">Ringkasan bulanan</div>
+        <h4 class="mb-3">Rekap Data Per Bulan</h4>
+        <div class="card-af">
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-6 col-md-4">
+                <label class="form-label">Bulan</label>
+                <input type="month" class="form-control" id="bl_bulan" />
+              </div>
+              <div class="col-12 col-md-3">
+                <button
+                  class="btn btn-af-blue w-100"
+                  onclick="renderRekapBulanan()"
+                >
+                  <i class="bi bi-search me-1"></i>Tampilkan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-af">
+          <div class="card-header header-blue">
+            <i class="bi bi-calendar-month me-2"></i>Total Capaian Bulanan per
+            Karyawan
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="blTable">
+                <thead>
+                  <tr>
+                    <th rowspan="2">NIK</th>
+                    <th rowspan="2">Nama</th>
+                    <th colspan="2">PWP</th>
+                    <th colspan="2">Sergap</th>
+                    <th colspan="2">Sueger</th>
+                    <th colspan="2">Ceban</th>
+                    <th colspan="2">New Member</th>
+                    <th colspan="2">PSM</th>
+                  </tr>
+                  <tr>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                    <th>Capaian</th>
+                    <th>%</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TARGET ================= -->
+      <div id="sec-target" class="section d-none">
+        <div class="eyebrow">Pengaturan</div>
+        <h4 class="mb-3">Form Entry Target</h4>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6" id="targetEditCard">
+            <div class="card-af">
+              <div class="card-header header-red">
+                <i class="bi bi-bullseye me-2"></i>Atur Target
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Parameter</label>
+                    <select
+                      class="form-select"
+                      id="tg_param"
+                      onchange="onTargetParamChange()"
+                    >
+                      <option value="pwp">PWP</option>
+                      <option value="sergap">Sergap</option>
+                      <option value="sueger">Sueger</option>
+                      <option value="ceban">Ceban</option>
+                      <option value="newmember">New Member</option>
+                      <option value="psm">PSM</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Bulan</label>
+                    <input
+                      type="month"
+                      class="form-control"
+                      id="tg_bulan"
+                      onchange="onTargetParamChange()"
+                    />
+                  </div>
+                </div>
+
+                <div id="tg_biasa_wrap" class="row g-3 mt-1">
+                  <div class="col-6">
+                    <label class="form-label">Target Periode 1 (1–15)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      class="form-control"
+                      id="tg_p1"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label"
+                      >Target Periode 2 (16–akhir)</label
+                    >
+                    <input
+                      type="number"
+                      min="0"
+                      class="form-control"
+                      id="tg_p2"
+                    />
+                  </div>
+                </div>
+
+                <div id="tg_newmember_wrap" class="row g-3 mt-1 d-none">
+                  <div class="col-12">
+                    <label class="form-label"
+                      >Target New Member (1 bulan penuh)</label
+                    >
+                    <input
+                      type="number"
+                      min="0"
+                      class="form-control"
+                      id="tg_nm"
+                    />
+                  </div>
+                </div>
+
+                <div id="tg_psm_wrap" class="d-none mt-1">
+                  <label class="form-label">Minggu</label>
+                  <select
+                    class="form-select mb-3"
+                    id="tg_psm_week"
+                    onchange="loadPsmDraftForWeek()"
+                  >
+                    <option value="1">Week 1 (1–7)</option>
+                    <option value="2">Week 2 (8–15)</option>
+                    <option value="3">Week 3 (16–23)</option>
+                    <option value="4">Week 4 (24–akhir)</option>
+                  </select>
+                  <label class="form-label"
+                    >Produk &amp; Target Minggu Ini</label
+                  >
+                  <div id="psmTargetRows"></div>
+                  <button
+                    class="btn btn-sm btn-outline-af mt-1"
+                    onclick="addPsmDraftRow()"
+                  >
+                    <i class="bi bi-plus-lg"></i> Tambah Produk
+                  </button>
+                </div>
+
+                <button
+                  class="btn btn-af-red px-4 mt-4"
+                  onclick="saveTargetForm()"
+                >
+                  <i class="bi bi-save me-1"></i>Simpan Target
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 d-none" id="targetLockedMsg">
+            <div class="card-af">
+              <div class="card-body text-center text-muted py-5">
+                <i class="bi bi-lock-fill" style="font-size: 2rem"></i>
+                <div class="mt-2 fw-semibold">
+                  Hanya admin yang dapat mengubah data Target
+                </div>
+                <div class="small">
+                  Anda tetap dapat melihat ringkasan target di sebelah kanan.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card-af">
+              <div class="card-header header-blue">
+                <i class="bi bi-list-check me-2"></i>Target Bulan Terpilih
+              </div>
+              <div class="card-body">
+                <div id="targetSummary"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= KARYAWAN ================= -->
+      <div id="sec-karyawan" class="section d-none">
+        <div class="eyebrow">Master data</div>
+        <h4 class="mb-3">Form Entry NIK &amp; Nama Karyawan</h4>
+        <div class="row g-3">
+          <div class="col-12 col-lg-5" id="karyawanEditCard">
+            <div class="card-af">
+              <div class="card-header header-red">
+                <i class="bi bi-person-plus me-2"></i>Tambah Karyawan
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">NIK</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="k_nik"
+                    placeholder="Contoh: 4501202301"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Nama</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="k_nama"
+                    placeholder="Nama lengkap karyawan"
+                  />
+                </div>
+                <button class="btn btn-af-red w-100" onclick="addKaryawan()">
+                  <i class="bi bi-check2-circle me-1"></i>Simpan
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-5 d-none" id="karyawanLockedMsg">
+            <div class="card-af">
+              <div class="card-body text-center text-muted py-5">
+                <i class="bi bi-lock-fill" style="font-size: 2rem"></i>
+                <div class="mt-2 fw-semibold">
+                  Hanya admin yang dapat mengubah data Karyawan
+                </div>
+                <div class="small">
+                  Anda tetap dapat melihat daftar karyawan di sebelah kanan.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-7">
+            <div class="card-af">
+              <div
+                class="card-header header-blue d-flex justify-content-between align-items-center"
+              >
+                <span><i class="bi bi-people me-2"></i>Daftar Karyawan</span>
+                <input
+                  type="text"
+                  id="k_search"
+                  class="form-control form-control-sm"
+                  style="width: 180px"
+                  placeholder="Cari nama/NIK..."
+                  oninput="renderKaryawanTable()"
+                />
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-striped mb-0">
+                    <thead>
+                      <tr>
+                        <th>NIK</th>
+                        <th>Nama</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="karyawanTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="af-footer">
+      Fokus Marketing Monitoring — Alfamart · data tersimpan otomatis
+    </footer>
+
+    <div
+      class="toast-container position-fixed bottom-0 end-0 p-3"
+      style="z-index: 1080"
+    >
+      <div
+        id="appToast"
+        class="toast align-items-center text-white border-0"
+        role="alert"
+      >
+        <div class="d-flex">
+          <div class="toast-body" id="appToastBody">Tersimpan</div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+          ></button>
+        </div>
+      </div>
+    </div>
+    </div>
+    <!-- /#appRoot -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+      /* ============ STATE ============ */
+      let authToken = null;
+      let authRole = null; // 'admin' | 'user'
+      let authNama = null;
+      let authUsername = null;
+
+      let employees = []; // [{nik,nama}]
+      let entries = []; // [{id,tanggal,nik,nama,pwp,sergap,sueger,ceban,newmember,psm:[{produk,qty}]}]
+      let targets = {
+        pwp: {},
+        sergap: {},
+        sueger: {},
+        ceban: {},
+        newmember: {},
+        psm: {},
+      };
+      let psmNikRows = []; // cache baris tabel Capaian PSM per NIK per Produk (untuk fitur sort)
+      let psmNikEmptyMsg = "";
+
+      const PARAM_LABEL = {
+        pwp: "PWP",
+        sergap: "Sergap",
+        sueger: "Sueger",
+        ceban: "Ceban",
+        newmember: "New Member",
+      };
+
+      /* ============ KONEKSI GOOGLE SHEET (via Google Apps Script Web App) ============ */
+      /* PENTING: ganti URL di bawah ini dengan URL Web App hasil deploy Apps Script Anda.
+   Lihat file Code.gs & panduan deploy yang disertakan terpisah. */
+      const APPS_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbz6DMfGnU__q-rzCAOrNwjtDVu27zqAymkuCPbs2q7e0vraEPxL92DRewlZopSobeXh3g/exec";
+
+      function isApiConfigured() {
+        return (
+          APPS_SCRIPT_URL &&
+          APPS_SCRIPT_URL.indexOf("https://script.google.com") === 0
+        );
+      }
+
+      async function apiGetAll() {
+        if (!isApiConfigured())
+          throw new Error(
+            "APPS_SCRIPT_URL belum diisi. Buka Code.gs, deploy sebagai Web App, lalu tempel URL-nya di bagian atas <script>.",
+          );
+        const res = await fetch(
+          APPS_SCRIPT_URL +
+            "?action=getAll&token=" +
+            encodeURIComponent(authToken || ""),
+        );
+        if (!res.ok)
+          throw new Error(
+            "Gagal menghubungi Google Sheet (HTTP " + res.status + ")",
+          );
+        const data = await res.json();
+        if (data.authRequired) {
+          forceLogout("Sesi berakhir, silakan login kembali.");
+          throw new Error(data.error);
+        }
+        if (data.error) throw new Error(data.error);
+        return data;
+      }
+      async function apiPost(action, payload) {
+        if (!isApiConfigured())
+          throw new Error(
+            "APPS_SCRIPT_URL belum diisi. Buka Code.gs, deploy sebagai Web App, lalu tempel URL-nya di bagian atas <script>.",
+          );
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // hindari CORS preflight
+          body: JSON.stringify(
+            Object.assign({ action: action, token: authToken }, payload),
+          ),
+        });
+        if (!res.ok)
+          throw new Error(
+            "Gagal menghubungi Google Sheet (HTTP " + res.status + ")",
+          );
+        const data = await res.json();
+        if (data.authRequired) {
+          forceLogout("Sesi berakhir, silakan login kembali.");
+          throw new Error(data.error);
+        }
+        if (data.error) throw new Error(data.error);
+        return data;
+      }
+      async function refreshAllFromServer() {
+        const data = await apiGetAll();
+        employees = data.employees || [];
+        entries = data.entries || [];
+        targets = data.targets || {
+          pwp: {},
+          sergap: {},
+          sueger: {},
+          ceban: {},
+          newmember: {},
+          psm: {},
+        };
+      }
+      function setLoading(isLoading) {
+        const el = document.getElementById("loadingOverlay");
+        if (el) el.classList.toggle("d-none", !isLoading);
+      }
+
+      /* ============ AUTH: LOGIN / LOGOUT / SESSION ============ */
+      const AUTH_STORAGE_KEY = "afm_auth_session";
+
+      function saveAuthToStorage(remember) {
+        const data = JSON.stringify({
+          token: authToken,
+          role: authRole,
+          nama: authNama,
+          username: authUsername,
+        });
+        // Simpan di localStorage (bertahan meski tab ditutup) jika "Ingat saya"
+        // dicentang, kalau tidak simpan di sessionStorage saja (hilang saat
+        // tab ditutup) - keduanya tetap divalidasi ulang oleh server tiap saat.
+        if (remember) {
+          localStorage.setItem(AUTH_STORAGE_KEY, data);
+          sessionStorage.removeItem(AUTH_STORAGE_KEY);
+        } else {
+          sessionStorage.setItem(AUTH_STORAGE_KEY, data);
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+      }
+
+      function loadAuthFromStorage() {
+        const raw =
+          localStorage.getItem(AUTH_STORAGE_KEY) ||
+          sessionStorage.getItem(AUTH_STORAGE_KEY);
+        if (!raw) return false;
+        try {
+          const data = JSON.parse(raw);
+          authToken = data.token;
+          authRole = data.role;
+          authNama = data.nama;
+          authUsername = data.username;
+          return !!authToken;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function clearAuthStorage() {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      }
+
+      let loginErrorTimer = null;
+
+      function hideLoginError() {
+        const errEl = document.getElementById("loginError");
+        errEl.classList.add("d-none");
+        errEl.textContent = "";
+        if (loginErrorTimer) {
+          clearTimeout(loginErrorTimer);
+          loginErrorTimer = null;
+        }
+      }
+
+      function showLoginScreen(message) {
+        document.getElementById("appRoot").classList.add("d-none");
+        document.getElementById("loginScreen").classList.remove("d-none");
+        const errEl = document.getElementById("loginError");
+        if (loginErrorTimer) {
+          clearTimeout(loginErrorTimer);
+          loginErrorTimer = null;
+        }
+        if (message) {
+          errEl.textContent = message;
+          errEl.classList.remove("d-none");
+          loginErrorTimer = setTimeout(hideLoginError, 4000);
+        } else {
+          errEl.classList.add("d-none");
+          errEl.textContent = "";
+        }
+      }
+
+      function showApp() {
+        document.getElementById("loginScreen").classList.add("d-none");
+        document.getElementById("appRoot").classList.remove("d-none");
+        applyRoleGating();
+      }
+
+      function forceLogout(message) {
+        authToken = null;
+        authRole = null;
+        authNama = null;
+        authUsername = null;
+        clearAuthStorage();
+        showLoginScreen(message || "");
+      }
+
+      async function doLogin() {
+        const username = document.getElementById("login_username").value.trim();
+        const password = document.getElementById("login_password").value;
+        const remember = document.getElementById("login_remember").checked;
+        if (!username || !password) {
+          showLoginScreen("Username dan password wajib diisi.");
+          return;
+        }
+        const btn = document.getElementById("loginSubmitBtn");
+        const btnLabel = document.getElementById("loginSubmitBtnLabel");
+        const originalLabel = btnLabel.innerHTML;
+        btn.disabled = true;
+        btnLabel.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses...';
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "login", username, password }),
+          });
+          const data = await res.json();
+          if (data.error) {
+            showLoginScreen(data.error);
+            return;
+          }
+          authToken = data.token;
+          authRole = data.role;
+          authNama = data.nama;
+          authUsername = data.username;
+          saveAuthToStorage(remember);
+          document.getElementById("login_password").value = "";
+          showApp();
+          setLoading(true);
+          await bootApp();
+          setLoading(false);
+        } catch (err) {
+          showLoginScreen("Gagal menghubungi server: " + err.message);
+        } finally {
+          btn.disabled = false;
+          btnLabel.innerHTML = originalLabel;
+        }
+      }
+
+      async function doLogout() {
+        try {
+          if (authToken) await apiPost("logout", {});
+        } catch (e) {
+          /* abaikan error logout, tetap kembali ke layar login */
+        }
+        forceLogout("");
+      }
+
+      function applyRoleGating() {
+        document.getElementById("authUserBadge").textContent =
+          (authNama || authUsername || "") +
+          (authRole === "admin" ? " (Admin)" : " (User)");
+        const isAdmin = authRole === "admin";
+        const targetForm = document.getElementById("targetEditCard");
+        const targetLockedMsg = document.getElementById("targetLockedMsg");
+        if (targetForm) targetForm.classList.toggle("d-none", !isAdmin);
+        if (targetLockedMsg) targetLockedMsg.classList.toggle("d-none", isAdmin);
+
+        const karyawanForm = document.getElementById("karyawanEditCard");
+        const karyawanLockedMsg = document.getElementById("karyawanLockedMsg");
+        if (karyawanForm) karyawanForm.classList.toggle("d-none", !isAdmin);
+        if (karyawanLockedMsg)
+          karyawanLockedMsg.classList.toggle("d-none", isAdmin);
+        renderKaryawanTable(); // refresh agar tombol hapus ikut ter-update sesuai role
+      }
+
+      /* ============ AUTH: LOGIN / LOGOUT / SESSION (selesai) ============ */
+
+
+      /* ============ DATE HELPERS ============ */
+      function pad2(n) {
+        return n.toString().padStart(2, "0");
+      }
+      function todayISO() {
+        const d = new Date();
+        return (
+          d.getFullYear() +
+          "-" +
+          pad2(d.getMonth() + 1) +
+          "-" +
+          pad2(d.getDate())
+        );
+      }
+      function todayMonth() {
+        return todayISO().slice(0, 7);
+      }
+      function monthKey(dateStr) {
+        return dateStr ? dateStr.slice(0, 7) : "";
+      }
+      function dayOf(dateStr) {
+        return +dateStr.slice(8, 10);
+      }
+      function periodeOf(dateStr) {
+        return dayOf(dateStr) <= 15 ? 1 : 2;
+      }
+      function weekOf(dateStr) {
+        const d = dayOf(dateStr);
+        if (d <= 7) return 1;
+        if (d <= 15) return 2;
+        if (d <= 23) return 3;
+        return 4;
+      }
+      function daysInMonth(mKey) {
+        if (!mKey) return 30;
+        const [y, m] = mKey.split("-").map(Number);
+        return new Date(y, m, 0).getDate();
+      }
+      function periodeLabel(mKey, p) {
+        const last = daysInMonth(mKey);
+        return p == 1 ? "1–15" : "16–" + last;
+      }
+      function weekLabel(mKey, w) {
+        const last = daysInMonth(mKey);
+        const map = { 1: "1–7", 2: "8–15", 3: "16–23", 4: "24–" + last };
+        return map[w];
+      }
+      function fmtTanggalID(dateStr) {
+        if (!dateStr) return "-";
+        const bln = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "Mei",
+          "Jun",
+          "Jul",
+          "Agu",
+          "Sep",
+          "Okt",
+          "Nov",
+          "Des",
+        ];
+        const [y, m, d] = dateStr.split("-").map(Number);
+        return d + " " + bln[m - 1] + " " + y;
+      }
+
+      /* ============ MISC HELPERS ============ */
+      function escapeHtml(s) {
+        return (s ?? "")
+          .toString()
+          .replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[c],
+          );
+      }
+      function pctOf(actual, target) {
+        target = +target || 0;
+        actual = +actual || 0;
+        if (target <= 0) return actual > 0 ? 100 : 0;
+        return Math.round((actual / target) * 1000) / 10;
+      }
+      function statusBadgeClass(p) {
+        if (p >= 100) return "bg-success";
+        if (p >= 70) return "bg-warning text-dark";
+        return "bg-danger";
+      }
+      function statusText(p) {
+        if (p >= 100) return "Tercapai";
+        if (p >= 70) return "Mendekati";
+        return "Kurang";
+      }
+      function empName(nik) {
+        const e = employees.find((x) => x.nik === nik);
+        return e ? e.nama : "(tidak dikenal)";
+      }
+      function showToast(msg, isError) {
+        const t = document.getElementById("appToast");
+        document.getElementById("appToastBody").textContent = msg;
+        t.className =
+          "toast align-items-center text-white border-0 " +
+          (isError ? "bg-danger" : "bg-success");
+        bootstrap.Toast.getOrCreateInstance(t, { delay: 2200 }).show();
+      }
+
+      /* ============ NAV ============ */
+      document.getElementById("mainTabs").addEventListener("click", (e) => {
+        const btn = e.target.closest(".nav-link");
+        if (!btn) return;
+        document
+          .querySelectorAll("#mainTabs .nav-link")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.add("d-none"));
+        document
+          .getElementById("sec-" + btn.dataset.sec)
+          .classList.remove("d-none");
+        if (btn.dataset.sec === "dashboard") renderDashboard();
+        if (btn.dataset.sec === "karyawan") renderKaryawanTable();
+        if (btn.dataset.sec === "target") {
+          renderTargetSummary();
+        }
+      });
+
+      /* ================= ENTRY DATA ================= */
+      function populateNikSelect() {
+        const sel = document.getElementById("f_nik");
+        const cur = sel.value;
+        sel.innerHTML =
+          '<option value="">— pilih NIK —</option>' +
+          employees
+            .slice()
+            .sort((a, b) => a.nik.localeCompare(b.nik))
+            .map(
+              (e) =>
+                `<option value="${escapeHtml(e.nik)}">${escapeHtml(e.nik)} — ${escapeHtml(e.nama)}</option>`,
+            )
+            .join("");
+        if (cur) sel.value = cur;
+      }
+      document.getElementById("f_nik").addEventListener("change", function () {
+        document.getElementById("f_nama").value = this.value
+          ? empName(this.value)
+          : "";
+      });
+      document
+        .getElementById("f_tanggal")
+        .addEventListener("change", onTanggalEntryChange);
+
+      let psmEntryDraft = [];
+      let gEntryMonth = "",
+        gEntryWeek = null;
+
+      function onTanggalEntryChange() {
+        const tgl = document.getElementById("f_tanggal").value;
+        if (!tgl) return;
+        gEntryMonth = monthKey(tgl);
+        gEntryWeek = weekOf(tgl);
+        const list =
+          (targets.psm[gEntryMonth] && targets.psm[gEntryMonth][gEntryWeek]) ||
+          [];
+        psmEntryDraft = list.map((r) => ({
+          produk: r.produk,
+          target: r.target,
+          qty: 0,
+          manual: false,
+        }));
+        renderPsmEntryRows();
+      }
+      function renderPsmEntryRows() {
+        const info = document.getElementById("psmEntryInfo");
+        info.innerHTML = gEntryMonth
+          ? `<span class="badge rounded-pill" style="background:var(--af-blue);">Minggu ${gEntryWeek} · ${weekLabel(gEntryMonth, gEntryWeek)}</span>`
+          : "";
+        const wrap = document.getElementById("psmEntryRows");
+        if (psmEntryDraft.length === 0) {
+          wrap.innerHTML = `<div class="empty-hint"><i class="bi bi-info-circle me-1"></i>Target PSM untuk minggu ini belum diatur. Silakan atur di tab <b>Target</b>, atau tambahkan produk manual.</div>`;
+          return;
+        }
+        wrap.innerHTML = psmEntryDraft
+          .map((r, i) => {
+            if (r.manual) {
+              return `<div class="row g-2 mb-2 align-items-center psm-row-manual">
+        <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nama produk" value="${escapeHtml(r.produk)}" oninput="psmEntryDraft[${i}].produk=this.value"></div>
+        <div class="col-4"><input type="number" min="0" class="form-control form-control-sm" placeholder="Qty" value="${r.qty}" oninput="psmEntryDraft[${i}].qty=parseFloat(this.value)||0"></div>
+        <div class="col-2"><button class="btn btn-sm btn-outline-danger w-100" onclick="removePsmEntryRow(${i})"><i class="bi bi-trash"></i></button></div>
+      </div>`;
+            }
+            return `<div class="row g-2 mb-2 align-items-center">
+      <div class="col-7"><div class="chip-produk">${escapeHtml(r.produk)} <span class="tgt">(target ${r.target})</span></div></div>
+      <div class="col-5"><input type="number" min="0" class="form-control form-control-sm" placeholder="Qty" value="${r.qty}" oninput="psmEntryDraft[${i}].qty=parseFloat(this.value)||0"></div>
+    </div>`;
+          })
+          .join("");
+      }
+      function addManualPsmEntryRow() {
+        if (!document.getElementById("f_tanggal").value) {
+          showToast("Isi tanggal terlebih dahulu", true);
+          return;
+        }
+        psmEntryDraft.push({ produk: "", target: 0, qty: 0, manual: true });
+        renderPsmEntryRows();
+      }
+      function removePsmEntryRow(i) {
+        psmEntryDraft.splice(i, 1);
+        renderPsmEntryRows();
+      }
+
+      function resetEntryForm() {
+        document.getElementById("f_nik").value = "";
+        document.getElementById("f_nama").value = "";
+        ["f_pwp", "f_sergap", "f_sueger", "f_ceban", "f_newmember"].forEach(
+          (id) => (document.getElementById(id).value = 0),
+        );
+        psmEntryDraft = [];
+        document.getElementById("psmEntryRows").innerHTML = "";
+        document.getElementById("psmEntryInfo").innerHTML = "";
+      }
+
+      async function submitEntry() {
+        const tanggal = document.getElementById("f_tanggal").value;
+        const nik = document.getElementById("f_nik").value;
+        if (!tanggal) {
+          showToast("Tanggal wajib diisi", true);
+          return;
+        }
+        if (!nik) {
+          showToast("NIK wajib dipilih", true);
+          return;
+        }
+        const entry = {
+          id: crypto.randomUUID
+            ? crypto.randomUUID()
+            : "e" + Date.now() + Math.random().toString(36).slice(2, 7),
+          tanggal,
+          nik,
+          nama: empName(nik),
+          pwp: +document.getElementById("f_pwp").value || 0,
+          sergap: +document.getElementById("f_sergap").value || 0,
+          sueger: +document.getElementById("f_sueger").value || 0,
+          ceban: +document.getElementById("f_ceban").value || 0,
+          newmember: +document.getElementById("f_newmember").value || 0,
+          psm: psmEntryDraft
+            .filter((r) => r.produk && r.produk.trim() !== "")
+            .map((r) => ({ produk: r.produk.trim(), qty: +r.qty || 0 })),
+        };
+        try {
+          setLoading(true);
+          await apiPost("addEntry", { entry });
+          await refreshAllFromServer();
+          showToast("Entry berhasil disimpan ke Google Sheet");
+          const keepDate = tanggal;
+          resetEntryForm();
+          document.getElementById("f_tanggal").value = keepDate;
+          onTanggalEntryChange();
+          renderDashboard();
+        } catch (err) {
+          showToast("Gagal menyimpan: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      async function deleteEntry(id) {
+        if (!confirm("Hapus entry ini?")) return;
+        try {
+          setLoading(true);
+          await apiPost("deleteEntry", { id });
+          await refreshAllFromServer();
+          renderDashboard();
+          showToast("Entry dihapus dari Google Sheet");
+        } catch (err) {
+          showToast("Gagal menghapus: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      /* ================= DASHBOARD ================= */
+      function renderDashboard() {
+        document.getElementById("todayBadge").innerHTML =
+          '<i class="bi bi-calendar3 me-1"></i>' + fmtTanggalID(todayISO());
+        const dateFilter = document.getElementById("dashDateFilter");
+        if (!dateFilter.value) dateFilter.value = todayISO();
+        const tgl = dateFilter.value;
+        const todays = entries.filter((e) => e.tanggal === tgl);
+
+        const sum = (f) => todays.reduce((a, e) => a + (e[f] || 0), 0);
+        const psmTotal = todays.reduce(
+          (a, e) => a + (e.psm || []).reduce((s, p) => s + (+p.qty || 0), 0),
+          0,
+        );
+
+        document.getElementById("dashStats").innerHTML = `
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-red"><i class="bi bi-clipboard-data bg-icon"></i><div class="lbl">Jumlah Entry</div><div class="num">${todays.length}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-blue"><i class="bi bi-gift bg-icon"></i><div class="lbl">PWP</div><div class="num">${sum("pwp")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-yellow"><i class="bi bi-lightning-charge bg-icon"></i><div class="lbl">Sergap</div><div class="num">${sum("sergap")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-dark"><i class="bi bi-cup-straw bg-icon"></i><div class="lbl">Sueger</div><div class="num">${sum("sueger")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-red"><i class="bi bi-cash-coin bg-icon"></i><div class="lbl">Ceban</div><div class="num">${sum("ceban")}</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-blue"><i class="bi bi-person-plus bg-icon"></i><div class="lbl">New Member</div><div class="num">${sum("newmember")}</div></div></div>
+  `;
+
+        const tbody = document.querySelector("#dashTable tbody");
+        if (todays.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4">Belum ada entry pada tanggal ini</td></tr>`;
+        } else {
+          tbody.innerHTML = todays
+            .map((e) => {
+              const psmQty = (e.psm || []).reduce(
+                (s, p) => s + (+p.qty || 0),
+                0,
+              );
+              return `<tr>
+        <td>${fmtTanggalID(e.tanggal)}</td><td>${escapeHtml(e.nik)}</td><td>${escapeHtml(e.nama)}</td>
+        <td>${e.pwp}</td><td>${e.sergap}</td><td>${e.sueger}</td><td>${e.ceban}</td><td>${e.newmember}</td><td>${psmQty}</td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="deleteEntry('${e.id}')"><i class="bi bi-trash"></i></button></td>
+      </tr>`;
+            })
+            .join("");
+        }
+        const total = document.createElement("tr"); // psm total row appended separately not needed
+        document.getElementById("psmEntryRows"); // no-op keep
+        document.getElementById("dashStats").insertAdjacentHTML(
+          "beforeend",
+          `
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-yellow"><i class="bi bi-boxes bg-icon"></i><div class="lbl">Total PSM (qty)</div><div class="num">${psmTotal}</div></div></div>
+  `,
+        );
+      }
+      document
+        .getElementById("dashDateFilter")
+        .addEventListener("change", renderDashboard);
+
+      /* ================= KARYAWAN ================= */
+      async function addKaryawan() {
+        const nik = document.getElementById("k_nik").value.trim();
+        const nama = document.getElementById("k_nama").value.trim();
+        if (!nik || !nama) {
+          showToast("NIK dan Nama wajib diisi", true);
+          return;
+        }
+        if (employees.some((e) => e.nik === nik)) {
+          showToast("NIK sudah terdaftar", true);
+          return;
+        }
+        try {
+          setLoading(true);
+          await apiPost("addEmployee", { nik, nama });
+          await refreshAllFromServer();
+          document.getElementById("k_nik").value = "";
+          document.getElementById("k_nama").value = "";
+          renderKaryawanTable();
+          populateNikSelect();
+          showToast("Karyawan ditambahkan ke Google Sheet");
+        } catch (err) {
+          showToast("Gagal menyimpan: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+      async function deleteKaryawan(nik) {
+        if (
+          !confirm(
+            "Hapus karyawan NIK " + nik + "? Data entry lama tetap tersimpan.",
+          )
+        )
+          return;
+        try {
+          setLoading(true);
+          await apiPost("deleteEmployee", { nik });
+          await refreshAllFromServer();
+          renderKaryawanTable();
+          populateNikSelect();
+          showToast("Karyawan dihapus");
+        } catch (err) {
+          showToast("Gagal menghapus: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+      function renderKaryawanTable() {
+        const q = (
+          document.getElementById("k_search").value || ""
+        ).toLowerCase();
+        const tbody = document.getElementById("karyawanTbody");
+        const list = employees
+          .filter(
+            (e) =>
+              e.nik.toLowerCase().includes(q) ||
+              e.nama.toLowerCase().includes(q),
+          )
+          .sort((a, b) => a.nama.localeCompare(b.nama));
+        tbody.innerHTML = list.length
+          ? list
+              .map(
+                (e) => `
+    <tr><td>${escapeHtml(e.nik)}</td><td>${escapeHtml(e.nama)}</td>
+    <td class="text-end">${authRole === "admin" ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteKaryawan('${escapeHtml(e.nik)}')"><i class="bi bi-trash"></i></button>` : ""}</td></tr>
+  `,
+              )
+              .join("")
+          : `<tr><td colspan="3" class="text-center text-muted py-3">Belum ada karyawan</td></tr>`;
+      }
+
+      /* ================= TARGET ================= */
+      function onTargetParamChange() {
+        const param = document.getElementById("tg_param").value;
+        const bulan = document.getElementById("tg_bulan").value;
+        document
+          .getElementById("tg_biasa_wrap")
+          .classList.toggle(
+            "d-none",
+            !["pwp", "sergap", "sueger", "ceban"].includes(param),
+          );
+        document
+          .getElementById("tg_newmember_wrap")
+          .classList.toggle("d-none", param !== "newmember");
+        document
+          .getElementById("tg_psm_wrap")
+          .classList.toggle("d-none", param !== "psm");
+
+        if (["pwp", "sergap", "sueger", "ceban"].includes(param) && bulan) {
+          const t = targets[param][bulan] || {};
+          document.getElementById("tg_p1").value = t[1] ?? "";
+          document.getElementById("tg_p2").value = t[2] ?? "";
+        }
+        if (param === "newmember" && bulan) {
+          document.getElementById("tg_nm").value =
+            targets.newmember[bulan] ?? "";
+        }
+        if (param === "psm") {
+          loadPsmDraftForWeek();
+        }
+        renderTargetSummary();
+      }
+      document
+        .getElementById("tg_bulan")
+        .addEventListener("change", renderTargetSummary);
+
+      let psmTargetDraft = [];
+      function loadPsmDraftForWeek() {
+        const bulan = document.getElementById("tg_bulan").value;
+        const week = +document.getElementById("tg_psm_week").value;
+        const existing =
+          (bulan && targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        psmTargetDraft = existing.length
+          ? existing.map((r) => ({ produk: r.produk, target: r.target }))
+          : [{ produk: "", target: 0 }];
+        renderPsmTargetRows();
+      }
+      function renderPsmTargetRows() {
+        document.getElementById("psmTargetRows").innerHTML = psmTargetDraft
+          .map(
+            (r, i) => `
+    <div class="row g-2 mb-2 align-items-center">
+      <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nama produk" value="${escapeHtml(r.produk)}" oninput="psmTargetDraft[${i}].produk=this.value"></div>
+      <div class="col-4"><input type="number" min="0" class="form-control form-control-sm" placeholder="Target" value="${r.target}" oninput="psmTargetDraft[${i}].target=parseFloat(this.value)||0"></div>
+      <div class="col-2"><button class="btn btn-sm btn-outline-danger w-100" onclick="removePsmDraftRow(${i})"><i class="bi bi-trash"></i></button></div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+      function addPsmDraftRow() {
+        psmTargetDraft.push({ produk: "", target: 0 });
+        renderPsmTargetRows();
+      }
+      function removePsmDraftRow(i) {
+        psmTargetDraft.splice(i, 1);
+        if (psmTargetDraft.length === 0)
+          psmTargetDraft.push({ produk: "", target: 0 });
+        renderPsmTargetRows();
+      }
+
+      async function saveTargetForm() {
+        const param = document.getElementById("tg_param").value;
+        const bulan = document.getElementById("tg_bulan").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        let payload;
+        if (["pwp", "sergap", "sueger", "ceban"].includes(param)) {
+          const p1 = +document.getElementById("tg_p1").value || 0;
+          const p2 = +document.getElementById("tg_p2").value || 0;
+          payload = { parameter: param, bulan, p1, p2 };
+        } else if (param === "newmember") {
+          payload = {
+            parameter: "newmember",
+            bulan,
+            value: +document.getElementById("tg_nm").value || 0,
+          };
+        } else if (param === "psm") {
+          const week = +document.getElementById("tg_psm_week").value;
+          const rows = psmTargetDraft
+            .filter((r) => r.produk && r.produk.trim() !== "")
+            .map((r) => ({ produk: r.produk.trim(), target: +r.target || 0 }));
+          payload = { parameter: "psm", bulan, week, rows };
+        }
+        try {
+          setLoading(true);
+          await apiPost("saveTarget", { target: payload });
+          await refreshAllFromServer();
+          showToast("Target berhasil disimpan ke Google Sheet");
+          renderTargetSummary();
+        } catch (err) {
+          showToast("Gagal menyimpan target: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      function renderTargetSummary() {
+        const bulan = document.getElementById("tg_bulan").value;
+        const el = document.getElementById("targetSummary");
+        if (!bulan) {
+          el.innerHTML = `<div class="empty-hint">Pilih bulan pada form di sebelah kiri untuk melihat ringkasan target.</div>`;
+          return;
+        }
+
+        let html = `<div class="table-responsive mb-3"><table class="table table-sm">
+    <thead><tr><th>Parameter</th><th>Periode 1</th><th>Periode 2 / Bulanan</th></tr></thead><tbody>`;
+        ["pwp", "sergap", "sueger", "ceban"].forEach((p) => {
+          const t = targets[p][bulan] || {};
+          html += `<tr><td>${PARAM_LABEL[p]}</td><td>${t[1] ?? "-"}</td><td>${t[2] ?? "-"}</td></tr>`;
+        });
+        html += `<tr><td>New Member</td><td colspan="2">${targets.newmember[bulan] ?? "-"}</td></tr>`;
+        html += `</tbody></table></div>`;
+
+        html += `<div class="fw-semibold mb-2" style="font-family:'Poppins';">Target PSM per Minggu</div>`;
+        for (let w = 1; w <= 4; w++) {
+          const rows = (targets.psm[bulan] && targets.psm[bulan][w]) || [];
+          html += `<div class="mb-2"><span class="badge rounded-pill mb-1" style="background:var(--af-blue);">Week ${w} (${weekLabel(bulan, w)})</span>`;
+          if (rows.length === 0) {
+            html += `<div class="text-muted small ms-1">Belum diatur</div>`;
+          } else {
+            html +=
+              '<div class="d-flex flex-wrap gap-2 mt-1">' +
+              rows
+                .map(
+                  (r) =>
+                    `<div class="chip-produk">${escapeHtml(r.produk)} <span class="tgt">(${r.target})</span></div>`,
+                )
+                .join("") +
+              "</div>";
+          }
+          html += `</div>`;
+        }
+        el.innerHTML = html;
+      }
+
+      /* ================= REKAP PERIODE ================= */
+      function onRpParamChange() {
+        const param = document.getElementById("rp_param").value;
+        document
+          .getElementById("rp_periode_wrap")
+          .classList.toggle("d-none", param === "newmember");
+      }
+      function renderRekapPeriode() {
+        const param = document.getElementById("rp_param").value;
+        const bulan = document.getElementById("rp_bulan").value;
+        const periode = +document.getElementById("rp_periode").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        const isNewMember = param === "newmember";
+        const filtered = entries.filter(
+          (e) =>
+            monthKey(e.tanggal) === bulan &&
+            (isNewMember || periodeOf(e.tanggal) === periode),
+        );
+
+        const perNik = {};
+        filtered.forEach((e) => {
+          perNik[e.nik] = perNik[e.nik] || { nama: e.nama, val: 0 };
+          perNik[e.nik].val += e[param] || 0;
+        });
+
+        const targetVal = isNewMember
+          ? targets.newmember[bulan] || 0
+          : (targets[param][bulan] || {})[periode] || 0;
+
+        const rows = Object.keys(perNik)
+          .map((nik) => ({ nik, nama: perNik[nik].nama, val: perNik[nik].val }))
+          .sort((a, b) => b.val - a.val);
+        const totalActual = rows.reduce((a, r) => a + r.val, 0);
+        const totalTarget = targetVal;
+        const totalPct = pctOf(totalActual, totalTarget);
+
+        document.getElementById("rpStats").innerHTML = `
+    <div class="col-6 col-md-3"><div class="stat-card stat-red"><i class="bi bi-graph-up-arrow bg-icon"></i><div class="lbl">Total Capaian</div><div class="num">${totalActual}</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card stat-blue"><i class="bi bi-bullseye bg-icon"></i><div class="lbl">Total Target</div><div class="num">${totalTarget}</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card stat-yellow"><i class="bi bi-percent bg-icon"></i><div class="lbl">% Capaian</div><div class="num">${totalPct}%</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-card stat-dark"><i class="bi bi-people bg-icon"></i><div class="lbl">Karyawan Aktif</div><div class="num">${rows.length}</div></div></div>
+  `;
+
+        const tbody = document.querySelector("#rpTable tbody");
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Belum ada data untuk filter ini</td></tr>`;
+        } else {
+          tbody.innerHTML = rows
+            .map((r) => {
+              const p = pctOf(r.val, targetVal);
+              return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td><td>${r.val}</td><td>${targetVal}</td>
+        <td><span class="badge badge-pct ${statusBadgeClass(p)}">${p}%</span></td>
+        <td><span class="badge badge-pct ${statusBadgeClass(p)}">${statusText(p)}</span></td></tr>`;
+            })
+            .join("");
+        }
+      }
+
+      /* ================= REKAP PSM ================= */
+      function switchPsmTab(tab) {
+        document
+          .querySelectorAll("[data-psmtab]")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelector(`[data-psmtab="${tab}"]`)
+          .classList.add("active");
+        document
+          .getElementById("psmTabWeek")
+          .classList.toggle("d-none", tab !== "week");
+        document
+          .getElementById("psmTabNik")
+          .classList.toggle("d-none", tab !== "nik");
+      }
+
+      function renderRekapPsmWeek() {
+        const bulan = document.getElementById("pw_bulan").value;
+        const week = +document.getElementById("pw_week").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        const produkList =
+          (targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        const filtered = entries.filter(
+          (e) => monthKey(e.tanggal) === bulan && weekOf(e.tanggal) === week,
+        );
+
+        // Total qty terjual per produk, gabungan seluruh karyawan (populasi per NIK ada di tab "Per NIK per Produk")
+        const totalByProduk = {};
+        filtered.forEach((e) => {
+          (e.psm || []).forEach((p) => {
+            totalByProduk[p.produk] =
+              (totalByProduk[p.produk] || 0) + (+p.qty || 0);
+          });
+        });
+
+        const targetByProduk = {};
+        produkList.forEach((p) => {
+          targetByProduk[p.produk] = +p.target || 0;
+        });
+
+        // Produk dari target + produk manual (di luar target) yang muncul di entry
+        const produkNames = [
+          ...new Set([
+            ...produkList.map((p) => p.produk),
+            ...Object.keys(totalByProduk),
+          ]),
+        ];
+
+        const tbody = document.querySelector("#pwTable tbody");
+        if (produkNames.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Belum ada data PSM untuk minggu ini</td></tr>`;
+          return;
+        }
+
+        let totalJualAll = 0,
+          totalTargetAll = 0;
+        const rowsHtml = produkNames
+          .map((produk) => {
+            const totalJual = totalByProduk[produk] || 0;
+            const target = targetByProduk[produk] || 0;
+            totalJualAll += totalJual;
+            totalTargetAll += target;
+            const p = pctOf(totalJual, target);
+            return `<tr><td>${escapeHtml(produk)}</td><td>${totalJual}</td><td>${target}</td>
+      <td><span class="badge badge-pct ${statusBadgeClass(p)}">${p}%</span></td></tr>`;
+          })
+          .join("");
+
+        const pTotal = pctOf(totalJualAll, totalTargetAll);
+        tbody.innerHTML =
+          rowsHtml +
+          `<tr class="table-total"><td>Total</td><td>${totalJualAll}</td><td>${totalTargetAll}</td>
+    <td><span class="badge badge-pct ${statusBadgeClass(pTotal)}">${pTotal}%</span></td></tr>`;
+      }
+
+      function renderRekapPsmNik() {
+        const bulan = document.getElementById("pn_bulan").value;
+        const week = +document.getElementById("pn_week").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        const filtered = entries.filter(
+          (e) => monthKey(e.tanggal) === bulan && weekOf(e.tanggal) === week,
+        );
+
+        // Total qty per nik|produk untuk minggu terpilih (dijumlahkan lintas hari)
+        const actualMap = {};
+        const namaByNik = {};
+        filtered.forEach((e) => {
+          namaByNik[e.nik] = e.nama;
+          (e.psm || []).forEach((p) => {
+            if (!p.produk) return;
+            const key = e.nik + "|" + p.produk;
+            actualMap[key] = (actualMap[key] || 0) + (+p.qty || 0);
+          });
+        });
+
+        const produkList =
+          (targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        const produkNames = produkList.map((p) => p.produk);
+        const targetByProduk = {};
+        produkList.forEach((p) => {
+          targetByProduk[p.produk] = Math.ceil((+p.target || 0) / 2);
+        });
+
+        // Sertakan juga produk manual (di luar target) yang muncul di entry
+        const extraProduk = [
+          ...new Set(
+            filtered.flatMap((e) => (e.psm || []).map((p) => p.produk)),
+          ),
+        ].filter((p) => !produkNames.includes(p));
+        const allProduk = [...produkNames, ...extraProduk];
+
+        // Karyawan yang relevan: gabungan (union) seluruh karyawan terdaftar + NIK manapun yang
+        // muncul di data entry minggu ini (walau tidak/belum terdaftar), supaya total per-NIK
+        // selalu konsisten dengan total "Per Minggu"
+        const nikSet = new Set(employees.map((e) => e.nik));
+        Object.keys(namaByNik).forEach((nik) => nikSet.add(nik));
+        const nikList = [...nikSet].sort((a, b) =>
+          (empName(a) || namaByNik[a] || "").localeCompare(
+            empName(b) || namaByNik[b] || "",
+          ),
+        );
+
+        const rows = [];
+        nikList.forEach((nik) => {
+          const nama = namaByNik[nik] || empName(nik);
+          allProduk.forEach((produk) => {
+            const actual = actualMap[nik + "|" + produk] || 0;
+            const target = targetByProduk[produk] || 0;
+            if (target === 0 && actual === 0) return; // sembunyikan baris kosong total
+            rows.push({
+              nik,
+              nama,
+              produk,
+              target,
+              actual,
+              pct: pctOf(actual, target),
+            });
+          });
+        });
+
+        psmNikRows = rows;
+        psmNikEmptyMsg =
+          allProduk.length === 0
+            ? "Target PSM minggu ini belum diatur dan belum ada data entry"
+            : rows.length === 0
+              ? "Belum ada data PSM untuk minggu ini"
+              : "";
+        renderPsmNikTbody();
+      }
+
+      function renderPsmNikTbody() {
+        const tbody = document.querySelector("#pnTable tbody");
+        if (psmNikEmptyMsg) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${psmNikEmptyMsg}</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = psmNikRows
+          .map((r) => {
+            return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td><td>${escapeHtml(r.produk)}</td>
+      <td>${r.target}</td><td>${r.actual}</td>
+      <td><span class="badge badge-pct ${statusBadgeClass(r.pct)}">${r.pct}%</span></td></tr>`;
+          })
+          .join("");
+      }
+
+      function sortPsmNikByPencapaian() {
+        psmNikRows.sort((a, b) => b.pct - a.pct);
+        renderPsmNikTbody();
+      }
+
+      /* ---- Toggle: Per Produk vs Total PSM NIK ---- */
+      let psmNikMode = "produk"; // 'produk' | 'total'
+      let psmNikTotalRows = []; // cache baris tabel Total PSM per NIK (untuk fitur sort)
+      let psmNikTotalEmptyMsg = "";
+
+      function setPsmNikMode(mode) {
+        psmNikMode = mode;
+        document
+          .getElementById("pnModeBtnProduk")
+          .classList.toggle("btn-af-blue", mode === "produk");
+        document
+          .getElementById("pnModeBtnProduk")
+          .classList.toggle("btn-outline-af", mode !== "produk");
+        document
+          .getElementById("pnModeBtnTotal")
+          .classList.toggle("btn-af-blue", mode === "total");
+        document
+          .getElementById("pnModeBtnTotal")
+          .classList.toggle("btn-outline-af", mode !== "total");
+        document
+          .getElementById("pnCardProduk")
+          .classList.toggle("d-none", mode !== "produk");
+        document
+          .getElementById("pnCardTotal")
+          .classList.toggle("d-none", mode !== "total");
+        renderRekapPsmNikActive();
+      }
+
+      function renderRekapPsmNikActive() {
+        if (psmNikMode === "total") {
+          renderRekapPsmNikTotal();
+        } else {
+          renderRekapPsmNik();
+        }
+      }
+
+      function renderRekapPsmNikTotal() {
+        const bulan = document.getElementById("pn_bulan").value;
+        const week = +document.getElementById("pn_week").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+
+        const filtered = entries.filter(
+          (e) => monthKey(e.tanggal) === bulan && weekOf(e.tanggal) === week,
+        );
+
+        // Total qty seluruh produk PSM per NIK untuk minggu terpilih
+        const actualByNik = {};
+        const namaByNik = {};
+        filtered.forEach((e) => {
+          namaByNik[e.nik] = e.nama;
+          const sumQty = (e.psm || []).reduce(
+            (s, p) => s + (+p.qty || 0),
+            0,
+          );
+          actualByNik[e.nik] = (actualByNik[e.nik] || 0) + sumQty;
+        });
+
+        // Target: jumlahkan seluruh target produk pada minggu ini, lalu bagi 2
+        const produkList =
+          (targets.psm[bulan] && targets.psm[bulan][week]) || [];
+        let totalTargetAll = 0;
+        produkList.forEach((p) => {
+          totalTargetAll += +p.target || 0;
+        });
+        const targetPerNik = Math.ceil(totalTargetAll / 2);
+
+        // Karyawan yang relevan: gabungan (union) seluruh karyawan terdaftar + NIK manapun
+        // yang muncul di data entry minggu ini (walau tidak/belum terdaftar)
+        const nikSet = new Set(employees.map((e) => e.nik));
+        Object.keys(namaByNik).forEach((nik) => nikSet.add(nik));
+        const nikList = [...nikSet].sort((a, b) =>
+          (empName(a) || namaByNik[a] || "").localeCompare(
+            empName(b) || namaByNik[b] || "",
+          ),
+        );
+
+        const rows = nikList.map((nik) => {
+          const nama = namaByNik[nik] || empName(nik);
+          const actual = actualByNik[nik] || 0;
+          return {
+            nik,
+            nama,
+            target: targetPerNik,
+            actual,
+            pct: pctOf(actual, targetPerNik),
+          };
+        });
+
+        psmNikTotalRows = rows;
+        psmNikTotalEmptyMsg =
+          produkList.length === 0
+            ? "Target PSM minggu ini belum diatur"
+            : rows.length === 0
+              ? "Belum ada data PSM untuk minggu ini"
+              : "";
+        renderPsmNikTotalTbody();
+      }
+
+      function renderPsmNikTotalTbody() {
+        const tbody = document.querySelector("#pnTotalTable tbody");
+        if (psmNikTotalEmptyMsg) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">${psmNikTotalEmptyMsg}</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = psmNikTotalRows
+          .map((r) => {
+            return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td>
+      <td>${r.target}</td><td>${r.actual}</td>
+      <td><span class="badge badge-pct ${statusBadgeClass(r.pct)}">${r.pct}%</span></td></tr>`;
+          })
+          .join("");
+      }
+
+      function sortPsmNikTotalByPencapaian() {
+        psmNikTotalRows.sort((a, b) => b.pct - a.pct);
+        renderPsmNikTotalTbody();
+      }
+
+      /* ================= REKAP BULANAN ================= */
+      function renderRekapBulanan() {
+        const bulan = document.getElementById("bl_bulan").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+        const filtered = entries.filter((e) => monthKey(e.tanggal) === bulan);
+
+        const perNik = {};
+        filtered.forEach((e) => {
+          perNik[e.nik] = perNik[e.nik] || {
+            nama: e.nama,
+            pwp: 0,
+            sergap: 0,
+            sueger: 0,
+            ceban: 0,
+            newmember: 0,
+            psm: 0,
+          };
+          perNik[e.nik].pwp += e.pwp || 0;
+          perNik[e.nik].sergap += e.sergap || 0;
+          perNik[e.nik].sueger += e.sueger || 0;
+          perNik[e.nik].ceban += e.ceban || 0;
+          perNik[e.nik].newmember += e.newmember || 0;
+          perNik[e.nik].psm += (e.psm || []).reduce(
+            (s, p) => s + (+p.qty || 0),
+            0,
+          );
+        });
+
+        const tPwp =
+          ((targets.pwp[bulan] || {})[1] || 0) +
+          ((targets.pwp[bulan] || {})[2] || 0);
+        const tSergap =
+          ((targets.sergap[bulan] || {})[1] || 0) +
+          ((targets.sergap[bulan] || {})[2] || 0);
+        const tSueger =
+          ((targets.sueger[bulan] || {})[1] || 0) +
+          ((targets.sueger[bulan] || {})[2] || 0);
+        const tCeban =
+          ((targets.ceban[bulan] || {})[1] || 0) +
+          ((targets.ceban[bulan] || {})[2] || 0);
+        const tNewmember = targets.newmember[bulan] || 0;
+        let tPsm = 0;
+        if (targets.psm[bulan]) {
+          [1, 2, 3, 4].forEach((w) => {
+            (targets.psm[bulan][w] || []).forEach((r) => {
+              tPsm += +r.target || 0;
+            });
+          });
+        }
+
+        const rows = Object.keys(perNik)
+          .map((nik) => ({ nik, ...perNik[nik] }))
+          .sort((a, b) => a.nama.localeCompare(b.nama));
+        const tbody = document.querySelector("#blTable tbody");
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="14" class="text-center text-muted py-4">Belum ada data bulan ini</td></tr>`;
+        } else {
+          tbody.innerHTML = rows
+            .map((r) => {
+              const cell = (val, tgt) => {
+                const p = pctOf(val, tgt);
+                return `<td>${val}</td><td><span class="badge badge-pct ${statusBadgeClass(p)}">${p}%</span></td>`;
+              };
+              return `<tr><td>${escapeHtml(r.nik)}</td><td>${escapeHtml(r.nama)}</td>
+        ${cell(r.pwp, tPwp)}${cell(r.sergap, tSergap)}${cell(r.sueger, tSueger)}${cell(r.ceban, tCeban)}${cell(r.newmember, tNewmember)}${cell(r.psm, tPsm)}
+      </tr>`;
+            })
+            .join("");
+        }
+      }
+
+      /* ================= INIT ================= */
+      function setDefaultDates() {
+        document.getElementById("f_tanggal").value = todayISO();
+        document.getElementById("dashDateFilter").value = todayISO();
+        ["rp_bulan", "pw_bulan", "pn_bulan", "bl_bulan", "tg_bulan"].forEach(
+          (id) => {
+            document.getElementById(id).value = todayMonth();
+          },
+        );
+      }
+
+      async function bootApp() {
+        try {
+          await refreshAllFromServer();
+        } catch (err) {
+          showToast(err.message, true);
+          if (authToken) {
+            document
+              .getElementById("configWarning")
+              .classList.remove("d-none");
+            document.getElementById("configWarning").textContent =
+              err.message;
+          }
+          return; // sesi tidak valid / gagal konek - forceLogout sudah dipanggil di apiGetAll
+        }
+
+        setDefaultDates();
+        populateNikSelect();
+        onTanggalEntryChange();
+        renderDashboard();
+        renderKaryawanTable();
+        onTargetParamChange();
+        document.getElementById("todayBadge").innerHTML =
+          '<i class="bi bi-calendar3 me-1"></i>' + fmtTanggalID(todayISO());
+      }
+
+      async function startup() {
+        if (loadAuthFromStorage()) {
+          showApp();
+          setLoading(true);
+          await bootApp();
+          setLoading(false);
+        } else {
+          showLoginScreen();
+        }
+      }
+      startup();
+    </script>
+  </body>
+</html>
