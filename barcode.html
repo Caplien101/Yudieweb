@@ -73,8 +73,7 @@
                 <div class="flex-1 relative">
                     <input type="text" id="search-input" 
                            placeholder="Ketik description, PLU, atau barcode..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl text-sm focus:border-blue-500 outline-none pr-10 input-focus transition-all"
-                           oninput="handleSearch()">
+                           class="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl text-sm focus:border-blue-500 outline-none pr-10 input-focus transition-all">
                     <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors">
                         ✕
                     </button>
@@ -222,6 +221,13 @@
         let currentSearchKeyword = "";
         let searchTimeout;
         let currentValues = { rak: 0, gudang: 0, mako: 0 };
+        let renderGeneration = 0; // dipakai untuk membatalkan render lama yang masih tertunda
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             // Modal close button
@@ -276,6 +282,9 @@
             
             try {
                 const resp = await fetch(WEB_APP_URL);
+                if (!resp.ok) {
+                    throw new Error(`HTTP error! status: ${resp.status}`);
+                }
                 const data = await resp.json();
                 
                 // Process data untuk memastikan semua field ada
@@ -302,10 +311,17 @@
             }
         }
 
+        let currentRenderedData = []; // data yang sedang ditampilkan, dirujuk oleh tombol Edit lewat data-index
+
         function renderData(data) {
             const container = document.getElementById('item-container');
             const noResults = document.getElementById('no-results');
-            
+
+            // Naikkan generation supaya setTimeout dari render sebelumnya (yang masih tertunda)
+            // tahu dirinya sudah usang dan tidak menambahkan kartu ke render yang baru ini.
+            const myGeneration = ++renderGeneration;
+            currentRenderedData = data;
+
             if (data.length === 0) {
                 container.innerHTML = '';
                 noResults.classList.remove('hidden');
@@ -318,21 +334,24 @@
             // Tambahkan delay untuk animasi bertahap
             data.forEach((item, index) => {
                 setTimeout(() => {
-                    const canvasId = `ean-${Date.now()}-${index}`;
+                    // Render ini sudah usang (ada renderData baru dipanggil setelahnya) -> batalkan
+                    if (myGeneration !== renderGeneration) return;
+
+                    const canvasId = `ean-${myGeneration}-${index}`;
                     const card = document.createElement('div');
                     card.className = "item-card bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col space-y-4 hover:shadow-md hover:border-slate-300 transition-all duration-300";
                     card.innerHTML = `
                         <div class="flex justify-between items-start">
                             <div class="flex-1">
-                                <span class="bg-blue-50 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest transition-all hover:bg-blue-100">${item.plu || 'N/A'}</span>
-                                <h3 class="font-black text-slate-800 text-lg uppercase leading-tight mt-1 transition-all hover:text-slate-900">${item.description}</h3>
+                                <span class="bg-blue-50 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest transition-all hover:bg-blue-100">${escapeHtml(item.plu || 'N/A')}</span>
+                                <h3 class="font-black text-slate-800 text-lg uppercase leading-tight mt-1 transition-all hover:text-slate-900">${escapeHtml(item.description)}</h3>
                             </div>
-                            <button onclick='openEdit(${JSON.stringify(item)})' class="edit-btn bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold active:scale-90 transition-all duration-200 shadow-sm hover:shadow">Edit</button>
+                            <button data-index="${index}" class="edit-btn bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold active:scale-90 transition-all duration-200 shadow-sm hover:shadow">Edit</button>
                         </div>
                         
                         <div class="bg-slate-50 rounded-2xl p-4 flex flex-col items-center justify-center transition-all hover:bg-slate-100">
                             ${item.barcode ? `<svg id="${canvasId}"></svg>` : '<p class="text-red-400 font-bold text-[10px] italic py-2">Barcode Belum Terdaftar</p>'}
-                            <p class="font-mono text-sm font-bold tracking-[0.3em] text-slate-500 mt-1">${item.barcode || ''}</p>
+                            <p class="font-mono text-sm font-bold tracking-[0.3em] text-slate-500 mt-1">${escapeHtml(item.barcode || '')}</p>
                         </div>
 
                         <div class="grid grid-cols-4 gap-2 text-center border-t pt-4">
@@ -342,11 +361,13 @@
                             <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg py-1 transition-all hover:from-blue-700 hover:to-blue-800"><p class="text-[8px] text-blue-200 font-bold uppercase">Total</p><p class="font-black text-white">${item.total || 0}</p></div>
                         </div>
                     `;
+                    card.querySelector('.edit-btn').addEventListener('click', () => openEdit(item));
                     container.appendChild(card);
 
                     // Render barcode jika ada
                     if (item.barcode && item.barcode.trim() !== '') {
                         setTimeout(() => {
+                            if (myGeneration !== renderGeneration) return;
                             try {
                                 // Coba format EAN13
                                 JsBarcode(`#${canvasId}`, item.barcode, {
@@ -436,12 +457,28 @@
             if (scanner.classList.contains('hidden')) {
                 scanner.classList.remove('hidden');
                 
-                // Stop any existing scanner
+                // Stop scanner lain yang mungkin masih aktif, dan tunggu selesai
+                // supaya kamera benar-benar release sebelum start scanner baru
+                const startNewScanner = () => {
+                    html5QrCode = new Html5Qrcode(scannerId);
+                    runScanner();
+                };
+
                 if (html5QrCode && html5QrCode.isScanning) {
-                    html5QrCode.stop();
+                    html5QrCode.stop().then(startNewScanner).catch(startNewScanner);
+                } else {
+                    startNewScanner();
                 }
-                
-                html5QrCode = new Html5Qrcode(scannerId);
+                return;
+            } else {
+                scanner.classList.add('hidden');
+                if (html5QrCode && html5QrCode.isScanning) {
+                    html5QrCode.stop().catch(err => console.log("Scanner already stopped"));
+                }
+                return;
+            }
+
+            function runScanner() {
                 html5QrCode.start(
                     { facingMode: "environment" }, 
                     { 
@@ -475,11 +512,6 @@
                     alert("Kamera tidak ditemukan atau izin ditolak");
                     scanner.classList.add('hidden');
                 });
-            } else {
-                scanner.classList.add('hidden');
-                if (html5QrCode && html5QrCode.isScanning) {
-                    html5QrCode.stop().catch(err => console.log("Scanner already stopped"));
-                }
             }
         }
 
@@ -557,10 +589,18 @@
         }
 
         function calcNewTotal() {
-            // Get set values
-            const setRak = parseInt(document.getElementById('m-rak-set').value) || 0;
-            const setGudang = parseInt(document.getElementById('m-gudang-set').value) || 0;
-            const setMako = parseInt(document.getElementById('m-mako-set').value) || 0;
+            // Cek apakah field SET diisi (termasuk "0"), bukan cuma parseInt > 0,
+            // supaya user bisa sengaja set stok jadi 0
+            const setRakRaw = document.getElementById('m-rak-set').value;
+            const setGudangRaw = document.getElementById('m-gudang-set').value;
+            const setMakoRaw = document.getElementById('m-mako-set').value;
+            const hasSetRak = setRakRaw !== '';
+            const hasSetGudang = setGudangRaw !== '';
+            const hasSetMako = setMakoRaw !== '';
+
+            const setRak = parseInt(setRakRaw) || 0;
+            const setGudang = parseInt(setGudangRaw) || 0;
+            const setMako = parseInt(setMakoRaw) || 0;
             
             // Get add values
             const addRak = parseInt(document.getElementById('m-rak-add').value) || 0;
@@ -570,10 +610,10 @@
             // Calculate final values
             let finalRak, finalGudang, finalMako;
             
-            // Jika ada nilai di SET, gunakan SET. Jika tidak, gunakan CURRENT + ADD
-            finalRak = setRak > 0 ? setRak : currentValues.rak + addRak;
-            finalGudang = setGudang > 0 ? setGudang : currentValues.gudang + addGudang;
-            finalMako = setMako > 0 ? setMako : currentValues.mako + addMako;
+            // Jika field SET diisi (walau "0"), gunakan SET. Jika tidak, gunakan CURRENT + ADD
+            finalRak = hasSetRak ? setRak : currentValues.rak + addRak;
+            finalGudang = hasSetGudang ? setGudang : currentValues.gudang + addGudang;
+            finalMako = hasSetMako ? setMako : currentValues.mako + addMako;
             
             // Calculate totals
             const newTotal = finalRak + finalGudang + finalMako;
@@ -594,15 +634,15 @@
                 
                 // Detail perubahan
                 const detailParts = [];
-                if (setRak > 0 || addRak !== 0) {
+                if (hasSetRak || addRak !== 0) {
                     const rakDiff = finalRak - currentValues.rak;
                     detailParts.push(`Rak: ${rakDiff > 0 ? '+' : ''}${rakDiff}`);
                 }
-                if (setGudang > 0 || addGudang !== 0) {
+                if (hasSetGudang || addGudang !== 0) {
                     const gudangDiff = finalGudang - currentValues.gudang;
                     detailParts.push(`Gudang: ${gudangDiff > 0 ? '+' : ''}${gudangDiff}`);
                 }
-                if (setMako > 0 || addMako !== 0) {
+                if (hasSetMako || addMako !== 0) {
                     const makoDiff = finalMako - currentValues.mako;
                     detailParts.push(`Mako: ${makoDiff > 0 ? '+' : ''}${makoDiff}`);
                 }
@@ -623,18 +663,25 @@
             btn.innerHTML = '<span class="animate-pulse">MENYIMPAN...</span>';
             isSaving = true;
             
-            // Calculate final values (same as calcNewTotal)
-            const setRak = parseInt(document.getElementById('m-rak-set').value) || 0;
-            const setGudang = parseInt(document.getElementById('m-gudang-set').value) || 0;
-            const setMako = parseInt(document.getElementById('m-mako-set').value) || 0;
+            // Calculate final values (same logic as calcNewTotal)
+            const setRakRaw = document.getElementById('m-rak-set').value;
+            const setGudangRaw = document.getElementById('m-gudang-set').value;
+            const setMakoRaw = document.getElementById('m-mako-set').value;
+            const hasSetRak = setRakRaw !== '';
+            const hasSetGudang = setGudangRaw !== '';
+            const hasSetMako = setMakoRaw !== '';
+
+            const setRak = parseInt(setRakRaw) || 0;
+            const setGudang = parseInt(setGudangRaw) || 0;
+            const setMako = parseInt(setMakoRaw) || 0;
             
             const addRak = parseInt(document.getElementById('m-rak-add').value) || 0;
             const addGudang = parseInt(document.getElementById('m-gudang-add').value) || 0;
             const addMako = parseInt(document.getElementById('m-mako-add').value) || 0;
             
-            let finalRak = setRak > 0 ? setRak : currentValues.rak + addRak;
-            let finalGudang = setGudang > 0 ? setGudang : currentValues.gudang + addGudang;
-            let finalMako = setMako > 0 ? setMako : currentValues.mako + addMako;
+            let finalRak = hasSetRak ? setRak : currentValues.rak + addRak;
+            let finalGudang = hasSetGudang ? setGudang : currentValues.gudang + addGudang;
+            let finalMako = hasSetMako ? setMako : currentValues.mako + addMako;
             
             const payload = {
                 barcode: document.getElementById('m-barcode').value || "",
