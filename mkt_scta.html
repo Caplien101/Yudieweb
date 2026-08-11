@@ -2323,7 +2323,7 @@
         const produkNames = produkList.map((p) => p.produk);
         const targetByProduk = {};
         produkList.forEach((p) => {
-          targetByProduk[p.produk] = Math.ceil((+p.target || 0) / 2);
+          targetByProduk[p.produk] = Math.ceil((+p.target || 0) / 3);
         });
 
         // Sertakan juga produk manual (di luar target) yang muncul di entry
