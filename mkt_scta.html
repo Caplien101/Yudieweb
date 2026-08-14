@@ -596,6 +596,11 @@
             </button>
           </li>
           <li class="nav-item">
+            <button class="nav-link" data-sec="scorepps">
+              <i class="bi bi-trophy"></i>Score PPS
+            </button>
+          </li>
+          <li class="nav-item">
             <button class="nav-link" data-sec="target">
               <i class="bi bi-bullseye"></i>Target
             </button>
@@ -1038,6 +1043,33 @@
           </div>
         </div>
         <div class="card-af">
+          <div class="card-header header-red">
+            <i class="bi bi-trophy me-2"></i>Peringkat Karyawan Bulan Ini
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="rankTable">
+                <thead>
+                  <tr>
+                    <th>Peringkat</th>
+                    <th>NIK</th>
+                    <th>Nama</th>
+                    <th>Total Poin</th>
+                    <th>PWP</th>
+                    <th>Sergap</th>
+                    <th>Sueger</th>
+                    <th>Ceban</th>
+                    <th>N.Member</th>
+                    <th>PSM</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-af">
           <div class="card-header header-blue">
             <i class="bi bi-calendar-month me-2"></i>Total Capaian Bulanan per
             Karyawan
@@ -1053,26 +1085,99 @@
                     <th colspan="2">Sergap</th>
                     <th colspan="2">Sueger</th>
                     <th colspan="2">Ceban</th>
-                    <th colspan="2">New Member</th>
+                    <th colspan="2">N.Member</th>
                     <th colspan="2">PSM</th>
                   </tr>
                   <tr>
-                    <th>Capaian</th>
+                    <th>Actual</th>
                     <th>%</th>
-                    <th>Capaian</th>
+                    <th>Actual</th>
                     <th>%</th>
-                    <th>Capaian</th>
+                    <th>Actual</th>
                     <th>%</th>
-                    <th>Capaian</th>
+                    <th>Actual</th>
                     <th>%</th>
-                    <th>Capaian</th>
+                    <th>Actual</th>
                     <th>%</th>
-                    <th>Capaian</th>
+                    <th>Actual</th>
                     <th>%</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCORE PPS ================= -->
+      <div id="sec-scorepps" class="section d-none">
+        <div class="eyebrow">Kinerja toko</div>
+        <h4 class="mb-3">Score PPS Bulanan</h4>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-5">
+            <div class="card-af">
+              <div class="card-header header-red">
+                <i class="bi bi-speedometer me-2"></i>Input APC
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label">Bulan</label>
+                    <input
+                      type="month"
+                      class="form-control"
+                      id="sp_bulan"
+                      onchange="onScorePpsMonthChange()"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label">APC Actual</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      class="form-control"
+                      id="sp_apc_actual"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label">APC Target</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      class="form-control"
+                      id="sp_apc_target"
+                    />
+                  </div>
+                </div>
+                <button
+                  class="btn btn-af-red px-4 mt-4"
+                  onclick="saveApcAndRenderScore()"
+                >
+                  <i class="bi bi-save me-1"></i>Simpan &amp; Hitung
+                </button>
+                <div class="small text-muted mt-2">
+                  PSM, Sergap, dan PWP dihitung otomatis dari data yang sudah
+                  ada. APC tersimpan ke Google Sheet — update di bulan yang
+                  sama akan menimpa nilai lama, bukan menambah baris baru.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-7">
+            <div class="card-af">
+              <div class="card-header header-blue">
+                <i class="bi bi-award me-2"></i>Hasil Score PPS
+              </div>
+              <div class="card-body" id="scorePpsResult">
+                <div class="empty-hint">
+                  Pilih bulan &amp; isi APC untuk melihat hasil perhitungan.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1341,6 +1446,7 @@
         ceban: {},
         newmember: {},
         psm: {},
+        apc: {},
       };
       let psmNikRows = []; // cache baris tabel Capaian PSM per NIK per Produk (untuk fitur sort)
       let psmNikEmptyMsg = "";
@@ -1423,7 +1529,9 @@
           ceban: {},
           newmember: {},
           psm: {},
+          apc: {},
         };
+        if (!targets.apc) targets.apc = {};
       }
       function setLoading(isLoading) {
         const el = document.getElementById("loadingOverlay");
@@ -1723,6 +1831,12 @@
         if (btn.dataset.sec === "target") {
           renderTargetSummary();
         }
+        if (btn.dataset.sec === "scorepps") {
+          if (!document.getElementById("sp_bulan").value) {
+            document.getElementById("sp_bulan").value = todayMonth();
+          }
+          onScorePpsMonthChange();
+        }
       });
 
       /* ================= ENTRY DATA ================= */
@@ -2003,6 +2117,158 @@
               )
               .join("")
           : `<tr><td colspan="3" class="text-center text-muted py-3">Belum ada karyawan</td></tr>`;
+      }
+
+      /* ================= SCORE PPS ================= */
+      const PPS_BOBOT = { apc: 25, psm: 20, sergap: 30, pwp: 25 };
+      const PPS_LABEL = { apc: "APC", psm: "PSM", sergap: "Sergap", pwp: "PWP" };
+
+      function computeStoreMonthlyTotals(bulan) {
+        const filtered = entries.filter((e) => monthKey(e.tanggal) === bulan);
+        let pwpActual = 0,
+          sergapActual = 0,
+          psmActual = 0;
+        filtered.forEach((e) => {
+          pwpActual += e.pwp || 0;
+          sergapActual += e.sergap || 0;
+          psmActual += (e.psm || []).reduce((s, p) => s + (+p.qty || 0), 0);
+        });
+        const pwpTarget =
+          ((targets.pwp[bulan] || {})[1] || 0) +
+          ((targets.pwp[bulan] || {})[2] || 0);
+        const sergapTarget =
+          ((targets.sergap[bulan] || {})[1] || 0) +
+          ((targets.sergap[bulan] || {})[2] || 0);
+        let psmTarget = 0;
+        if (targets.psm[bulan]) {
+          [1, 2, 3, 4].forEach((w) => {
+            (targets.psm[bulan][w] || []).forEach((r) => {
+              psmTarget += +r.target || 0;
+            });
+          });
+        }
+        return {
+          pwpActual,
+          pwpTarget,
+          sergapActual,
+          sergapTarget,
+          psmActual,
+          psmTarget,
+        };
+      }
+
+      function onScorePpsMonthChange() {
+        const bulan = document.getElementById("sp_bulan").value;
+        if (!bulan) return;
+        const apc = targets.apc[bulan] || {};
+        document.getElementById("sp_apc_actual").value = apc.actual ?? "";
+        document.getElementById("sp_apc_target").value = apc.target ?? "";
+        renderScorePps();
+      }
+
+      async function saveApcAndRenderScore() {
+        const bulan = document.getElementById("sp_bulan").value;
+        if (!bulan) {
+          showToast("Pilih bulan terlebih dahulu", true);
+          return;
+        }
+        const actual = +document.getElementById("sp_apc_actual").value || 0;
+        const target = +document.getElementById("sp_apc_target").value || 0;
+        try {
+          setLoading(true);
+          await apiPost("saveTarget", {
+            target: { parameter: "apc", bulan, actual, target },
+          });
+          await refreshAllFromServer();
+          showToast("APC berhasil disimpan ke Google Sheet");
+          onScorePpsMonthChange();
+        } catch (err) {
+          showToast("Gagal menyimpan APC: " + err.message, true);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      function renderScorePps() {
+        const bulan = document.getElementById("sp_bulan").value;
+        const el = document.getElementById("scorePpsResult");
+        if (!bulan) {
+          el.innerHTML = `<div class="empty-hint">Pilih bulan &amp; isi APC untuk melihat hasil perhitungan.</div>`;
+          return;
+        }
+        const apcActual = +document.getElementById("sp_apc_actual").value || 0;
+        const apcTarget = +document.getElementById("sp_apc_target").value || 0;
+        const t = computeStoreMonthlyTotals(bulan);
+
+        const items = [
+          { key: "apc", actual: apcActual, target: apcTarget },
+          { key: "psm", actual: t.psmActual, target: t.psmTarget },
+          { key: "sergap", actual: t.sergapActual, target: t.sergapTarget },
+          { key: "pwp", actual: t.pwpActual, target: t.pwpTarget },
+        ].map((it) => {
+          const bobot = PPS_BOBOT[it.key];
+          const score = it.target > 0 ? (it.actual / it.target) * bobot : 0;
+          return Object.assign({}, it, { bobot, score, gap: score - bobot });
+        });
+
+        const totalScore = items.reduce((s, it) => s + it.score, 0);
+        const totalColor =
+          totalScore >= 100
+            ? "stat-blue"
+            : totalScore >= 80
+              ? "stat-yellow"
+              : "stat-red";
+
+        const needsAttention = items
+          .filter((it) => it.target > 0 && it.gap < -0.01)
+          .sort((a, b) => a.gap - b.gap)[0];
+
+        let html = `<div class="row g-3 mb-3">
+    <div class="col-12">
+      <div class="stat-card ${totalColor}">
+        <i class="bi bi-trophy bg-icon"></i>
+        <div class="lbl">Total Score PPS</div>
+        <div class="num">${totalScore.toFixed(1)}%</div>
+      </div>
+    </div>
+  </div>`;
+
+        html += `<div class="table-responsive"><table class="table table-sm mb-3">
+    <thead><tr><th>Indikator</th><th>Actual</th><th>Target</th><th>Bobot</th><th>Skor</th><th>Selisih</th></tr></thead>
+    <tbody>`;
+        items.forEach((it) => {
+          const gapTxt =
+            it.target > 0
+              ? it.gap >= 0
+                ? `+${it.gap.toFixed(1)}`
+                : it.gap.toFixed(1)
+              : "-";
+          const gapClass =
+            it.target === 0
+              ? "text-muted"
+              : it.gap < 0
+                ? "text-danger fw-semibold"
+                : "text-success fw-semibold";
+          html += `<tr>
+      <td>${PPS_LABEL[it.key]}</td>
+      <td>${it.actual}</td>
+      <td>${it.target || "-"}</td>
+      <td>${it.bobot}</td>
+      <td>${it.target > 0 ? it.score.toFixed(1) : "-"}</td>
+      <td class="${gapClass}">${gapTxt}</td>
+    </tr>`;
+        });
+        html += `</tbody></table></div>`;
+
+        if (totalScore >= 100) {
+          html += `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle me-1"></i>Score PPS sudah mencapai 100% atau lebih.</div>`;
+        } else if (needsAttention) {
+          html += `<div class="alert alert-warning py-2 small mb-0"><i class="bi bi-exclamation-triangle me-1"></i>Paling perlu dikejar: <strong>${PPS_LABEL[needsAttention.key]}</strong> (kurang ${Math.abs(needsAttention.gap).toFixed(1)} poin dari bobot maksimalnya).</div>`;
+        } else {
+          html += `<div class="alert alert-secondary py-2 small mb-0">Lengkapi target tiap indikator untuk melihat rekomendasi.</div>`;
+        }
+
+        el.innerHTML = html;
       }
 
       /* ================= TARGET ================= */
@@ -2586,13 +2852,94 @@
             })
             .join("");
         }
+
+        renderRankingBulanan(rows, {
+          pwp: tPwp,
+          sergap: tSergap,
+          sueger: tSueger,
+          ceban: tCeban,
+          newmember: tNewmember,
+          psm: tPsm,
+        });
+      }
+
+      // Sama seperti pctOf, tapi target 0 dianggap skor 0 (bukan 100%)
+      // supaya karyawan tidak diuntungkan hanya karena admin belum isi target.
+      function pctForRanking(actual, target) {
+        target = +target || 0;
+        actual = +actual || 0;
+        if (target <= 0) return 0;
+        return (actual / target) * 100;
+      }
+
+      const RANK_INDICATORS = [
+        "pwp",
+        "sergap",
+        "sueger",
+        "ceban",
+        "newmember",
+        "psm",
+      ];
+
+      function renderRankingBulanan(rows, targetTotals) {
+        const tbody = document.querySelector("#rankTable tbody");
+        if (!rows || rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4">Belum ada data bulan ini</td></tr>`;
+          return;
+        }
+
+        const ranked = rows
+          .map((r) => {
+            const scores = {};
+            let totalScore = 0;
+            let totalActual = 0;
+            RANK_INDICATORS.forEach((key) => {
+              const s = pctForRanking(r[key], targetTotals[key]);
+              scores[key] = s;
+              totalScore += s;
+              totalActual += r[key] || 0;
+            });
+            return Object.assign({}, r, { scores, totalScore, totalActual });
+          })
+          .sort((a, b) => {
+            if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+            return b.totalActual - a.totalActual; // tie-breaker
+          });
+
+        const medal = (i) => {
+          if (i === 0) return '<i class="bi bi-trophy-fill text-warning me-1"></i>';
+          if (i === 1) return '<i class="bi bi-trophy-fill text-secondary me-1"></i>';
+          if (i === 2) return '<i class="bi bi-trophy-fill" style="color:#cd7f32" ></i> ';
+          return "";
+        };
+
+        tbody.innerHTML = ranked
+          .map((r, i) => {
+            const scoreCell = (key) =>
+              `<td>${targetTotals[key] > 0 ? r.scores[key].toFixed(1) + "%" : "-"}</td>`;
+            return `<tr>
+        <td>${i + 1} ${medal(i)}</td>
+        <td>${escapeHtml(r.nik)}</td>
+        <td>${escapeHtml(r.nama)}</td>
+        <td><strong>${r.totalScore.toFixed(1)}</strong></td>
+        ${scoreCell("pwp")}${scoreCell("sergap")}${scoreCell("sueger")}${scoreCell("ceban")}${scoreCell("newmember")}${scoreCell("psm")}
+      </tr>`;
+          })
+          .join("");
       }
 
       /* ================= INIT ================= */
       function setDefaultDates() {
         document.getElementById("f_tanggal").value = todayISO();
         document.getElementById("dashDateFilter").value = todayISO();
-        ["rp_bulan", "pw_bulan", "pn_bulan", "bl_bulan", "tg_bulan"].forEach(
+        [
+          "rp_bulan",
+          "pw_bulan",
+          "pn_bulan",
+          "bl_bulan",
+          "tg_bulan",
+          "sp_bulan",
+        ].forEach(
           (id) => {
             document.getElementById(id).value = todayMonth();
           },
