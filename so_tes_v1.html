@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kartu Stok — Stock Opname Serah Terima Shift</title>
+
+<!-- ======================================================================
+  KARTU STOK — versi web app pengganti Google Sheet serah terima shift
+  Backend: Firebase Firestore (real-time)
+  Frontend: Vanilla JS, single file, tanpa build step
+
+  SETUP (sekali saja):
+  1. https://console.firebase.google.com -> Add project
+  2. Build > Firestore Database -> Create database -> production mode -> region asia-southeast2 (Jakarta)
+  3. Project settings > General > Your apps > tambah Web App -> copy firebaseConfig
+  4. Tempel ke FIREBASE_CONFIG di bawah
+  5. Firestore > Rules, pakai ini dulu:
+
+     rules_version = '2';
+     service cloud.firestore {
+       match /databases/{database}/documents {
+         match /{document=**} { allow read, write: if true; }
+       }
+     }
+
+  6. Buka index.html di browser atau host di server toko / GitHub Pages.
+========================================================================== -->
+
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"
+  }
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#1c1b1a; --ink-soft:#5b5854;
+    --paper:#faf9f6; --paper-raised:#ffffff;
+    --line:#e4e1d9; --line-strong:#cfcbc0;
+    --red:#c1272d; --red-dim:#f4dcdb;
+    --green:#1f7a4d; --green-dim:#dcefe3;
+    --amber:#b8791a; --amber-dim:#f6e8d1;
+    --blue:#2454a3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .tabular{font-variant-numeric:tabular-nums;}
+
+  .perf{height:1px;background-image:repeating-linear-gradient(to right, var(--line-strong) 0 6px, transparent 6px 12px);margin:0;}
+
+  header.appbar{background:var(--ink);color:var(--paper);padding:8px 16px;display:flex;flex-direction:column;gap:6px;}
+  .appbar-inner{max-width:960px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{width:28px;height:28px;border-radius:6px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;color:#fff;}
+  .brand h1{font-size:13.5px;font-weight:700;margin:0;letter-spacing:.01em;}
+  .brand small{display:block;font-size:9.5px;color:#c9c6bf;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;}
+
+  .shift-status{max-width:960px;margin:0 auto;width:100%;display:flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border-radius:7px;}
+  .shift-status.on{background:rgba(59,217,122,.15);color:#8fe8ae;}
+  .shift-status.off{background:rgba(255,255,255,.06);color:#c9c6bf;}
+  .shift-status .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .shift-status.on .dot{background:#3bd97a;animation:pulse 2s infinite;}
+  .shift-status.off .dot{background:#7a776f;}
+
+  .led{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;position:relative;top:-1px;}
+  .led.online{background:#3bd97a;animation:pulse 2s infinite;}
+  .led.offline{background:#e05555;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(59,217,122,.55);}70%{box-shadow:0 0 0 6px rgba(59,217,122,0);}100%{box-shadow:0 0 0 0 rgba(59,217,122,0);}}
+  .status-pill{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:#2a2926;color:#e7e4dc;padding:4px 9px;border-radius:20px;display:flex;align-items:center;}
+  .status-pill.mode-badge.mode-local{background:var(--amber-dim);color:#7a5310;}
+  .status-pill.mode-badge.mode-live{background:var(--green-dim);color:#155c37;}
+  .user-pill{font-family:'JetBrains Mono',monospace;font-size:11px;background:#2a2926;color:#fff;padding:5px 10px;border-radius:6px;display:flex;align-items:center;gap:6px;cursor:pointer;border:1px solid #45433d;}
+
+  .toolbar{padding:10px 16px;background:var(--paper-raised);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+  .toolbar-inner, .appbar-inner{max-width:960px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  input, select{font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--line-strong);border-radius:7px;background:#fff;color:var(--ink);outline:none;}
+  input:focus, select:focus{border-color:var(--ink);}
+  .btn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:9px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;letter-spacing:.02em;transition:transform .06s ease;}
+  .btn:active{transform:scale(.97);}
+  .btn.outline{background:#fff;color:var(--ink);}
+  .btn.red{background:var(--red);border-color:var(--red);}
+  .btn.green{background:var(--green);border-color:var(--green);}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  #list{max-width:960px;margin:0 auto;padding:10px 12px 90px;}
+  .card{background:var(--paper-raised);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:box-shadow .15s ease;}
+  .card.locked{box-shadow:0 0 0 2px var(--amber-dim), 0 1px 0 var(--amber);}
+  .card.flash{animation:flash 1.1s ease;}
+  @keyframes flash{0%{background:var(--green-dim);}100%{background:var(--paper-raised);}}
+  .plu{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:14px;letter-spacing:.02em;}
+  .desc{font-size:11.5px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lock-badge{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--amber-dim);color:#7a5310;padding:3px 7px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+  .lock-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.4s infinite;}
+
+  .table-head{display:none;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-soft);letter-spacing:.05em;padding:0 14px 6px;gap:14px;}
+  .card-row{display:flex;align-items:center;gap:6px 12px;padding:9px 12px;flex-wrap:wrap;}
+  .cell-id{display:flex;flex-direction:column;min-width:0;flex:1 1 150px;}
+  .qty-group{display:flex;gap:6px 10px;flex-wrap:nowrap;}
+  .cell{display:flex;flex-direction:column;min-width:38px;}
+  .cell .lbl{font-size:8.5px;color:var(--ink-soft);font-weight:700;letter-spacing:.04em;font-family:'JetBrains Mono',monospace;}
+  .cell .v{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;}
+  .cell-sel{display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap;}
+  .cell-sel .sep{color:var(--line-strong);}
+  .cell-sel .v.pos{color:var(--green);}
+  .cell-sel .v.neg{color:var(--red);}
+  .cell-sel .v.zero{color:var(--ink-soft);}
+  .cell-action{margin-left:auto;display:flex;align-items:center;gap:6px;}
+  .edit-icon-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line-strong);background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;flex-shrink:0;}
+  .edit-icon-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+  @media(min-width:680px){
+    .table-head{display:flex;}
+    .table-head .th-id{flex:1 1 220px;}
+    .table-head .th{flex:0 0 64px;}
+    .table-head .th.wide{flex:0 0 170px;}
+    .card-row{flex-wrap:nowrap;padding:7px 14px;}
+    .cell-id{flex:1 1 220px;}
+    .qty-group{flex:0 0 auto;gap:0;}
+    .cell{flex:0 0 64px;}
+    .cell.wide{flex:0 0 170px;}
+    .cell .lbl{display:none;}
+    .desc{white-space:normal;}
+  }
+  @media(max-width:359px){
+    .card-row{padding:8px 10px;gap:5px 8px;}
+    .qty-group{gap:4px 6px;}
+    .cell{min-width:32px;}
+    .plu{font-size:13px;}
+    .desc{font-size:11px;}
+  }
+
+  .overlay{position:fixed;inset:0;background:rgba(28,27,26,.55);display:none;align-items:flex-end;justify-content:center;z-index:100;}
+  .overlay.show{display:flex;}
+  .sheet{background:var(--paper-raised);width:100%;max-width:460px;border-radius:16px 16px 0 0;padding:0;max-height:88vh;overflow-y:auto;animation:up .18s ease;}
+  @media(min-width:640px){.overlay{align-items:center;}.sheet{border-radius:14px;}}
+  @keyframes up{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .sheet-head{padding:16px 18px 10px;position:sticky;top:0;background:var(--paper-raised);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .sheet-body{padding:16px 18px 20px;}
+  .form-row{margin-bottom:12px;}
+  .form-row label{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft);margin-bottom:5px;letter-spacing:.04em;}
+  .form-row input, .form-row select{width:100%;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .selisih-preview{border:1px dashed var(--line-strong);border-radius:8px;padding:10px 12px;margin:4px 0 14px;background:#fbfaf7;}
+  .selisih-preview .num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;}
+  .selisih-preview .num.pos{color:var(--green);}
+  .selisih-preview .num.neg{color:var(--red);}
+  .selisih-preview .num.zero{color:var(--ink-soft);}
+  .selisih-preview .cap{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft);letter-spacing:.04em;margin-top:2px;}
+
+  #screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .login-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:26px 24px;width:100%;max-width:380px;}
+  .login-card .mark-lg{width:44px;height:44px;border-radius:10px;background:var(--red);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-weight:800;margin-bottom:14px;}
+  .login-shift-box{border:1px solid var(--line-strong);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+
+  .toast-wrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .toast{background:var(--ink);color:#fff;font-size:12.5px;padding:9px 14px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;animation:toastin .18s ease;}
+  @keyframes toastin{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--ink-soft);}
+  .empty .big{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.05em;}
+
+  .hist-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line-strong);font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .hist-row:last-child{border-bottom:none;}
+
+  .hidden{display:none !important;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:8px;}
+</style>
+</head>
+<body>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="mark-lg">SO</div>
+    <h2 style="margin:0 0 4px;font-size:18px;">Kartu Stok</h2>
+    <p style="margin:0 0 16px;font-size:12.5px;color:var(--ink-soft);">Serah terima stock opname antar shift — real-time.</p>
+    <p id="loginModeNote" style="margin:0 0 14px;font-size:10.5px;font-family:'JetBrains Mono',monospace;"></p>
+
+    <div class="login-shift-box" id="loginShiftBox">Memeriksa jam shift…</div>
+
+    <div class="form-row">
+      <label>NAMA PETUGAS</label>
+      <input type="text" id="loginName" placeholder="cth. Yudie" autocomplete="off">
+    </div>
+    <button class="btn red" style="width:100%;padding:11px;" onclick="doLogin()">MASUK →</button>
+    <p style="margin:14px 0 0;font-size:10.5px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;">
+      Shift 1: 07:00–09:00 · Shift 2: 15:00–17:00 · Shift 3: 22:00–02:00.
+      Di luar jam tersebut, data hanya bisa dilihat (tidak bisa diedit).
+    </p>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD SCREEN ================= -->
+<div id="screen-dashboard" class="hidden">
+  <header class="appbar">
+    <div class="appbar-inner">
+      <div class="brand">
+        <div class="mark">SO</div>
+        <div><h1>KARTU STOK</h1><small>SERAH TERIMA SHIFT</small></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="status-pill mode-badge" id="modeBadge">-</span>
+        <span class="status-pill"><span class="led online" id="connLed"></span><span id="connText">ONLINE</span></span>
+        <span class="user-pill" onclick="doLogout()" title="Klik untuk keluar sesi"><span id="pillUser">-</span> ⎋</span>
+      </div>
+    </div>
+    <div class="shift-status off" id="shiftStatusBar"><span class="dot"></span><span id="shiftStatusText">memeriksa jam…</span></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="toolbar-inner">
+      <input type="text" id="searchBox" placeholder="Cari PLU atau nama barang…" style="flex:1;min-width:180px;" oninput="renderList()">
+      <select id="filterSelisih" onchange="renderList()">
+        <option value="">Semua Item</option>
+        <option value="ada">Hanya Ada Selisih</option>
+      </select>
+      <button class="btn outline" onclick="openHistory()">RIWAYAT</button>
+      <button class="btn outline" onclick="openImport()">IMPORT</button>
+      <button class="btn red" onclick="openAdd()">+ ITEM</button>
+      <button class="btn outline hidden" id="resetLocalBtn" onclick="resetLocalData()" title="Kosongkan data lokal di browser ini">RESET DATA LOKAL</button>
+    </div>
+  </div>
+
+  <div id="list">
+    <div class="table-head">
+      <span class="th-id">PLU / NAMA BARANG</span>
+      <span class="th">RAK</span>
+      <span class="th">GUD</span>
+      <span class="th">BR/BKE</span>
+      <span class="th">OH</span>
+      <span class="th wide">SELISIH (SHIFT 3 · 1 · 2)</span>
+      <span style="width:34px;"></span>
+    </div>
+    <div id="listItems"></div>
+  </div>
+</div>
+
+<!-- ================= EDIT MODAL ================= -->
+<div class="overlay" id="editOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div><div class="plu" id="editPluLabel">-</div><div class="desc" id="editDescLabel">-</div></div>
+      <button class="btn ghost" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-grid">
+        <div class="form-row"><label>RAK (QTY)</label><input type="number" id="editRak" inputmode="numeric" oninput="updateSelisihPreview()"></div>
+        <div class="form-row"><label>GUDANG (QTY)</label><input type="number" id="editGudang" inputmode="numeric" oninput="updateSelisihPreview()"></div>
+        <div class="form-row"><label>BR/BKE (QTY)</label><input type="number" id="editBrBke" inputmode="numeric" oninput="updateSelisihPreview()"></div>
+        <div class="form-row"><label>ON HAND</label><input type="number" id="editOnHand" inputmode="numeric" oninput="updateSelisihPreview()"></div>
+      </div>
+      <div class="perf" style="margin:6px 0 12px;"></div>
+      <div class="selisih-preview">
+        <div class="num" id="selisihPreviewNum">0</div>
+        <div class="cap">SELISIH = (RAK + GUDANG + BR/BKE) − ON HAND</div>
+        <div class="cap" id="selisihTargetNotice" style="margin-top:6px;"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn outline" style="flex:1;" onclick="closeEdit()">BATAL</button>
+        <button class="btn green" style="flex:1;" id="saveEditBtn" onclick="saveEdit()">SIMPAN</button>
+      </div>
+      <p style="margin:12px 0 0;font-size:10.5px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;" id="lockNotice"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ADD ITEM MODAL ================= -->
+<div class="overlay" id="addOverlay">
+  <div class="sheet">
+    <div class="sheet-head"><div style="font-weight:700;font-size:14px;">TAMBAH ITEM</div><button class="btn ghost" onclick="closeAdd()">✕</button></div>
+    <div class="sheet-body">
+      <div class="form-row"><label>PLU</label><input type="text" id="addPlu"></div>
+      <div class="form-row"><label>NAMA BARANG</label><input type="text" id="addDesc"></div>
+      <div class="form-grid">
+        <div class="form-row"><label>RAK (QTY)</label><input type="number" id="addRak" value="0"></div>
+        <div class="form-row"><label>GUDANG (QTY)</label><input type="number" id="addGudang" value="0"></div>
+        <div class="form-row"><label>BR/BKE (QTY)</label><input type="number" id="addBrBke" value="0"></div>
+        <div class="form-row"><label>ON HAND</label><input type="number" id="addOnHand" value="0"></div>
+      </div>
+      <button class="btn red" style="width:100%;padding:11px;margin-top:6px;" onclick="submitAdd()">SIMPAN ITEM</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= IMPORT MODAL ================= -->
+<div class="overlay" id="importOverlay">
+  <div class="sheet">
+    <div class="sheet-head"><div style="font-weight:700;font-size:14px;">IMPORT DATA</div><button class="btn ghost" onclick="closeImport()">✕</button></div>
+    <div class="sheet-body">
+      <p style="font-size:11.5px;color:var(--ink-soft);margin-top:0;">
+        Tempel data dari Excel/Sheets (kolom dipisah TAB, satu baris per item):<br>
+        <span class="mono" style="font-size:10.5px;">PLU · Nama Barang · Rak(qty) · Gudang(qty) · BR/BKE(qty) · On Hand</span>
+      </p>
+      <textarea id="importText" rows="8" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:8px;border:1px solid var(--line-strong);border-radius:7px;"></textarea>
+      <button class="btn red" style="width:100%;padding:11px;margin-top:10px;" onclick="submitImport()">IMPORT SEKARANG</button>
+      <p id="importResult" style="font-size:11px;margin-top:8px;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= HISTORY MODAL ================= -->
+<div class="overlay" id="historyOverlay">
+  <div class="sheet" style="max-width:520px;">
+    <div class="sheet-head"><div style="font-weight:700;font-size:14px;">RIWAYAT SELISIH HARIAN</div><button class="btn ghost" onclick="closeHistory()">✕</button></div>
+    <div class="sheet-body">
+      <div class="form-row"><label>PILIH TANGGAL</label><input type="date" id="historyDate" onchange="loadHistory()"></div>
+      <div id="historyResults"><p style="font-size:11.5px;color:var(--ink-soft);">Pilih tanggal untuk lihat rekap selisih hari itu (data diarsipkan otomatis tiap reset jam 04:00).</p></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+/* =====================================================================
+   1) KONFIGURASI FIREBASE (opsional)
+   Kalau field apiKey masih "GANTI..." (belum diisi), app OTOMATIS jalan
+   pakai localStorage (mode lokal) — cocok buat lihat struktur data & UI,
+   revisi cepat, tanpa perlu setup apapun, bisa offline.
+   Begitu kamu isi config asli di sini, app otomatis pindah ke Firestore
+   (mode live, real-time antar device) tanpa perlu ubah kode lain.
+===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA5UQlIfAyQTCWcISs4y9j0U4L_JFpkaKI",
+  authDomain: "so-shift-51b9b.firebaseapp.com",
+  projectId: "so-shift-51b9b",
+  storageBucket: "so-shift-51b9b.firebasestorage.app",
+  messagingSenderId: "557855009400",
+  appId: "1:557855009400:web:d03e59dde70ef757755b8d"
+};
+
+const COL = "stock_opname";
+const HIST_COL = "selisih_history";
+const LS_ITEMS_KEY = "kartustok_items";
+const LS_META_KEY = "kartustok_meta";
+const LS_HIST_KEY = "kartustok_history";
+
+let MODE = "local";   // "local" | "firestore" — ditentukan saat bootstrap
+let db = null;
+let FS = null;         // namespace fungsi firestore, terisi hanya kalau MODE === "firestore"
+
+function isConfigFilled() {
+  return FIREBASE_CONFIG.apiKey && !String(FIREBASE_CONFIG.apiKey).startsWith("GANTI");
+}
+
+async function bootstrapStorage() {
+  if (isConfigFilled()) {
+    try {
+      const { initializeApp } = await import("firebase/app");
+      FS = await import("firebase/firestore");
+      const app = initializeApp(FIREBASE_CONFIG);
+      db = FS.getFirestore(app);
+      MODE = "firestore";
+      return;
+    } catch (e) {
+      console.error("Gagal load Firebase, fallback ke mode lokal:", e);
+    }
+  }
+  MODE = "local";
+}
+
+/* =====================================================================
+   2) STORAGE ADAPTER — satu API dipakai seluruh app, isinya beda
+      tergantung MODE (firestore vs localStorage)
+===================================================================== */
+function lsRead(key, fallback) {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch (e) { return fallback; }
+}
+function lsWrite(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+  window.dispatchEvent(new CustomEvent("localdata", { detail: { key } }));
+}
+function lsGetItems() { return lsRead(LS_ITEMS_KEY, {}); }
+function lsSetItems(obj) { lsWrite(LS_ITEMS_KEY, obj); }
+
+function toMillis(t) {
+  if (!t) return 0;
+  if (typeof t === "number") return t;
+  if (t.toMillis) return t.toMillis();
+  return 0;
+}
+
+const Store = {
+  async updateItem(plu, fields) {
+    if (MODE === "firestore") return FS.updateDoc(FS.doc(db, COL, plu), fields);
+    const obj = lsGetItems();
+    obj[plu] = { ...(obj[plu] || {}), ...fields };
+    lsSetItems(obj);
+  },
+  async setItem(plu, fields) {
+    if (MODE === "firestore") return FS.setDoc(FS.doc(db, COL, plu), fields, { merge: true });
+    const obj = lsGetItems();
+    obj[plu] = { ...(obj[plu] || {}), ...fields };
+    lsSetItems(obj);
+  },
+  async batchSet(entries) { // entries: [[plu, fields], ...] — merge semantics
+    if (MODE === "firestore") {
+      const batch = FS.writeBatch(db);
+      entries.forEach(([plu, fields]) => batch.set(FS.doc(db, COL, plu), fields, { merge: true }));
+      return batch.commit();
+    }
+    const obj = lsGetItems();
+    entries.forEach(([plu, fields]) => { obj[plu] = { ...(obj[plu] || {}), ...fields }; });
+    lsSetItems(obj);
+  },
+  async clearEditingFields(plu) {
+    if (MODE === "firestore") {
+      return FS.updateDoc(FS.doc(db, COL, plu), { editing_by: FS.deleteField(), editing_at: FS.deleteField() });
+    }
+    const obj = lsGetItems();
+    if (obj[plu]) { delete obj[plu].editing_by; delete obj[plu].editing_at; }
+    lsSetItems(obj);
+  },
+  async claimNewOpnameDate(newDate, resetByName) {
+    // Return { shouldReset, oldDate }. Firestore pakai transaction (anti race antar device),
+    // localStorage cukup read-modify-write langsung (satu device/browser saja).
+    if (MODE === "firestore") {
+      const metaRef = FS.doc(db, "store_meta", "session");
+      let shouldReset = false, oldDate = null;
+      await FS.runTransaction(db, async (tx) => {
+        const snap = await tx.get(metaRef);
+        const data = snap.exists() ? snap.data() : {};
+        oldDate = data.data_date || null;
+        if (oldDate !== newDate) {
+          shouldReset = true;
+          tx.set(metaRef, { data_date: newDate, reset_by: resetByName, reset_at: FS.serverTimestamp() }, { merge: true });
+        }
+      });
+      return { shouldReset, oldDate };
+    }
+    const meta = lsRead(LS_META_KEY, {});
+    const oldDate = meta.data_date || null;
+    if (oldDate !== newDate) {
+      lsWrite(LS_META_KEY, { data_date: newDate, reset_by: resetByName, reset_at: Date.now() });
+      return { shouldReset: true, oldDate };
+    }
+    return { shouldReset: false, oldDate };
+  },
+  async archiveHistory(records) {
+    if (MODE === "firestore") {
+      const batch = FS.writeBatch(db);
+      records.forEach(r => batch.set(FS.doc(db, HIST_COL, `${r.date}_${r.plu}`), { ...r, archived_at: FS.serverTimestamp() }));
+      return batch.commit();
+    }
+    const hist = lsRead(LS_HIST_KEY, {});
+    records.forEach(r => { hist[`${r.date}_${r.plu}`] = { ...r, archived_at: Date.now() }; });
+    lsWrite(LS_HIST_KEY, hist);
+  },
+  async queryHistory(date) {
+    if (MODE === "firestore") {
+      const q = FS.query(FS.collection(db, HIST_COL), FS.where("date", "==", date));
+      const snap = await FS.getDocs(q);
+      const rows = [];
+      snap.forEach(d => rows.push(d.data()));
+      return rows;
+    }
+    const hist = lsRead(LS_HIST_KEY, {});
+    return Object.values(hist).filter(r => r.date === date);
+  },
+  now() { return MODE === "firestore" ? FS.serverTimestamp() : Date.now(); },
+  subscribeItems(onChange) {
+    if (MODE === "firestore") {
+      FS.onSnapshot(FS.collection(db, COL), (snap) => {
+        snap.docChanges().forEach((change) => {
+          const data = change.doc.data();
+          const plu = change.doc.id;
+          if (change.type === "removed") { delete items[plu]; return; }
+          noteIfChangedByOther(plu, data);
+          items[plu] = data;
+        });
+        onChange();
+      }, (err) => {
+        console.error(err);
+        setConn(false);
+        toast("Gagal konek ke Firestore — cek FIREBASE_CONFIG");
+      });
+      window.addEventListener("online", () => setConn(true));
+      window.addEventListener("offline", () => setConn(false));
+      setConn(navigator.onLine);
+    } else {
+      const reload = () => {
+        const fresh = lsGetItems();
+        Object.entries(fresh).forEach(([plu, data]) => noteIfChangedByOther(plu, data));
+        items = fresh;
+        onChange();
+      };
+      reload();
+      window.addEventListener("storage", (e) => { if (!e.key || e.key === LS_ITEMS_KEY) reload(); });
+      window.addEventListener("localdata", (e) => { if (e.detail?.key === LS_ITEMS_KEY) reload(); });
+      setConn(true); // mode lokal selalu "tersedia", tidak tergantung koneksi
+    }
+  }
+};
+
+function noteIfChangedByOther(plu, data) {
+  const prevUpdatedAt = lastKnownUpdatedAt[plu];
+  const newUpdatedAt = toMillis(data.updated_at) || null;
+  if (newUpdatedAt && prevUpdatedAt && newUpdatedAt !== prevUpdatedAt &&
+      data.updated_by && data.updated_by !== currentUser.name) {
+    toast(`${data.updated_by} memperbarui PLU ${plu}`);
+    flashCard(plu);
+  }
+  if (newUpdatedAt) lastKnownUpdatedAt[plu] = newUpdatedAt;
+}
+
+/* =====================================================================
+   3) JAM SHIFT (persis seperti sheet) — dalam menit sejak 00:00
+===================================================================== */
+const SHIFT_WINDOWS = {
+  shift1: { start: 7 * 60, end: 9 * 60, label: "Shift 1", time: "07:00–09:00" },
+  shift2: { start: 15 * 60, end: 17 * 60, label: "Shift 2", time: "15:00–17:00" },
+  shift3: { start: 22 * 60, end: 26 * 60, label: "Shift 3", time: "22:00–02:00" } // lintas tengah malam
+};
+const SHIFT_DISPLAY_ORDER = ["shift3", "shift1", "shift2"]; // urutan sesuai sheet asli
+// Atribusi selisih: login shift1 -> tercatat di shift3, shift2 -> shift1, shift3 -> shift2
+const SELISIH_TARGET = { shift1: "shift3", shift2: "shift1", shift3: "shift2" };
+const RESET_HOUR = 4; // reset otomatis jam 04:00
+
+function minutesNow() {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+function getCurrentShift() {
+  const m = minutesNow();
+  const mExt = m < RESET_HOUR * 60 ? m + 24 * 60 : m;
+  for (const [key, w] of Object.entries(SHIFT_WINDOWS)) {
+    if (m >= w.start && m < w.end) return key;
+    if (mExt >= w.start && mExt < w.end) return key;
+  }
+  return null;
+}
+function currentOpnameDate() {
+  const d = new Date();
+  if (d.getHours() < RESET_HOUR) d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+/* =====================================================================
+   4) STATE
+===================================================================== */
+let currentUser = null;
+let items = {};
+let editingPlu = null;
+let heartbeatTimer = null;
+let lastKnownUpdatedAt = {};
+const LOCK_TTL_MS = 30000;
+const SHIFT_LABEL = { shift1: "Shift 1", shift2: "Shift 2", shift3: "Shift 3" };
+
+/* =====================================================================
+   5) LOGIN / SESSION
+===================================================================== */
+function refreshLoginShiftBox() {
+  const box = document.getElementById("loginShiftBox");
+  if (!box) return;
+  const sh = getCurrentShift();
+  if (sh) {
+    box.innerHTML = `<b>${SHIFT_LABEL[sh]} sedang aktif</b> (${SHIFT_WINDOWS[sh].time}) — selisih akan masuk ke <b>Selisih ${SHIFT_LABEL[SELISIH_TARGET[sh]]}</b>.`;
+  } else {
+    box.innerHTML = `Tidak ada shift aktif saat ini. Kamu tetap bisa <b>lihat data</b>, tapi tidak bisa edit sampai jam shift berikutnya.`;
+  }
+}
+setInterval(refreshLoginShiftBox, 15000);
+
+window.doLogin = function () {
+  const name = document.getElementById("loginName").value.trim();
+  if (!name) { toast("Isi nama petugas dulu"); return; }
+  currentUser = { name };
+  localStorage.setItem("so_user", JSON.stringify(currentUser));
+  enterDashboard();
+};
+
+window.doLogout = function () {
+  if (!confirm("Keluar dari sesi?")) return;
+  localStorage.removeItem("so_user");
+  currentUser = null;
+  document.getElementById("screen-dashboard").classList.add("hidden");
+  document.getElementById("screen-login").classList.remove("hidden");
+};
+
+function enterDashboard() {
+  document.getElementById("screen-login").classList.add("hidden");
+  document.getElementById("screen-dashboard").classList.remove("hidden");
+  document.getElementById("pillUser").textContent = currentUser.name;
+  document.getElementById("modeBadge").textContent = MODE === "local" ? "MODE LOKAL" : "LIVE (FIRESTORE)";
+  document.getElementById("modeBadge").className = "status-pill " + (MODE === "local" ? "mode-local" : "mode-live");
+  document.getElementById("resetLocalBtn").classList.toggle("hidden", MODE !== "local");
+  Store.subscribeItems(renderList);
+  updateShiftStatusBar();
+  setInterval(updateShiftStatusBar, 15000);
+  setInterval(maybeDailyReset, 60000);
+  maybeDailyReset();
+}
+
+async function boot() {
+  await bootstrapStorage();
+  const note = document.getElementById("loginModeNote");
+  if (note) {
+    note.textContent = MODE === "local"
+      ? "⚠ Mode lokal — data tersimpan di browser ini saja (localStorage), belum real-time antar device."
+      : "● Terhubung ke Firestore — real-time antar device.";
+    note.style.color = MODE === "local" ? "#7a5310" : "#1f7a4d";
+  }
+  refreshLoginShiftBox();
+  const saved = localStorage.getItem("so_user");
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.name) { currentUser = parsed; enterDashboard(); }
+      else localStorage.removeItem("so_user");
+    } catch (e) { localStorage.removeItem("so_user"); }
+  }
+}
+boot();
+
+function updateShiftStatusBar() {
+  const bar = document.getElementById("shiftStatusBar");
+  const txt = document.getElementById("shiftStatusText");
+  const sh = getCurrentShift();
+  if (sh) {
+    bar.className = "shift-status on";
+    txt.textContent = `${SHIFT_LABEL[sh]} AKTIF (${SHIFT_WINDOWS[sh].time}) — selisih akan tercatat ke Selisih ${SHIFT_LABEL[SELISIH_TARGET[sh]]}`;
+  } else {
+    bar.className = "shift-status off";
+    txt.textContent = "DI LUAR JAM ENTRY — mode lihat saja, edit terkunci sampai shift berikutnya";
+  }
+  renderList();
+}
+
+function setConn(isOnline) {
+  const led = document.getElementById("connLed");
+  const txt = document.getElementById("connText");
+  if (!led || !txt) return;
+  if (MODE === "local") { led.className = "led online"; txt.textContent = "LOKAL"; return; }
+  led.className = "led " + (isOnline ? "online" : "offline");
+  txt.textContent = isOnline ? "ONLINE" : "OFFLINE";
+}
+
+/* =====================================================================
+   6) RESET HARIAN OTOMATIS JAM 04:00
+===================================================================== */
+async function maybeDailyReset() {
+  const newDate = currentOpnameDate();
+  let claim;
+  try { claim = await Store.claimNewOpnameDate(newDate, currentUser.name); }
+  catch (e) { console.error("reset gagal diklaim", e); return; }
+  if (claim.shouldReset && claim.oldDate) {
+    await archiveAndResetAll(claim.oldDate);
+    toast(`Data harian di-reset — arsip tersimpan untuk ${claim.oldDate}`);
+  }
+}
+
+async function archiveAndResetAll(oldDate) {
+  const entries = Object.entries(items);
+  if (entries.length === 0) return;
+  const records = [];
+  const resets = [];
+  entries.forEach(([plu, d]) => {
+    const hasData = (d.rak || d.gudang || d.br_bke || d.on_hand || d.selisih_shift1 || d.selisih_shift2 || d.selisih_shift3);
+    if (hasData) {
+      records.push({
+        date: oldDate, plu, description: d.description || "",
+        rak: d.rak || 0, gudang: d.gudang || 0, br_bke: d.br_bke || 0, on_hand: d.on_hand || 0,
+        selisih_shift1: d.selisih_shift1 || 0, selisih_shift2: d.selisih_shift2 || 0, selisih_shift3: d.selisih_shift3 || 0
+      });
+    }
+    resets.push([plu, { rak: 0, gudang: 0, br_bke: 0, on_hand: 0, selisih_shift1: 0, selisih_shift2: 0, selisih_shift3: 0 }]);
+  });
+  try {
+    if (records.length) await Store.archiveHistory(records);
+    await Store.batchSet(resets);
+  } catch (e) { console.error("archive/reset gagal", e); }
+}
+
+/* =====================================================================
+   7) RENDER LIST
+===================================================================== */
+window.renderList = function () {
+  const q = document.getElementById("searchBox").value.trim().toLowerCase();
+  const selFilter = document.getElementById("filterSelisih").value;
+  const list = document.getElementById("listItems");
+
+  const rows = Object.entries(items)
+    .filter(([plu, d]) => {
+      const matchQ = !q || plu.toLowerCase().includes(q) || (d.description || "").toLowerCase().includes(q);
+      const hasSelisih = Number(d.selisih_shift1 || 0) !== 0 || Number(d.selisih_shift2 || 0) !== 0 || Number(d.selisih_shift3 || 0) !== 0;
+      const matchSel = selFilter !== "ada" || hasSelisih;
+      return matchQ && matchSel;
+    })
+    .sort((a, b) => a[0].localeCompare(b[0]));
+
+  if (rows.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="big">TIDAK ADA ITEM</div><p>Tambah item baru atau import data untuk mulai opname.</p></div>`;
+    return;
+  }
+  list.innerHTML = rows.map(([plu, d]) => renderCard(plu, d)).join("");
+};
+
+function renderCard(plu, d) {
+  const locked = isLocked(d);
+  const activeShift = getCurrentShift();
+  const canEdit = !!activeShift && !locked;
+  const gud = numOrDash(d.gudang);
+  const brbke = numOrDash(d.br_bke);
+  const oh = numOrDash(d.on_hand);
+
+  const selisihCell = SHIFT_DISPLAY_ORDER.map((sh, i) => {
+    const f = fmtSelisih(d["selisih_" + sh]);
+    const short = "S" + sh.replace("shift", "");
+    return `${i > 0 ? '<span class="sep">·</span>' : ""}<span class="v ${f.cls}">${short}:${f.txt}</span>`;
+  }).join("");
+
+  let editTitle = "Edit";
+  if (locked) editTitle = "Sedang diedit";
+  else if (!activeShift) editTitle = "Di luar jam entry";
+
+  return `
+  <div class="card ${locked ? "locked" : ""}" id="card-${cssSafe(plu)}">
+    <div class="card-row">
+      <div class="cell-id">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="plu">${escapeHtml(plu)}</span>
+          ${locked ? `<span class="lock-badge"><span class="dot"></span>${escapeHtml(d.editing_by)}</span>` : ""}
+        </div>
+        <div class="desc">${escapeHtml(d.description || "-")}</div>
+      </div>
+      <div class="qty-group">
+        <div class="cell"><span class="lbl">RAK</span><span class="v">${numOrDash(d.rak)}</span></div>
+        <div class="cell"><span class="lbl">GUD</span><span class="v">${gud}</span></div>
+        <div class="cell"><span class="lbl">BR/BKE</span><span class="v">${brbke}</span></div>
+        <div class="cell"><span class="lbl">OH</span><span class="v">${oh}</span></div>
+      </div>
+      <div class="cell wide cell-sel">${selisihCell}</div>
+      <div class="cell-action">
+        <button class="edit-icon-btn" ${canEdit ? "" : "disabled"} onclick="openEdit('${escJs(plu)}')" title="${editTitle}">✎</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function isLocked(d) {
+  if (!d.editing_by) return false;
+  const at = toMillis(d.editing_at);
+  if (Date.now() - at > LOCK_TTL_MS) return false;
+  return d.editing_by !== currentUser.name;
+}
+function fmtSelisih(v) {
+  const n = Number(v || 0);
+  if (n > 0) return { txt: "+" + n, cls: "pos" };
+  if (n < 0) return { txt: String(n), cls: "neg" };
+  return { txt: "0", cls: "zero" };
+}
+function flashCard(plu) {
+  const el = document.getElementById("card-" + cssSafe(plu));
+  if (!el) return;
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+}
+
+/* =====================================================================
+   8) EDIT — hanya boleh saat shift aktif; selisih dihitung otomatis
+===================================================================== */
+window.openEdit = async function (plu) {
+  try {
+    const d = items[plu];
+    if (!d) return;
+    if (isLocked(d)) { toast(`Item ini sedang diedit oleh ${d.editing_by}`); return; }
+    const activeShift = getCurrentShift();
+    if (!activeShift) { toast("Di luar jam entry shift — tidak bisa edit sekarang"); return; }
+
+    editingPlu = plu;
+    document.getElementById("editPluLabel").textContent = plu;
+    document.getElementById("editDescLabel").textContent = d.description || "-";
+    document.getElementById("editRak").value = d.rak ?? 0;
+    document.getElementById("editGudang").value = d.gudang ?? 0;
+    document.getElementById("editBrBke").value = d.br_bke ?? 0;
+    document.getElementById("editOnHand").value = d.on_hand ?? 0;
+    document.getElementById("saveEditBtn").disabled = false;
+    updateSelisihPreview();
+    document.getElementById("lockNotice").textContent =
+      "Field ini terkunci untukmu selama modal terbuka, otomatis lepas saat kamu simpan/batal atau setelah 30 detik idle.";
+    document.getElementById("editOverlay").classList.add("show");
+
+    await Store.updateItem(plu, { editing_by: currentUser.name, editing_at: Store.now() });
+    heartbeatTimer = setInterval(() => {
+      Store.updateItem(plu, { editing_at: Store.now() }).catch(() => {});
+    }, 10000);
+  } catch (e) {
+    console.error(e);
+    toast("Gagal buka form edit — cek koneksi");
+  }
+};
+
+window.updateSelisihPreview = function () {
+  const rak = Number(document.getElementById("editRak").value || 0);
+  const gudang = Number(document.getElementById("editGudang").value || 0);
+  const brbke = Number(document.getElementById("editBrBke").value || 0);
+  const oh = Number(document.getElementById("editOnHand").value || 0);
+  const selisih = (rak + gudang + brbke) - oh;
+  const f = fmtSelisih(selisih);
+  const numEl = document.getElementById("selisihPreviewNum");
+  numEl.textContent = f.txt;
+  numEl.className = "num " + f.cls;
+
+  const activeShift = getCurrentShift();
+  const notice = document.getElementById("selisihTargetNotice");
+  const saveBtn = document.getElementById("saveEditBtn");
+  if (activeShift) {
+    const target = SELISIH_TARGET[activeShift];
+    notice.textContent = `Login ${SHIFT_LABEL[activeShift]} (${SHIFT_WINDOWS[activeShift].time}) — akan tersimpan sebagai Selisih ${SHIFT_LABEL[target]}`;
+    saveBtn.disabled = false;
+  } else {
+    notice.textContent = "Jam shift sudah berakhir — tidak bisa simpan lagi, silakan buka ulang.";
+    saveBtn.disabled = true;
+  }
+};
+
+window.closeEdit = async function () {
+  document.getElementById("editOverlay").classList.remove("show");
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  if (editingPlu) await Store.clearEditingFields(editingPlu).catch(() => {});
+  editingPlu = null;
+};
+
+window.saveEdit = async function () {
+  if (!editingPlu) return;
+  const activeShift = getCurrentShift();
+  if (!activeShift) { toast("Jam shift sudah berakhir, tidak tersimpan"); return; }
+  const targetShift = SELISIH_TARGET[activeShift];
+  const plu = editingPlu;
+
+  const rak = Number(document.getElementById("editRak").value || 0);
+  const gudang = Number(document.getElementById("editGudang").value || 0);
+  const brbke = Number(document.getElementById("editBrBke").value || 0);
+  const oh = Number(document.getElementById("editOnHand").value || 0);
+  const selisih = (rak + gudang + brbke) - oh;
+
+  const payload = {
+    rak, gudang, br_bke: brbke, on_hand: oh,
+    ["selisih_" + targetShift]: selisih,
+    updated_by: currentUser.name,
+    updated_at: Store.now(),
+    editing_by: MODE === "firestore" ? FS.deleteField() : undefined,
+    editing_at: MODE === "firestore" ? FS.deleteField() : undefined
+  };
+  if (MODE === "local") { delete payload.editing_by; delete payload.editing_at; }
+
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  try {
+    await Store.updateItem(plu, payload);
+    if (MODE === "local") await Store.clearEditingFields(plu);
+    toast(`Tersimpan · PLU ${plu} · Selisih ${SHIFT_LABEL[targetShift]}: ${selisih}`);
+  } catch (e) {
+    console.error(e);
+    toast("Gagal simpan — cek koneksi");
+  }
+  document.getElementById("editOverlay").classList.remove("show");
+  editingPlu = null;
+};
+
+window.addEventListener("beforeunload", () => {
+  if (editingPlu) Store.clearEditingFields(editingPlu).catch(() => {});
+});
+
+/* =====================================================================
+   9) ADD ITEM
+===================================================================== */
+window.openAdd = function () { document.getElementById("addOverlay").classList.add("show"); };
+window.closeAdd = function () { document.getElementById("addOverlay").classList.remove("show"); };
+
+window.submitAdd = async function () {
+  const plu = document.getElementById("addPlu").value.trim();
+  if (!plu) { toast("PLU wajib diisi"); return; }
+  const payload = {
+    plu,
+    description: document.getElementById("addDesc").value.trim(),
+    rak: Number(document.getElementById("addRak").value || 0),
+    gudang: Number(document.getElementById("addGudang").value || 0),
+    br_bke: Number(document.getElementById("addBrBke").value || 0),
+    on_hand: Number(document.getElementById("addOnHand").value || 0),
+    selisih_shift1: 0, selisih_shift2: 0, selisih_shift3: 0,
+    updated_by: currentUser.name,
+    updated_at: Store.now()
+  };
+  await Store.setItem(plu, payload);
+  toast(`Item ${plu} ditambahkan`);
+  document.getElementById("addPlu").value = "";
+  document.getElementById("addDesc").value = "";
+  ["addRak", "addGudang", "addBrBke", "addOnHand"].forEach(id => document.getElementById(id).value = "0");
+  closeAdd();
+};
+
+/* =====================================================================
+   10) IMPORT
+===================================================================== */
+window.openImport = function () { document.getElementById("importOverlay").classList.add("show"); };
+window.closeImport = function () { document.getElementById("importOverlay").classList.remove("show"); };
+
+window.submitImport = async function () {
+  const raw = document.getElementById("importText").value.trim();
+  if (!raw) return;
+  const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
+  const entries = [];
+  lines.forEach(line => {
+    const cols = line.split("\t").map(c => c.trim());
+    if (cols.length < 1 || !cols[0]) return;
+    const [plu, description, rak, gudang, br_bke, on_hand] = cols;
+    entries.push([plu, {
+      plu, description: description || "",
+      rak: Number(rak || 0), gudang: Number(gudang || 0), br_bke: Number(br_bke || 0), on_hand: Number(on_hand || 0),
+      updated_by: currentUser.name, updated_at: Store.now()
+    }]);
+  });
+  try {
+    await Store.batchSet(entries);
+    document.getElementById("importResult").textContent = `${entries.length} item berhasil di-import.`;
+    document.getElementById("importText").value = "";
+    toast(`${entries.length} item di-import`);
+  } catch (e) {
+    console.error(e);
+    document.getElementById("importResult").textContent = "Gagal import — cek console.";
+  }
+};
+
+/* =====================================================================
+   11) RIWAYAT (arsip selisih harian)
+===================================================================== */
+window.openHistory = function () {
+  const dateInput = document.getElementById("historyDate");
+  if (!dateInput.value) dateInput.value = currentOpnameDate();
+  document.getElementById("historyOverlay").classList.add("show");
+  loadHistory();
+};
+window.closeHistory = function () { document.getElementById("historyOverlay").classList.remove("show"); };
+
+window.loadHistory = async function () {
+  const date = document.getElementById("historyDate").value;
+  const box = document.getElementById("historyResults");
+  if (!date) return;
+  box.innerHTML = `<p style="font-size:11.5px;color:var(--ink-soft);">Memuat…</p>`;
+  try {
+    const rows = await Store.queryHistory(date);
+    if (!rows.length) {
+      box.innerHTML = `<p style="font-size:11.5px;color:var(--ink-soft);">Tidak ada arsip untuk tanggal ini.</p>`;
+      return;
+    }
+    rows.sort((a, b) => (a.plu || "").localeCompare(b.plu || ""));
+    box.innerHTML = rows.map(r => `
+      <div class="hist-row">
+        <span>${escapeHtml(r.plu)} — ${escapeHtml(r.description || "")}</span>
+        <span>S3:${r.selisih_shift3 || 0} · S1:${r.selisih_shift1 || 0} · S2:${r.selisih_shift2 || 0}</span>
+      </div>`).join("");
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = `<p style="font-size:11.5px;color:var(--red);">Gagal memuat riwayat.</p>`;
+  }
+};
+
+/* =====================================================================
+   12) RESET DATA LOKAL (tombol khusus MODE lokal, buat revisi cepat)
+===================================================================== */
+window.resetLocalData = function () {
+  if (MODE !== "local") return;
+  if (!confirm("Hapus semua data lokal (items, histori, meta) di browser ini? Tidak bisa dibatalkan.")) return;
+  localStorage.removeItem(LS_ITEMS_KEY);
+  localStorage.removeItem(LS_META_KEY);
+  localStorage.removeItem(LS_HIST_KEY);
+  toast("Data lokal dikosongkan");
+  window.dispatchEvent(new CustomEvent("localdata", { detail: { key: LS_ITEMS_KEY } }));
+};
+
+/* =====================================================================
+   13) UTIL
+===================================================================== */
+function toast(msg) {
+  const wrap = document.getElementById("toastWrap");
+  const el = document.createElement("div");
+  el.className = "toast"; el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+function numOrDash(v) { return (v === undefined || v === null) ? "-" : v; }
+function escapeHtml(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function escJs(s) { return String(s).replace(/'/g, "\\'"); }
+function cssSafe(s) { return String(s).replace(/[^a-zA-Z0-9_-]/g, "_"); }
+
+setInterval(() => { if (currentUser) renderList(); }, 5000);
+
+</script>
+</body>
+</html>
