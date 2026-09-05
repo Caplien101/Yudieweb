@@ -334,7 +334,12 @@ function toast(msg){
 function stripCheckDigit(code){
   // Remove the last digit of a scanned/entered barcode, per store convention
   // that master data barcodes are stored WITHOUT the trailing check digit.
-  const clean = String(code || '').trim().replace(/\D/g, '');
+  let clean = String(code || '').trim().replace(/\D/g, '');
+  // If the barcode starts with a leading 0, drop it before searching
+  // (e.g. scanned 08999912345 -> search 899991234).
+  if (clean.length > 1 && clean.charAt(0) === '0'){
+    clean = clean.slice(1);
+  }
   if (clean.length <= 1) return clean;
   return clean.slice(0, -1);
 }
