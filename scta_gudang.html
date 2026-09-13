@@ -2,1267 +2,1079 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventory Gudang</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Catat Stok Gudang — Alfamart Cut Mutia</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <style>
   :root{
-    --bg:#f5f6f8;
-    --card:#ffffff;
-    --accent:#1E4AA8;
-    --accent-dark:#153870;
-    --alfa-red:#ED1C24;
-    --alfa-red-dark:#B71319;
-    --alfa-yellow:#FFD200;
-    --alfa-yellow-dark:#E0B900;
-    --danger:#ED1C24;
-    --success:#16a34a;
-    --text:#1f2430;
-    --muted:#6b7280;
-    --border:#e5e7eb;
-    --radius:14px;
+    --af-red:#ED1C24;
+    --af-red-dark:#C4151B;
+    --af-yellow:#FFD200;
+    --af-blue:#1E4AA8;
+    --bg:#F2F2F7;
+    --card:#FFFFFF;
+    --text:#1C1C1E;
+    --text-sub:#6E6E73;
+    --border:#E5E5EA;
+    --radius:16px;
+    --radius-sm:10px;
   }
   *{box-sizing:border-box;}
   body{
     background:var(--bg);
     color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    padding-bottom:60px;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding-bottom:90px;
+    -webkit-tap-highlight-color:transparent;
   }
-  .brand-stripe{
-    height:5px;
-    display:flex;
-  }
-  .brand-stripe span{flex:1;}
-  .brand-stripe .s-red{background:var(--alfa-red);}
-  .brand-stripe .s-yellow{background:var(--alfa-yellow);}
-  .brand-stripe .s-blue{background:var(--accent);}
-
   .topbar{
-    background:linear-gradient(135deg,var(--alfa-red),var(--alfa-red-dark));
+    background:linear-gradient(135deg,var(--af-red) 0%,var(--af-red-dark) 100%);
     color:#fff;
-    padding:22px 0 60px;
-    border-radius:0 0 28px 28px;
-    box-shadow:0 6px 18px rgba(237,28,36,.28);
-    position:relative;
-    border-bottom:4px solid var(--alfa-yellow);
+    padding:16px 16px 20px;
+    border-radius:0 0 24px 24px;
+    box-shadow:0 4px 16px rgba(237,28,36,.25);
+    position:sticky; top:0; z-index:20;
   }
-  .topbar h1{font-size:1.4rem;font-weight:700;margin:0;}
-  .topbar p{margin:2px 0 0;opacity:.9;font-size:.85rem;}
-  .container-narrow{max-width:820px;margin:0 auto;padding:0 16px;}
-  .btn-topbar{
-    background:rgba(255,255,255,.15);
-    border:1px solid rgba(255,255,255,.35);
-    color:#fff;
+  .topbar h1{font-size:1.05rem; font-weight:700; margin:0;}
+  .topbar .sub{font-size:.78rem; opacity:.85; margin-top:2px;}
+  .store-badge{
+    background:var(--af-yellow); color:#5c4600; font-weight:700; font-size:.72rem;
+    padding:2px 10px; border-radius:20px; display:inline-block; margin-top:6px;
   }
-  .btn-topbar:hover{background:rgba(255,255,255,.25);color:#fff;}
-
-  .scan-card{
-    margin-top:-42px;
+  .container-app{max-width:520px; margin:0 auto; padding:14px;}
+  .card-ios{
     background:var(--card);
+    border:none;
     border-radius:var(--radius);
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-    padding:18px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card-ios h2{
+    font-size:.72rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--text-sub); margin-bottom:10px;
+  }
+  .form-control, .form-select{
+    border-radius:var(--radius-sm);
     border:1px solid var(--border);
+    padding:.65rem .85rem;
+    font-size:.95rem;
   }
-  .scan-input-wrap{position:relative;}
-  .scan-input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1.2rem;}
-  #scanInput{
-    padding:14px 14px 14px 42px;
-    font-size:1.15rem;
-    border-radius:12px;
-    border:2px solid var(--border);
+  .form-control:focus, .form-select:focus{
+    border-color:var(--af-blue);
+    box-shadow:0 0 0 3px rgba(30,74,168,.12);
   }
-  #scanInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(30,74,168,.15);}
+  .btn{border-radius:var(--radius-sm); font-weight:600; padding:.6rem 1rem;}
+  .btn-af{background:var(--af-red); border-color:var(--af-red); color:#fff;}
+  .btn-af:hover{background:var(--af-red-dark); border-color:var(--af-red-dark); color:#fff;}
+  .btn-af:active, .btn-af:focus{color:#fff;}
+  .btn-af-outline{background:#fff; border:1.5px solid var(--af-red); color:var(--af-red);}
+  .btn-af-outline:hover{background:#fff5f5; color:var(--af-red);}
+  .btn-blue{background:var(--af-blue); border-color:var(--af-blue); color:#fff;}
+  .btn-blue:hover{background:#173a86; border-color:#173a86; color:#fff;}
+  .scan-row{display:flex; gap:8px;}
+  .scan-row .form-control{flex:1;}
+  .btn-cam{
+    width:48px; flex:0 0 48px; background:var(--af-blue); color:#fff; border:none;
+    border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:1.15rem;
+  }
+  .suggest-list{
+    border:1px solid var(--border); border-radius:var(--radius-sm); margin-top:6px;
+    max-height:260px; overflow-y:auto; display:none; background:#fff;
+  }
+  .suggest-item{padding:.6rem .85rem; border-bottom:1px solid var(--border); cursor:pointer; font-size:.9rem;}
+  .suggest-item:last-child{border-bottom:none;}
+  .suggest-item:hover, .suggest-item.active{background:#F5F6FA;}
+  .suggest-item small{display:block; color:var(--text-sub);}
+  .rak-chip{
+    display:inline-block; background:#EAF0FF; color:var(--af-blue); font-weight:700;
+    font-size:.68rem; padding:1px 8px; border-radius:20px; margin-left:6px;
+  }
 
-  .sync-bar{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:10px 14px;
-    margin-top:14px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    flex-wrap:wrap;
+  .product-hit{
+    border-radius:var(--radius-sm); background:#F5F8FF; border:1px solid #DCE6FF;
+    padding:12px 14px; margin-top:12px;
   }
-  .sync-status{
-    font-size:.8rem;
-    color:var(--muted);
+  .product-hit .pname{font-weight:700; font-size:.98rem;}
+  .product-hit .pmeta{font-size:.78rem; color:var(--text-sub); margin-top:2px;}
+  .not-found-box{
+    border-radius:var(--radius-sm); background:#FFF6E5; border:1px solid #FFE3A3;
+    padding:12px 14px; margin-top:12px; font-size:.85rem;
   }
-  .sync-status.is-error{color:var(--danger);}
-  .sync-status.is-ok{color:var(--success);}
-  .sync-actions{display:flex;gap:8px;flex:0 0 auto;}
+  .qty-row{display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .qty-btn{
+    width:40px; height:40px; border-radius:50%; border:1px solid var(--border);
+    background:#fff; font-size:1.2rem; font-weight:700; color:var(--af-red);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  .qty-input{width:70px; text-align:center; font-weight:700; font-size:1.05rem;}
 
-  .card-soft{
-    background:var(--card);
-    border-radius:var(--radius);
-    border:1px solid var(--border);
-    padding:18px;
-    margin-top:16px;
+  .rak-group{margin-bottom:12px;}
+  .rak-group-head{
+    display:flex; justify-content:space-between; align-items:center;
+    background:#F5F8FF; border:1px solid #DCE6FF; border-radius:var(--radius-sm);
+    padding:8px 12px; font-size:.82rem; font-weight:700; color:var(--af-blue); margin-bottom:6px;
   }
-  .badge-stock{
-    font-size:1rem;
-    padding:.5em .8em;
-    border-radius:10px;
-    background:#e8edf9;
-    color:var(--accent-dark);
-    font-weight:700;
+  .rak-group-head .rak-total{color:var(--af-red);}
+  .cart-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--border);
   }
-  .stat-pill{
-    background:#e8edf9;
-    color:var(--accent-dark);
-    border-radius:10px;
-    padding:8px 12px;
-    font-size:.85rem;
+  .cart-item:last-child{border-bottom:none;}
+  .cart-item .ci-name{font-weight:600; font-size:.9rem;}
+  .cart-item .ci-meta{font-size:.75rem; color:var(--text-sub);}
+  .cart-item .ci-qty{font-weight:700; color:var(--af-red); font-size:.95rem; margin-right:8px; white-space:nowrap; min-width:26px; text-align:right; display:inline-block;}
+  .badge-new{background:var(--af-yellow); color:#5c4600; font-size:.65rem; font-weight:700; padding:1px 6px; border-radius:6px; margin-left:6px;}
+  .empty-state{text-align:center; color:var(--text-sub); font-size:.85rem; padding:20px 0;}
+  .empty-state i{font-size:1.8rem; display:block; margin-bottom:6px; opacity:.4;}
+
+  .tabbar{
+    position:fixed; bottom:0; left:0; right:0; background:#fff;
+    border-top:1px solid var(--border); display:flex; z-index:30;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tabbar button{
+    flex:1; border:none; background:none; padding:9px 4px 8px;
+    font-size:.68rem; color:var(--text-sub); font-weight:600;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  .tabbar button i{font-size:1.2rem;}
+  .tabbar button.active{color:var(--af-red);}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+
+  details.rak-accordion{
+    border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:10px; overflow:hidden;
+  }
+  details.rak-accordion summary{
+    list-style:none; cursor:pointer; padding:11px 14px; display:flex; justify-content:space-between; align-items:center;
+    background:#F5F8FF; font-weight:700; font-size:.88rem; color:var(--af-blue);
+  }
+  details.rak-accordion summary::-webkit-details-marker{display:none;}
+  details.rak-accordion summary .chev{transition:transform .2s; color:var(--text-sub); font-size:.9rem;}
+  details.rak-accordion[open] summary .chev{transform:rotate(180deg);}
+  details.rak-accordion summary .rak-summary-meta{font-weight:600; color:var(--af-red); font-size:.8rem;}
+  .rak-accordion-body{padding:4px 14px 8px;}
+  .hist-row{border-bottom:1px solid var(--border); padding:9px 0; font-size:.85rem; display:flex; gap:10px; align-items:flex-start;}
+  .hist-row:last-child{border-bottom:none;}
+  .hist-row-body{flex:1; min-width:0;}
+  .hist-top{display:flex; align-items:center; gap:8px;}
+  .hist-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .hist-qty{flex:0 0 auto; text-align:right; font-weight:700; color:var(--af-red);}
+  .hist-qty-wrap{display:flex; align-items:center; gap:6px; flex:0 0 auto;}
+  .hist-edit-btn, .hist-qty-save, .hist-qty-cancel{
+    border:none; background:none; padding:2px 4px; font-size:.95rem; color:var(--text-sub); line-height:1;
+  }
+  .hist-edit-btn:hover{color:var(--af-blue);}
+  .hist-meta{color:var(--text-sub); font-size:.72rem; margin-top:2px;}
+
+  .sync-banner{
+    background:#FFF3CD; color:#8A6D00; font-size:.78rem; text-align:center;
+    padding:7px; border-radius:var(--radius-sm); margin-bottom:12px; display:none;
     font-weight:600;
   }
-  table.table thead th{font-size:.78rem;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);}
-  table.table td{vertical-align:middle;font-size:.92rem;}
-  .btn-primary{background:var(--accent);border-color:var(--accent);}
-  .btn-primary:hover{background:var(--accent-dark);border-color:var(--accent-dark);}
-  .btn-icon{padding:.3rem .55rem;}
-  .not-found-icon{font-size:2.2rem;color:#f59e0b;}
-  .found-icon{font-size:2.2rem;color:var(--success);}
-  .qty-box{max-width:110px;}
-  .footer-note{text-align:center;color:var(--muted);font-size:.78rem;margin-top:30px;}
-  .empty-state{text-align:center;color:var(--muted);padding:30px 10px;}
-  .empty-state i{font-size:2rem;display:block;margin-bottom:8px;}
-  #cameraReader{border-radius:12px;overflow:hidden;background:#000;min-height:220px;display:flex;align-items:center;justify-content:center;}
-  #cameraReader video{width:100%;max-height:340px;object-fit:cover;border-radius:12px;}
-
-  /* deskripsi panjang di tabel desktop: potong rapi + tooltip lewat title attr */
-  td.desc-cell{
-    max-width:320px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+  #camModal .modal-body{padding:0; background:#000; border-radius:0 0 12px 12px; overflow:hidden;}
+  #camVideo{width:100%; display:block;}
+  .toast-af{
+    position:fixed; top:14px; left:50%; transform:translateX(-50%);
+    background:#1C1C1E; color:#fff; padding:9px 18px; border-radius:30px;
+    font-size:.85rem; z-index:100; opacity:0; transition:opacity .25s, top .25s; pointer-events:none;
   }
-
-  /* kartu produk untuk tampilan smartphone - satu baris, tap untuk aksi */
-  .product-card-mobile{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:10px 14px;
-    margin-bottom:8px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    cursor:pointer;
-    transition:background .12s ease;
-  }
-  .product-card-mobile:active{
-    background:#FFF6D6;
-  }
-  .product-card-mobile .pc-plu{
-    flex:0 0 auto;
-    font-weight:700;
-    font-size:.78rem;
-    color:#6b4b00;
-    background:var(--alfa-yellow);
-    padding:3px 9px;
-    border-radius:8px;
-    white-space:nowrap;
-  }
-  .product-card-mobile .pc-desc-oneline{
-    flex:1 1 auto;
-    min-width:0;
-    font-size:.8rem;
-    color:var(--text);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .product-card-mobile .pc-qty{
-    flex:0 0 auto;
-    font-weight:700;
-    font-size:.9rem;
-    color:var(--text);
-    white-space:nowrap;
-  }
-  .product-card-mobile .pc-qty small{
-    font-weight:500;
-    color:var(--muted);
-    font-size:.68rem;
-  }
-  .product-card-mobile .pc-chevron{
-    flex:0 0 auto;
-    color:var(--muted);
-    font-size:.9rem;
-  }
-  .pending-dot{
-    display:inline-block;
-    width:7px;height:7px;
-    border-radius:50%;
-    background:#f59e0b;
-    margin-right:6px;
-  }
-  @keyframes icon-spin-rotate{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-  .icon-spin{ animation: icon-spin-rotate .8s linear infinite; display:inline-block; }
+  .toast-af.show{opacity:1; top:18px;}
+  .form-label-sm{font-size:.78rem; font-weight:600; color:var(--text-sub); margin-bottom:4px;}
 </style>
 </head>
 <body>
 
-<div class="brand-stripe" aria-hidden="true"><span class="s-red"></span><span class="s-yellow"></span><span class="s-blue"></span></div>
-
 <div class="topbar">
-  <div class="container-narrow d-flex justify-content-between align-items-center">
-    <div>
-      <h1><i class="bi bi-box-seam-fill"></i> Inventory Gudang</h1>
-      <p>Gudang SAT SPBU Cut Mutia ( CG20 )</p>
+  <div class="container-app py-0">
+    <h1><i class="bi bi-boxes"></i> Catat Stok Gudang</h1>
+    <div class="sub">Data rak, PLU, barcode &amp; deskripsi sudah tersedia — tinggal scan &amp; isi qty</div>
+    <span class="store-badge">Alfamart Cut Mutia</span>
+  </div>
+</div>
+
+<div class="container-app">
+
+  <div class="sync-banner" id="syncBanner">
+    <i class="bi bi-cloud-arrow-up"></i> <span id="syncBannerText">Ada catatan tersimpan offline</span>
+    <button class="btn btn-sm btn-af ms-2 py-0 px-2" id="btnSyncNow" style="font-size:.72rem;">Sync sekarang</button>
+  </div>
+
+  <!-- TAB: CATAT -->
+  <div class="tab-pane active" id="tab-catat">
+
+    <div class="card-ios">
+      <h2><i class="bi bi-upc-scan"></i> Scan / Cari Barang</h2>
+      <div class="scan-row">
+        <input type="text" class="form-control" id="barcodeInput" placeholder="Scan barcode atau ketik lalu Enter" autocomplete="off" inputmode="numeric">
+        <button class="btn-cam" id="btnOpenCam" title="Buka kamera"><i class="bi bi-camera-fill"></i></button>
+      </div>
+      <div class="mt-2 position-relative">
+        <input type="text" class="form-control" id="nameSearchInput" placeholder="Atau cari berdasarkan nama/deskripsi barang" autocomplete="off">
+        <div class="suggest-list" id="suggestList"></div>
+      </div>
+
+      <div id="resultZone"></div>
     </div>
-    <button class="btn btn-topbar btn-sm" id="btnOpenSettings" title="Pengaturan">
-      <i class="bi bi-gear-fill"></i>
+
+    <div class="card-ios">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="mb-0"><i class="bi bi-clipboard-data"></i> Daftar Catatan (<span id="cartCount">0</span>)</h2>
+        <button class="btn btn-sm btn-af-outline" id="btnClearCart" style="font-size:.75rem; padding:.25rem .6rem;">Kosongkan</button>
+      </div>
+      <div id="cartList">
+        <div class="empty-state"><i class="bi bi-inbox"></i>Belum ada barang dicatat</div>
+      </div>
+    </div>
+
+    <button class="btn btn-af w-100 py-2" id="btnSubmitCart" style="font-size:.95rem;">
+      <i class="bi bi-cloud-arrow-up-fill"></i> Simpan Stok (<span id="submitCount">0</span>)
     </button>
   </div>
-</div>
 
-<div class="container-narrow">
-
-  <!-- SCAN CARD -->
-  <div class="scan-card">
-    <form id="scanForm" autocomplete="off">
-      <label class="form-label fw-semibold mb-1">Scan / ketik barcode</label>
-      <div class="d-flex gap-2">
-        <div class="scan-input-wrap flex-grow-1">
-          <i class="bi bi-upc-scan"></i>
-          <input type="text" id="scanInput" class="form-control" placeholder="Tembak barcode di sini lalu Enter..." autofocus>
-        </div>
-        <button type="button" class="btn btn-primary" id="btnScanCamera" title="Scan pakai kamera">
-          <i class="bi bi-camera-fill"></i>
-        </button>
-        <button type="button" class="btn btn-outline-secondary" id="btnManualSearch" title="Cari tanpa barcode (mis. produk UMKM / barcode rusak)">
-          <i class="bi bi-search"></i>
+  <!-- TAB: RIWAYAT -->
+  <div class="tab-pane" id="tab-history">
+    <div class="card-ios">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="mb-0"><i class="bi bi-clock-history"></i> Riwayat per Rak</h2>
+        <button class="btn btn-sm btn-blue" id="btnRefreshHist" style="font-size:.72rem; padding:.25rem .6rem;">
+          <i class="bi bi-arrow-clockwise"></i> Muat ulang
         </button>
       </div>
-      
-    </form>
+      <div class="d-flex gap-2 align-items-center mb-1">
+        <input type="date" class="form-control" id="histDateFilter" style="flex:1;">
+        <button class="btn btn-af-outline" id="btnHistAll" style="font-size:.78rem; padding:.5rem .7rem; white-space:nowrap;">Semua</button>
+      </div>
+      <div class="mb-1">
+        <select class="form-select" id="histRakFilter">
+          <option value="">Semua Rak</option>
+        </select>
+      </div>
+      <div id="histSummary" style="font-size:.78rem; color:var(--text-sub); margin:8px 0 2px;"></div>
+      <div id="histList" class="mt-2">
+        <div class="empty-state"><i class="bi bi-hourglass-split"></i>Memuat riwayat…</div>
+      </div>
+    </div>
   </div>
 
-  <!-- SYNC BAR -->
-  <div class="sync-bar">
-    <div class="sync-status" id="syncStatusText">Memuat...</div>
-    <div class="sync-actions">
-      <button class="btn btn-sm btn-outline-secondary" id="btnRefreshSheet" title="Ambil data terbaru dari Sheet">
-        <i class="bi bi-arrow-clockwise" id="refreshIcon"></i>
+  <!-- TAB: PENGATURAN -->
+  <div class="tab-pane" id="tab-settings">
+    <div class="card-ios">
+      <h2><i class="bi bi-gear-fill"></i> Koneksi Server</h2>
+      <div style="font-size:.85rem;" id="serverUrlInfo"></div>
+      <a href="#" id="toggleUrlOverride" style="font-size:.75rem; display:inline-block; margin-top:8px;">Ubah URL server (khusus admin)</a>
+      <div id="urlOverrideWrap" style="display:none; margin-top:8px;">
+        <label class="form-label-sm">Apps Script Web App URL</label>
+        <input type="text" class="form-control mb-2" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn btn-blue w-100" id="btnSaveUrl">Simpan &amp; Muat Master Data</button>
+      </div>
+      <div class="mt-2" style="font-size:.78rem; color:var(--text-sub);" id="masterStatus"></div>
+    </div>
+    <div class="card-ios">
+      <h2><i class="bi bi-database"></i> Data Lokal</h2>
+      <div style="font-size:.85rem;" id="localStats"></div>
+      <button class="btn btn-af-outline w-100 mt-2" id="btnResyncMaster">
+        <i class="bi bi-arrow-repeat"></i> Sinkronkan Ulang Master Data
       </button>
-      <button class="btn btn-sm btn-primary position-relative" id="btnSendUpdate">
-        <span id="btnSendUpdateContent"><i class="bi bi-cloud-upload"></i> Kirim Update</span>
-        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle d-none" id="pendingBadge">0</span>
-      </button>
     </div>
   </div>
 
-  <!-- INVENTORY LIST -->
-  <div class="card-soft">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-      <h5 class="mb-0"><i class="bi bi-list-ul"></i> Daftar Produk</h5>
-      <div class="d-flex gap-2 align-items-center">
-        <span class="stat-pill" id="statTotalItem">0 item</span>
-        <span class="stat-pill" id="statTotalQty">0 qty</span>
-      </div>
-    </div>
-    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Cari barcode / PLU / deskripsi...">
-
-    <div class="table-responsive d-none d-md-block">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr>
-            <th>Barcode</th>
-            <th>PLU</th>
-            <th>Deskripsi</th>
-            <th class="text-end">Qty</th>
-            <th class="text-end">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="inventoryTableBody"></tbody>
-      </table>
-    </div>
-
-    <!-- Kartu untuk layar smartphone -->
-    <div id="inventoryCardsMobile" class="d-md-none"></div>
-
-    <div id="emptyState" class="empty-state d-none">
-      <i class="bi bi-inbox"></i>
-      Belum ada data produk. Scan barcode untuk mulai menambahkan.
-    </div>
-  </div>
-
-  <div class="footer-note">Perubahan disimpan dulu di perangkat ini, baru dikirim ke Google Sheet saat kamu tekan "Kirim Update".</div>
 </div>
 
-<!-- MODAL HASIL SCAN -->
-<div class="modal fade" id="resultModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:16px;">
-      <div class="modal-header">
-        <h5 class="modal-title" id="resultModalTitle">Hasil Scan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="resultModalBody">
-        <!-- diisi dinamis lewat JS -->
-      </div>
-    </div>
-  </div>
+<div class="tabbar">
+  <button class="active" data-tab="tab-catat"><i class="bi bi-upc-scan"></i>Catat</button>
+  <button data-tab="tab-history"><i class="bi bi-clock-history"></i>Riwayat</button>
+  <button data-tab="tab-settings"><i class="bi bi-gear"></i>Pengaturan</button>
 </div>
 
-<!-- MODAL KAMERA -->
-<div class="modal fade" id="cameraModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:16px;">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-camera-fill"></i> Scan Kamera</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div id="cameraReader">
-          <video id="cameraVideo" autoplay playsinline muted></video>
-        </div>
-        <div id="cameraError" class="alert alert-danger mt-2 d-none small"></div>
-        <div class="form-text mt-2">Arahkan kamera ke barcode. Pastikan izin kamera browser sudah diaktifkan.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL CARI MANUAL (tanpa barcode) -->
-<div class="modal fade" id="manualSearchModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-scrollable">
-    <div class="modal-content" style="border-radius:16px;">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-search"></i> Cari Produk Tanpa Barcode</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <input type="text" id="manualSearchInput" class="form-control mb-3" placeholder="Ketik PLU atau nama produk...">
-        <div id="manualSearchResults" class="list-group"></div>
-        <div id="manualSearchEmpty" class="empty-state d-none">
-          
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL ACTION SHEET (tap kartu mobile) -->
-<div class="modal fade" id="actionSheetModal" tabindex="-1">
+<!-- Camera modal -->
+<div class="modal fade" id="camModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:16px;">
+    <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="actionSheetTitle">Pilih Aksi</h5>
+        <h6 class="modal-title"><i class="bi bi-camera-fill"></i> Arahkan ke barcode</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div class="text-muted small mb-3" id="actionSheetSubtitle"></div>
-        <div class="d-grid gap-2">
-          <button class="btn btn-outline-secondary text-start" id="actionSheetEditBtn">
-            <i class="bi bi-pencil me-2"></i> Edit Produk
-          </button>
-          <button class="btn btn-outline-danger text-start" id="actionSheetDeleteBtn">
-            <i class="bi bi-trash me-2"></i> Hapus Produk
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL EDIT -->
-<div class="modal fade" id="editModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:16px;">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Produk</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editForm">
-          <input type="hidden" id="editOriginalBarcode">
-          <div class="mb-2">
-            <label class="form-label">Barcode</label>
-            <input type="text" id="editBarcode" class="form-control" readonly disabled>
-            <div class="form-text">Barcode tidak bisa diubah di sini karena dipakai sebagai kunci sinkronisasi ke Google Sheet.</div>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">PLU</label>
-            <input type="text" id="editPlu" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Deskripsi</label>
-            <input type="text" id="editDescription" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Qty</label>
-            <input type="number" id="editQty" class="form-control" required>
-          </div>
-        </form>
+        <video id="camVideo" autoplay playsinline muted></video>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline-danger me-auto" id="btnDeleteFromModal"><i class="bi bi-trash"></i> Hapus</button>
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button class="btn btn-primary" id="btnSaveEdit">Simpan</button>
+        <small class="text-muted" id="camStatus">Mencari kamera…</small>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL PENGATURAN -->
-<div class="modal fade" id="settingsModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:16px;">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-gear-fill"></i> Pengaturan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <label class="form-label fw-semibold">Koneksi Google Sheet</label>
-        <div class="form-text mb-1">URL Web App sudah diatur langsung di kode (hardcode). Kalau perlu ganti, edit variabel <code>GAS_WEB_APP_URL</code> di bagian atas script.</div>
-        <input type="text" id="settingsUrlInput" class="form-control mb-3" readonly>
+<div class="toast-af" id="toastAf"></div>
 
-        <hr>
-        <label class="form-label fw-semibold">Backup lokal (opsional)</label>
-        <div class="d-flex gap-2 mb-3">
-          <button class="btn btn-sm btn-outline-secondary flex-fill" id="btnExport"><i class="bi bi-download"></i> Export JSON</button>
-          <button class="btn btn-sm btn-outline-secondary flex-fill" id="btnImportTrigger"><i class="bi bi-upload"></i> Import JSON</button>
-          <input type="file" id="importFile" accept="application/json" class="d-none">
-        </div>
-
-        <hr>
-        <button class="btn btn-sm btn-outline-danger w-100" id="btnResetLocal"><i class="bi bi-exclamation-triangle"></i> Reset semua data lokal</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script>
-(function(){
-  "use strict";
+/* =========================================================
+   CATAT STOK GUDANG — Alfamart Cut Mutia
+   Diturunkan dari app "Request Barang Rak". Single-file app.
 
-  const LS_MASTER = "inv_cache_master";
-  const LS_INVENTORY = "inv_cache_inventory";
-  const LS_PENDING = "inv_pending_changes";
-  // ============================================================
-  // GANTI URL DI BAWAH INI dengan URL Web App Apps Script kamu
-  // (dari Deploy > Manage deployments, bentuknya diakhiri /exec)
-  // ============================================================
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzIguNWHQmKtEdUST8vanrIefpa0EsjTAFP-M6OgQ4TrdrRS7yqKTyDa_xSIQcjdgt0/exec";
+   Master data (rak, plu, barcode, deskripsi) dimuat SEKALI saat
+   halaman dibuka / disinkronkan, dan setiap produk SUDAH punya
+   rak-nya masing-masing di master data. User hanya scan/cari
+   barang lalu isi qty — rak & grouping terjadi otomatis
+   berdasarkan data master, tanpa perlu pilih rak manual.
 
-  const LS_GAS_URL = "inv_gas_url";
-  const LS_PENDING_DELETES = "inv_pending_deletes";
-  const LS_LAST_SYNC = "inv_last_sync";
+   Kontrak API yang diharapkan dari Apps Script Web App:
+   - GET  ?action=getMaster
+         -> { ok:true, items:[{plu,nama,barcode,rak}, ...] }
+           (nama = deskripsi barang; rak = lokasi rak barang tsb)
+   - POST { action:'submitStok', timestamp,
+            items:[{plu,nama,barcode,rak,qty,isNew}, ...] }
+         -> { ok:true }
+   - GET  ?action=getHistory[&date=YYYY-MM-DD]
+         -> { ok:true, items:[{row,plu,nama,barcode,rak,qty,timestamp}, ...] }
+           (row = nomor baris asli di sheet Stok Gudang, dipakai untuk edit qty)
+   - POST { action:'updateQty', row, qty }
+         -> { ok:true }
+   ========================================================= */
 
-  const scanInput = document.getElementById("scanInput");
-  const tableBody = document.getElementById("inventoryTableBody");
-  const cardsMobile = document.getElementById("inventoryCardsMobile");
-  const emptyState = document.getElementById("emptyState");
-  const searchInput = document.getElementById("searchInput");
-  const statTotalItem = document.getElementById("statTotalItem");
-  const statTotalQty = document.getElementById("statTotalQty");
-  const resultModalBody = document.getElementById("resultModalBody");
-  const resultModalTitle = document.getElementById("resultModalTitle");
-  const syncStatusText = document.getElementById("syncStatusText");
-  const pendingBadge = document.getElementById("pendingBadge");
-  const cameraErrorBox = document.getElementById("cameraError");
+// Kosongkan dulu — isi lewat tab Pengaturan setelah Apps Script untuk
+// pencatatan stok gudang ini di-deploy. Kalau sudah tetap, tempel di sini
+// supaya semua petugas langsung bisa pakai tanpa isi URL manual.
+const CONFIG = {
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyi2lh_6LjYALmtpKXePELzj_4bUudisiDdgPIC0yzYcJdjknsTTZmv35rPTiGlaXKx6g/exec'
+};
 
-  let editModal, resultModal, cameraModal, actionSheetModal, settingsModal, manualSearchModal;
-  let videoStream = null;
-  let detectionTimer = null;
-  let cameraStarting = false;
-  let actionSheetBarcode = null;
+const LS_KEYS = {
+  scriptUrl: 'gs_scriptUrl',
+  master: 'gs_master',          // cached master data array (plu, nama, barcode, rak)
+  masterUpdated: 'gs_master_ts',
+  pending: 'gs_pendingStok'     // offline queue of not-yet-synced batches
+};
 
-  // ---------- helpers umum ----------
-  function esc(str){
-    return String(str ?? "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
+let MASTER = [];        // [{plu, nama, barcode, rak}]
+let CART = [];          // [{id, plu, nama, barcode, rak, qty, isNew}]
+let currentMatch = null;
+let cartIdSeq = 1;
+
+/* ---------- Utilities ---------- */
+
+function toast(msg){
+  const t = document.getElementById('toastAf');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+// Normalisasi barcode hasil scan/ketik sebelum dicocokkan ke master data:
+// 1) hapus 1 digit terakhir (check digit), sesuai konvensi master data toko
+// 2) jika hasilnya masih diawali angka 0, hapus 1 angka 0 di depan tersebut
+//    (barcode UPC-A yang disimpan sebagai EAN-13 biasanya dapat tambahan 0 di depan)
+function normalizeBarcode(code){
+  let clean = String(code || '').trim().replace(/\D/g, '');
+  if (clean.length <= 1) return clean;
+  clean = clean.slice(0, -1);
+  if (clean.length > 1 && clean.startsWith('0')) {
+    clean = clean.replace(/^0/, '');
   }
+  return clean;
+}
 
-  function formatNumber(n){
-    n = Number(n) || 0;
-    return n.toLocaleString("id-ID");
-  }
+function normalize(str){
+  return String(str || '').toLowerCase().trim();
+}
 
-  // Barcode dari database tidak mencantumkan 1 digit terakhir (check digit),
-  // jadi hasil scan harus dipotong 1 digit di belakang sebelum dicocokkan.
-  function normalizeBarcode(raw){
-    const clean = String(raw || "").trim();
-    return clean.length > 1 ? clean.slice(0, -1) : clean;
-  }
+function getScriptUrl(){
+  if (CONFIG.SCRIPT_URL && CONFIG.SCRIPT_URL.indexOf('https://') === 0) return CONFIG.SCRIPT_URL;
+  return localStorage.getItem(LS_KEYS.scriptUrl) || '';
+}
+function hasHardcodedUrl(){
+  return !!(CONFIG.SCRIPT_URL && CONFIG.SCRIPT_URL.indexOf('https://') === 0);
+}
 
-  // ---------- penyimpanan lokal: cache sheet + antrian pending ----------
-  function loadMasterCache(){
-    try{ return JSON.parse(localStorage.getItem(LS_MASTER)) || []; }catch(e){ return []; }
-  }
-  function saveMasterCache(arr){ localStorage.setItem(LS_MASTER, JSON.stringify(arr)); }
+function loadMasterFromCache(){
+  try{
+    const raw = localStorage.getItem(LS_KEYS.master);
+    MASTER = raw ? JSON.parse(raw) : [];
+  }catch(e){ MASTER = []; }
+}
 
-  function loadInventoryCache(){
-    try{ return JSON.parse(localStorage.getItem(LS_INVENTORY)) || []; }catch(e){ return []; }
-  }
-  function saveInventoryCache(arr){ localStorage.setItem(LS_INVENTORY, JSON.stringify(arr)); }
+function saveMasterToCache(){
+  localStorage.setItem(LS_KEYS.master, JSON.stringify(MASTER));
+  localStorage.setItem(LS_KEYS.masterUpdated, new Date().toISOString());
+}
 
-  function loadPending(){
-    try{ return JSON.parse(localStorage.getItem(LS_PENDING)) || {}; }catch(e){ return {}; }
-  }
-  function savePending(obj){ localStorage.setItem(LS_PENDING, JSON.stringify(obj)); }
+function findByBarcode(code){
+  if (!code) return null;
+  return MASTER.find(p => p.barcode === code) || null;
+}
 
-  function loadPendingDeletes(){
-    try{ return JSON.parse(localStorage.getItem(LS_PENDING_DELETES)) || []; }catch(e){ return []; }
-  }
-  function savePendingDeletes(arr){ localStorage.setItem(LS_PENDING_DELETES, JSON.stringify(arr)); }
-
-  function addPendingDelete(barcode){
-    const arr = loadPendingDeletes();
-    if(!arr.includes(barcode)) arr.push(barcode);
-    savePendingDeletes(arr);
-  }
-  function removePendingDelete(barcode){
-    const arr = loadPendingDeletes().filter(b => b !== barcode);
-    savePendingDeletes(arr);
-  }
-
-  function upsertPendingChange(barcode, updates){
-    const pending = loadPending();
-    const existing = pending[barcode] || {};
-    pending[barcode] = Object.assign({}, existing, updates);
-    savePending(pending);
-    // kalau barcode ini sebelumnya ditandai untuk dihapus lalu di-scan/edit lagi,
-    // batalkan penghapusannya supaya tidak konflik saat sinkron
-    removePendingDelete(barcode);
-    updatePendingBadge();
-  }
-
-  function getGasUrl(){
-    const url = GAS_WEB_APP_URL.trim();
-    if(!url || url.indexOf("PASTE_URL") === 0) return "";
-    return url;
-  }
-
-  // ---------- data efektif (cache sheet + pending overlay) ----------
-  function getMasterRecord(barcode){
-    return loadMasterCache().find(m => m.barcode === barcode);
-  }
-
-  // gabungan master cache + pending, supaya produk yang baru ditambahkan
-  // (belum sempat "Kirim Update") tetap dianggap "terdaftar" saat discan lagi
-  function getEffectiveMasterRecord(barcode){
-    const pending = loadPending()[barcode];
-    if(pending && (pending.isNew || pending.masterChanged)){
-      return { barcode: pending.barcode, plu: pending.plu, description: pending.description };
+// Barang baru yang ditambahkan saat offline (isNew, belum sync ke sheet) harus
+// tetap dikenali lokal walau MASTER ditimpa ulang oleh fetch server terbaru.
+function mergePendingNewItemsIntoMaster_(){
+  const pendingNewItems = getPendingQueue().flatMap(b => (b.items || []).filter(it => it.isNew));
+  let changed = false;
+  pendingNewItems.forEach(it=>{
+    if (!MASTER.find(m => m.barcode === it.barcode)){
+      MASTER.push({ plu: it.plu, nama: it.nama, barcode: it.barcode, rak: it.rak });
+      changed = true;
     }
-    return getMasterRecord(barcode);
-  }
+  });
+  if (changed) saveMasterToCache();
+}
 
-  function getEffectiveInventoryList(){
-    const inv = loadInventoryCache();
-    const pending = loadPending();
-    const deletes = new Set(loadPendingDeletes());
-    const map = new Map();
-    inv.forEach(p => map.set(p.barcode, Object.assign({}, p)));
-    Object.values(pending).forEach(p => {
-      map.set(p.barcode, { barcode: p.barcode, plu: p.plu, description: p.description, qty: Number(p.qty)||0 });
-    });
-    deletes.forEach(barcode => map.delete(barcode));
-    return Array.from(map.values());
-  }
+function findByNameQuery(q){
+  const nq = normalize(q);
+  if (!nq) return [];
+  return MASTER.filter(p => normalize(p.nama).includes(nq) || normalize(p.plu).includes(nq)).slice(0, 12);
+}
 
-  // daftar Master Produk (bukan Data Inventory) + pending -> dipakai untuk cari manual
-  // supaya produk yang belum pernah punya qty (tanpa barcode terbaca) tetap bisa ditemukan
-  function getEffectiveMasterList(){
-    const master = loadMasterCache();
-    const pending = loadPending();
-    const map = new Map();
-    master.forEach(m => map.set(m.barcode, Object.assign({}, m)));
-    Object.values(pending).forEach(p => {
-      if(p.isNew || p.masterChanged){
-        map.set(p.barcode, { barcode: p.barcode, plu: p.plu, description: p.description });
-      }
-    });
-    return Array.from(map.values());
-  }
+/* ---------- Master data sync ---------- */
 
-  function findEffectiveProduct(barcode){
-    return getEffectiveInventoryList().find(p => p.barcode === barcode);
-  }
-
-  // pencarian gabungan: cek Data Inventory dulu, kalau tidak ada tapi barcode
-  // terdaftar di Master Produk, tetap dianggap "ditemukan" dengan qty 0.
-  // Dipakai di scan DAN di tombol tambah/kurangi supaya konsisten.
-  function resolveProduct(barcode){
-    const invProduct = findEffectiveProduct(barcode);
-    if(invProduct) return invProduct;
-
-    const master = getEffectiveMasterRecord(barcode);
-    if(master) return { barcode, plu: master.plu, description: master.description, qty: 0 };
-
-    return null;
-  }
-
-  // ---------- render: tabel + kartu daftar produk ----------
-  function renderTable(filter){
-    const list = getEffectiveInventoryList();
-    const pending = loadPending();
-    const q = (filter || "").trim().toLowerCase();
-
-    const filtered = q ? list.filter(p =>
-      p.barcode.toLowerCase().includes(q) ||
-      p.plu.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
-    ) : list;
-
-    tableBody.innerHTML = "";
-    cardsMobile.innerHTML = "";
-
-    if(filtered.length === 0){
-      emptyState.classList.remove("d-none");
+async function fetchMasterFromServer(){
+  const url = getScriptUrl();
+  if (!url){ return false; }
+  document.getElementById('masterStatus').textContent = 'Memuat master data…';
+  try{
+    const res = await fetch(url + '?action=getMaster');
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.items)){
+      MASTER = data.items.map(it => ({
+        plu: String(it.plu || '').trim(),
+        nama: String(it.nama || '').trim(),
+        barcode: String(it.barcode || '').trim(),
+        rak: String(it.rak || '').trim()
+      }));
+      saveMasterToCache();
+      mergePendingNewItemsIntoMaster_();
+      document.getElementById('masterStatus').textContent =
+        `Master data dimuat: ${MASTER.length} produk (✔ ${new Date().toLocaleTimeString('id-ID')})`;
+      updateLocalStats();
+      return true;
     } else {
-      emptyState.classList.add("d-none");
-
-      filtered.forEach(p => {
-        const isPending = !!pending[p.barcode];
-        const dot = isPending ? '<span class="pending-dot" title="Belum dikirim"></span>' : '';
-
-        // baris tabel (desktop/tablet)
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><code>${esc(p.barcode)}</code></td>
-          <td>${dot}${esc(p.plu)}</td>
-          <td class="desc-cell" title="${esc(p.description)}">${esc(p.description)}</td>
-          <td class="text-end fw-semibold">${formatNumber(p.qty)}</td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-secondary btn-icon me-1 btn-edit-row" data-barcode="${esc(p.barcode)}">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger btn-icon btn-delete-row" data-barcode="${esc(p.barcode)}">
-              <i class="bi bi-trash"></i>
-            </button>
-          </td>`;
-        tableBody.appendChild(tr);
-
-        // kartu (smartphone) — satu baris: PLU, deskripsi, qty. Tap kartu untuk pilih aksi.
-        const card = document.createElement("div");
-        card.className = "product-card-mobile";
-        card.dataset.barcode = p.barcode;
-        card.innerHTML = `
-          <span class="pc-plu">${dot}${esc(p.plu)}</span>
-          <span class="pc-desc-oneline">${esc(p.description)}</span>
-          <span class="pc-qty">${formatNumber(p.qty)}</span>
-          <i class="bi bi-chevron-right pc-chevron"></i>`;
-        cardsMobile.appendChild(card);
-      });
+      document.getElementById('masterStatus').textContent = 'Gagal memuat: format respons tidak sesuai.';
+      return false;
     }
-
-    statTotalItem.textContent = `${list.length} item`;
-    statTotalQty.textContent = `${formatNumber(list.reduce((s,p)=>s+(Number(p.qty)||0),0))} qty`;
+  }catch(e){
+    document.getElementById('masterStatus').textContent = 'Gagal memuat master data (offline / URL salah). Memakai data cache.';
+    return false;
   }
+}
 
-  // ---------- render: scan result (found) ----------
-  function renderFound(product){
-    resultModalTitle.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Produk Ditemukan`;
-    resultModalBody.innerHTML = `
-      <div class="d-flex align-items-start gap-3">
-        <i class="bi bi-check-circle-fill found-icon"></i>
-        <div class="flex-grow-1">
-          <div class="d-flex justify-content-between flex-wrap gap-2">
-            <div>
-              <h5 class="mb-0">${esc(product.description)}</h5>
-              <div class="text-muted small">PLU: ${esc(product.plu)} &middot; Barcode: <code>${esc(product.barcode)}</code></div>
-            </div>
-            <span class="badge badge-stock">
-              Stok: ${formatNumber(product.qty)}
-            </span>
-          </div>
+function updateLocalStats(){
+  const ts = localStorage.getItem(LS_KEYS.masterUpdated);
+  const pending = getPendingQueue();
+  document.getElementById('localStats').innerHTML =
+    `${MASTER.length} produk master tersimpan lokal (rak, PLU, barcode, deskripsi).<br>` +
+    `Terakhir sinkron: ${ts ? new Date(ts).toLocaleString('id-ID') : '-'}<br>` +
+    `Batch catatan menunggu sync: ${pending.length}`;
+}
 
-          <div class="row g-2 mt-2">
-            <div class="col-auto">
-              <div class="input-group">
-                <input type="number" id="adjustQty" class="form-control qty-box" value="1" min="1">
-                <button class="btn btn-success" id="btnAddStock"><i class="bi bi-plus-lg"></i> Tambah</button>
-                <button class="btn btn-outline-danger" id="btnReduceStock"><i class="bi bi-dash-lg"></i> Kurangi</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>`;
+/* ---------- Offline queue ---------- */
 
-    document.getElementById("btnAddStock").addEventListener("click", () => adjustStock(product.barcode, +1));
-    document.getElementById("btnReduceStock").addEventListener("click", () => adjustStock(product.barcode, -1));
-
-    resultModal.show();
+function getPendingQueue(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEYS.pending) || '[]'); }
+  catch(e){ return []; }
+}
+function savePendingQueue(q){
+  localStorage.setItem(LS_KEYS.pending, JSON.stringify(q));
+  refreshSyncBanner();
+  updateLocalStats();
+}
+function refreshSyncBanner(){
+  const q = getPendingQueue();
+  const banner = document.getElementById('syncBanner');
+  if (q.length > 0){
+    document.getElementById('syncBannerText').textContent =
+      `${q.length} batch catatan tersimpan offline, belum terkirim`;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
   }
-
-  // ---------- render: scan result (not found -> add form) ----------
-  function renderNotFound(barcode){
-    resultModalTitle.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Barcode Belum Terdaftar`;
-    resultModalBody.innerHTML = `
-      <div class="d-flex align-items-start gap-3">
-        <i class="bi bi-exclamation-triangle-fill not-found-icon"></i>
-        <div class="flex-grow-1">
-          <div class="text-muted small mb-3">Barcode: <code>${esc(barcode)}</code> — produk belum ada di Master Produk. Lengkapi data di bawah.</div>
-          <form id="addForm" class="row g-2">
-            <div class="col-12 col-sm-3">
-              <label class="form-label small mb-1">PLU</label>
-              <input type="text" id="newPlu" class="form-control" required>
-            </div>
-            <div class="col-12 col-sm-5">
-              <label class="form-label small mb-1">Deskripsi</label>
-              <input type="text" id="newDescription" class="form-control" required>
-            </div>
-            <div class="col-8 col-sm-2">
-              <label class="form-label small mb-1">Qty</label>
-              <input type="number" id="newQty" class="form-control" value="0" required>
-            </div>
-            <div class="col-4 col-sm-2 d-flex align-items-end">
-              <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Simpan</button>
-            </div>
-          </form>
-        </div>
-      </div>`;
-
-    document.getElementById("addForm").addEventListener("submit", function(e){
-      e.preventDefault();
-      const plu = document.getElementById("newPlu").value.trim();
-      const description = document.getElementById("newDescription").value.trim();
-      const qty = Number(document.getElementById("newQty").value) || 0;
-
-      if(!plu || !description) return;
-
-      // produk baru -> belum ada di Master Produk, jadi saat sync harus masuk ke Master + Data Inventory
-      upsertPendingChange(barcode, { barcode, plu, description, qty, isNew: true, masterChanged: true });
-      renderTable(searchInput.value);
-      renderFound({ barcode, plu, description, qty });
-    });
-
-    resultModal.show();
-    setTimeout(() => {
-      const field = document.getElementById("newPlu");
-      if(field) field.focus();
-    }, 300);
-  }
-
-  // ---------- stock adjust dari modal hasil scan ----------
-  function adjustStock(barcode, direction){
-    const amount = Number(document.getElementById("adjustQty").value) || 0;
-    if(amount <= 0) return;
-
-    const product = resolveProduct(barcode);
-    if(!product) return;
-
-    const newQty = Math.max(0, (Number(product.qty) || 0) + (direction * amount));
-    applyQtyChange(barcode, product.plu, product.description, newQty);
-
-    renderTable(searchInput.value);
-    renderFound(resolveProduct(barcode));
-  }
-
-  function applyQtyChange(barcode, plu, description, newQty){
-    // hanya qty yang berubah -> isNew/masterChanged TIDAK diset di sini,
-    // supaya kalau barcode ini sebelumnya sudah pending sebagai produk baru,
-    // status isNew tetap terjaga (upsertPendingChange melakukan merge, bukan overwrite penuh).
-    upsertPendingChange(barcode, { barcode, plu, description, qty: newQty });
-  }
-
-  // ---------- scan handling ----------
-  document.getElementById("scanForm").addEventListener("submit", function(e){
-    e.preventDefault();
-    handleScan(scanInput.value);
-  });
-
-  function handleScan(rawValue){
-    const raw = String(rawValue || "").trim();
-    if(!raw) return;
-
-    const barcode = normalizeBarcode(raw);
-    const product = resolveProduct(barcode);
-
-    if(product){
-      renderFound(product);
-    } else {
-      renderNotFound(barcode);
-    }
-
-    scanInput.value = "";
-  }
-
-  document.getElementById("resultModal").addEventListener("hidden.bs.modal", function(){
-    scanInput.focus();
-  });
-
-  // ---------- scan via kamera smartphone (native BarcodeDetector) ----------
-  const cameraModalEl = document.getElementById("cameraModal");
-
-  document.getElementById("btnScanCamera").addEventListener("click", function(){
-    cameraModal.show();
-  });
-
-  // ---------- cari manual (tanpa barcode) - untuk produk rusak/UMKM ----------
-  document.getElementById("btnManualSearch").addEventListener("click", function(){
-    document.getElementById("manualSearchInput").value = "";
-    renderManualSearchResults("");
-    manualSearchModal.show();
-    setTimeout(() => document.getElementById("manualSearchInput").focus(), 300);
-  });
-
-  document.getElementById("manualSearchInput").addEventListener("input", function(){
-    renderManualSearchResults(this.value);
-  });
-
-  function renderManualSearchResults(query){
-    const q = query.trim().toLowerCase();
-    const list = getEffectiveMasterList();
-    const filtered = q ? list.filter(m =>
-      m.plu.toLowerCase().includes(q) ||
-      m.description.toLowerCase().includes(q) ||
-      m.barcode.toLowerCase().includes(q)
-    ) : list;
-
-    const container = document.getElementById("manualSearchResults");
-    const emptyBox = document.getElementById("manualSearchEmpty");
-    container.innerHTML = "";
-
-    if(filtered.length === 0){
-      emptyBox.classList.remove("d-none");
-      return;
-    }
-    emptyBox.classList.add("d-none");
-
-    filtered.slice(0, 50).forEach(m => {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = "list-group-item list-group-item-action";
-      item.innerHTML = `
-        <div class="fw-semibold">${esc(m.plu)} — ${esc(m.description)}</div>
-        <div class="text-muted small">Barcode: ${esc(m.barcode)}</div>`;
-      item.addEventListener("click", function(){
-        manualSearchModal.hide();
-        const product = resolveProduct(m.barcode);
-        if(product) renderFound(product);
-      });
-      container.appendChild(item);
-    });
-  }
-
-  cameraModalEl.addEventListener("shown.bs.modal", startCameraScanner);
-  cameraModalEl.addEventListener("hidden.bs.modal", stopCameraScanner);
-
-  function startCameraScanner(){
-    if(cameraStarting) return;
-    cameraStarting = true;
-    cameraErrorBox.classList.add("d-none");
-
-    if(!("BarcodeDetector" in window)){
-      cameraErrorBox.textContent = "Browser ini tidak mendukung pemindaian kamera bawaan. Gunakan Chrome/Edge versi terbaru di Android, atau ketik/tempel barcode secara manual.";
-      cameraErrorBox.classList.remove("d-none");
-      cameraStarting = false;
-      return;
-    }
-
-    const preferredFormats = ["ean_13","ean_8","code_128","code_39","upc_a","upc_e","codabar","qr_code"];
-
-    (async function(){
-      try{
-        let formats = preferredFormats;
-        if(typeof BarcodeDetector.getSupportedFormats === "function"){
-          const supported = await BarcodeDetector.getSupportedFormats();
-          const filtered = preferredFormats.filter(f => supported.includes(f));
-          formats = filtered.length ? filtered : supported;
-        }
-
-        const detector = new BarcodeDetector({ formats });
-
-        videoStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false
-        });
-
-        const videoEl = document.getElementById("cameraVideo");
-        videoEl.srcObject = videoStream;
-        await videoEl.play();
-
-        detectionTimer = setInterval(async () => {
-          if(!videoEl.videoWidth) return;
-          try{
-            const barcodes = await detector.detect(videoEl);
-            if(barcodes && barcodes.length > 0){
-              const value = barcodes[0].rawValue;
-              cameraModal.hide();
-              handleScan(value);
-            }
-          }catch(e){ /* frame gagal dibaca, coba lagi di frame berikutnya */ }
-        }, 350);
-
-        cameraStarting = false;
-      }catch(err){
-        cameraStarting = false;
-        let msg = "Tidak bisa mengakses kamera.";
-        if(err && err.name === "NotAllowedError") msg = "Izin kamera ditolak. Aktifkan izin kamera untuk situs ini di pengaturan browser.";
-        else if(err && err.name === "NotFoundError") msg = "Kamera tidak ditemukan di perangkat ini.";
-        else if(err && err.message) msg += " (" + err.message + ")";
-        cameraErrorBox.textContent = msg;
-        cameraErrorBox.classList.remove("d-none");
-      }
-    })();
-  }
-
-  function stopCameraScanner(){
-    if(detectionTimer){
-      clearInterval(detectionTimer);
-      detectionTimer = null;
-    }
-    if(videoStream){
-      videoStream.getTracks().forEach(track => track.stop());
-      videoStream = null;
-    }
-    const videoEl = document.getElementById("cameraVideo");
-    if(videoEl) videoEl.srcObject = null;
-  }
-
-  // ---------- table row actions (edit / delete) - tampilan desktop ----------
-  function handleRowActionClick(e){
-    const editBtn = e.target.closest(".btn-edit-row");
-    const delBtn = e.target.closest(".btn-delete-row");
-
-    if(editBtn){
-      openEditModal(editBtn.dataset.barcode);
-    } else if(delBtn){
-      deleteProduct(delBtn.dataset.barcode);
-    }
-  }
-  tableBody.addEventListener("click", handleRowActionClick);
-
-  // ---------- tap kartu (mobile) -> action sheet pilih Edit / Hapus ----------
-  cardsMobile.addEventListener("click", function(e){
-    const card = e.target.closest(".product-card-mobile");
-    if(!card) return;
-    openActionSheet(card.dataset.barcode);
-  });
-
-  function openActionSheet(barcode){
-    const product = findEffectiveProduct(barcode);
-    if(!product) return;
-
-    actionSheetBarcode = barcode;
-    document.getElementById("actionSheetTitle").textContent = "PLU " + product.plu;
-    document.getElementById("actionSheetSubtitle").textContent = product.description;
-    actionSheetModal.show();
-  }
-
-  document.getElementById("actionSheetEditBtn").addEventListener("click", function(){
-    actionSheetModal.hide();
-    if(actionSheetBarcode) openEditModal(actionSheetBarcode);
-  });
-
-  document.getElementById("actionSheetDeleteBtn").addEventListener("click", function(){
-    actionSheetModal.hide();
-    if(actionSheetBarcode) deleteProduct(actionSheetBarcode);
-  });
-
-  // ---------- edit modal ----------
-  function openEditModal(barcode){
-    const product = findEffectiveProduct(barcode);
-    if(!product) return;
-
-    document.getElementById("editOriginalBarcode").value = product.barcode;
-    document.getElementById("editBarcode").value = product.barcode;
-    document.getElementById("editPlu").value = product.plu;
-    document.getElementById("editDescription").value = product.description;
-    document.getElementById("editQty").value = product.qty;
-
-    editModal.show();
-  }
-
-  document.getElementById("btnSaveEdit").addEventListener("click", function(){
-    const barcode = document.getElementById("editOriginalBarcode").value;
-    const plu = document.getElementById("editPlu").value.trim();
-    const description = document.getElementById("editDescription").value.trim();
-    const qty = Number(document.getElementById("editQty").value) || 0;
-
-    if(!plu || !description) return;
-
-    const master = getEffectiveMasterRecord(barcode);
-    const pendingBefore = loadPending()[barcode];
-    const isNew = (pendingBefore && pendingBefore.isNew) || !master;
-    const masterChanged = isNew || !master || master.plu !== plu || master.description !== description;
-
-    upsertPendingChange(barcode, { barcode, plu, description, qty, isNew, masterChanged });
-    renderTable(searchInput.value);
-    editModal.hide();
-  });
-
-  document.getElementById("btnDeleteFromModal").addEventListener("click", function(){
-    const barcode = document.getElementById("editOriginalBarcode").value;
-    editModal.hide();
-    deleteProduct(barcode);
-  });
-
-  function deleteProduct(barcode){
-    const wasSynced = loadInventoryCache().some(p => p.barcode === barcode);
-    const confirmMsg = wasSynced
-      ? "Hapus produk " + barcode + " dari Data Inventory?\n\nBaris ini akan ikut terhapus di Google Sheet saat kamu tekan \"Kirim Update\". Data di Master Produk TIDAK dihapus, jadi produk ini masih bisa discan lagi nanti (qty mulai dari 0)."
-      : "Hapus produk " + barcode + " dari daftar?";
-    if(!confirm(confirmMsg)) return;
-
-    // batalkan perubahan pending (add/edit qty) yang belum sempat terkirim untuk barcode ini
-    const pending = loadPending();
-    delete pending[barcode];
-    savePending(pending);
-
-    // hanya perlu antre hapus ke Sheet kalau barisnya memang sudah pernah tersinkron
-    if(wasSynced){
-      addPendingDelete(barcode);
-    } else {
-      removePendingDelete(barcode);
-    }
-
-    updatePendingBadge();
-    renderTable(searchInput.value);
-  }
-
-  // ---------- search ----------
-  searchInput.addEventListener("input", function(){
-    renderTable(this.value);
-  });
-
-  // ---------- sinkronisasi Google Sheet ----------
-  function updateSyncStatus(html, isError){
-    syncStatusText.innerHTML = html;
-    syncStatusText.classList.remove("is-error", "is-ok");
-    if(isError) syncStatusText.classList.add("is-error");
-  }
-
-  function spinnerHtml(text){
-    return `<span class="spinner-border spinner-border-sm me-1" role="status"></span>${esc(text)}`;
-  }
-
-  function updatePendingBadge(){
-    const count = Object.keys(loadPending()).length + loadPendingDeletes().length;
-    if(count > 0){
-      pendingBadge.textContent = count;
-      pendingBadge.classList.remove("d-none");
-    } else {
-      pendingBadge.classList.add("d-none");
-    }
-  }
-
-  function formatSyncTime(){
-    const iso = localStorage.getItem(LS_LAST_SYNC);
-    if(!iso) return "-";
-    const d = new Date(iso);
-    return d.toLocaleString("id-ID", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" });
-  }
-
-  function normalizeMasterRow(row){
-    return {
-      barcode: String(row.Barcode ?? row.barcode ?? "").trim(),
-      plu: String(row.PLU ?? row.plu ?? "").trim(),
-      description: String(row.Description ?? row.description ?? "").trim()
-    };
-  }
-  function normalizeInventoryRow(row){
-    return {
-      barcode: String(row.Barcode ?? row.barcode ?? "").trim(),
-      plu: String(row.PLU ?? row.plu ?? "").trim(),
-      description: String(row.Description ?? row.description ?? "").trim(),
-      qty: Number(row.Qty ?? row.qty ?? 0) || 0
-    };
-  }
-
-  async function fetchFromSheet(){
-    const url = getGasUrl();
-    if(!url){
-      updateSyncStatus(esc("URL GAS belum diisi di kode (GAS_WEB_APP_URL)."), true);
-      return;
-    }
-
-    const refreshBtn = document.getElementById("btnRefreshSheet");
-    const refreshIcon = document.getElementById("refreshIcon");
-    refreshBtn.disabled = true;
-    refreshIcon.classList.add("icon-spin");
-    updateSyncStatus(spinnerHtml("Mengambil data dari Google Sheet..."));
-
-    try{
-      const sep = url.includes("?") ? "&" : "?";
-      const res = await fetch(url + sep + "action=getData");
-      const data = await res.json();
-      if(!data.success) throw new Error(data.error || "Gagal mengambil data");
-
-      const master = (data.master || []).map(normalizeMasterRow).filter(m => m.barcode);
-      const inventory = (data.inventory || []).map(normalizeInventoryRow).filter(p => p.barcode);
-
-      saveMasterCache(master);
-      saveInventoryCache(inventory);
-      localStorage.setItem(LS_LAST_SYNC, new Date().toISOString());
-
-      renderTable(searchInput.value);
-      updateSyncStatus('<i class="bi bi-check-circle-fill me-1"></i>Data tersinkron. Terakhir: ' + esc(formatSyncTime()), false);
-    }catch(err){
-      updateSyncStatus('<i class="bi bi-x-circle-fill me-1"></i>Gagal mengambil data: ' + esc(err.message), true);
-    }finally{
-      refreshBtn.disabled = false;
-      refreshIcon.classList.remove("icon-spin");
-    }
-  }
-
-  async function sendUpdates(){
-    const url = getGasUrl();
-    if(!url){
-      updateSyncStatus(esc("URL GAS belum diisi di kode (GAS_WEB_APP_URL)."), true);
-      return;
-    }
-
-    const pending = loadPending();
-    const changes = Object.values(pending);
-    const deletes = loadPendingDeletes();
-    const totalCount = changes.length + deletes.length;
-
-    if(totalCount === 0){
-      updateSyncStatus(esc("Tidak ada perubahan untuk dikirim."));
-      return;
-    }
-
-    const sendBtn = document.getElementById("btnSendUpdate");
-    const sendContent = document.getElementById("btnSendUpdateContent");
-    const originalContentHtml = sendContent.innerHTML;
-
-    sendBtn.disabled = true;
-    sendContent.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span>Mengirim...`;
-    updateSyncStatus(spinnerHtml("Mengirim " + totalCount + " perubahan..."));
-
+}
+
+async function trySyncPending(){
+  const url = getScriptUrl();
+  if (!url) return;
+  let q = getPendingQueue();
+  if (q.length === 0) return;
+  let anySuccess = false;
+  for (const batch of [...q]){
     try{
       const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ changes, deletes })
+        method: 'POST',
+        headers: {'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'submitStok', ...batch })
       });
       const data = await res.json();
-      if(!data.success && data.errors && data.errors.length){
-        throw new Error(data.errors.join("; "));
+      if (data.ok){
+        q = q.filter(b => b !== batch);
+        anySuccess = true;
       }
-      if(!data.success && !data.error) throw new Error("Gagal mengirim data");
-      if(data.error) throw new Error(data.error);
-
-      mergeChangesIntoCache(changes);
-      mergeDeletesIntoCache(deletes);
-      savePending({});
-      savePendingDeletes([]);
-      updatePendingBadge();
-      renderTable(searchInput.value);
-      updateSyncStatus('<i class="bi bi-check-circle-fill me-1"></i>Berhasil kirim ' + totalCount + ' perubahan.', false);
-    }catch(err){
-      updateSyncStatus('<i class="bi bi-x-circle-fill me-1"></i>Gagal mengirim: ' + esc(err.message), true);
-    }finally{
-      sendBtn.disabled = false;
-      sendContent.innerHTML = originalContentHtml;
-    }
+    }catch(e){ /* stay offline, keep in queue */ }
   }
+  savePendingQueue(q);
+  if (anySuccess) toast('Catatan offline berhasil disinkronkan');
+}
 
-  function mergeDeletesIntoCache(deletes){
-    if(!deletes || deletes.length === 0) return;
-    const deleteSet = new Set(deletes);
-    const inventory = loadInventoryCache().filter(p => !deleteSet.has(p.barcode));
-    saveInventoryCache(inventory);
+/* ---------- Barcode scan (hardware / keyboard-wedge) ---------- */
+
+const barcodeInput = document.getElementById('barcodeInput');
+barcodeInput.addEventListener('keydown', (e)=>{
+  if (e.key === 'Enter'){
+    e.preventDefault();
+    handleBarcodeSubmit(barcodeInput.value);
   }
+});
 
-  function mergeChangesIntoCache(changes){
-    const master = loadMasterCache();
-    const inventory = loadInventoryCache();
+function handleBarcodeSubmit(raw){
+  const normalized = normalizeBarcode(raw);
+  if (!normalized){ return; }
+  processLookup({ barcode: normalized });
+  barcodeInput.value = '';
+}
 
-    changes.forEach(c => {
-      if(c.isNew || c.masterChanged){
-        const idx = master.findIndex(m => m.barcode === c.barcode);
-        const rec = { barcode: c.barcode, plu: c.plu, description: c.description };
-        if(idx === -1) master.push(rec); else master[idx] = rec;
-      }
-      const idx2 = inventory.findIndex(p => p.barcode === c.barcode);
-      const rec2 = { barcode: c.barcode, plu: c.plu, description: c.description, qty: c.qty };
-      if(idx2 === -1) inventory.push(rec2); else inventory[idx2] = rec2;
-    });
+/* ---------- Camera scan (BarcodeDetector) ---------- */
 
-    saveMasterCache(master);
-    saveInventoryCache(inventory);
+let camStream = null;
+let camLoopHandle = null;
+const camModalEl = document.getElementById('camModal');
+const camModal = new bootstrap.Modal(camModalEl);
+
+document.getElementById('btnOpenCam').addEventListener('click', openCamera);
+
+async function openCamera(){
+  const statusEl = document.getElementById('camStatus');
+  if (!('BarcodeDetector' in window)){
+    toast('Kamera scan tidak didukung di browser ini — gunakan scanner fisik atau ketik manual');
+    return;
   }
-
-  document.getElementById("btnRefreshSheet").addEventListener("click", () => fetchFromSheet());
-  document.getElementById("btnSendUpdate").addEventListener("click", () => sendUpdates());
-
-  // ---------- pengaturan ----------
-  document.getElementById("btnOpenSettings").addEventListener("click", function(){
-    document.getElementById("settingsUrlInput").value = getGasUrl() || "(belum diisi - edit GAS_WEB_APP_URL di kode)";
-    settingsModal.show();
-  });
-
-  document.getElementById("btnResetLocal").addEventListener("click", function(){
-    if(!confirm("Ini akan menghapus SEMUA data lokal (cache + perubahan belum dikirim) di perangkat ini. Lanjutkan?")) return;
-    localStorage.removeItem(LS_MASTER);
-    localStorage.removeItem(LS_INVENTORY);
-    localStorage.removeItem(LS_PENDING);
-    localStorage.removeItem(LS_PENDING_DELETES);
-    localStorage.removeItem(LS_LAST_SYNC);
-    updatePendingBadge();
-    renderTable("");
-    updateSyncStatus(esc("Data lokal direset."));
-    settingsModal.hide();
-  });
-
-  // ---------- export / import backup JSON (cache inventory efektif) ----------
-  document.getElementById("btnExport").addEventListener("click", function(){
-    const list = getEffectiveInventoryList();
-    const blob = new Blob([JSON.stringify(list, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "inventory-gudang-" + new Date().toISOString().slice(0,10) + ".json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  document.getElementById("btnImportTrigger").addEventListener("click", function(){
-    document.getElementById("importFile").click();
-  });
-
-  document.getElementById("importFile").addEventListener("change", function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(evt){
+  camModal.show();
+  statusEl.textContent = 'Mengaktifkan kamera…';
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const video = document.getElementById('camVideo');
+    video.srcObject = camStream;
+    const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128'] });
+    statusEl.textContent = 'Arahkan kamera ke barcode…';
+    const loop = async ()=>{
+      if (!camStream) return;
       try{
-        const data = JSON.parse(evt.target.result);
-        if(!Array.isArray(data)) throw new Error("Format tidak valid");
-        saveInventoryCache(data);
-        renderTable(searchInput.value);
-        alert("Import berhasil: " + data.length + " produk dimuat ke cache lokal.");
-      }catch(err){
-        alert("Gagal import file: " + err.message);
-      }
-      e.target.value = "";
+        const codes = await detector.detect(video);
+        if (codes.length > 0){
+          const val = codes[0].rawValue;
+          stopCamera();
+          camModal.hide();
+          handleBarcodeSubmit(val);
+          return;
+        }
+      }catch(e){ /* keep trying */ }
+      camLoopHandle = requestAnimationFrame(loop);
     };
-    reader.readAsText(file);
+    camLoopHandle = requestAnimationFrame(loop);
+  }catch(e){
+    statusEl.textContent = 'Tidak bisa mengakses kamera. Izinkan akses kamera lalu coba lagi.';
+  }
+}
+
+function stopCamera(){
+  if (camLoopHandle) cancelAnimationFrame(camLoopHandle);
+  if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream = null; }
+}
+camModalEl.addEventListener('hidden.bs.modal', stopCamera);
+
+/* ---------- Name search / autocomplete ---------- */
+
+const nameSearchInput = document.getElementById('nameSearchInput');
+const suggestList = document.getElementById('suggestList');
+
+nameSearchInput.addEventListener('input', ()=>{
+  const q = nameSearchInput.value;
+  if (!q.trim()){ suggestList.style.display = 'none'; suggestList.innerHTML=''; return; }
+  const hits = findByNameQuery(q);
+  if (hits.length === 0){
+    suggestList.innerHTML = `<div class="suggest-item text-muted">Tidak ditemukan — akan dianggap barang baru jika dilanjutkan</div>`;
+    suggestList.style.display = 'block';
+    return;
+  }
+  suggestList.innerHTML = hits.map(p => `
+    <div class="suggest-item" data-plu="${p.plu}">
+      ${escapeHtml(p.nama)}<span class="rak-chip">${escapeHtml(p.rak || '-')}</span>
+      <small>PLU ${escapeHtml(p.plu)} • Barcode ${escapeHtml(p.barcode)}</small>
+    </div>`).join('');
+  suggestList.style.display = 'block';
+});
+
+suggestList.addEventListener('click', (e)=>{
+  const item = e.target.closest('.suggest-item');
+  if (!item || !item.dataset.plu) return;
+  const p = MASTER.find(m => m.plu === item.dataset.plu);
+  if (p){
+    processLookup({ barcode: p.barcode });
+    nameSearchInput.value = '';
+    suggestList.style.display = 'none';
+  }
+});
+
+document.addEventListener('click', (e)=>{
+  if (!e.target.closest('#nameSearchInput') && !e.target.closest('#suggestList')){
+    suggestList.style.display = 'none';
+  }
+});
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- Lookup + result rendering ---------- */
+
+function processLookup({ barcode }){
+  const hit = findByBarcode(barcode);
+  const zone = document.getElementById('resultZone');
+  if (hit){
+    currentMatch = { ...hit, isNew:false };
+    zone.innerHTML = `
+      <div class="product-hit">
+        <div class="pname">${escapeHtml(hit.nama)}<span class="rak-chip"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(hit.rak || 'Tanpa Rak')}</span></div>
+        <div class="pmeta">PLU ${escapeHtml(hit.plu)} • Barcode ${escapeHtml(hit.barcode)}</div>
+        <div class="qty-row">
+          <button class="qty-btn" id="qtyMinus">–</button>
+          <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
+          <button class="qty-btn" id="qtyPlus">+</button>
+          <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
+        </div>
+      </div>`;
+    bindQtyControls();
+  } else {
+    currentMatch = { plu:'', nama:'', barcode, rak:'', isNew:true };
+    zone.innerHTML = `
+      <div class="not-found-box">
+        <div><i class="bi bi-exclamation-triangle-fill text-warning"></i> Produk belum terdaftar di master data (barcode: ${escapeHtml(barcode)}). Lengkapi datanya sekali di sini — otomatis tersimpan di master untuk scan berikutnya.</div>
+        <div class="mt-2">
+          <label class="form-label-sm">PLU</label>
+          <input type="text" class="form-control mb-2" id="newPlu" placeholder="Masukkan PLU">
+          <label class="form-label-sm">Nama / Deskripsi Barang</label>
+          <input type="text" class="form-control mb-2" id="newNama" placeholder="Masukkan nama/deskripsi barang">
+          <label class="form-label-sm">Rak</label>
+          <input type="text" class="form-control" id="newRak" placeholder="Masukkan rak/lokasi barang">
+        </div>
+        <div class="qty-row">
+          <button class="qty-btn" id="qtyMinus">–</button>
+          <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
+          <button class="qty-btn" id="qtyPlus">+</button>
+          <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
+        </div>
+      </div>`;
+    bindQtyControls();
+  }
+}
+
+function bindQtyControls(){
+  document.getElementById('qtyMinus').addEventListener('click', ()=>{
+    const el = document.getElementById('qtyValue');
+    el.value = Math.max(1, (parseInt(el.value)||1) - 1);
   });
+  document.getElementById('qtyPlus').addEventListener('click', ()=>{
+    const el = document.getElementById('qtyValue');
+    el.value = (parseInt(el.value)||1) + 1;
+  });
+  document.getElementById('btnAddCart').addEventListener('click', addCurrentToCart);
+}
 
-  // ---------- init ----------
-  document.addEventListener("DOMContentLoaded", function(){
-    editModal = new bootstrap.Modal(document.getElementById("editModal"));
-    resultModal = new bootstrap.Modal(document.getElementById("resultModal"));
-    cameraModal = new bootstrap.Modal(document.getElementById("cameraModal"));
-    actionSheetModal = new bootstrap.Modal(document.getElementById("actionSheetModal"));
-    settingsModal = new bootstrap.Modal(document.getElementById("settingsModal"));
-    manualSearchModal = new bootstrap.Modal(document.getElementById("manualSearchModal"));
+function addCurrentToCart(){
+  if (!currentMatch) return;
+  const qty = Math.max(1, parseInt(document.getElementById('qtyValue').value) || 1);
 
-    renderTable("");
-    updatePendingBadge();
-
-    if(getGasUrl()){
-      fetchFromSheet();
-    } else {
-      updateSyncStatus(esc("URL GAS belum diisi di kode. Edit variabel GAS_WEB_APP_URL di script."), true);
+  if (currentMatch.isNew){
+    const plu = document.getElementById('newPlu').value.trim();
+    const nama = document.getElementById('newNama').value.trim();
+    const rak = document.getElementById('newRak').value.trim();
+    if (!plu || !nama || !rak){
+      toast('Isi PLU, Nama/Deskripsi, dan Rak terlebih dahulu');
+      return;
     }
+    currentMatch.plu = plu;
+    currentMatch.nama = nama;
+    currentMatch.rak = rak;
+    // Tambahkan ke cache master lokal supaya langsung dikenali (lengkap dengan rak) di scan berikutnya
+    MASTER.push({ plu, nama, barcode: currentMatch.barcode, rak });
+    saveMasterToCache();
+  }
 
-    scanInput.focus();
+  const rak = currentMatch.rak || 'Tanpa Rak';
+
+  // Barang yang sama digabung qty-nya
+  const existing = CART.find(c => c.barcode === currentMatch.barcode);
+  if (existing){
+    existing.qty += qty;
+  } else {
+    CART.push({ id: cartIdSeq++, plu: currentMatch.plu, nama: currentMatch.nama, barcode: currentMatch.barcode, rak, qty, isNew: !!currentMatch.isNew });
+  }
+
+  renderCart();
+  document.getElementById('resultZone').innerHTML = '';
+  currentMatch = null;
+  toast(`Ditambahkan — rak "${rak}"`);
+}
+
+/* ---------- Cart (grouped by rak, automatic) ---------- */
+
+function renderCart(){
+  const list = document.getElementById('cartList');
+  document.getElementById('cartCount').textContent = CART.length;
+  document.getElementById('submitCount').textContent = CART.reduce((s,c)=>s+c.qty,0);
+
+  if (CART.length === 0){
+    list.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada barang dicatat</div>`;
+    return;
+  }
+
+  const rakNames = [...new Set(CART.map(c => c.rak))].sort((a,b)=> a.localeCompare(b, 'id'));
+
+  list.innerHTML = rakNames.map(rak => {
+    const items = CART.filter(c => c.rak === rak);
+    const totalQty = items.reduce((s,c)=>s+c.qty,0);
+    return `
+      <div class="rak-group">
+        <div class="rak-group-head">
+          <span><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(rak)}</span>
+          <span class="rak-total">${totalQty} pcs</span>
+        </div>
+        ${items.map(c => `
+          <div class="cart-item">
+            <div>
+              <div class="ci-name">${escapeHtml(c.nama)}${c.isNew ? '<span class="badge-new">BARU</span>' : ''}</div>
+              <div class="ci-meta">PLU ${escapeHtml(c.plu)} • Barcode ${escapeHtml(c.barcode)}</div>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="ci-qty">${c.qty}</span>
+              <button class="btn btn-sm btn-af-outline" data-remove="${c.id}" style="padding:.15rem .5rem;"><i class="bi bi-trash3"></i></button>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-remove]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = parseInt(btn.dataset.remove);
+      CART = CART.filter(c => c.id !== id);
+      renderCart();
+    });
   });
+}
+
+document.getElementById('btnClearCart').addEventListener('click', ()=>{
+  if (CART.length === 0) return;
+  if (confirm('Kosongkan seluruh daftar catatan?')){
+    CART = [];
+    renderCart();
+  }
+});
+
+/* ---------- Submit ---------- */
+
+document.getElementById('btnSubmitCart').addEventListener('click', submitCart);
+
+async function submitCart(){
+  if (CART.length === 0){
+    toast('Daftar catatan masih kosong');
+    return;
+  }
+
+  const batch = {
+    timestamp: new Date().toISOString(),
+    items: CART.map(c => ({ plu:c.plu, nama:c.nama, barcode:c.barcode, rak:c.rak, qty:c.qty, isNew: !!c.isNew }))
+  };
+
+  const url = getScriptUrl();
+  let sent = false;
+  if (url && navigator.onLine){
+    try{
+      const res = await fetch(url, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'submitStok', ...batch })
+      });
+      const data = await res.json();
+      sent = !!data.ok;
+    }catch(e){ sent = false; }
+  }
+
+  if (sent){
+    toast('Stok berhasil disimpan');
+    loadHistory();
+  } else {
+    const q = getPendingQueue();
+    q.push(batch);
+    savePendingQueue(q);
+    toast('Tersimpan offline — akan dikirim otomatis saat online');
+  }
+
+  CART = [];
+  renderCart();
+}
+
+/* ---------- History (grouped by rak, with rak filter + qty edit) ---------- */
+
+let HISTORY_ITEMS = []; // cache of last fetch (respects date filter only)
+
+function todayLocalStr(){
+  const d = new Date();
+  const tzOff = d.getTimezoneOffset() * 60000;
+  return new Date(d - tzOff).toISOString().slice(0,10);
+}
+
+async function loadHistory(){
+  const url = getScriptUrl();
+  const histList = document.getElementById('histList');
+  const histSummary = document.getElementById('histSummary');
+
+  if (!url){
+    histList.innerHTML = `<div class="empty-state"><i class="bi bi-gear"></i>Atur Apps Script URL di tab Pengaturan dulu</div>`;
+    histSummary.textContent = '';
+    return;
+  }
+  histList.innerHTML = `<div class="empty-state"><i class="bi bi-hourglass-split"></i>Memuat riwayat…</div>`;
+  histSummary.textContent = '';
+  const dateVal = document.getElementById('histDateFilter').value;
+  try{
+    const qs = dateVal ? `&date=${encodeURIComponent(dateVal)}` : '';
+    const res = await fetch(url + '?action=getHistory' + qs);
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.items)){
+      HISTORY_ITEMS = data.items;
+      refreshHistRakFilterOptions();
+      applyHistoryFilterAndRender();
+    } else {
+      HISTORY_ITEMS = [];
+      histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada riwayat${dateVal ? ' untuk tanggal ini' : ''}</div>`;
+    }
+  }catch(e){
+    histList.innerHTML = `<div class="empty-state"><i class="bi bi-wifi-off"></i>Tidak bisa memuat riwayat (offline)</div>`;
+  }
+}
+
+// Isi opsi dropdown filter rak dari gabungan rak di Master Produk + rak yang
+// muncul di riwayat (jaga-jaga ada rak lama yang sudah tak ada di master).
+function refreshHistRakFilterOptions(){
+  const sel = document.getElementById('histRakFilter');
+  const prevVal = sel.value;
+  const rakSet = new Set();
+  MASTER.forEach(p => { if (p.rak) rakSet.add(p.rak); });
+  HISTORY_ITEMS.forEach(r => { if (r.rak) rakSet.add(r.rak); });
+  const rakNames = [...rakSet].sort((a,b)=> a.localeCompare(b, 'id'));
+
+  sel.innerHTML = '<option value="">Semua Rak</option>' +
+    rakNames.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
+
+  if (rakNames.includes(prevVal)) sel.value = prevVal;
+}
+
+function applyHistoryFilterAndRender(){
+  const histList = document.getElementById('histList');
+  const histSummary = document.getElementById('histSummary');
+  const dateVal = document.getElementById('histDateFilter').value;
+  const rakVal = document.getElementById('histRakFilter').value;
+
+  const filtered = rakVal
+    ? HISTORY_ITEMS.filter(r => (r.rak || '') === rakVal)
+    : HISTORY_ITEMS;
+
+  if (filtered.length === 0){
+    histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada riwayat${rakVal ? ' untuk rak ini' : ''}${dateVal ? ' pada tanggal ini' : ''}</div>`;
+    histSummary.textContent = '';
+    return;
+  }
+
+  renderHistoryGrouped(filtered);
+  const totalQty = filtered.reduce((s,r)=>s+(Number(r.qty)||0),0);
+  const rakCount = new Set(filtered.map(r=>r.rak || '(Tanpa Rak)')).size;
+  histSummary.textContent = `${filtered.length} catatan • ${totalQty} pcs • ${rakCount} rak` +
+    (rakVal ? ` • Rak: ${rakVal}` : '') + (dateVal ? ` • ${dateVal}` : '');
+}
+
+document.getElementById('histRakFilter').addEventListener('change', applyHistoryFilterAndRender);
+
+function renderHistoryGrouped(items){
+  const histList = document.getElementById('histList');
+
+  const groups = {};
+  items.forEach(row => {
+    const rak = row.rak && String(row.rak).trim() ? String(row.rak).trim() : '(Tanpa Rak)';
+    if (!groups[rak]) groups[rak] = [];
+    groups[rak].push(row);
+  });
+
+  const rakNames = Object.keys(groups).sort((a,b)=> a.localeCompare(b, 'id'));
+
+  histList.innerHTML = rakNames.map((rak, idx) => {
+    const rows = groups[rak].slice().sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
+    const totalQty = rows.reduce((s,r)=>s+(Number(r.qty)||0),0);
+    return `
+      <details class="rak-accordion" ${idx === 0 ? 'open' : ''}>
+        <summary>
+          <span><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(rak)}</span>
+          <span class="rak-summary-meta">${rows.length} item • ${totalQty} pcs <i class="bi bi-chevron-down chev"></i></span>
+        </summary>
+        <div class="rak-accordion-body">
+          ${rows.map(row => `
+            <div class="hist-row" data-row="${row.row}">
+              <div class="hist-row-body">
+                <div class="hist-top">
+                  <span class="hist-name">${escapeHtml(row.nama)}</span>
+                  <span class="hist-qty-wrap">
+                    <span class="hist-qty">${escapeHtml(String(row.qty))}</span>
+                    <button class="hist-edit-btn" data-edit-row="${row.row}" data-qty="${row.qty}" title="Edit qty"><i class="bi bi-pencil-fill"></i></button>
+                  </span>
+                </div>
+                <div class="hist-meta">PLU ${escapeHtml(row.plu)} • ${new Date(row.timestamp).toLocaleString('id-ID')}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </details>`;
+  }).join('');
+}
+
+// Delegasi klik untuk tombol edit qty di riwayat
+document.getElementById('histList').addEventListener('click', (e)=>{
+  const editBtn = e.target.closest('.hist-edit-btn');
+  if (editBtn){
+    startEditQty(editBtn.closest('.hist-row'), Number(editBtn.dataset.editRow), Number(editBtn.dataset.qty));
+    return;
+  }
+  const saveBtn = e.target.closest('.hist-qty-save');
+  if (saveBtn){
+    const wrap = saveBtn.closest('.hist-qty-wrap');
+    const input = wrap.querySelector('.hist-qty-edit-input');
+    saveEditQty(Number(saveBtn.dataset.row), input.value);
+    return;
+  }
+  const cancelBtn = e.target.closest('.hist-qty-cancel');
+  if (cancelBtn){
+    applyHistoryFilterAndRender();
+    return;
+  }
+});
+
+function startEditQty(rowEl, rowId, currentQty){
+  const wrap = rowEl.querySelector('.hist-qty-wrap');
+  wrap.innerHTML = `
+    <input type="number" min="0" class="form-control hist-qty-edit-input" value="${currentQty}" style="width:64px; display:inline-block; padding:.2rem .4rem; font-weight:700;">
+    <button class="hist-qty-save" data-row="${rowId}" title="Simpan"><i class="bi bi-check-circle-fill text-success"></i></button>
+    <button class="hist-qty-cancel" title="Batal"><i class="bi bi-x-circle-fill text-danger"></i></button>`;
+  wrap.querySelector('.hist-qty-edit-input').focus();
+}
+
+async function saveEditQty(rowId, newQtyRaw){
+  const newQty = Number(newQtyRaw);
+  if (isNaN(newQty) || newQty < 0){
+    toast('Qty tidak valid');
+    return;
+  }
+  const url = getScriptUrl();
+  if (!url){ toast('Atur Apps Script URL dulu di tab Pengaturan'); return; }
+  if (!navigator.onLine){ toast('Perlu koneksi internet untuk mengubah qty yang sudah terkirim'); return; }
+
+  try{
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'updateQty', row: rowId, qty: newQty })
+    });
+    const data = await res.json();
+    if (data.ok){
+      const item = HISTORY_ITEMS.find(r => r.row === rowId);
+      if (item) item.qty = newQty;
+      toast('Qty berhasil diperbarui');
+      applyHistoryFilterAndRender();
+    } else {
+      toast('Gagal update qty — coba lagi');
+    }
+  }catch(e){
+    toast('Gagal update qty — periksa koneksi');
+  }
+}
+
+document.getElementById('btnRefreshHist').addEventListener('click', loadHistory);
+
+document.getElementById('histDateFilter').addEventListener('change', ()=>{
+  document.getElementById('histDateFilter').dataset.touched = '1';
+  loadHistory();
+});
+document.getElementById('btnHistAll').addEventListener('click', ()=>{
+  const el = document.getElementById('histDateFilter');
+  el.value = '';
+  el.dataset.touched = '1';
+  loadHistory();
+});
+
+/* ---------- Settings ---------- */
+
+document.getElementById('toggleUrlOverride').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const wrap = document.getElementById('urlOverrideWrap');
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+});
+
+function renderServerUrlInfo(){
+  const info = document.getElementById('serverUrlInfo');
+  if (hasHardcodedUrl()){
+    info.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Server sudah terhubung otomatis.`;
+  } else if (localStorage.getItem(LS_KEYS.scriptUrl)){
+    info.innerHTML = `<i class="bi bi-info-circle-fill text-primary"></i> Terhubung lewat URL manual (override).`;
+  } else {
+    info.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Belum terhubung ke server.`;
+  }
+}
+
+document.getElementById('btnSaveUrl').addEventListener('click', async ()=>{
+  const val = document.getElementById('scriptUrlInput').value.trim();
+  if (!val){ toast('Masukkan URL terlebih dahulu'); return; }
+  localStorage.setItem(LS_KEYS.scriptUrl, val);
+  renderServerUrlInfo();
+  await fetchMasterFromServer();
+  await trySyncPending();
+});
+document.getElementById('btnResyncMaster').addEventListener('click', fetchMasterFromServer);
+
+/* ---------- Tabs ---------- */
+
+document.querySelectorAll('.tabbar button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbar button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'tab-history'){
+      const dateInput = document.getElementById('histDateFilter');
+      if (!dateInput.dataset.touched) dateInput.value = todayLocalStr();
+      loadHistory();
+    }
+  });
+});
+
+document.getElementById('btnSyncNow').addEventListener('click', trySyncPending);
+window.addEventListener('online', trySyncPending);
+
+/* ---------- Init ---------- */
+
+(function init(){
+  // Muat master data (rak, plu, barcode, deskripsi) dari cache dulu supaya
+  // langsung siap dipakai walau baru buka halaman / lagi offline.
+  loadMasterFromCache();
+  const savedUrl = getScriptUrl();
+  const overrideUrl = localStorage.getItem(LS_KEYS.scriptUrl);
+  if (overrideUrl) document.getElementById('scriptUrlInput').value = overrideUrl;
+  renderServerUrlInfo();
+
+  refreshSyncBanner();
+  updateLocalStats();
+
+  // Ambil master data terbaru dari server saat halaman dimuat, supaya rak,
+  // plu, barcode, dan deskripsi semua produk sudah tersedia sebelum user scan.
+  if (savedUrl){
+    fetchMasterFromServer().then(()=> trySyncPending());
+  } else {
+    document.getElementById('masterStatus').textContent = 'Belum terhubung ke server — atur URL di tab Pengaturan.';
+  }
 })();
 </script>
 </body>
