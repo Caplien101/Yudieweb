@@ -156,18 +156,6 @@
   details.rak-accordion[open] summary .chev{transform:rotate(180deg);}
   details.rak-accordion summary .rak-summary-meta{font-weight:600; color:var(--af-red); font-size:.8rem;}
   .rak-accordion-body{padding:4px 14px 8px;}
-  .hist-row{border-bottom:1px solid var(--border); padding:9px 0; font-size:.85rem; display:flex; gap:10px; align-items:flex-start;}
-  .hist-row:last-child{border-bottom:none;}
-  .hist-row-body{flex:1; min-width:0;}
-  .hist-top{display:flex; align-items:center; gap:8px;}
-  .hist-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .hist-qty{flex:0 0 auto; text-align:right; font-weight:700; color:var(--af-red);}
-  .hist-qty-wrap{display:flex; align-items:center; gap:6px; flex:0 0 auto;}
-  .hist-edit-btn, .hist-qty-save, .hist-qty-cancel{
-    border:none; background:none; padding:2px 4px; font-size:.95rem; color:var(--text-sub); line-height:1;
-  }
-  .hist-edit-btn:hover{color:var(--af-blue);}
-  .hist-meta{color:var(--text-sub); font-size:.72rem; margin-top:2px;}
 
   .sync-banner{
     background:#FFF3CD; color:#8A6D00; font-size:.78rem; text-align:center;
@@ -183,6 +171,40 @@
   }
   .toast-af.show{opacity:1; top:18px;}
   .form-label-sm{font-size:.78rem; font-weight:600; color:var(--text-sub); margin-bottom:4px;}
+  .view-toggle{display:flex; gap:8px;}
+  .view-toggle-btn{
+    flex:1; border:1.5px solid var(--border); background:#fff; color:var(--text-sub);
+    border-radius:var(--radius-sm); padding:.5rem .4rem; font-size:.78rem; font-weight:700;
+  }
+  .view-toggle-btn.active{border-color:var(--af-red); background:#FFF0F0; color:var(--af-red);}
+  .zona-chip-row{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; -webkit-overflow-scrolling:touch;}
+  .zona-chip-row::-webkit-scrollbar{display:none;}
+  .zona-chip{
+    flex:0 0 auto; white-space:nowrap; border-radius:20px; border:1.5px solid var(--border);
+    background:#fff; color:var(--text-sub); font-weight:700; font-size:.78rem; padding:.4rem .9rem;
+  }
+  .zona-chip.active{border-color:var(--af-blue); background:#EAF0FF; color:var(--af-blue);}
+
+  .hist-card{
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:9px 11px; margin-bottom:8px; background:#fff;
+  }
+  .hist-card-row1{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .hist-card-name{font-weight:700; font-size:.85rem; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .hist-card-edit-btn{border:none; background:none; color:var(--af-blue); font-size:1rem; padding:2px 4px; flex:0 0 auto; line-height:1;}
+  .hist-card-meta{font-size:.72rem; color:var(--text-sub); margin-top:1px;}
+  .hist-barcode{display:block; width:100%; height:34px; margin:5px 0 1px;}
+  .hist-card-row2{display:flex; justify-content:space-between; align-items:flex-end; gap:8px; margin-top:4px;}
+  .hist-card-locs{font-size:.7rem; color:var(--text-sub); flex:1; min-width:0; line-height:1.35;}
+  .hist-card-qty{font-weight:700; color:var(--af-red); font-size:.88rem; flex:0 0 auto; white-space:nowrap;}
+
+  .edit-qty-row{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid var(--border);}
+  .edit-qty-row:last-child{border-bottom:none;}
+  .eqr-label{font-size:.82rem; flex:1; min-width:0;}
+  .eqr-meta{font-size:.7rem; color:var(--text-sub); margin-top:1px;}
+  .eqr-controls{display:flex; gap:6px; align-items:center; flex:0 0 auto;}
+  .eqr-input{width:66px; text-align:center; padding:.3rem .3rem; font-weight:700;}
+  .eqr-save{width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center;}
 </style>
 </head>
 <body>
@@ -206,6 +228,16 @@
   <div class="tab-pane active" id="tab-catat">
 
     <div class="card-ios">
+      <h2><i class="bi bi-diagram-3-fill"></i> Zona Penyimpanan</h2>
+      <select class="form-select" id="currentZonaInput">
+        <option value="">Pilih zona (900–915)…</option>
+      </select>
+      <div style="font-size:.72rem; color:var(--text-sub); margin-top:6px;">
+        Pilih zona tempat kamu berada sekarang. Barang yang di-scan berikutnya akan dicatat masuk ke zona ini — ganti dulu kalau pindah zona. Zona ini hanya menandai lokasi penyimpanan saat disimpan; tidak memengaruhi pencarian/pencocokan produk di master data.
+      </div>
+    </div>
+
+    <div class="card-ios">
       <h2><i class="bi bi-upc-scan"></i> Scan / Cari Barang</h2>
       <div class="scan-row">
         <input type="text" class="form-control" id="barcodeInput" placeholder="Scan barcode atau ketik lalu Enter" autocomplete="off" inputmode="numeric">
@@ -217,6 +249,7 @@
       </div>
 
       <div id="resultZone"></div>
+      <datalist id="rakDatalistCatat"></datalist>
     </div>
 
     <div class="card-ios">
@@ -238,17 +271,23 @@
   <div class="tab-pane" id="tab-history">
     <div class="card-ios">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2 class="mb-0"><i class="bi bi-clock-history"></i> Riwayat per Rak</h2>
+        <h2 class="mb-0"><i class="bi bi-clock-history"></i> Riwayat</h2>
         <button class="btn btn-sm btn-blue" id="btnRefreshHist" style="font-size:.72rem; padding:.25rem .6rem;">
           <i class="bi bi-arrow-clockwise"></i> Muat ulang
         </button>
       </div>
-      <div class="d-flex gap-2 align-items-center mb-1">
-        <input type="date" class="form-control" id="histDateFilter" style="flex:1;">
-        <button class="btn btn-af-outline" id="btnHistAll" style="font-size:.78rem; padding:.5rem .7rem; white-space:nowrap;">Semua</button>
+      <div class="view-toggle mb-2">
+        <button type="button" class="view-toggle-btn active" id="viewPerRakBtn" data-mode="perRak"><i class="bi bi-geo-alt-fill"></i> Per Rak</button>
+        <button type="button" class="view-toggle-btn" id="viewPerZonaBtn" data-mode="perZona"><i class="bi bi-diagram-3-fill"></i> Per Zona</button>
+        <button type="button" class="view-toggle-btn" id="viewPerProdukBtn" data-mode="perProduk"><i class="bi bi-boxes"></i> Per Produk</button>
       </div>
-      <div class="mb-1">
-        <select class="form-select" id="histRakFilter">
+      <div class="position-relative mb-2">
+        <input type="text" class="form-control" id="histSearchInput" placeholder="Cari produk (nama atau PLU)…" autocomplete="off">
+      </div>
+      <div class="form-label-sm mb-1">Filter Zona</div>
+      <div class="zona-chip-row mb-2" id="histZonaChips"></div>
+      <div id="histRakFilterWrap">
+        <select class="form-select mb-1" id="histRakFilter">
           <option value="">Semua Rak</option>
         </select>
       </div>
@@ -307,30 +346,56 @@
   </div>
 </div>
 
+<!-- Edit Qty modal -->
+<div class="modal fade" id="editQtyModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="editQtyModalTitle"><i class="bi bi-pencil-fill"></i> Edit Qty</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="editQtyModalBody"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast-af" id="toastAf"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
 <script>
 /* =========================================================
    CATAT STOK GUDANG — Alfamart Cut Mutia
    Diturunkan dari app "Request Barang Rak". Single-file app.
 
    Master data (rak, plu, barcode, deskripsi) dimuat SEKALI saat
-   halaman dibuka / disinkronkan, dan setiap produk SUDAH punya
-   rak-nya masing-masing di master data. User hanya scan/cari
-   barang lalu isi qty — rak & grouping terjadi otomatis
-   berdasarkan data master, tanpa perlu pilih rak manual.
+   halaman dibuka / disinkronkan. Master Produk TIDAK memiliki
+   kolom Zona — pencarian & pencocokan barcode/nama tidak pernah
+   dikunci oleh zona. Zona (900-915) murni menandai "aku sedang
+   berada di zona mana sekarang" dan dipakai untuk MENANDAI setiap
+   catatan yang dikirim ke sheet "Stok Gudang" (lokasi peletakan
+   barang saat itu), bukan sebagai kunci pencocokan produk.
+   Satu produk (barcode) boleh ada di beberapa rak sekaligus.
 
    Kontrak API yang diharapkan dari Apps Script Web App:
    - GET  ?action=getMaster
          -> { ok:true, items:[{plu,nama,barcode,rak}, ...] }
-           (nama = deskripsi barang; rak = lokasi rak barang tsb)
+           (nama = deskripsi barang; rak = lokasi rak; barcode = versi
+            ternormalisasi, dipakai untuk pencocokan. Tidak ada zona.)
    - POST { action:'submitStok', timestamp,
-            items:[{plu,nama,barcode,rak,qty,isNew}, ...] }
+            items:[{plu,nama,barcode,rawBarcode,rak,zona,qty,isNew}, ...] }
          -> { ok:true }
+           (zona di sini adalah zona tempat user berada saat mencatat,
+            dikirim apa adanya ke sheet Stok Gudang untuk pelacakan lokasi.
+            barcode = versi ternormalisasi, dipakai server untuk mencocokkan
+            / menambah baris Master Produk; rawBarcode = barcode ASLI hasil
+            scan kamera/scanner, INI yang disimpan ke kolom Barcode sheet
+            Stok Gudang & yang dirender sebagai kode batang di riwayat.)
    - GET  ?action=getHistory[&date=YYYY-MM-DD]
-         -> { ok:true, items:[{row,plu,nama,barcode,rak,qty,timestamp}, ...] }
-           (row = nomor baris asli di sheet Stok Gudang, dipakai untuk edit qty)
+         -> { ok:true, items:[{row,plu,nama,barcode,rak,zona,qty,timestamp}, ...] }
+           (row = nomor baris asli di sheet Stok Gudang, dipakai untuk edit qty.
+            barcode di sini adalah barcode ASLI hasil scan, bukan versi
+            ternormalisasi — sesuai apa yang tersimpan di Stok Gudang.)
    - POST { action:'updateQty', row, qty }
          -> { ok:true }
    ========================================================= */
@@ -339,18 +404,19 @@
 // pencatatan stok gudang ini di-deploy. Kalau sudah tetap, tempel di sini
 // supaya semua petugas langsung bisa pakai tanpa isi URL manual.
 const CONFIG = {
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyi2lh_6LjYALmtpKXePELzj_4bUudisiDdgPIC0yzYcJdjknsTTZmv35rPTiGlaXKx6g/exec'
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw9dD4W32Fu_jl3TCk3vvvux20vM01mpqT2rsk42QcMcH43AHdxHi4BwC-3lU_U3xeSKA/exec'
 };
 
 const LS_KEYS = {
   scriptUrl: 'gs_scriptUrl',
-  master: 'gs_master',          // cached master data array (plu, nama, barcode, rak)
+  master: 'gs_master',          // cached master data array (plu, nama, barcode, rak) — no zona
   masterUpdated: 'gs_master_ts',
-  pending: 'gs_pendingStok'     // offline queue of not-yet-synced batches
+  pending: 'gs_pendingStok',    // offline queue of not-yet-synced batches
+  currentZona: 'gs_currentZona'
 };
 
-let MASTER = [];        // [{plu, nama, barcode, rak}]
-let CART = [];          // [{id, plu, nama, barcode, rak, qty, isNew}]
+let MASTER = [];        // [{plu, nama, barcode, rak}]  — no zona field
+let CART = [];          // [{id, plu, nama, barcode, rak, zona, qty, isNew}]
 let currentMatch = null;
 let cartIdSeq = 1;
 
@@ -400,20 +466,37 @@ function loadMasterFromCache(){
 function saveMasterToCache(){
   localStorage.setItem(LS_KEYS.master, JSON.stringify(MASTER));
   localStorage.setItem(LS_KEYS.masterUpdated, new Date().toISOString());
+  refreshRakDatalist();
 }
 
-function findByBarcode(code){
-  if (!code) return null;
-  return MASTER.find(p => p.barcode === code) || null;
+// Isi datalist saran rak (dipakai saat input rak untuk produk baru / lokasi baru).
+// Tidak lagi disaring oleh zona — master data tidak mengenal zona, jadi semua
+// rak yang pernah dipakai selalu disarankan apa pun zona yang sedang dipilih.
+function refreshRakDatalist(){
+  const dl = document.getElementById('rakDatalistCatat');
+  if (!dl) return;
+  const rakSet = new Set();
+  MASTER.forEach(p => { if (p.rak) rakSet.add(p.rak); });
+  dl.innerHTML = [...rakSet].sort((a,b)=> a.localeCompare(b, 'id'))
+    .map(r => `<option value="${escapeHtml(r)}">`).join('');
+}
+
+// Produk yang sama bisa berada di lebih dari satu rak — jadi satu barcode
+// bisa punya beberapa baris master (rak berbeda-beda). Dipakai saat scan
+// untuk mendeteksi apakah perlu tampilkan pilihan lokasi. TIDAK difilter zona.
+function findAllByBarcode(code){
+  if (!code) return [];
+  return MASTER.filter(p => p.barcode === code);
 }
 
 // Barang baru yang ditambahkan saat offline (isNew, belum sync ke sheet) harus
 // tetap dikenali lokal walau MASTER ditimpa ulang oleh fetch server terbaru.
+// Kunci kecocokan: barcode + rak saja (zona bukan bagian dari master).
 function mergePendingNewItemsIntoMaster_(){
   const pendingNewItems = getPendingQueue().flatMap(b => (b.items || []).filter(it => it.isNew));
   let changed = false;
   pendingNewItems.forEach(it=>{
-    if (!MASTER.find(m => m.barcode === it.barcode)){
+    if (!MASTER.find(m => m.barcode === it.barcode && normalize(m.rak) === normalize(it.rak))){
       MASTER.push({ plu: it.plu, nama: it.nama, barcode: it.barcode, rak: it.rak });
       changed = true;
     }
@@ -421,6 +504,7 @@ function mergePendingNewItemsIntoMaster_(){
   if (changed) saveMasterToCache();
 }
 
+// Cari produk berdasarkan nama/PLU — tidak lagi disaring oleh zona.
 function findByNameQuery(q){
   const nq = normalize(q);
   if (!nq) return [];
@@ -525,10 +609,25 @@ barcodeInput.addEventListener('keydown', (e)=>{
   }
 });
 
+function requireZonaSelected(){
+  const zona = document.getElementById('currentZonaInput').value;
+  if (!zona){
+    toast('Pilih Zona Penyimpanan terlebih dahulu');
+    document.getElementById('currentZonaInput').focus();
+    return false;
+  }
+  return true;
+}
+
 function handleBarcodeSubmit(raw){
-  const normalized = normalizeBarcode(raw);
+  if (!requireZonaSelected()) return;
+  const rawTrimmed = String(raw || '').trim();
+  const normalized = normalizeBarcode(rawTrimmed);
   if (!normalized){ return; }
-  processLookup({ barcode: normalized });
+  // barcode (normalized) dipakai untuk mencocokkan ke Master Produk;
+  // rawBarcode (utuh, apa adanya hasil scan) yang nanti dikirim & disimpan
+  // ke database (Stok Gudang) serta dirender sebagai kode batang di riwayat.
+  processLookup({ barcode: normalized, rawBarcode: rawTrimmed });
   barcodeInput.value = '';
 }
 
@@ -539,7 +638,10 @@ let camLoopHandle = null;
 const camModalEl = document.getElementById('camModal');
 const camModal = new bootstrap.Modal(camModalEl);
 
-document.getElementById('btnOpenCam').addEventListener('click', openCamera);
+document.getElementById('btnOpenCam').addEventListener('click', ()=>{
+  if (!requireZonaSelected()) return;
+  openCamera();
+});
 
 async function openCamera(){
   const statusEl = document.getElementById('camStatus');
@@ -596,7 +698,7 @@ nameSearchInput.addEventListener('input', ()=>{
     return;
   }
   suggestList.innerHTML = hits.map(p => `
-    <div class="suggest-item" data-plu="${p.plu}">
+    <div class="suggest-item" data-plu="${p.plu}" data-barcode="${p.barcode}">
       ${escapeHtml(p.nama)}<span class="rak-chip">${escapeHtml(p.rak || '-')}</span>
       <small>PLU ${escapeHtml(p.plu)} • Barcode ${escapeHtml(p.barcode)}</small>
     </div>`).join('');
@@ -605,13 +707,13 @@ nameSearchInput.addEventListener('input', ()=>{
 
 suggestList.addEventListener('click', (e)=>{
   const item = e.target.closest('.suggest-item');
-  if (!item || !item.dataset.plu) return;
-  const p = MASTER.find(m => m.plu === item.dataset.plu);
-  if (p){
-    processLookup({ barcode: p.barcode });
-    nameSearchInput.value = '';
-    suggestList.style.display = 'none';
-  }
+  if (!item || !item.dataset.barcode) return;
+  if (!requireZonaSelected()) return;
+  // Dipilih lewat pencarian nama (bukan scan) — tidak ada barcode "asli" hasil
+  // kamera di sini, jadi rawBarcode memakai barcode master apa adanya.
+  processLookup({ barcode: item.dataset.barcode, rawBarcode: item.dataset.barcode });
+  nameSearchInput.value = '';
+  suggestList.style.display = 'none';
 });
 
 document.addEventListener('click', (e)=>{
@@ -626,45 +728,114 @@ function escapeHtml(s){
 
 /* ---------- Lookup + result rendering ---------- */
 
-function processLookup({ barcode }){
-  const hit = findByBarcode(barcode);
-  const zone = document.getElementById('resultZone');
-  if (hit){
-    currentMatch = { ...hit, isNew:false };
-    zone.innerHTML = `
-      <div class="product-hit">
-        <div class="pname">${escapeHtml(hit.nama)}<span class="rak-chip"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(hit.rak || 'Tanpa Rak')}</span></div>
-        <div class="pmeta">PLU ${escapeHtml(hit.plu)} • Barcode ${escapeHtml(hit.barcode)}</div>
-        <div class="qty-row">
-          <button class="qty-btn" id="qtyMinus">–</button>
-          <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
-          <button class="qty-btn" id="qtyPlus">+</button>
-          <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
-        </div>
-      </div>`;
-    bindQtyControls();
+// Pencarian/pencocokan produk TIDAK dikunci oleh zona — master data hanya
+// berisi plu, nama, barcode, rak. Zona yang sedang dipilih hanya dipakai
+// nanti untuk MENANDAI catatan (lokasi peletakan) saat ditambahkan ke cart.
+// `barcode` (sudah dinormalisasi) dipakai untuk mencocokkan ke Master Produk;
+// `rawBarcode` (utuh, apa adanya hasil scan) hanya dibawa serta untuk nanti
+// dikirim & disimpan ke database serta dirender sebagai kode batang.
+function processLookup({ barcode, rawBarcode }){
+  const allMatches = findAllByBarcode(barcode);
+  const raw = rawBarcode || barcode;
+
+  if (allMatches.length === 0){
+    // Barcode ini belum dikenal sama sekali di master data.
+    renderNewItemForm(barcode, '', '', raw);
+  } else if (allMatches.length === 1){
+    renderSingleMatch(allMatches[0], raw);
   } else {
-    currentMatch = { plu:'', nama:'', barcode, rak:'', isNew:true };
-    zone.innerHTML = `
-      <div class="not-found-box">
-        <div><i class="bi bi-exclamation-triangle-fill text-warning"></i> Produk belum terdaftar di master data (barcode: ${escapeHtml(barcode)}). Lengkapi datanya sekali di sini — otomatis tersimpan di master untuk scan berikutnya.</div>
-        <div class="mt-2">
-          <label class="form-label-sm">PLU</label>
-          <input type="text" class="form-control mb-2" id="newPlu" placeholder="Masukkan PLU">
-          <label class="form-label-sm">Nama / Deskripsi Barang</label>
-          <input type="text" class="form-control mb-2" id="newNama" placeholder="Masukkan nama/deskripsi barang">
-          <label class="form-label-sm">Rak</label>
-          <input type="text" class="form-control" id="newRak" placeholder="Masukkan rak/lokasi barang">
-        </div>
-        <div class="qty-row">
-          <button class="qty-btn" id="qtyMinus">–</button>
-          <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
-          <button class="qty-btn" id="qtyPlus">+</button>
-          <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
-        </div>
-      </div>`;
-    bindQtyControls();
+    renderLocationPicker(allMatches, barcode, raw);
   }
+}
+
+// Barcode cocok di tepat 1 rak — langsung tampilkan qty untuk ditambahkan.
+// Zona yang ditandai pada catatan diambil dari Zona Penyimpanan yang sedang
+// dipilih user saat ini (bukan properti dari master data).
+function renderSingleMatch(hit, rawBarcode){
+  const currentZona = document.getElementById('currentZonaInput').value;
+  currentMatch = { ...hit, rawBarcode: rawBarcode || hit.barcode, zona: currentZona, isNew:false };
+  const zone = document.getElementById('resultZone');
+  zone.innerHTML = `
+    <div class="product-hit">
+      <div class="pname">${escapeHtml(hit.nama)}<span class="rak-chip"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(hit.rak || 'Tanpa Rak')}</span><span class="rak-chip"><i class="bi bi-diagram-3-fill"></i> Zona ${escapeHtml(String(currentZona || '-'))}</span></div>
+      <div class="pmeta">PLU ${escapeHtml(hit.plu)} • Barcode ${escapeHtml(hit.barcode)}</div>
+      <div class="qty-row">
+        <button class="qty-btn" id="qtyMinus">–</button>
+        <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
+        <button class="qty-btn" id="qtyPlus">+</button>
+        <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
+      </div>
+      <a href="#" id="btnAddNewLocation" style="font-size:.75rem; display:inline-block; margin-top:10px;">
+        <i class="bi bi-plus-square-dotted"></i> Produk ini ada di rak lain juga? Tambah lokasi baru
+      </a>
+    </div>`;
+  bindQtyControls();
+  document.getElementById('btnAddNewLocation').addEventListener('click', (e)=>{
+    e.preventDefault();
+    renderNewItemForm(hit.barcode, hit.plu, hit.nama, rawBarcode);
+  });
+}
+
+// Barcode cocok di lebih dari 1 rak — user harus pilih rak dulu.
+function renderLocationPicker(matches, barcode, rawBarcode){
+  const zone = document.getElementById('resultZone');
+  zone.innerHTML = `
+    <div class="product-hit">
+      <div class="pname">${escapeHtml(matches[0].nama)}</div>
+      <div class="pmeta">PLU ${escapeHtml(matches[0].plu)} • Barcode ${escapeHtml(barcode)} • ada di ${matches.length} rak</div>
+      <div class="mt-2" style="font-size:.85rem; font-weight:600; color:var(--text-sub);">Pilih rak yang sesuai:</div>
+      <div class="suggest-list" style="display:block; margin-top:6px;">
+        ${matches.map((m, idx) => `
+          <div class="suggest-item" data-pick="${idx}">
+            <i class="bi bi-geo-alt-fill" style="color:var(--af-blue);"></i> ${escapeHtml(m.rak || 'Tanpa Rak')}
+          </div>`).join('')}
+      </div>
+      <a href="#" id="btnAddNewLocation" style="font-size:.75rem; display:inline-block; margin-top:10px;">
+        <i class="bi bi-plus-square-dotted"></i> Belum ada di daftar? Tambah lokasi baru
+      </a>
+    </div>`;
+  zone.querySelectorAll('[data-pick]').forEach(el=>{
+    el.addEventListener('click', ()=> renderSingleMatch(matches[parseInt(el.dataset.pick)], rawBarcode));
+  });
+  document.getElementById('btnAddNewLocation').addEventListener('click', (e)=>{
+    e.preventDefault();
+    renderNewItemForm(barcode, matches[0].plu, matches[0].nama, rawBarcode);
+  });
+}
+
+// Form input barang: dipakai untuk produk yang benar-benar baru (plu/nama
+// kosong, semua field bisa diisi), maupun produk yang sudah dikenal tapi
+// ditemukan di rak/lokasi baru (plu/nama sudah terisi & dikunci). Zona
+// diambil otomatis dari pilihan Zona Penyimpanan saat ini — hanya untuk
+// menandai catatan, bukan bagian dari pencarian/pencocokan master data.
+function renderNewItemForm(barcode, knownPlu, knownNama, rawBarcode){
+  const isKnownProduct = !!(knownPlu || knownNama);
+  const currentZona = document.getElementById('currentZonaInput').value;
+  currentMatch = { plu: knownPlu || '', nama: knownNama || '', barcode, rawBarcode: rawBarcode || barcode, rak:'', zona: currentZona, isNew:true };
+  const zone = document.getElementById('resultZone');
+  zone.innerHTML = `
+    <div class="not-found-box">
+      <div><i class="bi bi-${isKnownProduct ? 'geo-alt-fill' : 'exclamation-triangle-fill text-warning'}"></i> ${
+        isKnownProduct
+          ? `Menambahkan lokasi/rak baru untuk produk ini (akan ditandai Zona ${escapeHtml(String(currentZona))} saat disimpan).`
+          : `Produk belum terdaftar di master data (barcode: ${escapeHtml(barcode)}). Lengkapi datanya sekali di sini — otomatis tersimpan di master untuk scan berikutnya.`
+      }</div>
+      <div class="mt-2">
+        <label class="form-label-sm">PLU</label>
+        <input type="text" class="form-control mb-2" id="newPlu" placeholder="Masukkan PLU" value="${escapeHtml(knownPlu || '')}" ${isKnownProduct ? 'readonly' : ''}>
+        <label class="form-label-sm">Nama / Deskripsi Barang</label>
+        <input type="text" class="form-control mb-2" id="newNama" placeholder="Masukkan nama/deskripsi barang" value="${escapeHtml(knownNama || '')}" ${isKnownProduct ? 'readonly' : ''}>
+        <label class="form-label-sm">Rak</label>
+        <input type="text" class="form-control" id="newRak" placeholder="Masukkan rak/lokasi barang" list="rakDatalistCatat">
+      </div>
+      <div class="qty-row">
+        <button class="qty-btn" id="qtyMinus">–</button>
+        <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
+        <button class="qty-btn" id="qtyPlus">+</button>
+        <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
+      </div>
+    </div>`;
+  bindQtyControls();
 }
 
 function bindQtyControls(){
@@ -682,6 +853,7 @@ function bindQtyControls(){
 function addCurrentToCart(){
   if (!currentMatch) return;
   const qty = Math.max(1, parseInt(document.getElementById('qtyValue').value) || 1);
+  const zona = currentMatch.zona || document.getElementById('currentZonaInput').value;
 
   if (currentMatch.isNew){
     const plu = document.getElementById('newPlu').value.trim();
@@ -691,28 +863,43 @@ function addCurrentToCart(){
       toast('Isi PLU, Nama/Deskripsi, dan Rak terlebih dahulu');
       return;
     }
-    currentMatch.plu = plu;
-    currentMatch.nama = nama;
-    currentMatch.rak = rak;
-    // Tambahkan ke cache master lokal supaya langsung dikenali (lengkap dengan rak) di scan berikutnya
-    MASTER.push({ plu, nama, barcode: currentMatch.barcode, rak });
-    saveMasterToCache();
+    // Cegah duplikat: kalau kombinasi barcode+rak ini ternyata sudah ada
+    // di master, pakai baris yang sudah ada saja, jangan buat baris baru.
+    // (Zona TIDAK ikut dicek karena bukan bagian dari kunci master.)
+    const already = MASTER.find(m => m.barcode === currentMatch.barcode
+      && normalize(m.rak) === normalize(rak));
+    if (already){
+      currentMatch.plu = already.plu;
+      currentMatch.nama = already.nama;
+      currentMatch.rak = already.rak;
+    } else {
+      currentMatch.plu = plu;
+      currentMatch.nama = nama;
+      currentMatch.rak = rak;
+      // Tambahkan baris master baru (barcode+rak baru) supaya langsung dikenali di scan berikutnya
+      // (Master Produk tetap pakai barcode yang sudah dinormalisasi, bukan raw.)
+      MASTER.push({ plu, nama, barcode: currentMatch.barcode, rak });
+      saveMasterToCache();
+    }
   }
 
   const rak = currentMatch.rak || 'Tanpa Rak';
+  const rawBarcode = currentMatch.rawBarcode || currentMatch.barcode;
 
-  // Barang yang sama digabung qty-nya
-  const existing = CART.find(c => c.barcode === currentMatch.barcode);
+  // Barang yang sama (berdasarkan PLU — stabil, tidak terpengaruh variasi
+  // representasi barcode asli antar-scan), rak yang sama, DAN zona yang
+  // sama digabung qty-nya.
+  const existing = CART.find(c => c.plu === currentMatch.plu && c.rak === rak && String(c.zona) === String(zona));
   if (existing){
     existing.qty += qty;
   } else {
-    CART.push({ id: cartIdSeq++, plu: currentMatch.plu, nama: currentMatch.nama, barcode: currentMatch.barcode, rak, qty, isNew: !!currentMatch.isNew });
+    CART.push({ id: cartIdSeq++, plu: currentMatch.plu, nama: currentMatch.nama, barcode: currentMatch.barcode, rawBarcode, rak, zona, qty, isNew: !!currentMatch.isNew });
   }
 
   renderCart();
   document.getElementById('resultZone').innerHTML = '';
   currentMatch = null;
-  toast(`Ditambahkan — rak "${rak}"`);
+  toast(`Ditambahkan — Zona ${zona}, rak "${rak}"`);
 }
 
 /* ---------- Cart (grouped by rak, automatic) ---------- */
@@ -727,15 +914,16 @@ function renderCart(){
     return;
   }
 
-  const rakNames = [...new Set(CART.map(c => c.rak))].sort((a,b)=> a.localeCompare(b, 'id'));
+  const groupKeys = [...new Set(CART.map(c => (c.zona || '-') + '|' + c.rak))].sort((a,b)=> a.localeCompare(b, 'id'));
 
-  list.innerHTML = rakNames.map(rak => {
-    const items = CART.filter(c => c.rak === rak);
+  list.innerHTML = groupKeys.map(key => {
+    const [zona, rak] = key.split('|');
+    const items = CART.filter(c => ((c.zona || '-') + '|' + c.rak) === key);
     const totalQty = items.reduce((s,c)=>s+c.qty,0);
     return `
       <div class="rak-group">
         <div class="rak-group-head">
-          <span><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(rak)}</span>
+          <span><i class="bi bi-diagram-3-fill"></i> Zona ${escapeHtml(zona)} <i class="bi bi-geo-alt-fill ms-1"></i> ${escapeHtml(rak)}</span>
           <span class="rak-total">${totalQty} pcs</span>
         </div>
         ${items.map(c => `
@@ -781,7 +969,10 @@ async function submitCart(){
 
   const batch = {
     timestamp: new Date().toISOString(),
-    items: CART.map(c => ({ plu:c.plu, nama:c.nama, barcode:c.barcode, rak:c.rak, qty:c.qty, isNew: !!c.isNew }))
+    // barcode = versi ternormalisasi (dipakai server untuk mencocokkan/menambah
+    // Master Produk); rawBarcode = barcode ASLI hasil scan (disimpan ke Stok Gudang
+    // & dipakai untuk merender kode batang di riwayat).
+    items: CART.map(c => ({ plu:c.plu, nama:c.nama, barcode:c.barcode, rawBarcode:c.rawBarcode || c.barcode, rak:c.rak, zona:c.zona, qty:c.qty, isNew: !!c.isNew }))
   };
 
   const url = getScriptUrl();
@@ -814,12 +1005,24 @@ async function submitCart(){
 
 /* ---------- History (grouped by rak, with rak filter + qty edit) ---------- */
 
-let HISTORY_ITEMS = []; // cache of last fetch (respects date filter only)
+let HISTORY_ITEMS = []; // cache of last fetch (seluruh riwayat, tanpa filter tanggal)
+let histViewMode = 'perRak'; // 'perRak' | 'perZona' | 'perProduk'
+let selectedHistZona = ''; // '' = semua zona; state untuk chip filter zona
+let CARD_REGISTRY = {}; // id -> objek kartu (dipakai saat tombol edit ditekan)
+let cardRegistrySeq = 1;
+let editQtyModal = null;
 
-function todayLocalStr(){
-  const d = new Date();
-  const tzOff = d.getTimezoneOffset() * 60000;
-  return new Date(d - tzOff).toISOString().slice(0,10);
+document.getElementById('viewPerRakBtn').addEventListener('click', ()=> setHistViewMode('perRak'));
+document.getElementById('viewPerZonaBtn').addEventListener('click', ()=> setHistViewMode('perZona'));
+document.getElementById('viewPerProdukBtn').addEventListener('click', ()=> setHistViewMode('perProduk'));
+
+function setHistViewMode(mode){
+  histViewMode = mode;
+  document.getElementById('viewPerRakBtn').classList.toggle('active', mode === 'perRak');
+  document.getElementById('viewPerZonaBtn').classList.toggle('active', mode === 'perZona');
+  document.getElementById('viewPerProdukBtn').classList.toggle('active', mode === 'perProduk');
+  document.getElementById('histRakFilterWrap').style.display = mode === 'perProduk' ? 'none' : 'block';
+  applyHistoryFilterAndRender();
 }
 
 async function loadHistory(){
@@ -834,32 +1037,57 @@ async function loadHistory(){
   }
   histList.innerHTML = `<div class="empty-state"><i class="bi bi-hourglass-split"></i>Memuat riwayat…</div>`;
   histSummary.textContent = '';
-  const dateVal = document.getElementById('histDateFilter').value;
   try{
-    const qs = dateVal ? `&date=${encodeURIComponent(dateVal)}` : '';
-    const res = await fetch(url + '?action=getHistory' + qs);
+    const res = await fetch(url + '?action=getHistory');
     const data = await res.json();
     if (data.ok && Array.isArray(data.items)){
       HISTORY_ITEMS = data.items;
+      refreshHistZonaChips();
       refreshHistRakFilterOptions();
       applyHistoryFilterAndRender();
     } else {
       HISTORY_ITEMS = [];
-      histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada riwayat${dateVal ? ' untuk tanggal ini' : ''}</div>`;
+      histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada riwayat</div>`;
     }
   }catch(e){
     histList.innerHTML = `<div class="empty-state"><i class="bi bi-wifi-off"></i>Tidak bisa memuat riwayat (offline)</div>`;
   }
 }
 
-// Isi opsi dropdown filter rak dari gabungan rak di Master Produk + rak yang
-// muncul di riwayat (jaga-jaga ada rak lama yang sudah tak ada di master).
+// Render tombol chip filter zona (hanya zona yang benar-benar ada di data
+// riwayat) plus chip "Semua". Lebih cepat ditekan di layar HP daripada dropdown.
+function refreshHistZonaChips(){
+  const wrap = document.getElementById('histZonaChips');
+  const zonaSet = new Set();
+  HISTORY_ITEMS.forEach(r => { if (r.zona) zonaSet.add(String(r.zona)); });
+  const zonaNames = [...zonaSet].sort((a,b)=> Number(a) - Number(b));
+
+  if (!zonaNames.includes(selectedHistZona)) selectedHistZona = '';
+
+  const chips = [{ val: '', label: 'Semua Zona' }, ...zonaNames.map(z => ({ val: z, label: `Zona ${z}` }))];
+  wrap.innerHTML = chips.map(c => `
+    <button type="button" class="zona-chip ${c.val === selectedHistZona ? 'active' : ''}" data-zona="${escapeHtml(c.val)}">${escapeHtml(c.label)}</button>
+  `).join('');
+
+  wrap.querySelectorAll('.zona-chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      selectedHistZona = btn.dataset.zona;
+      wrap.querySelectorAll('.zona-chip').forEach(b=> b.classList.toggle('active', b === btn));
+      refreshHistRakFilterOptions(); // rak filter menyesuaikan zona yang dipilih
+      applyHistoryFilterAndRender();
+    });
+  });
+}
+
+// Isi opsi dropdown filter rak dari gabungan rak di Master Produk (semua rak,
+// tanpa filter zona karena master tidak punya zona) + rak yang muncul di
+// riwayat pada zona yang sedang difilter (kalau ada).
 function refreshHistRakFilterOptions(){
   const sel = document.getElementById('histRakFilter');
   const prevVal = sel.value;
   const rakSet = new Set();
   MASTER.forEach(p => { if (p.rak) rakSet.add(p.rak); });
-  HISTORY_ITEMS.forEach(r => { if (r.rak) rakSet.add(r.rak); });
+  HISTORY_ITEMS.forEach(r => { if (r.rak && (!selectedHistZona || String(r.zona) === selectedHistZona)) rakSet.add(r.rak); });
   const rakNames = [...rakSet].sort((a,b)=> a.localeCompare(b, 'id'));
 
   sel.innerHTML = '<option value="">Semua Rak</option>' +
@@ -868,110 +1096,285 @@ function refreshHistRakFilterOptions(){
   if (rakNames.includes(prevVal)) sel.value = prevVal;
 }
 
-function applyHistoryFilterAndRender(){
-  const histList = document.getElementById('histList');
-  const histSummary = document.getElementById('histSummary');
-  const dateVal = document.getElementById('histDateFilter').value;
+document.getElementById('histSearchInput').addEventListener('input', applyHistoryFilterAndRender);
+document.getElementById('histRakFilter').addEventListener('change', applyHistoryFilterAndRender);
+
+// Terapkan pencarian produk + filter zona (chip) + rak
+function getFilteredHistoryItems(){
+  const search = normalize(document.getElementById('histSearchInput').value);
   const rakVal = document.getElementById('histRakFilter').value;
 
-  const filtered = rakVal
-    ? HISTORY_ITEMS.filter(r => (r.rak || '') === rakVal)
-    : HISTORY_ITEMS;
+  return HISTORY_ITEMS.filter(r => {
+    if (search && !normalize(r.nama).includes(search) && !normalize(r.plu).includes(search)) return false;
+    if (selectedHistZona && String(r.zona || '') !== selectedHistZona) return false;
+    if (rakVal && (r.rak || '') !== rakVal) return false;
+    return true;
+  });
+}
+
+/* ---------- Ringkasan lokasi + kartu produk (dipakai oleh ketiga tampilan) ---------- */
+
+// Ambil catatan TERBARU per kombinasi PLU+Rak+Zona. PLU dipakai sebagai kunci
+// identitas produk (bukan barcode) karena barcode yang dikirim sekarang adalah
+// barcode ASLI hasil scan — representasinya bisa sedikit berbeda antar-scan
+// meski produknya sama, sedangkan PLU tetap stabil.
+function dedupeLatestLocations(items){
+  const latestByKey = {};
+  items.forEach(row=>{
+    const key = row.plu + '|' + (row.rak || '') + '|' + (row.zona || '');
+    const prev = latestByKey[key];
+    if (!prev || new Date(row.timestamp) > new Date(prev.timestamp)) latestByKey[key] = row;
+  });
+  return Object.values(latestByKey);
+}
+
+// Gabungkan sekumpulan location-entry menjadi kartu per produk: qty dijumlahkan,
+// dan barcode yang ditampilkan diambil dari catatan yang paling baru.
+function buildProductCards(locationEntries){
+  const byPlu = {};
+  locationEntries.forEach(row=>{
+    if (!byPlu[row.plu]) byPlu[row.plu] = { plu: row.plu, nama: row.nama, barcode: row.barcode, _latestTs: row.timestamp, entries: [] };
+    byPlu[row.plu].entries.push(row);
+    if (new Date(row.timestamp) >= new Date(byPlu[row.plu]._latestTs)){
+      byPlu[row.plu].barcode = row.barcode;
+      byPlu[row.plu]._latestTs = row.timestamp;
+    }
+  });
+  return Object.values(byPlu).map(p=>{
+    p.total = p.entries.reduce((s,e)=>s+(Number(e.qty)||0),0);
+    p.entries.sort((a,b)=> (Number(a.zona)||0) - (Number(b.zona)||0) || (a.rak||'').localeCompare(b.rak||'', 'id'));
+    delete p._latestTs;
+    return p;
+  }).sort((a,b)=> a.nama.localeCompare(b.nama, 'id'));
+}
+
+// Ringkas daftar lokasi jadi 1 baris teks kecil di kartu.
+function summarizeLocations(entries, mode){
+  if (entries.length === 1 && mode !== 'rakzona') return new Date(entries[0].timestamp).toLocaleString('id-ID');
+  if (mode === 'zona')    return entries.map(e => `Zona ${escapeHtml(String(e.zona || '-'))}: ${e.qty}`).join(' • ');
+  if (mode === 'rak')     return entries.map(e => `${escapeHtml(e.rak || 'Tanpa Rak')}: ${e.qty}`).join(' • ');
+  return entries.map(e => `${escapeHtml(e.rak || 'Tanpa Rak')} (Zona ${escapeHtml(String(e.zona || '-'))}): ${e.qty}`).join(' • ');
+}
+
+// Render 1 kartu produk ringkas. opts.showBarcode = tampilkan barcode asli
+// sebagai kode batang grafis (dipakai khusus tampilan Per Zona).
+function renderCompactCard(card, opts){
+  const id = 'c' + (cardRegistrySeq++);
+  CARD_REGISTRY[id] = card;
+  const locText = summarizeLocations(card.entries, opts.locMode);
+  return `
+    <div class="hist-card">
+      <div class="hist-card-row1">
+        <span class="hist-card-name">${escapeHtml(card.nama)}</span>
+        <button class="hist-card-edit-btn" data-card-id="${id}" title="Edit qty"><i class="bi bi-pencil-fill"></i></button>
+      </div>
+      <div class="hist-card-meta">PLU ${escapeHtml(card.plu)}${opts.showBarcode ? '' : ' • Barcode ' + escapeHtml(card.barcode || '-')}</div>
+      ${opts.showBarcode ? `<svg class="hist-barcode" data-barcode="${escapeHtml(card.barcode || '')}"></svg>` : ''}
+      <div class="hist-card-row2">
+        <span class="hist-card-locs">${locText}</span>
+        <span class="hist-card-qty">${card.total} pcs</span>
+      </div>
+    </div>`;
+}
+
+// Deteksi format barcode retail standar dari nilai barcode ASLI hasil scan,
+// supaya tampilannya sesuai barcode produk aslinya (EAN-13/UPC/EAN-8) kalau
+// memang valid — dan baru jatuh ke CODE128 (format generik, selalu bisa
+// merender apa pun) kalau tidak cocok format/checksum manapun.
+function eanChecksumValid_(digits, weightFirst){
+  // digits: string angka, elemen terakhir = check digit.
+  // weightFirst: bobot untuk posisi pertama (index 0) — sisanya berselang-seling.
+  const n = digits.length;
+  let sum = 0;
+  for (let i = 0; i < n - 1; i++){
+    const w = (i % 2 === 0) ? weightFirst : (4 - weightFirst); // weightFirst∈{1,3} -> selang-seling 1/3
+    sum += Number(digits[i]) * w;
+  }
+  const check = (10 - (sum % 10)) % 10;
+  return check === Number(digits[n - 1]);
+}
+
+function pickBarcodeFormat(value){
+  const v = String(value || '').trim();
+  if (/^\d{13}$/.test(v) && eanChecksumValid_(v, 1)) return 'EAN13';
+  if (/^\d{12}$/.test(v) && eanChecksumValid_(v, 3)) return 'UPC';
+  if (/^\d{8}$/.test(v)  && eanChecksumValid_(v, 3)) return 'EAN8';
+  return 'CODE128';
+}
+
+// Render kode batang grafis untuk semua kartu yang baru saja dimasukkan ke DOM
+// (dipanggil setelah innerHTML diisi, karena JsBarcode butuh elemen SVG nyata).
+function renderBarcodeGraphics(){
+  document.querySelectorAll('.hist-barcode').forEach(el=>{
+    const val = el.dataset.barcode;
+    if (!val) return;
+    const format = pickBarcodeFormat(val);
+    try{
+      JsBarcode(el, val, { format, displayValue: false, height: 32, margin: 0, width: 1.3 });
+    }catch(e){
+      // Fallback terakhir kalau format yang terdeteksi ternyata masih gagal dirender
+      try{ JsBarcode(el, val, { format: 'CODE128', displayValue: false, height: 32, margin: 0, width: 1.3 }); }
+      catch(e2){ /* nilai barcode benar-benar tidak bisa dirender, lewati */ }
+    }
+  });
+}
+
+function applyHistoryFilterAndRender(){
+  CARD_REGISTRY = {};
+  const filtered = getFilteredHistoryItems();
+  const histList = document.getElementById('histList');
+  const histSummary = document.getElementById('histSummary');
+  const rakVal = document.getElementById('histRakFilter').value;
 
   if (filtered.length === 0){
-    histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada riwayat${rakVal ? ' untuk rak ini' : ''}${dateVal ? ' pada tanggal ini' : ''}</div>`;
+    histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Tidak ada catatan yang cocok dengan filter ini</div>`;
     histSummary.textContent = '';
     return;
   }
 
-  renderHistoryGrouped(filtered);
-  const totalQty = filtered.reduce((s,r)=>s+(Number(r.qty)||0),0);
-  const rakCount = new Set(filtered.map(r=>r.rak || '(Tanpa Rak)')).size;
-  histSummary.textContent = `${filtered.length} catatan • ${totalQty} pcs • ${rakCount} rak` +
-    (rakVal ? ` • Rak: ${rakVal}` : '') + (dateVal ? ` • ${dateVal}` : '');
+  if (histViewMode === 'perZona') renderPerZona(filtered);
+  else if (histViewMode === 'perProduk') renderPerProduk(filtered);
+  else renderPerRak(filtered);
+
+  const dedup = dedupeLatestLocations(filtered);
+  const totalQty = dedup.reduce((s,r)=>s+(Number(r.qty)||0),0);
+  const rakCount = new Set(dedup.map(r=>r.rak || '(Tanpa Rak)')).size;
+  const zonaCount = new Set(dedup.map(r=>r.zona || '-')).size;
+  histSummary.textContent = `${dedup.length} lokasi • ${totalQty} pcs • ${rakCount} rak • ${zonaCount} zona` +
+    (selectedHistZona ? ` • Zona ${selectedHistZona}` : '') + (rakVal ? ` • Rak: ${rakVal}` : '');
 }
 
-document.getElementById('histRakFilter').addEventListener('change', applyHistoryFilterAndRender);
-
-function renderHistoryGrouped(items){
-  const histList = document.getElementById('histList');
-
+// Tampilan "Per Rak": grup teratas = Rak. Di dalam tiap rak, 1 kartu per
+// produk — kalau produk yang sama tercatat di beberapa zona pada rak yang
+// sama, digabung jadi 1 kartu (qty dijumlahkan, zona jadi daftar teks).
+function renderPerRak(items){
+  const dedup = dedupeLatestLocations(items);
   const groups = {};
-  items.forEach(row => {
-    const rak = row.rak && String(row.rak).trim() ? String(row.rak).trim() : '(Tanpa Rak)';
+  dedup.forEach(e=>{
+    const rak = e.rak && String(e.rak).trim() ? String(e.rak).trim() : '(Tanpa Rak)';
     if (!groups[rak]) groups[rak] = [];
-    groups[rak].push(row);
+    groups[rak].push(e);
   });
-
   const rakNames = Object.keys(groups).sort((a,b)=> a.localeCompare(b, 'id'));
 
-  histList.innerHTML = rakNames.map((rak, idx) => {
-    const rows = groups[rak].slice().sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
-    const totalQty = rows.reduce((s,r)=>s+(Number(r.qty)||0),0);
+  document.getElementById('histList').innerHTML = rakNames.map((rak, idx) => {
+    const cards = buildProductCards(groups[rak]);
+    const totalQty = cards.reduce((s,c)=>s+c.total,0);
     return `
       <details class="rak-accordion" ${idx === 0 ? 'open' : ''}>
         <summary>
           <span><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(rak)}</span>
-          <span class="rak-summary-meta">${rows.length} item • ${totalQty} pcs <i class="bi bi-chevron-down chev"></i></span>
+          <span class="rak-summary-meta">${cards.length} produk • ${totalQty} pcs <i class="bi bi-chevron-down chev"></i></span>
         </summary>
         <div class="rak-accordion-body">
-          ${rows.map(row => `
-            <div class="hist-row" data-row="${row.row}">
-              <div class="hist-row-body">
-                <div class="hist-top">
-                  <span class="hist-name">${escapeHtml(row.nama)}</span>
-                  <span class="hist-qty-wrap">
-                    <span class="hist-qty">${escapeHtml(String(row.qty))}</span>
-                    <button class="hist-edit-btn" data-edit-row="${row.row}" data-qty="${row.qty}" title="Edit qty"><i class="bi bi-pencil-fill"></i></button>
-                  </span>
-                </div>
-                <div class="hist-meta">PLU ${escapeHtml(row.plu)} • ${new Date(row.timestamp).toLocaleString('id-ID')}</div>
-              </div>
-            </div>`).join('')}
+          ${cards.map(c => renderCompactCard(c, { showBarcode:false, locMode:'zona' })).join('')}
         </div>
       </details>`;
   }).join('');
 }
 
-// Delegasi klik untuk tombol edit qty di riwayat
-document.getElementById('histList').addEventListener('click', (e)=>{
-  const editBtn = e.target.closest('.hist-edit-btn');
-  if (editBtn){
-    startEditQty(editBtn.closest('.hist-row'), Number(editBtn.dataset.editRow), Number(editBtn.dataset.qty));
-    return;
-  }
-  const saveBtn = e.target.closest('.hist-qty-save');
-  if (saveBtn){
-    const wrap = saveBtn.closest('.hist-qty-wrap');
-    const input = wrap.querySelector('.hist-qty-edit-input');
-    saveEditQty(Number(saveBtn.dataset.row), input.value);
-    return;
-  }
-  const cancelBtn = e.target.closest('.hist-qty-cancel');
-  if (cancelBtn){
-    applyHistoryFilterAndRender();
-    return;
-  }
-});
+// Tampilan "Per Zona": grup teratas = Zona. Di dalam tiap zona, 1 kartu per
+// produk — kalau produk yang sama ada di beberapa rak pada zona yang sama,
+// digabung jadi 1 kartu (qty dijumlahkan, rak jadi daftar teks). Barcode asli
+// hasil scan dirender sebagai kode batang grafis di kartu ini.
+function renderPerZona(items){
+  const dedup = dedupeLatestLocations(items);
+  const groups = {};
+  dedup.forEach(e=>{
+    const zona = e.zona ? String(e.zona) : '(Tanpa Zona)';
+    if (!groups[zona]) groups[zona] = [];
+    groups[zona].push(e);
+  });
+  const zonaNames = Object.keys(groups).sort((a,b)=> (Number(a)||0) - (Number(b)||0));
 
-function startEditQty(rowEl, rowId, currentQty){
-  const wrap = rowEl.querySelector('.hist-qty-wrap');
-  wrap.innerHTML = `
-    <input type="number" min="0" class="form-control hist-qty-edit-input" value="${currentQty}" style="width:64px; display:inline-block; padding:.2rem .4rem; font-weight:700;">
-    <button class="hist-qty-save" data-row="${rowId}" title="Simpan"><i class="bi bi-check-circle-fill text-success"></i></button>
-    <button class="hist-qty-cancel" title="Batal"><i class="bi bi-x-circle-fill text-danger"></i></button>`;
-  wrap.querySelector('.hist-qty-edit-input').focus();
+  document.getElementById('histList').innerHTML = zonaNames.map((zona, idx) => {
+    const cards = buildProductCards(groups[zona]);
+    const totalQty = cards.reduce((s,c)=>s+c.total,0);
+    return `
+      <details class="rak-accordion" ${idx === 0 ? 'open' : ''}>
+        <summary>
+          <span><i class="bi bi-diagram-3-fill"></i> Zona ${escapeHtml(zona)}</span>
+          <span class="rak-summary-meta">${cards.length} produk • ${totalQty} pcs <i class="bi bi-chevron-down chev"></i></span>
+        </summary>
+        <div class="rak-accordion-body">
+          ${cards.map(c => renderCompactCard(c, { showBarcode:true, locMode:'rak' })).join('')}
+        </div>
+      </details>`;
+  }).join('');
+  renderBarcodeGraphics();
 }
 
-async function saveEditQty(rowId, newQtyRaw){
+// Tampilan "Per Produk": tidak ada grup teratas — 1 kartu per produk,
+// digabung dari SEMUA rak & zona tempat produk itu tercatat (atau hasil
+// filter yang sedang aktif).
+function renderPerProduk(items){
+  const dedup = dedupeLatestLocations(items);
+  const cards = buildProductCards(dedup);
+  document.getElementById('histList').innerHTML =
+    `<div class="rak-accordion-body" style="border:none; padding:0;">` +
+    cards.map(c => renderCompactCard(c, { showBarcode:false, locMode:'rakzona' })).join('') +
+    `</div>`;
+}
+
+/* ---------- Popup edit qty ---------- */
+
+// Delegasi klik tombol edit di kartu manapun (Per Rak / Per Zona / Per Produk)
+document.getElementById('histList').addEventListener('click', (e)=>{
+  const editBtn = e.target.closest('.hist-card-edit-btn');
+  if (!editBtn) return;
+  const card = CARD_REGISTRY[editBtn.dataset.cardId];
+  if (card) openEditQtyModal(card);
+});
+
+function openEditQtyModal(card){
+  document.getElementById('editQtyModalTitle').innerHTML = `<i class="bi bi-pencil-fill"></i> ${escapeHtml(card.nama)}`;
+  renderEditQtyModalBody(card);
+  editQtyModal.show();
+}
+
+function renderEditQtyModalBody(card){
+  const body = document.getElementById('editQtyModalBody');
+  body.innerHTML = `
+    <div style="font-size:.78rem; color:var(--text-sub); margin-bottom:6px;">PLU ${escapeHtml(card.plu)} • Barcode ${escapeHtml(card.barcode || '-')}</div>
+    ${card.entries.map(e => `
+      <div class="edit-qty-row" data-row="${e.row}">
+        <div>
+          <div class="eqr-label"><i class="bi bi-diagram-3-fill" style="color:var(--af-blue);"></i> Zona ${escapeHtml(String(e.zona || '-'))} <i class="bi bi-geo-alt-fill ms-1" style="color:var(--af-blue);"></i> ${escapeHtml(e.rak || 'Tanpa Rak')}</div>
+          <div class="eqr-meta">${new Date(e.timestamp).toLocaleString('id-ID')}</div>
+        </div>
+        <div class="eqr-controls">
+          <input type="number" min="0" class="form-control eqr-input" value="${e.qty}">
+          <button class="btn btn-af eqr-save" title="Simpan"><i class="bi bi-check-lg"></i></button>
+        </div>
+      </div>`).join('')}
+  `;
+  body.querySelectorAll('.eqr-save').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const rowWrap = btn.closest('.edit-qty-row');
+      const rowId = Number(rowWrap.dataset.row);
+      const input = rowWrap.querySelector('.eqr-input');
+      btn.disabled = true;
+      const ok = await saveEditQtyRow(rowId, input.value);
+      btn.disabled = false;
+      if (ok){
+        const entry = card.entries.find(e2 => e2.row === rowId);
+        if (entry) entry.qty = Number(input.value);
+        card.total = card.entries.reduce((s,e2)=>s+(Number(e2.qty)||0),0);
+        applyHistoryFilterAndRender();
+      }
+    });
+  });
+}
+
+async function saveEditQtyRow(rowId, newQtyRaw){
   const newQty = Number(newQtyRaw);
   if (isNaN(newQty) || newQty < 0){
     toast('Qty tidak valid');
-    return;
+    return false;
   }
   const url = getScriptUrl();
-  if (!url){ toast('Atur Apps Script URL dulu di tab Pengaturan'); return; }
-  if (!navigator.onLine){ toast('Perlu koneksi internet untuk mengubah qty yang sudah terkirim'); return; }
+  if (!url){ toast('Atur Apps Script URL dulu di tab Pengaturan'); return false; }
+  if (!navigator.onLine){ toast('Perlu koneksi internet untuk mengubah qty yang sudah terkirim'); return false; }
 
   try{
     const res = await fetch(url, {
@@ -984,27 +1387,18 @@ async function saveEditQty(rowId, newQtyRaw){
       const item = HISTORY_ITEMS.find(r => r.row === rowId);
       if (item) item.qty = newQty;
       toast('Qty berhasil diperbarui');
-      applyHistoryFilterAndRender();
+      return true;
     } else {
       toast('Gagal update qty — coba lagi');
+      return false;
     }
   }catch(e){
     toast('Gagal update qty — periksa koneksi');
+    return false;
   }
 }
 
 document.getElementById('btnRefreshHist').addEventListener('click', loadHistory);
-
-document.getElementById('histDateFilter').addEventListener('change', ()=>{
-  document.getElementById('histDateFilter').dataset.touched = '1';
-  loadHistory();
-});
-document.getElementById('btnHistAll').addEventListener('click', ()=>{
-  const el = document.getElementById('histDateFilter');
-  el.value = '';
-  el.dataset.touched = '1';
-  loadHistory();
-});
 
 /* ---------- Settings ---------- */
 
@@ -1044,8 +1438,6 @@ document.querySelectorAll('.tabbar button').forEach(btn=>{
     btn.classList.add('active');
     document.getElementById(btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'tab-history'){
-      const dateInput = document.getElementById('histDateFilter');
-      if (!dateInput.dataset.touched) dateInput.value = todayLocalStr();
       loadHistory();
     }
   });
@@ -1054,12 +1446,39 @@ document.querySelectorAll('.tabbar button').forEach(btn=>{
 document.getElementById('btnSyncNow').addEventListener('click', trySyncPending);
 window.addEventListener('online', trySyncPending);
 
+/* ---------- Zona Penyimpanan (900-915) ---------- */
+
+const ZONA_MIN = 900;
+const ZONA_MAX = 915;
+
+function populateZonaOptions(){
+  const sel = document.getElementById('currentZonaInput');
+  let opts = '<option value="">Pilih zona (900–915)…</option>';
+  for (let z = ZONA_MIN; z <= ZONA_MAX; z++){
+    opts += `<option value="${z}">Zona ${z}</option>`;
+  }
+  sel.innerHTML = opts;
+}
+
+document.getElementById('currentZonaInput').addEventListener('change', ()=>{
+  const val = document.getElementById('currentZonaInput').value;
+  localStorage.setItem(LS_KEYS.currentZona, val);
+  document.getElementById('resultZone').innerHTML = '';
+  currentMatch = null;
+});
+
 /* ---------- Init ---------- */
 
 (function init(){
+  populateZonaOptions();
+  editQtyModal = new bootstrap.Modal(document.getElementById('editQtyModal'));
+  const savedZona = localStorage.getItem(LS_KEYS.currentZona);
+  if (savedZona) document.getElementById('currentZonaInput').value = savedZona;
+
   // Muat master data (rak, plu, barcode, deskripsi) dari cache dulu supaya
   // langsung siap dipakai walau baru buka halaman / lagi offline.
   loadMasterFromCache();
+  refreshRakDatalist();
   const savedUrl = getScriptUrl();
   const overrideUrl = localStorage.getItem(LS_KEYS.scriptUrl);
   if (overrideUrl) document.getElementById('scriptUrlInput').value = overrideUrl;
