@@ -631,12 +631,31 @@ function handleBarcodeSubmit(raw){
   barcodeInput.value = '';
 }
 
-/* ---------- Camera scan (BarcodeDetector) ---------- */
+/* ---------- Camera scan (BarcodeDetector, hybrid native + WASM ponyfill) ---------- */
 
+// Browser dengan BarcodeDetector native (Chrome/Edge/Android) memakainya langsung
+// — tercepat, tidak ada file tambahan yang diunduh. Browser yang TIDAK punya
+// native detector (Safari/iOS) baru meminjam constructor dari "barcode-detector"
+// (ZXing-C++ dikompilasi ke WebAssembly) yang di-lazy-load dari CDN persis saat
+// tombol kamera pertama kali ditekan — jadi pengguna Android/Chrome tidak pernah
+// mengunduh byte tambahan apa pun untuk ini.
 let camStream = null;
 let camLoopHandle = null;
+let cachedDetectorCtor = null;
 const camModalEl = document.getElementById('camModal');
 const camModal = new bootstrap.Modal(camModalEl);
+
+async function getBarcodeDetectorCtor(){
+  if (cachedDetectorCtor) return cachedDetectorCtor;
+  if ('BarcodeDetector' in window){
+    cachedDetectorCtor = window.BarcodeDetector;
+    return cachedDetectorCtor;
+  }
+  // Native tidak tersedia (mis. Safari/iOS) — muat ponyfill WASM sekali saja.
+  const mod = await import('https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/es/ponyfill.min.js');
+  cachedDetectorCtor = mod.BarcodeDetector;
+  return cachedDetectorCtor;
+}
 
 document.getElementById('btnOpenCam').addEventListener('click', ()=>{
   if (!requireZonaSelected()) return;
@@ -645,17 +664,23 @@ document.getElementById('btnOpenCam').addEventListener('click', ()=>{
 
 async function openCamera(){
   const statusEl = document.getElementById('camStatus');
-  if (!('BarcodeDetector' in window)){
-    toast('Kamera scan tidak didukung di browser ini — gunakan scanner fisik atau ketik manual');
+  camModal.show();
+  statusEl.textContent = 'Menyiapkan pemindai…';
+
+  let DetectorCtor;
+  try{
+    DetectorCtor = await getBarcodeDetectorCtor();
+  }catch(e){
+    statusEl.textContent = 'Gagal memuat pemindai barcode (perlu koneksi internet untuk pertama kali) — gunakan scanner fisik atau ketik manual.';
     return;
   }
-  camModal.show();
+
   statusEl.textContent = 'Mengaktifkan kamera…';
   try{
     camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     const video = document.getElementById('camVideo');
     video.srcObject = camStream;
-    const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128'] });
+    const detector = new DetectorCtor({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128'] });
     statusEl.textContent = 'Arahkan kamera ke barcode…';
     const loop = async ()=>{
       if (!camStream) return;
