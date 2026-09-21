@@ -69,6 +69,7 @@
   .btn-af{background:var(--af-red); border-color:var(--af-red); color:#fff;}
   .btn-af:hover{background:var(--af-red-dark); border-color:var(--af-red-dark); color:#fff;}
   .btn-af:active, .btn-af:focus{color:#fff;}
+  .btn-af:disabled, .btn-af.disabled{background:var(--af-red); border-color:var(--af-red); color:#fff; opacity:.75;}
   .btn-af-outline{background:#fff; border:1.5px solid var(--af-red); color:var(--af-red);}
   .btn-af-outline:hover{background:#fff5f5; color:var(--af-red);}
   .btn-blue{background:var(--af-blue); border-color:var(--af-blue); color:#fff;}
@@ -263,7 +264,10 @@
     </div>
 
     <button class="btn btn-af w-100 py-2" id="btnSubmitCart" style="font-size:.95rem;">
-      <i class="bi bi-cloud-arrow-up-fill"></i> Simpan Stok (<span id="submitCount">0</span>)
+      <span id="submitIdle"><i class="bi bi-cloud-arrow-up-fill"></i> Simpan Stok (<span id="submitCount">0</span>)</span>
+      <span id="submitBusy" class="d-none">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><span id="submitBusyText">Mengirim…</span>
+      </span>
     </button>
   </div>
 
@@ -316,6 +320,9 @@
       <div style="font-size:.85rem;" id="localStats"></div>
       <button class="btn btn-af-outline w-100 mt-2" id="btnResyncMaster">
         <i class="bi bi-arrow-repeat"></i> Sinkronkan Ulang Master Data
+      </button>
+      <button class="btn btn-af-outline w-100 mt-2" id="btnDiscardPending" style="display:none;">
+        <i class="bi bi-trash3"></i> Buang Antrian Offline
       </button>
     </div>
   </div>
@@ -550,6 +557,8 @@ function updateLocalStats(){
     `${MASTER.length} produk master tersimpan lokal (rak, PLU, barcode, deskripsi).<br>` +
     `Terakhir sinkron: ${ts ? new Date(ts).toLocaleString('id-ID') : '-'}<br>` +
     `Batch catatan menunggu sync: ${pending.length}`;
+  const dBtn = document.getElementById('btnDiscardPending');
+  if (dBtn) dBtn.style.display = pending.length > 0 ? '' : 'none';
 }
 
 /* ---------- Offline queue ---------- */
@@ -986,11 +995,27 @@ document.getElementById('btnClearCart').addEventListener('click', ()=>{
 
 document.getElementById('btnSubmitCart').addEventListener('click', submitCart);
 
+let isSubmitting = false;
+
+function setSubmitLoading(on, text){
+  const btn = document.getElementById('btnSubmitCart');
+  btn.disabled = on;
+  btn.setAttribute('aria-busy', on ? 'true' : 'false');
+  document.getElementById('submitIdle').classList.toggle('d-none', on);
+  document.getElementById('submitBusy').classList.toggle('d-none', !on);
+  if (on && text) document.getElementById('submitBusyText').textContent = text;
+}
+
 async function submitCart(){
+  if (isSubmitting) return;            // cegah klik ganda → batch terkirim dobel
   if (CART.length === 0){
     toast('Daftar catatan masih kosong');
     return;
   }
+
+  // Snapshot isi yang dikirim. Kalau petugas masih scan saat pengiriman
+  // berlangsung, item baru tidak ikut terhapus setelah selesai.
+  const snapshot = new Map(CART.map(c => [c.id, c.qty]));
 
   const batch = {
     timestamp: new Date().toISOString(),
@@ -1001,31 +1026,50 @@ async function submitCart(){
   };
 
   const url = getScriptUrl();
+  const canSend = !!(url && navigator.onLine);
   let sent = false;
-  if (url && navigator.onLine){
-    try{
-      const res = await fetch(url, {
-        method:'POST',
-        headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action:'submitStok', ...batch })
-      });
-      const data = await res.json();
-      sent = !!data.ok;
-    }catch(e){ sent = false; }
+
+  isSubmitting = true;
+  setSubmitLoading(true, canSend ? `Mengirim ${batch.items.length} item…` : 'Menyimpan offline…');
+
+  try{
+    if (canSend){
+      try{
+        const res = await fetch(url, {
+          method:'POST',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body: JSON.stringify({ action:'submitStok', ...batch })
+        });
+        const data = await res.json();
+        sent = !!data.ok;
+      }catch(e){ sent = false; }
+    }
+
+    if (sent){
+      toast('Stok berhasil disimpan');
+      loadHistory();
+    } else {
+      const q = getPendingQueue();
+      q.push(batch);
+      savePendingQueue(q);
+      toast('Tersimpan offline — akan dikirim otomatis saat online');
+    }
+
+    // Buang hanya item yang tadi dikirim (kurangi qty sesuai snapshot).
+    CART = CART.map(c => {
+      const sentQty = snapshot.get(c.id);
+      if (sentQty !== undefined) c.qty -= sentQty;
+      return c;
+    }).filter(c => c.qty > 0);
+    renderCart();
+  } finally {
+    isSubmitting = false;
+    setSubmitLoading(false);
   }
 
-  if (sent){
-    toast('Stok berhasil disimpan');
-    loadHistory();
-  } else {
-    const q = getPendingQueue();
-    q.push(batch);
-    savePendingQueue(q);
-    toast('Tersimpan offline — akan dikirim otomatis saat online');
-  }
-
-  CART = [];
-  renderCart();
+  // Koneksi terbukti jalan → sekalian kosongkan antrian offline lama
+  // (hanya batch yang sukses terkirim yang dihapus dari localStorage).
+  if (sent) trySyncPending();
 }
 
 /* ---------- History (grouped by rak, with rak filter + qty edit) ---------- */
@@ -1469,6 +1513,32 @@ document.querySelectorAll('.tabbar button').forEach(btn=>{
 });
 
 document.getElementById('btnSyncNow').addEventListener('click', trySyncPending);
+
+// Buang antrian offline secara manual (dengan konfirmasi). Data di antrian ini
+// BELUM masuk ke sheet, jadi penghapusan bersifat permanen.
+document.getElementById('btnDiscardPending').addEventListener('click', ()=>{
+  const q = getPendingQueue();
+  if (q.length === 0) return;
+  const items = q.flatMap(b => b.items || []);
+  const totalQty = items.reduce((s,it)=> s + (parseInt(it.qty) || 0), 0);
+  const ok = confirm(
+    `Buang ${q.length} batch (${items.length} baris, ${totalQty} pcs) yang BELUM terkirim ke server?\n\n` +
+    `Data ini akan dihapus permanen dan tidak bisa dikembalikan.`
+  );
+  if (!ok) return;
+
+  // Produk baru yang hanya ada di antrian ini ikut dibuang dari cache master
+  // lokal, supaya tidak ada produk "hantu" yang belum pernah masuk server.
+  const newItems = items.filter(it => it.isNew);
+  if (newItems.length){
+    MASTER = MASTER.filter(m => !newItems.some(it =>
+      it.barcode === m.barcode && normalize(it.rak) === normalize(m.rak)));
+    saveMasterToCache();
+  }
+
+  savePendingQueue([]);   // sekaligus menyegarkan banner & statistik lokal
+  toast('Antrian offline dibuang');
+});
 window.addEventListener('online', trySyncPending);
 
 /* ---------- Zona Penyimpanan (900-915) ---------- */
