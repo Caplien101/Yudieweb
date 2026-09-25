@@ -99,6 +99,7 @@
   }
   .product-hit .pname{font-weight:700; font-size:.98rem;}
   .product-hit .pmeta{font-size:.78rem; color:var(--text-sub); margin-top:2px;}
+  .prev-stock-badge{font-size:.76rem; background:#eef4ff; color:#1d4ed8; border:1px solid #c7d9fb; border-radius:8px; padding:5px 8px; margin:6px 0; line-height:1.3;}
   .not-found-box{
     border-radius:var(--radius-sm); background:#FFF6E5; border:1px solid #FFE3A3;
     padding:12px 14px; margin-top:12px; font-size:.85rem;
@@ -125,6 +126,7 @@
   .cart-item:last-child{border-bottom:none;}
   .cart-item .ci-name{font-weight:600; font-size:.9rem;}
   .cart-item .ci-meta{font-size:.75rem; color:var(--text-sub);}
+  .cart-item .ci-total{font-size:.78rem; color:#1d4ed8; margin-top:2px;}
   .cart-item .ci-qty{font-weight:700; color:var(--af-red); font-size:.95rem; margin-right:8px; white-space:nowrap; min-width:26px; text-align:right; display:inline-block;}
   .badge-new{background:var(--af-yellow); color:#5c4600; font-size:.65rem; font-weight:700; padding:1px 6px; border-radius:6px; margin-left:6px;}
   .empty-state{text-align:center; color:var(--text-sub); font-size:.85rem; padding:20px 0;}
@@ -206,14 +208,27 @@
   .eqr-controls{display:flex; gap:6px; align-items:center; flex:0 0 auto;}
   .eqr-input{width:66px; text-align:center; padding:.3rem .3rem; font-weight:700;}
   .eqr-save{width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center;}
+  .eqr-delete{width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; font-size:.85rem;}
+.conn-badge{
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:.68rem; font-weight:600; padding:2px 8px; border-radius:999px;
+  position:absolute; top:8px; right:10px;
+}
+.conn-badge.online{ background:rgba(25,135,84,.15); color:#19875a; }
+.conn-badge.offline{ background:rgba(220,53,69,.15); color:#dc3545; }
+.conn-badge.reconnecting{ background:rgba(255,193,7,.18); color:#b8860b; }
+.conn-badge.reconnecting .conn-dot{ animation:connPulse 1s infinite ease-in-out; }
+@keyframes connPulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.conn-dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
 </style>
 </head>
 <body>
 
-<div class="topbar">
+<div class="topbar" style="position:relative;">
+  <span class="conn-badge" id="connBadge"><span class="conn-dot"></span><span id="connBadgeText">…</span></span>
   <div class="container-app py-0">
     <h1><i class="bi bi-boxes"></i> Catat Stok Gudang</h1>
-    <div class="sub">Data rak, PLU, barcode &amp; deskripsi sudah tersedia — tinggal scan &amp; isi qty</div>
+    
     <span class="store-badge">Alfamart Cut Mutia</span>
   </div>
 </div>
@@ -233,9 +248,7 @@
       <select class="form-select" id="currentZonaInput">
         <option value="">Pilih zona (900–915)…</option>
       </select>
-      <div style="font-size:.72rem; color:var(--text-sub); margin-top:6px;">
-        Pilih zona tempat kamu berada sekarang. Barang yang di-scan berikutnya akan dicatat masuk ke zona ini — ganti dulu kalau pindah zona. Zona ini hanya menandai lokasi penyimpanan saat disimpan; tidak memengaruhi pencarian/pencocokan produk di master data.
-      </div>
+      
     </div>
 
     <div class="card-ios">
@@ -255,19 +268,16 @@
 
     <div class="card-ios">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2 class="mb-0"><i class="bi bi-clipboard-data"></i> Daftar Catatan (<span id="cartCount">0</span>)</h2>
-        <button class="btn btn-sm btn-af-outline" id="btnClearCart" style="font-size:.75rem; padding:.25rem .6rem;">Kosongkan</button>
+        <h2 class="mb-0"><i class="bi bi-clipboard-data"></i> Tercatat Sesi Ini (<span id="cartCount">0</span>)</h2>
+        <button class="btn btn-sm btn-af-outline" id="btnClearCart" style="font-size:.75rem; padding:.25rem .6rem;">Bersihkan Tampilan</button>
       </div>
       <div id="cartList">
-        <div class="empty-state"><i class="bi bi-inbox"></i>Belum ada barang dicatat</div>
+        <div class="empty-state"><i class="bi bi-inbox"></i>Belum ada barang dicatat sesi ini</div>
       </div>
     </div>
 
     <button class="btn btn-af w-100 py-2" id="btnSubmitCart" style="font-size:.95rem;">
-      <span id="submitIdle"><i class="bi bi-cloud-arrow-up-fill"></i> Simpan Stok (<span id="submitCount">0</span>)</span>
-      <span id="submitBusy" class="d-none">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><span id="submitBusyText">Mengirim…</span>
-      </span>
+      <i class="bi bi-check-circle-fill"></i> Selesai
     </button>
   </div>
 
@@ -314,6 +324,15 @@
         <button class="btn btn-blue w-100" id="btnSaveUrl">Simpan &amp; Muat Master Data</button>
       </div>
       <div class="mt-2" style="font-size:.78rem; color:var(--text-sub);" id="masterStatus"></div>
+    </div>
+    <div class="card-ios">
+      <h2><i class="bi bi-fire"></i> Firebase (Pencatatan Stok)</h2>
+      <div style="font-size:.78rem; color:var(--text-sub); margin-bottom:6px;">
+        Tempel Firebase config project (dari Firebase Console → Project settings → SDK setup and configuration → Config).
+      </div>
+      <textarea class="form-control mb-2" id="firebaseConfigInput" rows="5" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...", ...}'></textarea>
+      <button class="btn btn-blue w-100" id="btnSaveFirebaseConfig">Simpan &amp; Sambungkan Firebase</button>
+      <div class="mt-2" style="font-size:.78rem; color:var(--text-sub);" id="firebaseStatus"></div>
     </div>
     <div class="card-ios">
       <h2><i class="bi bi-database"></i> Data Lokal</h2>
@@ -370,6 +389,72 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+
+<!-- =========================================================
+     FIREBASE (pencatatan stok — stokMovements + currentStock)
+     Master data TETAP dari Google Sheet/Apps Script, tidak lewat sini.
+     Config Firebase Project diisi user lewat tab Pengaturan (disimpan
+     di localStorage key gs_firebaseConfig), lalu module ini membaca &
+     init secara dinamis. window.FB dipakai sebagai jembatan ke script
+     utama (non-module) di bawah.
+     ========================================================= -->
+<script type="module">
+  const LS_FB_CONFIG = 'gs_firebaseConfig';
+
+  // Config bawaan project Firebase (aman ditanam di client — bukan rahasia,
+  // keamanan data diatur lewat Firestore Security Rules, bukan dari config
+  // ini). Dipakai kalau localStorage belum diisi (browser baru/private mode).
+  // Tab Pengaturan tetap bisa dipakai untuk ganti ke project lain kalau perlu.
+  const DEFAULT_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBNtUHas_ZF4EF3bO61kWmJwkPNO_NdJlA",
+    authDomain: "precounted-f7a1c.firebaseapp.com",
+    projectId: "precounted-f7a1c",
+    storageBucket: "precounted-f7a1c.firebasestorage.app",
+    messagingSenderId: "173664402073",
+    appId: "1:173664402073:web:75785356288996cf221608"
+  };
+
+  window.FB = { ready:false, error:null };
+  let initStarted = false; // jaga-jaga: initializeFirestore() tidak boleh dipanggil dua kali di app yang sama
+
+  async function initFirebase(){
+    if (initStarted) return; // sudah pernah jalan di sesi ini — jangan diulang
+    initStarted = true;
+    let cfg;
+    try{
+      const raw = localStorage.getItem(LS_FB_CONFIG);
+      cfg = raw ? JSON.parse(raw) : DEFAULT_FIREBASE_CONFIG;
+      if (!raw) localStorage.setItem(LS_FB_CONFIG, JSON.stringify(DEFAULT_FIREBASE_CONFIG));
+    }catch(e){ cfg = DEFAULT_FIREBASE_CONFIG; }
+
+    try{
+      const [{ initializeApp }, fs] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js')
+      ]);
+      const app = initializeApp(cfg);
+      const db = fs.initializeFirestore(app, {
+        localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() })
+      });
+      window.FB = {
+        ready:true, error:null, app, db,
+        collection:fs.collection, doc:fs.doc, setDoc:fs.setDoc, addDoc:fs.addDoc,
+        getDoc:fs.getDoc, getDocs:fs.getDocs, query:fs.query, where:fs.where,
+        orderBy:fs.orderBy, limit:fs.limit, onSnapshot:fs.onSnapshot,
+        runTransaction:fs.runTransaction, increment:fs.increment,
+        serverTimestamp:fs.serverTimestamp, writeBatch:fs.writeBatch,
+        arrayUnion:fs.arrayUnion
+      };
+      window.dispatchEvent(new Event('fb-ready'));
+    }catch(e){
+      console.error('Firebase init gagal:', e);
+      window.FB = { ready:false, error:String(e && e.message || e) };
+      window.dispatchEvent(new Event('fb-ready'));
+    }
+  }
+  initFirebase();
+</script>
+
 <script>
 /* =========================================================
    CATAT STOK GUDANG — Alfamart Cut Mutia
@@ -418,9 +503,56 @@ const LS_KEYS = {
   scriptUrl: 'gs_scriptUrl',
   master: 'gs_master',          // cached master data array (plu, nama, barcode, rak) — no zona
   masterUpdated: 'gs_master_ts',
-  pending: 'gs_pendingStok',    // offline queue of not-yet-synced batches
-  currentZona: 'gs_currentZona'
+  pending: 'gs_pendingStok',    // [DEPRECATED sejak pindah ke Firestore] offline queue lama
+  currentZona: 'gs_currentZona',
+  firebaseConfig: 'gs_firebaseConfig'
 };
+
+/* ---------- Firestore: pencatatan stok ----------
+   stokMovements/{id}  : log transaksi, append-only.
+     { plu, nama, barcode, rawBarcode, rak, zona, qty, status:'active'|'void',
+       editHistory:[{from,to,at}], createdAt, voidedAt }
+   currentStock/{id}   : agregat qty berjalan per (barcode+rak), id deterministik.
+     { plu, nama, barcode, rak, qty, lastMovementAt }
+   qty di currentStock SELALU diubah lewat increment(delta), tidak pernah lewat
+   set(qty_baru) langsung — supaya catatan lama tidak pernah tertimpa dan aman
+   dari race condition saat dua HP submit/edit hampir bersamaan. */
+
+function stockDocId(barcode, rak){
+  const clean = v => normalize(v).replace(/[\/\\]/g,'_').replace(/^\.+$/,'_');
+  return `${clean(barcode) || 'nobarcode'}__${clean(rak) || 'norak'}`;
+}
+
+// Tunggu module Firebase selesai init (biasanya sudah selesai duluan karena
+// script module di-load lebih dulu di <head>/atas, tapi ini jaga-jaga kalau
+// koneksi lambat saat pertama kali buka halaman).
+function waitForFB(timeoutMs = 8000){
+  return new Promise(resolve=>{
+    if (window.FB && (window.FB.ready || window.FB.error)) return resolve(window.FB);
+    const onReady = ()=>{ clearTimeout(t); window.removeEventListener('fb-ready', onReady); resolve(window.FB); };
+    window.addEventListener('fb-ready', onReady);
+    const t = setTimeout(()=>{ window.removeEventListener('fb-ready', onReady); resolve(window.FB); }, timeoutMs);
+  });
+}
+
+function firebaseConfigured(){
+  return true; // DEFAULT_FIREBASE_CONFIG selalu tersedia; kegagalan init ditangani lewat FB.error
+}
+
+// Ambil stok yang sudah tercatat sebelumnya untuk barcode+rak ini — dipakai
+// murni sebagai INFORMASI di kartu hasil scan, bukan angka yang bisa diedit
+// di halaman Catat. qty yang diisi user selalu berarti "tambahan baru".
+async function fetchCurrentStock(barcode, rak){
+  const FB = await waitForFB();
+  if (!FB || !FB.ready) return null;
+  try{
+    const ref = FB.doc(FB.db, 'currentStock', stockDocId(barcode, rak));
+    const snap = await FB.getDoc(ref);
+    if (!snap.exists()) return { qty:0, lastMovementAt:null, none:true };
+    const d = snap.data();
+    return { qty: d.qty || 0, lastMovementAt: d.lastMovementAt ? d.lastMovementAt.toDate() : null };
+  }catch(e){ return null; }
+}
 
 let MASTER = [];        // [{plu, nama, barcode, rak}]  — no zona field
 let CART = [];          // [{id, plu, nama, barcode, rak, zona, qty, isNew}]
@@ -732,7 +864,7 @@ nameSearchInput.addEventListener('input', ()=>{
     return;
   }
   suggestList.innerHTML = hits.map(p => `
-    <div class="suggest-item" data-plu="${p.plu}" data-barcode="${p.barcode}">
+    <div class="suggest-item" data-plu="${escapeHtml(p.plu)}" data-barcode="${escapeHtml(p.barcode)}">
       ${escapeHtml(p.nama)}<span class="rak-chip">${escapeHtml(p.rak || '-')}</span>
       <small>PLU ${escapeHtml(p.plu)} • Barcode ${escapeHtml(p.barcode)}</small>
     </div>`).join('');
@@ -793,11 +925,15 @@ function renderSingleMatch(hit, rawBarcode){
     <div class="product-hit">
       <div class="pname">${escapeHtml(hit.nama)}<span class="rak-chip"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(hit.rak || 'Tanpa Rak')}</span><span class="rak-chip"><i class="bi bi-diagram-3-fill"></i> Zona ${escapeHtml(String(currentZona || '-'))}</span></div>
       <div class="pmeta">PLU ${escapeHtml(hit.plu)} • Barcode ${escapeHtml(hit.barcode)}</div>
+      <div id="prevStockBadge" class="prev-stock-badge"><i class="bi bi-hourglass-split"></i> Memeriksa stok tercatat…</div>
       <div class="qty-row">
         <button class="qty-btn" id="qtyMinus">–</button>
         <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
         <button class="qty-btn" id="qtyPlus">+</button>
-        <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
+        <button class="btn btn-af ms-auto" id="btnAddCart">
+          <span id="addIdle"><i class="bi bi-plus-circle-fill"></i> Tambah</span>
+          <span id="addBusy" class="d-none"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Menyimpan…</span>
+        </button>
       </div>
       <a href="#" id="btnAddNewLocation" style="font-size:.75rem; display:inline-block; margin-top:10px;">
         <i class="bi bi-plus-square-dotted"></i> Produk ini ada di rak lain juga? Tambah lokasi baru
@@ -808,6 +944,30 @@ function renderSingleMatch(hit, rawBarcode){
     e.preventDefault();
     renderNewItemForm(hit.barcode, hit.plu, hit.nama, rawBarcode);
   });
+  renderPrevStockBadge(hit.barcode, hit.rak || 'Tanpa Rak');
+}
+
+// Tampilkan info stok yang sudah tercatat sebelumnya untuk barcode+rak ini.
+// Murni informasi (bukan field yang bisa diedit) — qty yang diisi user di
+// halaman Catat selalu berarti TAMBAHAN baru di atas angka ini, bukan total.
+async function renderPrevStockBadge(barcode, rak){
+  const el = document.getElementById('prevStockBadge');
+  if (!el) return; // kartu hasil sudah berganti sebelum lookup selesai
+  if (!firebaseConfigured()){
+    el.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Firebase belum diatur — stok lama tidak bisa dicek.`;
+    return;
+  }
+  const prev = await fetchCurrentStock(barcode, rak);
+  const el2 = document.getElementById('prevStockBadge'); // re-check, kartu bisa sudah berganti
+  if (!el2) return;
+  if (!prev){
+    el2.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Stok lama tidak bisa dibaca (offline / belum ada cache).`;
+  } else if (prev.none){
+    el2.innerHTML = `<i class="bi bi-info-circle"></i> Belum ada stok tercatat sebelumnya di rak ini.`;
+  } else {
+    const when = prev.lastMovementAt ? prev.lastMovementAt.toLocaleString('id-ID') : '-';
+    el2.innerHTML = `<i class="bi bi-clock-history"></i> Stok tercatat sebelumnya: <b>${prev.qty} pcs</b> (terakhir ${when})`;
+  }
 }
 
 // Barcode cocok di lebih dari 1 rak — user harus pilih rak dulu.
@@ -861,15 +1021,34 @@ function renderNewItemForm(barcode, knownPlu, knownNama, rawBarcode){
         <input type="text" class="form-control mb-2" id="newNama" placeholder="Masukkan nama/deskripsi barang" value="${escapeHtml(knownNama || '')}" ${isKnownProduct ? 'readonly' : ''}>
         <label class="form-label-sm">Rak</label>
         <input type="text" class="form-control" id="newRak" placeholder="Masukkan rak/lokasi barang" list="rakDatalistCatat">
+        <div id="prevStockBadge" class="prev-stock-badge" style="display:none;"></div>
       </div>
       <div class="qty-row">
         <button class="qty-btn" id="qtyMinus">–</button>
         <input type="number" class="form-control qty-input" id="qtyValue" value="1" min="1">
         <button class="qty-btn" id="qtyPlus">+</button>
-        <button class="btn btn-af ms-auto" id="btnAddCart"><i class="bi bi-plus-circle-fill"></i> Tambah</button>
+        <button class="btn btn-af ms-auto" id="btnAddCart">
+          <span id="addIdle"><i class="bi bi-plus-circle-fill"></i> Tambah</span>
+          <span id="addBusy" class="d-none"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Menyimpan…</span>
+        </button>
       </div>
     </div>`;
   bindQtyControls();
+  if (isKnownProduct){
+    // Rak diisi bebas di sini — cek ulang stok tercatat tiap rak berubah,
+    // biar ketahuan kalau ternyata rak yang diketik itu sudah ada catatannya.
+    const rakInput = document.getElementById('newRak');
+    const check = ()=>{
+      const rakVal = rakInput.value.trim();
+      const badge = document.getElementById('prevStockBadge');
+      if (!rakVal){ badge.style.display = 'none'; return; }
+      badge.style.display = '';
+      badge.innerHTML = `<i class="bi bi-hourglass-split"></i> Memeriksa stok tercatat…`;
+      renderPrevStockBadge(barcode, rakVal);
+    };
+    rakInput.addEventListener('blur', check);
+    rakInput.addEventListener('change', check);
+  }
 }
 
 function bindQtyControls(){
@@ -884,8 +1063,47 @@ function bindQtyControls(){
   document.getElementById('btnAddCart').addEventListener('click', addCurrentToCart);
 }
 
-function addCurrentToCart(){
-  if (!currentMatch) return;
+let isAdding = false; // cegah klik ganda tombol Tambah (satu klik = satu movement Firestore)
+
+function setAddLoading(on){
+  const btn = document.getElementById('btnAddCart');
+  if (!btn) return;
+  btn.disabled = on;
+  const idle = document.getElementById('addIdle');
+  const busy = document.getElementById('addBusy');
+  if (idle) idle.classList.toggle('d-none', on);
+  if (busy) busy.classList.toggle('d-none', !on);
+}
+
+// Race sederhana supaya lookup stok lama tidak menggantung lama-lama kalau
+// offline dan belum ada apa pun di cache Firestore untuk key ini.
+function withTimeout(promise, ms){
+  return Promise.race([promise, new Promise(res => setTimeout(()=> res(null), ms))]);
+}
+
+// Daftarkan produk baru ke Master Produk (Google Sheet) lewat Apps Script
+// yang sudah ada — best-effort, tidak memblokir. Sekaligus masukkan ke
+// cache MASTER lokal supaya langsung dikenali di scan berikutnya.
+function registerNewProductIfNeeded(item){
+  if (!item.isNew) return;
+  if (!MASTER.some(m => m.barcode === item.barcode && normalize(m.rak) === normalize(item.rak))){
+    MASTER.push({ plu:item.plu, nama:item.nama, barcode:item.barcode, rak:item.rak });
+    saveMasterToCache();
+    refreshRakDatalist();
+  }
+  const payload = { timestamp:new Date().toISOString(), items:[item] };
+  const enqueue = ()=>{ const q = getPendingQueue(); q.push(payload); savePendingQueue(q); };
+  const url = getScriptUrl();
+  if (!url || !navigator.onLine){ enqueue(); return; }
+  fetch(url, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ action:'submitStok', ...payload })
+  }).then(r => r.json()).then(d => { if (!d.ok) enqueue(); }).catch(enqueue);
+}
+
+async function addCurrentToCart(){
+  if (!currentMatch || isAdding) return;
   const qty = Math.max(1, parseInt(document.getElementById('qtyValue').value) || 1);
   const zona = currentMatch.zona || document.getElementById('currentZonaInput').value;
 
@@ -910,30 +1128,62 @@ function addCurrentToCart(){
       currentMatch.plu = plu;
       currentMatch.nama = nama;
       currentMatch.rak = rak;
-      // Tambahkan baris master baru (barcode+rak baru) supaya langsung dikenali di scan berikutnya
-      // (Master Produk tetap pakai barcode yang sudah dinormalisasi, bukan raw.)
-      MASTER.push({ plu, nama, barcode: currentMatch.barcode, rak });
-      saveMasterToCache();
     }
+  }
+
+  isAdding = true; setAddLoading(true); // kunci sebelum await pertama supaya tap ganda tidak lolos
+  const FB = await waitForFB();
+  if (!FB || !FB.ready){
+    isAdding = false; setAddLoading(false);
+    toast('Firebase belum tersambung — periksa Pengaturan');
+    return;
   }
 
   const rak = currentMatch.rak || 'Tanpa Rak';
   const rawBarcode = currentMatch.rawBarcode || currentMatch.barcode;
+  const item = { plu: currentMatch.plu, nama: currentMatch.nama, barcode: currentMatch.barcode, rawBarcode, rak, zona, qty, isNew: !!currentMatch.isNew };
 
-  // Barang yang sama (berdasarkan PLU — stabil, tidak terpengaruh variasi
-  // representasi barcode asli antar-scan), rak yang sama, DAN zona yang
-  // sama digabung qty-nya.
-  const existing = CART.find(c => c.plu === currentMatch.plu && c.rak === rak && String(c.zona) === String(zona));
-  if (existing){
-    existing.qty += qty;
-  } else {
-    CART.push({ id: cartIdSeq++, plu: currentMatch.plu, nama: currentMatch.nama, barcode: currentMatch.barcode, rawBarcode, rak, zona, qty, isNew: !!currentMatch.isNew });
+  try{
+    // Stok lama dibaca ulang saat ini juga (bukan dari badge yang mungkin
+    // sudah agak basi) supaya angka "lama → baru" yang ditampilkan akurat.
+    const prev = await withTimeout(fetchCurrentStock(item.barcode, item.rak), 4000);
+    const prevQty = prev ? prev.qty : null; // null = tidak terbaca (mis. offline & belum ada cache)
+    const newTotal = (prevQty || 0) + qty;
+
+    const movRef = FB.doc(FB.collection(FB.db, 'stokMovements'));
+    const stockRef = FB.doc(FB.db, 'currentStock', stockDocId(item.barcode, item.rak));
+    const batch = FB.writeBatch(FB.db);
+    batch.set(movRef, {
+      plu:item.plu, nama:item.nama, barcode:item.barcode, rawBarcode:item.rawBarcode,
+      rak:item.rak, zona:item.zona, qty:item.qty, status:'active', createdAt: FB.serverTimestamp()
+    });
+    batch.set(stockRef, {
+      plu:item.plu, nama:item.nama, barcode:item.barcode, rak:item.rak,
+      qty: FB.increment(item.qty), lastMovementAt: FB.serverTimestamp()
+    }, { merge:true });
+
+    // TIDAK menunggu commit() sampai server balas — begitu commit() dipanggil,
+    // Firestore sudah menyimpan penulisan ini ke antrian lokal (IndexedDB),
+    // yang tetap ada walau halaman langsung di-refresh atau sedang offline.
+    batch.commit().catch(err=>{
+      console.error('Sync ke Firestore gagal permanen:', err);
+      CART = CART.filter(c => c.row !== movRef.id); renderCart();
+      toast('Sebagian data gagal sinkron ke server — cek tab Pengaturan');
+    });
+
+    registerNewProductIfNeeded(item);
+
+    CART.push({ id: cartIdSeq++, row: movRef.id, ...item, prevQty, newTotal });
+    renderCart();
+    document.getElementById('resultZone').innerHTML = '';
+    currentMatch = null;
+    toast(prevQty === null
+      ? `Tersimpan — +${qty} pcs (stok lama tidak terbaca, offline)`
+      : `Tersimpan — ${prevQty} → ${newTotal} pcs (Zona ${zona}, rak "${rak}")`);
+  } finally {
+    isAdding = false;
+    setAddLoading(false);
   }
-
-  renderCart();
-  document.getElementById('resultZone').innerHTML = '';
-  currentMatch = null;
-  toast(`Ditambahkan — Zona ${zona}, rak "${rak}"`);
 }
 
 /* ---------- Cart (grouped by rak, automatic) ---------- */
@@ -941,10 +1191,9 @@ function addCurrentToCart(){
 function renderCart(){
   const list = document.getElementById('cartList');
   document.getElementById('cartCount').textContent = CART.length;
-  document.getElementById('submitCount').textContent = CART.reduce((s,c)=>s+c.qty,0);
 
   if (CART.length === 0){
-    list.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada barang dicatat</div>`;
+    list.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada barang dicatat sesi ini</div>`;
     return;
   }
 
@@ -958,119 +1207,68 @@ function renderCart(){
       <div class="rak-group">
         <div class="rak-group-head">
           <span><i class="bi bi-diagram-3-fill"></i> Zona ${escapeHtml(zona)} <i class="bi bi-geo-alt-fill ms-1"></i> ${escapeHtml(rak)}</span>
-          <span class="rak-total">${totalQty} pcs</span>
+          <span class="rak-total">+${totalQty} pcs</span>
         </div>
         ${items.map(c => `
           <div class="cart-item">
             <div>
               <div class="ci-name">${escapeHtml(c.nama)}${c.isNew ? '<span class="badge-new">BARU</span>' : ''}</div>
               <div class="ci-meta">PLU ${escapeHtml(c.plu)} • Barcode ${escapeHtml(c.barcode)}</div>
+              <div class="ci-total"><i class="bi bi-arrow-right-short"></i> ${c.prevQty === null ? 'stok lama tidak terbaca' : `${c.prevQty} → <b>${c.newTotal}</b> pcs`}</div>
             </div>
             <div class="d-flex align-items-center">
-              <span class="ci-qty">${c.qty}</span>
-              <button class="btn btn-sm btn-af-outline" data-remove="${c.id}" style="padding:.15rem .5rem;"><i class="bi bi-trash3"></i></button>
+              <span class="ci-qty">+${c.qty}</span>
+              <button class="btn btn-sm btn-af-outline" data-remove="${c.id}" data-row="${escapeHtml(c.row)}" style="padding:.15rem .5rem;"><i class="bi bi-trash3"></i></button>
             </div>
           </div>`).join('')}
       </div>`;
   }).join('');
 
+  // Item ini sudah tersimpan di Firestore sejak tombol Tambah ditekan, jadi
+  // "hapus" di sini berarti MEMBATALKAN catatan itu (soft-delete di server),
+  // bukan sekadar menghapus tampilan lokal.
   list.querySelectorAll('[data-remove]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
+    btn.addEventListener('click', async ()=>{
       const id = parseInt(btn.dataset.remove);
-      CART = CART.filter(c => c.id !== id);
-      renderCart();
+      const rowId = btn.dataset.row;
+      const item = CART.find(c => c.id === id);
+      if (!item) return;
+      if (!confirm(`Batalkan catatan ini? Stok akan dikurangi ${item.qty} pcs.`)) return;
+      btn.disabled = true;
+      const ok = await voidMovementRow(rowId);
+      if (ok){
+        CART = CART.filter(c => c.id !== id);
+        renderCart();
+        toast('Catatan dibatalkan');
+      } else {
+        btn.disabled = false;
+      }
     });
   });
 }
 
 document.getElementById('btnClearCart').addEventListener('click', ()=>{
   if (CART.length === 0) return;
-  if (confirm('Kosongkan seluruh daftar catatan?')){
+  // Ini hanya membersihkan TAMPILAN daftar di layar. Semua catatan di
+  // dalamnya sudah tersimpan ke Firestore sejak tombol Tambah ditekan —
+  // untuk membatalkan catatan yang sudah tersimpan, hapus satu-satu lewat
+  // tombol 🗑 di baris masing-masing, atau lewat tab Riwayat.
+  if (confirm('Bersihkan daftar di layar ini? (Data yang sudah tersimpan TIDAK ikut terhapus.)')){
     CART = [];
     renderCart();
   }
 });
 
-/* ---------- Submit ---------- */
+/* ---------- Selesai (Simpan Stok lama sudah tidak diperlukan lagi —
+   tiap Tambah sudah langsung tersimpan ke Firestore) ---------- */
 
-document.getElementById('btnSubmitCart').addEventListener('click', submitCart);
+document.getElementById('btnSubmitCart').addEventListener('click', ()=>{
+  if (CART.length === 0){ toast('Belum ada catatan sesi ini'); return; }
+  CART = [];
+  renderCart();
+  toast('Selesai — semua catatan sudah tersimpan');
+});
 
-let isSubmitting = false;
-
-function setSubmitLoading(on, text){
-  const btn = document.getElementById('btnSubmitCart');
-  btn.disabled = on;
-  btn.setAttribute('aria-busy', on ? 'true' : 'false');
-  document.getElementById('submitIdle').classList.toggle('d-none', on);
-  document.getElementById('submitBusy').classList.toggle('d-none', !on);
-  if (on && text) document.getElementById('submitBusyText').textContent = text;
-}
-
-async function submitCart(){
-  if (isSubmitting) return;            // cegah klik ganda → batch terkirim dobel
-  if (CART.length === 0){
-    toast('Daftar catatan masih kosong');
-    return;
-  }
-
-  // Snapshot isi yang dikirim. Kalau petugas masih scan saat pengiriman
-  // berlangsung, item baru tidak ikut terhapus setelah selesai.
-  const snapshot = new Map(CART.map(c => [c.id, c.qty]));
-
-  const batch = {
-    timestamp: new Date().toISOString(),
-    // barcode = versi ternormalisasi (dipakai server untuk mencocokkan/menambah
-    // Master Produk); rawBarcode = barcode ASLI hasil scan (disimpan ke Stok Gudang
-    // & dipakai untuk merender kode batang di riwayat).
-    items: CART.map(c => ({ plu:c.plu, nama:c.nama, barcode:c.barcode, rawBarcode:c.rawBarcode || c.barcode, rak:c.rak, zona:c.zona, qty:c.qty, isNew: !!c.isNew }))
-  };
-
-  const url = getScriptUrl();
-  const canSend = !!(url && navigator.onLine);
-  let sent = false;
-
-  isSubmitting = true;
-  setSubmitLoading(true, canSend ? `Mengirim ${batch.items.length} item…` : 'Menyimpan offline…');
-
-  try{
-    if (canSend){
-      try{
-        const res = await fetch(url, {
-          method:'POST',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body: JSON.stringify({ action:'submitStok', ...batch })
-        });
-        const data = await res.json();
-        sent = !!data.ok;
-      }catch(e){ sent = false; }
-    }
-
-    if (sent){
-      toast('Stok berhasil disimpan');
-      loadHistory();
-    } else {
-      const q = getPendingQueue();
-      q.push(batch);
-      savePendingQueue(q);
-      toast('Tersimpan offline — akan dikirim otomatis saat online');
-    }
-
-    // Buang hanya item yang tadi dikirim (kurangi qty sesuai snapshot).
-    CART = CART.map(c => {
-      const sentQty = snapshot.get(c.id);
-      if (sentQty !== undefined) c.qty -= sentQty;
-      return c;
-    }).filter(c => c.qty > 0);
-    renderCart();
-  } finally {
-    isSubmitting = false;
-    setSubmitLoading(false);
-  }
-
-  // Koneksi terbukti jalan → sekalian kosongkan antrian offline lama
-  // (hanya batch yang sukses terkirim yang dihapus dari localStorage).
-  if (sent) trySyncPending();
-}
 
 /* ---------- History (grouped by rak, with rak filter + qty edit) ---------- */
 
@@ -1094,33 +1292,61 @@ function setHistViewMode(mode){
   applyHistoryFilterAndRender();
 }
 
+let historyUnsub = null; // unsubscribe listener Firestore sebelumnya, biar tidak dobel
+
 async function loadHistory(){
-  const url = getScriptUrl();
   const histList = document.getElementById('histList');
   const histSummary = document.getElementById('histSummary');
 
-  if (!url){
-    histList.innerHTML = `<div class="empty-state"><i class="bi bi-gear"></i>Atur Apps Script URL di tab Pengaturan dulu</div>`;
+  if (!firebaseConfigured()){
+    histList.innerHTML = `<div class="empty-state"><i class="bi bi-gear"></i>Atur Firebase di tab Pengaturan dulu</div>`;
     histSummary.textContent = '';
     return;
   }
+  const FB = await waitForFB();
+  if (!FB || !FB.ready){
+    histList.innerHTML = `<div class="empty-state"><i class="bi bi-wifi-off"></i>Firebase belum tersambung</div>`;
+    histSummary.textContent = '';
+    return;
+  }
+
   histList.innerHTML = `<div class="empty-state"><i class="bi bi-hourglass-split"></i>Memuat riwayat…</div>`;
   histSummary.textContent = '';
-  try{
-    const res = await fetch(url + '?action=getHistory');
-    const data = await res.json();
-    if (data.ok && Array.isArray(data.items)){
-      HISTORY_ITEMS = data.items;
-      refreshHistZonaChips();
-      refreshHistRakFilterOptions();
-      applyHistoryFilterAndRender();
-    } else {
-      HISTORY_ITEMS = [];
-      histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Belum ada riwayat</div>`;
+
+  if (historyUnsub) { historyUnsub(); historyUnsub = null; }
+
+  const q = FB.query(
+    FB.collection(FB.db, 'stokMovements'),
+    FB.orderBy('createdAt', 'desc'),
+    FB.limit(1000) // batasi 1000 catatan terbaru — cukup untuk kebutuhan riwayat gudang
+  );
+
+  historyUnsub = FB.onSnapshot(q, snap=>{
+    markSynced();
+    // Real-time + otomatis terisi dari cache saat offline (persistentLocalCache).
+    HISTORY_ITEMS = snap.docs
+      .map(d=>{
+        const v = d.data();
+        return {
+          row: d.id, plu: v.plu, nama: v.nama, barcode: v.barcode,
+          rawBarcode: v.rawBarcode || v.barcode, rak: v.rak, zona: v.zona,
+          qty: v.qty, status: v.status || 'active',
+          timestamp: v.createdAt ? v.createdAt.toDate().toISOString() : new Date().toISOString()
+        };
+      })
+      .filter(r => r.status !== 'void'); // dibatalkan (soft delete) — tidak ditampilkan
+    refreshHistZonaChips();
+    refreshHistRakFilterOptions();
+    applyHistoryFilterAndRender();
+  }, err=>{
+    console.error('Gagal memuat riwayat:', err);
+    markReconnecting();
+    // Jangan timpa daftar yang sudah tampil (biasanya sudah terisi dari cache
+    // lokal); listener akan otomatis mengisi ulang begitu SDK berhasil retry.
+    if (HISTORY_ITEMS.length === 0){
+      histList.innerHTML = `<div class="empty-state"><i class="bi bi-wifi-off"></i>Menyambungkan ulang ke server…</div>`;
     }
-  }catch(e){
-    histList.innerHTML = `<div class="empty-state"><i class="bi bi-wifi-off"></i>Tidak bisa memuat riwayat (offline)</div>`;
-  }
+  });
 }
 
 // Render tombol chip filter zona (hanya zona yang benar-benar ada di data
@@ -1168,10 +1394,13 @@ function refreshHistRakFilterOptions(){
 document.getElementById('histSearchInput').addEventListener('input', applyHistoryFilterAndRender);
 document.getElementById('histRakFilter').addEventListener('change', applyHistoryFilterAndRender);
 
+function activeRakFilter_(){
+  return histViewMode === 'perProduk' ? '' : document.getElementById('histRakFilter').value;
+}
 // Terapkan pencarian produk + filter zona (chip) + rak
 function getFilteredHistoryItems(){
   const search = normalize(document.getElementById('histSearchInput').value);
-  const rakVal = document.getElementById('histRakFilter').value;
+  const rakVal = activeRakFilter_();
 
   return HISTORY_ITEMS.filter(r => {
     if (search && !normalize(r.nama).includes(search) && !normalize(r.plu).includes(search)) return false;
@@ -1188,13 +1417,20 @@ function getFilteredHistoryItems(){
 // barcode ASLI hasil scan — representasinya bisa sedikit berbeda antar-scan
 // meski produknya sama, sedangkan PLU tetap stabil.
 function dedupeLatestLocations(items){
-  const latestByKey = {};
+  // Tiap movement = tambahan (delta), jadi qty per lokasi = JUMLAH semua movement aktif.
+  // `movements` menyimpan baris aslinya (dipakai modal edit/batalkan).
+  const g = {};
   items.forEach(row=>{
     const key = row.plu + '|' + (row.rak || '') + '|' + (row.zona || '');
-    const prev = latestByKey[key];
-    if (!prev || new Date(row.timestamp) > new Date(prev.timestamp)) latestByKey[key] = row;
+    let a = g[key];
+    if (!a) a = g[key] = { ...row, qty:0, movements:[] };
+    a.movements.push(row);
+    a.qty += Number(row.qty) || 0;
+    if (new Date(row.timestamp) > new Date(a.timestamp)){
+      a.timestamp = row.timestamp; a.barcode = row.barcode; a.rawBarcode = row.rawBarcode;
+    }
   });
-  return Object.values(latestByKey);
+  return Object.values(g);
 }
 
 // Gabungkan sekumpulan location-entry menjadi kartu per produk: qty dijumlahkan,
@@ -1202,10 +1438,10 @@ function dedupeLatestLocations(items){
 function buildProductCards(locationEntries){
   const byPlu = {};
   locationEntries.forEach(row=>{
-    if (!byPlu[row.plu]) byPlu[row.plu] = { plu: row.plu, nama: row.nama, barcode: row.barcode, _latestTs: row.timestamp, entries: [] };
+    if (!byPlu[row.plu]) byPlu[row.plu] = { plu: row.plu, nama: row.nama, barcode: row.rawBarcode || row.barcode, _latestTs: row.timestamp, entries: [] };
     byPlu[row.plu].entries.push(row);
     if (new Date(row.timestamp) >= new Date(byPlu[row.plu]._latestTs)){
-      byPlu[row.plu].barcode = row.barcode;
+      byPlu[row.plu].barcode = row.rawBarcode || row.barcode;
       byPlu[row.plu]._latestTs = row.timestamp;
     }
   });
@@ -1293,7 +1529,7 @@ function applyHistoryFilterAndRender(){
   const filtered = getFilteredHistoryItems();
   const histList = document.getElementById('histList');
   const histSummary = document.getElementById('histSummary');
-  const rakVal = document.getElementById('histRakFilter').value;
+  const rakVal = activeRakFilter_();
 
   if (filtered.length === 0){
     histList.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>Tidak ada catatan yang cocok dengan filter ini</div>`;
@@ -1401,12 +1637,23 @@ function openEditQtyModal(card){
   editQtyModal.show();
 }
 
+function recalcCard_(card, removeRowId){
+  card.entries.forEach(en=>{
+    if (removeRowId) en.movements = en.movements.filter(m => m.row !== removeRowId);
+    en.qty = en.movements.reduce((s,m)=>s+(Number(m.qty)||0),0);
+  });
+  card.entries = card.entries.filter(en => en.movements.length > 0);
+  card.total = card.entries.reduce((s,en)=>s+en.qty,0);
+}
+
 function renderEditQtyModalBody(card){
   const body = document.getElementById('editQtyModalBody');
+  const moves = card.entries.flatMap(en => en.movements || [en])
+    .sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
   body.innerHTML = `
     <div style="font-size:.78rem; color:var(--text-sub); margin-bottom:6px;">PLU ${escapeHtml(card.plu)} • Barcode ${escapeHtml(card.barcode || '-')}</div>
-    ${card.entries.map(e => `
-      <div class="edit-qty-row" data-row="${e.row}">
+    ${moves.map(e => `
+      <div class="edit-qty-row" data-row="${escapeHtml(String(e.row))}">
         <div>
           <div class="eqr-label"><i class="bi bi-diagram-3-fill" style="color:var(--af-blue);"></i> Zona ${escapeHtml(String(e.zona || '-'))} <i class="bi bi-geo-alt-fill ms-1" style="color:var(--af-blue);"></i> ${escapeHtml(e.rak || 'Tanpa Rak')}</div>
           <div class="eqr-meta">${new Date(e.timestamp).toLocaleString('id-ID')}</div>
@@ -1414,57 +1661,95 @@ function renderEditQtyModalBody(card){
         <div class="eqr-controls">
           <input type="number" min="0" class="form-control eqr-input" value="${e.qty}">
           <button class="btn btn-af eqr-save" title="Simpan"><i class="bi bi-check-lg"></i></button>
+          <button class="btn btn-af-outline eqr-delete" title="Batalkan catatan ini"><i class="bi bi-trash3"></i></button>
         </div>
       </div>`).join('')}
+    ${moves.length === 0 ? `<div class="empty-state" style="padding:16px 0;">Tidak ada catatan tersisa</div>` : ''}
   `;
   body.querySelectorAll('.eqr-save').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const rowWrap = btn.closest('.edit-qty-row');
-      const rowId = Number(rowWrap.dataset.row);
+      const rowId = rowWrap.dataset.row;
       const input = rowWrap.querySelector('.eqr-input');
+      const newQty = Number(input.value);
+      if (input.value.trim() === '' || !Number.isInteger(newQty) || newQty < 0){ toast('Qty tidak valid (harus bilangan bulat ≥ 0)'); return; }
       btn.disabled = true;
-      const ok = await saveEditQtyRow(rowId, input.value);
+      const ok = await editMovementQty(rowId, newQty);
       btn.disabled = false;
       if (ok){
-        const entry = card.entries.find(e2 => e2.row === rowId);
-        if (entry) entry.qty = Number(input.value);
-        card.total = card.entries.reduce((s,e2)=>s+(Number(e2.qty)||0),0);
-        applyHistoryFilterAndRender();
+        const mv = moves.find(m => m.row === rowId);
+        if (mv) mv.qty = newQty;
+        recalcCard_(card);
+        toast('Qty berhasil diperbarui');
+        editQtyModal.hide();
+      }
+    });
+  });
+  body.querySelectorAll('.eqr-delete').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const rowWrap = btn.closest('.edit-qty-row');
+      const rowId = rowWrap.dataset.row;
+      if (!confirm('Batalkan catatan ini? Stok akan dikurangi sesuai qty catatan ini.')) return;
+      btn.disabled = true;
+      const ok = await voidMovementRow(rowId);
+      btn.disabled = false;
+      if (ok){
+        recalcCard_(card, rowId);
+        renderEditQtyModalBody(card); // re-render supaya baris yang dibatalkan hilang
+        toast('Catatan dibatalkan');
+        if (card.entries.length === 0) editQtyModal.hide();
       }
     });
   });
 }
 
-async function saveEditQtyRow(rowId, newQtyRaw){
-  const newQty = Number(newQtyRaw);
-  if (isNaN(newQty) || newQty < 0){
-    toast('Qty tidak valid');
-    return false;
-  }
-  const url = getScriptUrl();
-  if (!url){ toast('Atur Apps Script URL dulu di tab Pengaturan'); return false; }
-  if (!navigator.onLine){ toast('Perlu koneksi internet untuk mengubah qty yang sudah terkirim'); return false; }
-
+// Ubah qty satu movement — dihitung sebagai SELISIH (delta) terhadap qty asli
+// di server (dibaca ulang dalam transaksi, bukan percaya angka di layar),
+// supaya aman kalau ada dua orang mengedit baris yang sama hampir bersamaan,
+// dan currentStock tidak pernah di-set langsung, hanya di-increment(delta).
+// Baca movement (server bila online, cache lokal bila offline), lalu tulis lewat
+// batch + increment(delta). Tidak memakai runTransaction karena transaksi WAJIB online
+// dan gagal untuk catatan yang belum sempat sync.
+async function applyMovementChange_(rowId, compute){
+  const FB = await waitForFB();
+  if (!FB || !FB.ready){ toast('Firebase belum tersambung'); return false; }
   try{
-    const res = await fetch(url, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'updateQty', row: rowId, qty: newQty })
-    });
-    const data = await res.json();
-    if (data.ok){
-      const item = HISTORY_ITEMS.find(r => r.row === rowId);
-      if (item) item.qty = newQty;
-      toast('Qty berhasil diperbarui');
-      return true;
-    } else {
-      toast('Gagal update qty — coba lagi');
-      return false;
-    }
+    const movRef = FB.doc(FB.db, 'stokMovements', rowId);
+    const snap = await FB.getDoc(movRef);
+    if (!snap.exists()) throw new Error('Catatan tidak ditemukan');
+    const data = snap.data();
+    const c = compute(data);
+    if (!c) return true;
+    const batch = FB.writeBatch(FB.db);
+    batch.update(movRef, c.movUpdate);
+    batch.set(FB.doc(FB.db, 'currentStock', stockDocId(data.barcode, data.rak)),
+      { qty: FB.increment(c.delta), lastMovementAt: FB.serverTimestamp() }, { merge:true });
+    batch.commit().catch(err=>{ console.error(err); toast('Perubahan gagal sinkron ke server'); });
+    return true;
   }catch(e){
-    toast('Gagal update qty — periksa koneksi');
+    console.error(e);
+    toast('Gagal: ' + (e.message || 'coba lagi'));
     return false;
   }
+}
+
+function editMovementQty(rowId, newQty){
+  return applyMovementChange_(rowId, data=>{
+    if (data.status === 'void') throw new Error('Catatan ini sudah dibatalkan');
+    const oldQty = Number(data.qty) || 0;
+    return {
+      delta: newQty - oldQty,
+      movUpdate: { qty:newQty, editHistory: window.FB.arrayUnion({ from:oldQty, to:newQty, at:new Date().toISOString() }) }
+    };
+  });
+}
+
+// Soft-delete: movement ditandai 'void' dan currentStock dikurangi qty-nya.
+function voidMovementRow(rowId){
+  return applyMovementChange_(rowId, data=>{
+    if (data.status === 'void') return null;
+    return { delta: -(Number(data.qty) || 0), movUpdate: { status:'void', voidedAt: window.FB.serverTimestamp() } };
+  });
 }
 
 document.getElementById('btnRefreshHist').addEventListener('click', loadHistory);
@@ -1497,6 +1782,40 @@ document.getElementById('btnSaveUrl').addEventListener('click', async ()=>{
   await trySyncPending();
 });
 document.getElementById('btnResyncMaster').addEventListener('click', fetchMasterFromServer);
+
+function renderFirebaseStatus(){
+  const el = document.getElementById('firebaseStatus');
+  if (!firebaseConfigured()){
+    el.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Belum diatur — pencatatan stok tidak bisa dikirim.`;
+    return;
+  }
+  const FB = window.FB;
+  if (FB && FB.ready){
+    el.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Firebase tersambung.`;
+  } else if (FB && FB.error){
+    el.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> Gagal tersambung (${escapeHtml(FB.error)}). Periksa config &amp; koneksi.`;
+  } else {
+    el.innerHTML = `<i class="bi bi-hourglass-split"></i> Menyambungkan…`;
+  }
+}
+window.addEventListener('fb-ready', renderFirebaseStatus);
+
+document.getElementById('btnSaveFirebaseConfig').addEventListener('click', async ()=>{
+  const raw = document.getElementById('firebaseConfigInput').value.trim();
+  if (!raw){ toast('Tempel config Firebase terlebih dahulu'); return; }
+  let parsed;
+  try{ parsed = JSON.parse(raw); }
+  catch(e){ toast('Format JSON config tidak valid'); return; }
+  if (!parsed.projectId){ toast('Config tampak tidak lengkap (projectId tidak ada)'); return; }
+  const changed = localStorage.getItem(LS_KEYS.firebaseConfig) !== JSON.stringify(parsed);
+  localStorage.setItem(LS_KEYS.firebaseConfig, JSON.stringify(parsed));
+  if (!changed){ toast('Config sama seperti sebelumnya — sudah tersambung'); return; }
+  // Firestore tidak bisa di-init ulang di sesi yang sama kalau config berubah
+  // (initializeFirestore() hanya boleh dipanggil sekali per app). Cara paling
+  // aman: simpan lalu muat ulang halaman supaya init berjalan bersih dari nol.
+  toast('Config disimpan — memuat ulang halaman…');
+  setTimeout(()=> location.reload(), 600);
+});
 
 /* ---------- Tabs ---------- */
 
@@ -1541,10 +1860,46 @@ document.getElementById('btnDiscardPending').addEventListener('click', ()=>{
 });
 window.addEventListener('online', trySyncPending);
 
+/* ---------- Indikator online/offline ---------- */
+
+// state: 'online' | 'offline' | 'reconnecting'
+// 'reconnecting' dipakai saat browser bilang online tapi listener Firestore
+// (onSnapshot) baru saja errored — SDK sedang mencoba menyambung ulang sendiri.
+let connState = navigator.onLine ? 'online' : 'offline';
+
+function updateConnBadge(){
+  const badge = document.getElementById('connBadge');
+  const text = document.getElementById('connBadgeText');
+  if (!badge) return;
+  if (!navigator.onLine) connState = 'offline';
+  else if (connState === 'offline') connState = 'online';
+  badge.classList.toggle('online', connState === 'online');
+  badge.classList.toggle('offline', connState === 'offline');
+  badge.classList.toggle('reconnecting', connState === 'reconnecting');
+  text.textContent = connState === 'online' ? 'Online'
+    : connState === 'offline' ? 'Offline'
+    : 'Menyambungkan ulang…';
+}
+window.addEventListener('online', updateConnBadge);
+window.addEventListener('offline', updateConnBadge);
+
+// Dipanggil dari error callback onSnapshot: koneksi realtime terputus tapi
+// perangkat masih online — SDK Firestore retry otomatis di belakang layar.
+function markReconnecting(){
+  if (!navigator.onLine) return; // offline murni lebih penting ditampilkan
+  connState = 'reconnecting';
+  updateConnBadge();
+}
+// Dipanggil begitu snapshot berhasil masuk lagi setelah reconnecting.
+function markSynced(){
+  if (connState !== 'offline') connState = 'online';
+  updateConnBadge();
+}
+
 /* ---------- Zona Penyimpanan (900-915) ---------- */
 
 const ZONA_MIN = 900;
-const ZONA_MAX = 920;
+const ZONA_MAX = 915;
 
 function populateZonaOptions(){
   const sel = document.getElementById('currentZonaInput');
@@ -1566,6 +1921,7 @@ document.getElementById('currentZonaInput').addEventListener('change', ()=>{
 
 (function init(){
   populateZonaOptions();
+  updateConnBadge();
   editQtyModal = new bootstrap.Modal(document.getElementById('editQtyModal'));
   const savedZona = localStorage.getItem(LS_KEYS.currentZona);
   if (savedZona) document.getElementById('currentZonaInput').value = savedZona;
@@ -1578,6 +1934,21 @@ document.getElementById('currentZonaInput').addEventListener('change', ()=>{
   const overrideUrl = localStorage.getItem(LS_KEYS.scriptUrl);
   if (overrideUrl) document.getElementById('scriptUrlInput').value = overrideUrl;
   renderServerUrlInfo();
+
+  // Sama seperti DEFAULT_FIREBASE_CONFIG di module Firebase di atas — dipakai
+  // di sini hanya untuk mengisi tampilan textarea Pengaturan lebih awal
+  // (script module berjalan agak belakangan karena type="module" ditunda).
+  const DEFAULT_FIREBASE_CONFIG_DISPLAY = {
+    apiKey: "AIzaSyBNtUHas_ZF4EF3bO61kWmJwkPNO_NdJlA",
+    authDomain: "precounted-f7a1c.firebaseapp.com",
+    projectId: "precounted-f7a1c",
+    storageBucket: "precounted-f7a1c.firebasestorage.app",
+    messagingSenderId: "173664402073",
+    appId: "1:173664402073:web:75785356288996cf221608"
+  };
+  const savedFbConfig = localStorage.getItem(LS_KEYS.firebaseConfig);
+  document.getElementById('firebaseConfigInput').value = savedFbConfig || JSON.stringify(DEFAULT_FIREBASE_CONFIG_DISPLAY, null, 2);
+  renderFirebaseStatus();
 
   refreshSyncBanner();
   updateLocalStats();
